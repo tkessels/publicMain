@@ -29,6 +29,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
+/**
+ * @author ABerthold
+ *
+ */
 public class GUI extends JFrame implements Observer {
 	
 	public ChatEngine ce;

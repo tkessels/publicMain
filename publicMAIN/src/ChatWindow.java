@@ -18,6 +18,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
+/**
+ * @author ABerthold
+ *
+ */
 public class ChatWindow extends JPanel implements ActionListener, Observer{
 
 	private String name;

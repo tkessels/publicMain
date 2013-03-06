@@ -107,7 +107,7 @@ public class GUI extends JFrame implements Observer {
 	
 	public void addChat(final ChatWindow cw){
 		//evtl noch Typunterscheidung hinzufügn
-		String title = cw.getName();
+		String title = cw.getTabText();
 		
 		chatList.add(cw);
 		jTabbedPane.addTab(title, cw);

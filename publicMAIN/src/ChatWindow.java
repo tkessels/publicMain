@@ -41,36 +41,27 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	 */
 	private void doWindowbuildingstuff(){
 		//Layout für ChatWindow (JPanel) festlegen auf BorderLayout:
-				this.setLayout(new BorderLayout());
-				
-				//LookAndFeel auf NimRODLookAndFeel setzen:
-				try {
-					// Set System L&F
-					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-				} 
-				catch (UnsupportedLookAndFeelException e) {
-					System.out.println(e.getMessage());
-				}
-			
-				this.sendenBtn = new JButton("send");
-				this.jTextArea = new JTextArea(10,30);
-				this.jScrollPane = new JScrollPane(jTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-				this.eingabeFeld = new JTextField();
-				
-				jTextArea.setEditable(true); // später ändern!!!
-				jTextArea.setLineWrap(true);
-				
-				sendenBtn.addActionListener(this);
-				eingabeFeld.addActionListener(this);
-				
-				
-				this.add(jScrollPane, BorderLayout.CENTER);
-				JPanel panel = new JPanel(new BorderLayout());
-				panel.add(eingabeFeld, BorderLayout.CENTER);
-				panel.add(sendenBtn, BorderLayout.EAST);
-				this.add(panel, BorderLayout.SOUTH);
-				
-				this.setVisible(true);
+		this.setLayout(new BorderLayout());
+	
+		this.sendenBtn = new JButton("send");
+		this.jTextArea = new JTextArea(10,30);
+		this.jScrollPane = new JScrollPane(jTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.eingabeFeld = new JTextField();
+		
+		jTextArea.setEditable(true); // später ändern!!!
+		jTextArea.setLineWrap(true);
+		
+		sendenBtn.addActionListener(this);
+		eingabeFeld.addActionListener(this);
+		
+		
+		this.add(jScrollPane, BorderLayout.CENTER);
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(eingabeFeld, BorderLayout.CENTER);
+		panel.add(sendenBtn, BorderLayout.EAST);
+		this.add(panel, BorderLayout.SOUTH);
+		
+		this.setVisible(true);
 	}
 	
 

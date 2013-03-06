@@ -29,6 +29,10 @@ public class NodeEngine {
 	
 	private ChatEngine	ce;
 	
+	public NodeEngine() {
+		ce=ChatEngine.getCE();
+		
+	}
 	
 	public static NodeEngine getNE(){
 		if(ich==null){

@@ -1,15 +1,10 @@
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.DatagramPacket;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.DatagramChannel;
-import java.util.Date;
 
 
 public class MSG implements Serializable{
@@ -18,6 +13,7 @@ public class MSG implements Serializable{
 	private long timestamp;
 	private NachrichtenTyp typ;
 	private byte code;
+	private String group;
 	private Object data;
 	
 
@@ -106,6 +102,14 @@ public class MSG implements Serializable{
 		return "Message [empfänger=" + empfänger + ", sender=" + sender
 				+ ", timestamp=" + timestamp + ", typ=" + typ + ", code="
 				+ code + ", data=" + data + "]";
+	}
+
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
 	}
 
 }

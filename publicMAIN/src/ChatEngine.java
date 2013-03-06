@@ -1,5 +1,7 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 import java.util.Observer;
 
 
@@ -8,14 +10,19 @@ import java.util.Observer;
  * @author tkessels
  *
  */
-public class ChatEngine {
+public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
 	public GUI gui;
 	private List<Node> nodes;
+	private List<Kanal> channels;
 	
 	
+	
+	/**Liefert die Instanz der CE
+	 * @return
+	 */
 	public static synchronized ChatEngine getCE(){
 		if(ce==null) ce=new ChatEngine();
 		return ce;
@@ -27,6 +34,7 @@ public class ChatEngine {
 	 * @param text Nachricht
 	 */
 	public void send_private(long uid, String text){
+		
 		//TODO: CODE HERE
 	}
 	
@@ -78,6 +86,7 @@ public class ChatEngine {
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
 	public	void	group_leave(String gruppen_name){
+		
 		//TODO: CODE HERE		
 	}
 	
@@ -126,7 +135,15 @@ public class ChatEngine {
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel,String gruppen_name){
-		//TODO:Code Here
+		for (Kanal x : channels) {
+			if(x.isName(gruppen_name)){
+				x.addObserver(chatPanel);
+				return;
+			}
+		}
+		
+		GruppenKanal tmp =new GruppenKanal(gruppen_name);
+		channels.add(tmp);
 	}
 	
 	
@@ -143,9 +160,26 @@ public class ChatEngine {
 	public	void	remove_MSGListener(Observer chatPanel){
 		//TODO:Code Here		
 	}
+	
+	
 	public	void	put(MSG nachricht){
 		//WAS SOLL DAS HIER NOCHMAL KÖNNEN?
 		
+	}
+	
+	
+	private ChatEngine(){
+		ne=NodeEngine.getNE();
+		channels=new ArrayList<Kanal>();
+	}
+	
+
+	
+	
+	
+	public static void main(String[] args) {
+		
+//		System.out.println(string2long("HelloWorld"));
 	}
 
 	

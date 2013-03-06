@@ -15,7 +15,7 @@ public class ChatEngine {
 	private List<Node> nodes;
 	
 	
-	private static synchronized ChatEngine getCE(){
+	public static synchronized ChatEngine getCE(){
 		if(ce==null) ce=new ChatEngine();
 		return ce;
 	}

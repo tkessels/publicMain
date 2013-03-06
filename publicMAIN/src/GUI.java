@@ -8,7 +8,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -23,17 +27,19 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-//import com.nilo.plaf.nimrod.NimRODLookAndFeel;
+import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
-public class GUI extends JFrame {
+public class GUI extends JFrame implements Observer {
 	
-//	public ChatEngine ce;
-//	public LogEngine log;
-	
-	private static GUI me; 
+	public ChatEngine ce;
+	public LogEngine log;
 
-	private List<ChatWindow> chats;
-	private JTabbedPane jTp;
+	
+	private static GUI me;
+	private List<Node> nodes;
+
+	private List<ChatWindow> chatList;
+	private JTabbedPane jTabbedPane;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
 	private JMenuItem menuItem;
@@ -41,35 +47,38 @@ public class GUI extends JFrame {
 	/**
 	 * Konstruktor für GUI 
 	 */
-	public GUI(){
-//		ce = new ChatEngine();
-//		log = new LogEngine();
+	private GUI(){
+		ce = ChatEngine.getCE();
+		log = new LogEngine();
 		
 		GUI.me=this;
-//		try {
-//			// LookAndFeel auf NimRODLookAndFeel setzen:
-//			UIManager.setLookAndFeel(new NimRODLookAndFeel());
-//		} 
-//		catch (UnsupportedLookAndFeelException e) {
-//			System.out.println(e.getMessage());
-//		}
+		try {
+			// LookAndFeel auf NimRODLookAndFeel setzen:
+			// hier müssen noch die Farben angepasst werden!
+			UIManager.setLookAndFeel(new NimRODLookAndFeel());
+		} 
+		catch (UnsupportedLookAndFeelException e) {
+			System.out.println(e.getMessage());
+		}
 		
 		this.menuBar = new JMenuBar();
 		this.fileMenu = new JMenu("Datei");
-		this.menuItem = new JMenuItem("Speichern unter");
-		this.chats = new ArrayList<ChatWindow>();
-		this.jTp = new JTabbedPane();
+		this.menuItem = new JMenuItem("request_File()");
+		this.chatList = new ArrayList<ChatWindow>();
+		this.jTabbedPane = new JTabbedPane();
 		
-		jTp.setTabPlacement(JTabbedPane.TOP);
+		jTabbedPane.setTabPlacement(JTabbedPane.TOP);
 //		jTp.setBackground(Color.CYAN);
 //		jTp.setForeground(Color.RED);
 		
+		
+		// Listener zu den einzelen Komponenten hinzufügen:
+		// ActionListener für die MenuItems:
 		menuItem.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				request_File();
-				
 			}
 		});
 		
@@ -79,10 +88,10 @@ public class GUI extends JFrame {
 		this.setJMenuBar(menuBar);
 		
 		
-		this.add(jTp);
+		this.add(jTabbedPane);
 		
 		addChat(new ChatWindow("public"));
-		addChat(new ChatWindow("mattin"));
+		
 
 		this.setIconImage(new ImageIcon("pM_Logo2.png").getImage());
 		this.setLocationRelativeTo(null);
@@ -96,10 +105,10 @@ public class GUI extends JFrame {
 		//evtl noch Typunterscheidung hinzufügn
 		String title = cw.getName();
 		
-		chats.add(cw);
-		jTp.addTab(title, cw);
+		chatList.add(cw);
+		jTabbedPane.addTab(title, cw);
 		
-		int index = jTp.indexOfTab(title);
+		int index = jTabbedPane.indexOfComponent(cw);
 		
 		JPanel pnlTab = new JPanel(new BorderLayout());
 		pnlTab.setOpaque(false);
@@ -115,7 +124,7 @@ public class GUI extends JFrame {
 				if(e.getModifiersEx() == 2048){
 					getGUI().delChat(cw);
 				} else {
-					jTp.setSelectedComponent(cw);
+					jTabbedPane.setSelectedComponent(cw);
 				}
 			}
 			@Override
@@ -169,7 +178,7 @@ public class GUI extends JFrame {
 		pnlTab.add(lblTitle, BorderLayout.CENTER);
 		pnlTab.add(btnClose, BorderLayout.EAST);
 		
-		jTp.setTabComponentAt(index, pnlTab);
+		jTabbedPane.setTabComponentAt(index, pnlTab);
 		
 	}
 	
@@ -181,9 +190,9 @@ public class GUI extends JFrame {
 	 * @param cw
 	 */
 	public void delChat(ChatWindow cw){
-		jTp.remove(cw);
-		chats.remove(cw);
-		if(chats.isEmpty()){
+		jTabbedPane.remove(cw);
+		chatList.remove(cw);
+		if(chatList.isEmpty()){
 			addChat(new ChatWindow("public"));
 		}
 	}
@@ -196,7 +205,10 @@ public class GUI extends JFrame {
 	 * @return GUI
 	 */
 	public static GUI getGUI(){
-		return GUI.me;
+		if(me == null){
+			me = new GUI();
+		}
+		return me;
 	}
 	
 	/**
@@ -208,9 +220,9 @@ public class GUI extends JFrame {
 	 */
 	public File request_File(){
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal = fileChooser.showOpenDialog(getParent());
+		int returnVal = fileChooser.showSaveDialog(getParent());
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
-	       System.out.println("You chose to open this file: " +
+	       System.out.println("You chose to save this file: " +
 	            fileChooser.getSelectedFile().getName());
 	    }
 
@@ -235,7 +247,24 @@ public class GUI extends JFrame {
  	 */
  	public static void main(String[] args) {
 
-		new GUI();
+		getGUI();
 		
 	}
-}
+
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
+	@Override
+	public void update(Observable o, Object arg) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public Node getNode(long sender) {
+		for (Node x : nodes) if(x.getNodeID()==sender)return x;
+		return null;
+		}
+
+		
+	}
+

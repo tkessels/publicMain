@@ -27,16 +27,16 @@ public class NodeEngine {
 	private boolean isRoot;
 	// -------------------------
 	
-	private ChatEngine	ce;
+
 	
 	public NodeEngine() {
-		ce=ChatEngine.getCE();
+
 		
 	}
 	
 	public static NodeEngine getNE(){
 		if(ich==null){
-			synchronized (ich) {
+			synchronized (NodeEngine.class) {
 				ich=new NodeEngine();				
 			}
 		}

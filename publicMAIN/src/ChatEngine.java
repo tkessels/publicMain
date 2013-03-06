@@ -1,8 +1,13 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 
@@ -15,8 +20,9 @@ public class ChatEngine extends Observable{
 	public NodeEngine ne;
 	public LogEngine log;
 	public GUI gui;
-	private List<Node> nodes;
+	private Set<Node> nodes;
 	private List<Kanal> channels;
+	private BlockingQueue<MSG> inbox;
 	
 	
 	
@@ -28,6 +34,15 @@ public class ChatEngine extends Observable{
 		return ce;
 	}
 
+	
+	private ChatEngine(){
+		ne=NodeEngine.getNE();
+		channels=new ArrayList<Kanal>();
+		nodes=new HashSet<Node>();
+		nodes.addAll(Arrays.asList(ne.getNodes()));
+		inbox=new LinkedBlockingQueue<MSG>();
+	}
+	
 	
 	/**Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
 	 * @param uid UID des Empfängers
@@ -85,7 +100,7 @@ public class ChatEngine extends Observable{
 	/**verlässt eine gruppe wieder
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
-	public	void	group_leave(String gruppen_name){
+	public void group_leave(String gruppen_name){
 		
 		//TODO: CODE HERE		
 	}
@@ -136,7 +151,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void add_MSGListener(Observer chatPanel,String gruppen_name){
 		for (Kanal x : channels) {
-			if(x.isName(gruppen_name)){
+			if(x.is(gruppen_name)){
 				x.addObserver(chatPanel);
 				return;
 			}
@@ -162,15 +177,11 @@ public class ChatEngine extends Observable{
 	}
 	
 	
-	public	void	put(MSG nachricht){
-		//WAS SOLL DAS HIER NOCHMAL KÖNNEN?
+	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
+	 * @param nachricht Die neue Nachricht
+	 */
+	public void put(MSG nachricht){
 		
-	}
-	
-	
-	private ChatEngine(){
-		ne=NodeEngine.getNE();
-		channels=new ArrayList<Kanal>();
 	}
 	
 

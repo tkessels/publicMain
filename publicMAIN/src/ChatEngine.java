@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.List;
+import java.util.Observer;
 
 
 
@@ -124,7 +125,7 @@ public class ChatEngine {
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
-	public void add_MSGListener(MSGListener chatPanel,String gruppen_name){
+	public void add_MSGListener(Observer chatPanel,String gruppen_name){
 		//TODO:Code Here
 	}
 	
@@ -133,13 +134,13 @@ public class ChatEngine {
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
-	public void	add_MSGListener(MSGListener chatPanel,long UID){
+	public void	add_MSGListener(Observer chatPanel,long UID){
 		//TODO:Code Here		
 	}
 	/** Entefert ein Chatpannel aus allen Kanälen
 	 * @param chatPanel
 	 */
-	public	void	remove_MSGListener(MSGListener chatPanel){
+	public	void	remove_MSGListener(Observer chatPanel){
 		//TODO:Code Here		
 	}
 	public	void	put(MSG nachricht){

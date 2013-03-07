@@ -16,12 +16,11 @@ public class UserList extends JWindow {
 	private int breite;
 	private JFrame parent;
 	
+	
 	public UserList(JFrame parent) {
 		this.parent=parent;
 		this.hoehe = parent.getHeight();
 		this.breite = 150;
-		
-		
 	}
 	
 	public void aufklappen(){

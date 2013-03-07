@@ -1,10 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Frame;
 import java.awt.Insets;
-import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -26,14 +23,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
-import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
-import com.nilo.plaf.nimrod.NimRODLookAndFeel;
+//import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
  * @author ABerthold
@@ -61,7 +54,12 @@ public class GUI extends JFrame implements Observer {
 	 * Konstruktor für GUI 
 	 */
 	private GUI(){
-		this.ce = ChatEngine.getCE();
+		try {
+			this.ce = ChatEngine.getCE();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		this.log = new LogEngine();
 		this.me=this;
 		this.menuBar = new JMenuBar();
@@ -82,19 +80,19 @@ public class GUI extends JFrame implements Observer {
 		
 		// Listener zu den einzelen Komponenten hinzufügen:
 		// ActionListener für das MenuItemNimRoD
-		this.lafNimROD.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-				} catch (Exception ex){
-					System.out.println(ex.getMessage());
-				}
-				SwingUtilities.updateComponentTreeUI(GUI.me);
-				GUI.me.pack();
-			}
-		});
+//		this.lafNimROD.addActionListener(new ActionListener() {
+//			
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				try{
+//					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+//				} catch (Exception ex){
+//					System.out.println(ex.getMessage());
+//				}
+//				SwingUtilities.updateComponentTreeUI(GUI.me);
+//				GUI.me.pack();
+//			}
+//		});
 		
 		// ActionListener für die MenuItemRequestFile:
 		this.menuItemRequestFile.addActionListener(new ActionListener() {
@@ -110,6 +108,7 @@ public class GUI extends JFrame implements Observer {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton)e.getSource();
+				System.out.println(me.getBounds());
 				if(source.isSelected()){
 					userListWin = new UserList(GUI.me);
 					userListWin.aufklappen();

@@ -1,5 +1,13 @@
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 
 
@@ -7,25 +15,48 @@ import java.util.List;
  * @author tkessels
  *
  */
-public class ChatEngine {
+public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	public GUI gui;
-	private List<Node> nodes;
+//	private GUI gui;
+	private Set<Node> nodes;
+	private List<GruppenKanal> group_channels;
+	private List<KnotenKanal> private_channels;
+	
+	private Thread msgSorterBot;//verteilt eingehende MSGs
+	private Thread neMaintenance;//warted die NE
 	
 	
-	private static synchronized ChatEngine getCE(){
+	private BlockingQueue<MSG> inbox;
+	
+	
+	
+	/**Liefert die Instanz der CE
+	 * @return
+	 */
+	public static synchronized ChatEngine getCE() throws Exception{
 		if(ce==null) ce=new ChatEngine();
 		return ce;
 	}
 
+	
+	private ChatEngine(){
+		ne=NodeEngine.getNE();
+		group_channels=new ArrayList<GruppenKanal>();
+		private_channels=new ArrayList<KnotenKanal>();
+		nodes=new HashSet<Node>();
+		nodes.addAll(Arrays.asList(ne.getNodes()));
+		inbox=new LinkedBlockingQueue<MSG>();
+	}
+	
 	
 	/**Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
 	 * @param uid UID des Empfängers
 	 * @param text Nachricht
 	 */
 	public void send_private(long uid, String text){
+		
 		//TODO: CODE HERE
 	}
 	
@@ -70,13 +101,18 @@ public class ChatEngine {
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name){
+		/*Lege KAnal an 
+		 * informiere NodeEngine über neue gruppe wenn noch nicht vorhanden so das ander nodes diese anzeigen
+		 * vielleicht machen wirdas auch einfach indem wir ein group announce paket forgen
+		*/
 		//TODO: CODE HERE
 	}
 	
 	/**verlässt eine gruppe wieder
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
-	public	void	group_leave(String gruppen_name){
+	public void group_leave(String gruppen_name){
+		
 		//TODO: CODE HERE		
 	}
 	
@@ -95,7 +131,7 @@ public class ChatEngine {
 	 */
 	public	File	request_File(){
 		//TODO: CODE HERE
-		return gui.request_File();
+		return GUI.getGUI().request_File();
 	}
 	
 	/**Veranlasst das Nachrichten vom user mit der <code>uid</code> nicht mehr angezeigt werden.
@@ -124,8 +160,23 @@ public class ChatEngine {
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
-	public void add_MSGListener(MSGListener chatPanel,String gruppen_name){
-		//TODO:Code Here
+	public void add_MSGListener(Observer chatPanel,String gruppen_name){
+		//gibt es den Kanal schon
+		group_channels.contains(new GruppenKanal(gruppen_name));
+		
+		//neues CW an Kanal anmelden
+
+		
+		/*for (Kanal x : channels) {
+			if(x.is(gruppen_name)){
+				x.addObserver(chatPanel);
+				return;
+			}
+		}
+		
+		GruppenKanal tmp =new GruppenKanal(gruppen_name);
+		channels.add(tmp);*/
+		
 	}
 	
 	
@@ -133,17 +184,29 @@ public class ChatEngine {
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
-	public void	add_MSGListener(MSGListener chatPanel,long UID){
+	public void	add_MSGListener(Observer chatPanel,long UID){
 		//TODO:Code Here		
 	}
 	/** Entefert ein Chatpannel aus allen Kanälen
 	 * @param chatPanel
 	 */
-	public	void	remove_MSGListener(MSGListener chatPanel){
+	public	void	remove_MSGListener(Observer chatPanel){
 		//TODO:Code Here		
 	}
-	public	void	put(MSG nachricht){
-		//WAS SOLL DAS HIER NOCHMAL KÖNNEN?
+	
+	
+	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
+	 * @param nachricht Die neue Nachricht
+	 */
+	public void put(MSG nachricht){
+		inbox.add(nachricht);
+	}
+	
+
+	
+	
+	
+	public static void main(String[] args) {
 		
 	}
 

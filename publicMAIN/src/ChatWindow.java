@@ -1,7 +1,4 @@
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Observable;
@@ -12,11 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpringLayout.Constraints;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
-import com.nilo.plaf.nimrod.NimRODLookAndFeel;
+//import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
  * @author ABerthold

@@ -95,7 +95,7 @@ public class ChatEngine extends Observable{
 	 * @return Array aller verbundener Nodes
 	 */
 	public	Node[]	getUsers(){
-		return (Node[]) Node.toArray();
+		return (Node[])nodes.toArray();
 	}
 	
 	/** tritt einer Gruppe bei
@@ -180,9 +180,16 @@ public class ChatEngine extends Observable{
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
-	public void	add_MSGListener(Observer chatPanel,long UID){
-		//TODO:Code Here		
+	public void	add_MSGListener(Observer chatPanel,long uid){
+		int i = group_channels.indexOf(new KnotenKanal(uid));
+		if(i>=0)group_channels.get(i).addObserver(chatPanel);
+		else{
+			KnotenKanal tmp =new KnotenKanal(uid);
+			tmp.addObserver(chatPanel);
+			private_channels.add(tmp);
+		}
 	}
+	
 	/** Entefert ein Chatpannel aus allen Kanälen
 	 * @param chatPanel
 	 */
@@ -192,7 +199,7 @@ public class ChatEngine extends Observable{
 	
 	
 	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
-	 * @param nachricht Die neue Nachricht
+	 * @param nachricht Die neue Nachricht.
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);

@@ -79,7 +79,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
 		
-		
 	}
 	
 	/**

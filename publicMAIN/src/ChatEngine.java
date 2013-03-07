@@ -95,7 +95,7 @@ public class ChatEngine extends Observable{
 	 * @return Array aller verbundener Nodes
 	 */
 	public	Node[]	getUsers(){
-		return (Node[]) Node.toArray();
+		return (Node[])nodes.toArray();
 	}
 	
 	/** tritt einer Gruppe bei
@@ -192,7 +192,7 @@ public class ChatEngine extends Observable{
 	
 	
 	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
-	 * @param nachricht Die neue Nachricht
+	 * @param nachricht Die neue Nachricht.
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);

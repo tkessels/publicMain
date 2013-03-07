@@ -6,6 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowStateListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +65,8 @@ public class GUI extends JFrame implements Observer {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		
 		this.log = new LogEngine();
 		this.me=this;
 		this.menuBar = new JMenuBar();
@@ -78,6 +85,7 @@ public class GUI extends JFrame implements Observer {
 			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));
 		}
 		
+		
 		// Listener zu den einzelen Komponenten hinzufügen:
 		// ActionListener für das MenuItemNimRoD
 //		this.lafNimROD.addActionListener(new ActionListener() {
@@ -94,6 +102,7 @@ public class GUI extends JFrame implements Observer {
 //			}
 //		});
 		
+		
 		// ActionListener für die MenuItemRequestFile:
 		this.menuItemRequestFile.addActionListener(new ActionListener() {
 			@Override
@@ -102,13 +111,13 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
+		
 		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
 		this.userListBtn.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton)e.getSource();
-				System.out.println(me.getBounds());
 				if(source.isSelected()){
 					userListWin = new UserList(GUI.me);
 					userListWin.aufklappen();
@@ -117,6 +126,8 @@ public class GUI extends JFrame implements Observer {
 				}
 			}
 		});
+		
+		
 		
 		
 		// Menüs hinzufügen:
@@ -218,6 +229,8 @@ public class GUI extends JFrame implements Observer {
 				source.setForeground(Color.BLACK);
 			}
 		});
+		
+		
 		
 		
 		pnlTab.add(lblTitle, BorderLayout.CENTER);

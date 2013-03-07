@@ -49,6 +49,20 @@ public class ChatEngine extends Observable{
 		ignored=new HashSet<Node>();
 		nodes.addAll(Arrays.asList(ne.getNodes()));
 		inbox=new LinkedBlockingQueue<MSG>();
+		group_join("public");
+		
+		
+		msgSorterBot=new Thread(new Runnable() {
+			
+			public void run() {
+				while (true) {
+					MSG tmp = inbox.remove();//versuche alle kanäle für jeweil gruppen und private nachrichten
+					if (tmp.getTyp() == NachrichtenTyp.GROUP) for (GruppenKanal x : group_channels) if (x.add(tmp)) break;
+					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) for (KnotenKanal y : private_channels) if (y.add(tmp))break;
+					}
+				}
+
+		});
 	}
 	
 	
@@ -103,6 +117,8 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name){
+		//GruppenKanal tmp =new GruppenKanal(gruppen_name);
+		//group_channels.add(tmp);
 		/*Lege KAnal an 
 		 * informiere NodeEngine über neue gruppe wenn noch nicht vorhanden so das ander nodes diese anzeigen
 		 * vielleicht machen wirdas auch einfach indem wir ein group announce paket forgen

@@ -10,6 +10,7 @@ public class KnotenKanal extends Kanal{
 		if((nachricht.getSender()==(long)referenz)||nachricht.getEmpfänger()==(long)referenz){
 			setChanged();
 			notifyObservers(nachricht);
+			messages.add(nachricht);
 			return true;
 		}
 		return false;

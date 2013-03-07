@@ -1,34 +1,78 @@
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.DatagramPacket;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.DatagramChannel;
-import java.util.Date;
 
 
+/**Diese Klasse repräsentiert unser Datenpaket
+ * ggf. von Serializable auf Externalized umstellen wenn Dateneingespart werden müssen da nicht alle Paktearten alle Felder benötigen
+ * @author tkessels
+ *
+ */
 public class MSG implements Serializable{
-	private long empfänger;
-	private long sender;
-	private long timestamp;
+	private static Integer id_counter=0;
+	private static final long serialVersionUID = -2010661171218754968L;
+	//SystemMessage Codes
+	private static final byte NODE_UPDATE		=		0;
+	private static final byte ALIAS_UPDATE		=		1;
+	
+	private static final byte ECHO_REQUEST		=		10;
+	private static final byte ECHO_RESPONSE		=	-	10;
+	private static final byte ROOT_DISCOVERY	=		20;
+	private static final byte ROOT_REPLAY		=	-	20;
+	private static final byte POLL_CHILDNODES	=		30;
+	private static final byte REPORT_CHILDNODES	=	-	30;
+	private static final byte NODE_SHUTDOWN		=		40;
+	private static final byte CMD_SHUTDOWN		=		70;
+	private static final byte CMD_RESTART		=		71;
+	
+
+	
+	
+	
+	
+	
+	
+	//Typisierung
 	private NachrichtenTyp typ;
 	private byte code;
+	//Quelle und Eindeutigkeit
+	private long sender;
+	private long timestamp;
+	private int id;
+	//Empfänger
+	private long empfänger;
+	private String group;
+	//Payload
 	private Object data;
 	
 
-	private static final long serialVersionUID = -2010661171218754968L;
-
+	private MSG() {
+		synchronized (id_counter) {
+			this.id=id_counter;
+			MSG.id_counter++;
+		}
+		this.timestamp=System.currentTimeMillis();
+		this.sender= NodeEngine.getNE().getME().getNodeID();
+	}
+	
+	public MSG(String text){
+		this("public",text);
+	}
+	
+	public MSG(String group,String text){
+		this();
+		this.typ=NachrichtenTyp.GROUP;
+		this.group=group.toLowerCase();
+		this.data=text;
+	}
+	
+	public MSG(long user, String text){
+		this();
+		this.typ=NachrichtenTyp.PRIVATE;
+		this.empfänger=user;
+		this.data=text;
+	}
+	
 	public long getEmpfänger() {
 		return empfänger;
-	}
-
-	public void setEmpfänger(long empfänger) {
-		this.empfänger = empfänger;
 	}
 
 	public long getSender() {
@@ -50,62 +94,26 @@ public class MSG implements Serializable{
 	public Object getData() {
 		return data;
 	}
+	
+	public String getGroup() {
+		return group;
+	}
 
-	
-	public MSG() {
-		timestamp=System.currentTimeMillis();
-		empfänger=0;
-		sender= NodeEngine.getNE().getME().getNodeID();
-		sender=0;
-		typ=NachrichtenTyp.SYSTEM;
-		data="Echo Request";
-		code=1;
-	}
-	
-
-	public byte[] toByteArray() {
-		byte[] buffer=new byte[1];
-		try {
-			ByteArrayOutputStream toBytes=new ByteArrayOutputStream();
-			ObjectOutputStream toStream= new ObjectOutputStream(toBytes);
-			
-			toStream.writeObject(empfänger);
-			toStream.writeObject(sender);
-			toStream.writeObject(timestamp);
-			toStream.writeObject(typ);
-			toStream.writeObject(code);
-			toStream.writeObject(data);
-			
-			
-			
-			buffer=toBytes.toByteArray();
-		} catch (IOException e) {
-			System.err.println("Konnte Nachricht:" + this.toString() + "nicht in Bytes umwandeln"   );
-		}
-		return buffer;
-	}
-	
-	public MSG(DatagramPacket x) throws ClassNotFoundException, IOException{
-		this(x.getData());
-	}
-	
-	public MSG(byte[] data) throws ClassNotFoundException, IOException{
-			ByteArrayInputStream toBytes=new ByteArrayInputStream(data);
-			ObjectInputStream toStream= new ObjectInputStream(toBytes);
-			
-			empfänger= (long) toStream.readObject();
-			sender = (long) toStream.readObject();
-			timestamp = (long) toStream.readObject();
-			typ= (NachrichtenTyp) toStream.readObject();
-			code= (byte) toStream.readObject();
-			data= (byte[]) toStream.readObject();
+	public int getId() {
+		return id;
 	}
 
 	@Override
 	public String toString() {
-		return "Message [empfänger=" + empfänger + ", sender=" + sender
-				+ ", timestamp=" + timestamp + ", typ=" + typ + ", code="
-				+ code + ", data=" + data + "]";
+		return "MSG [" + (typ != null ? "typ=" + typ + ", " : "") + "code="
+				+ code + ", sender=" + sender + ", timestamp=" + timestamp
+				+ ", id=" + id + ", empfänger=" + empfänger + ", "
+				+ (group != null ? "group=" + group + ", " : "")
+				+ (data != null ? "data=" + data : "") + "]";
 	}
+
+	
+
+
 
 }

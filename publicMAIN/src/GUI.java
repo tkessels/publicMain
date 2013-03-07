@@ -65,6 +65,8 @@ public class GUI extends JFrame implements Observer {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		
 		this.log = new LogEngine();
 		this.me=this;
 		this.menuBar = new JMenuBar();
@@ -83,6 +85,7 @@ public class GUI extends JFrame implements Observer {
 			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));
 		}
 		
+		
 		// Listener zu den einzelen Komponenten hinzufügen:
 		// ActionListener für das MenuItemNimRoD
 //		this.lafNimROD.addActionListener(new ActionListener() {
@@ -98,6 +101,7 @@ public class GUI extends JFrame implements Observer {
 //				GUI.me.pack();
 //			}
 //		});
+		
 		
 		// ActionListener für die MenuItemRequestFile:
 		this.menuItemRequestFile.addActionListener(new ActionListener() {
@@ -122,6 +126,8 @@ public class GUI extends JFrame implements Observer {
 				}
 			}
 		});
+		
+		
 		
 		
 		// Menüs hinzufügen:
@@ -223,6 +229,8 @@ public class GUI extends JFrame implements Observer {
 				source.setForeground(Color.BLACK);
 			}
 		});
+		
+		
 		
 		
 		pnlTab.add(lblTitle, BorderLayout.CENTER);

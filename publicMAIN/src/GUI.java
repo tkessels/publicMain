@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.DefaultListCellRenderer.UIResource;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -39,18 +41,19 @@ import javax.swing.UIManager;
  */
 public class GUI extends JFrame implements Observer {
 	
+	//Deklarationen:
 	public ChatEngine ce;
 	public LogEngine log;
 	
 	private static GUI me;
 	private List<Node> nodes;
 	private List<ChatWindow> chatList;
-	private JTabbedPane jTabbedPane;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
 	private JMenuItem menuItemRequestFile;
 	private JMenu lafMenu;
 	private JMenuItem lafNimROD;
+	private JTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
 	private UserList userListWin;
 	
@@ -66,26 +69,28 @@ public class GUI extends JFrame implements Observer {
 			e.printStackTrace();
 		}
 		
-		
+		//Initialisierungen:
+		this.me = this;
 		this.log = new LogEngine();
-		this.me=this;
 		this.menuBar = new JMenuBar();
 		this.fileMenu = new JMenu("Datei");
-		this.menuItemRequestFile = new JMenuItem("request_File()");
+		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
 		this.lafMenu = new JMenu("Design wechsel");
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton("<");
 		this.lafNimROD = new JMenuItem("NimROD");
 		
-		
+		// Anlegen der Menüeinträge für Design wechsel (installierte LookAndFeels)
+		// + hinzufügen zum lafMenu ("Design wechsel")
+		// + hinzufügen der ActionListener (lafController)
 		for(UIManager.LookAndFeelInfo laf:UIManager.getInstalledLookAndFeels()){
 			JMenuItem tempJMenuItem = new JMenuItem(laf.getName());
 			lafMenu.add(tempJMenuItem);
 			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));
 		}
 		
-		
+		//TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
 		// Listener zu den einzelen Komponenten hinzufügen:
 		// ActionListener für das MenuItemNimRoD
 //		this.lafNimROD.addActionListener(new ActionListener() {
@@ -101,7 +106,7 @@ public class GUI extends JFrame implements Observer {
 //				GUI.me.pack();
 //			}
 //		});
-		
+
 		
 		// ActionListener für die MenuItemRequestFile:
 		this.menuItemRequestFile.addActionListener(new ActionListener() {
@@ -113,22 +118,21 @@ public class GUI extends JFrame implements Observer {
 		
 		
 		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
+		this.userListBtn.setToolTipText("Userlist anzeigen");
 		this.userListBtn.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton)e.getSource();
 				if(source.isSelected()){
+					userListBtn.setText(">");
 					userListWin = new UserList(GUI.me);
 					userListWin.aufklappen();
 				} else {
+					userListBtn.setText("<");
 					userListWin.zuklappen();
 				}
 			}
 		});
-		
-		
-		
 		
 		// Menüs hinzufügen:
 		this.fileMenu.add(menuItemRequestFile);
@@ -136,12 +140,12 @@ public class GUI extends JFrame implements Observer {
 		this.lafMenu.add(lafNimROD);
 		this.menuBar.add(userListBtn);
 		this.menuBar.add(fileMenu);
-		this.setJMenuBar(menuBar);
 		
 		
 		// GUI Komponenten hinzufügen:
+		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
-		this.addChat(new ChatWindow("public"));
+		this.addChat(new ChatWindow("public  "));
 
 		
 		// GUI Einstellungen:
@@ -155,46 +159,59 @@ public class GUI extends JFrame implements Observer {
 	
 	/**
 	 * Diese Methode fügt ein ChatWindow hinzu
+	 * 
+	 * Diese Methode fügt ein ChatWindow zu GUI hinzu und setzt dessen Komponenten
 	 * @param cw
 	 */
 	public void addChat(final ChatWindow cw){
-		//evtl noch Typunterscheidung hinzufügn
-		
+		//TODO: evtl. noch Typunterscheidung hinzufügen (Methode getCwTyp():String)
 		String title = cw.getTabText();
 		
+		// neues ChatWindow (cw) zur Chatliste (ArrayList<ChatWindow>) hinzufügen:
 		this.chatList.add(cw);
+		// erzeugen von neuem Tab für neues ChatWindow:
 		this.jTabbedPane.addTab(title, cw);
 		
-		
+		// ChatWindow am NachrichtenListener (MSGListener) anmelden:
 //		ce.group_join(title);
 		ce.add_MSGListener(cw, title);
 		
+		// Index vom ChatWindow im JTabbedPane holen um am richtigen Ort einzufügen:
 		int index = jTabbedPane.indexOfComponent(cw);
 		
+		// JPanel für Tabbeschriftung erzeugen und durchsichtig machen:
 		JPanel pnlTab = new JPanel(new BorderLayout());
 		pnlTab.setOpaque(false);
 		
-		JLabel lblTitle = new JLabel(title + "   ");
+		// Label für Tabbeschriftung erzeugen:
+		JLabel lblTitle = new JLabel(title);
+		// MouseListener zu JLabel (lblTitle) hinzufügen:
 		lblTitle.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				// TODO Auto-generated method stub
 			}
 			@Override
+			// Mittlere Maustastenklick (=2048) auf Label schließt das ChatWindow
+			// jeder andere Klick führt zur Auswahl des ChatWindows:
 			public void mousePressed(MouseEvent e) {
-				if(e.getModifiersEx() == 2048){
+				if(e.getModifiersEx() == 2048){ 
 					getGUI().delChat(cw);
 				} else {
 					jTabbedPane.setSelectedComponent(cw);
 				}
 			}
 			@Override
+			// beim verlassen der Maus von JLabel (lblTitle) wird die Schrift schwarz
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				JLabel source = (JLabel)e.getSource();
+				source.setForeground(Color.BLACK);
 			}
 			@Override
+			// beim betreten der Maus von JLabel (lblTitle) wird die Schrift rot
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
+				JLabel source = (JLabel)e.getSource();
+				source.setForeground(Color.RED);
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -202,11 +219,13 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
+		// Schließenbutton für Tabbeschriftung erzeugen und gestalten:
 		JButton btnClose = new JButton("x");
-		btnClose.setFont(new Font("mei", Font.PLAIN, 10));
+		btnClose.setFont(new Font("fontBtnClose", Font.PLAIN, 10));
 		btnClose.setOpaque(false);
 		btnClose.setMargin(new Insets(0, 4, 2, 4));
 		btnClose.setBorderPainted(false);
+		// MouseListener für Schließenbutton (btnClose) hinzufügen:
 		btnClose.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
@@ -217,26 +236,29 @@ public class GUI extends JFrame implements Observer {
 				// TODO Auto-generated method stub
 			}
 			@Override
+			// Bei Klick ChatWindow (cw) schliesen:
 			public void mouseClicked(MouseEvent arg0) {
 				getGUI().delChat(cw);
 			}
 			@Override
+			// bei Mouseover wird das "x" des Schließenbutton (btnClose) rot:
 			public void mouseEntered(MouseEvent e) {
 				JButton source = (JButton)e.getSource();
-	//			btnClose.setOpaque(true);
 				source.setForeground(Color.RED);
 			}
 			@Override
+			// beim verlassen der Maus wird das "x" des Schließenbutton (btnClose) schwarz:
 			public void mouseExited(MouseEvent e) {
 				JButton source = (JButton)e.getSource();
-	//			btnClose.setOpaque(false);
 				source.setForeground(Color.BLACK);
 			}
 		});
 		
+		// Label (lblTitle) + Schließenbutton (btnClose) zum Tab (pnlTab) hinzufügen:
 		pnlTab.add(lblTitle, BorderLayout.CENTER);
 		pnlTab.add(btnClose, BorderLayout.EAST);
 		
+		// den neuen Tab an die Stelle von index setzen:
 		this.jTabbedPane.setTabComponentAt(index, pnlTab);
 		
 	}
@@ -244,17 +266,22 @@ public class GUI extends JFrame implements Observer {
 	/**
 	 * Diese Methode entfernt ein ChatWindow
 	 * 
-	 * Diese Methode sorgt dafür das ChatWindows aus der ArrayList "chats" entfernt werden
+	 * Diese Methode sorgt dafür das ChatWindows aus der ArrayList "chatList" entfernt werden
 	 * und im GUI nicht mehr angezeigt werden.
-	 * @param cw
+	 * @param ChatWindow
 	 */
 	public void delChat(ChatWindow cw){
+		// ChatWindow (cw) aus jTabbedPane entfernen:
 		this.jTabbedPane.remove(cw);
+		// ChatWindow aus Chatliste entfernen:
 		this.chatList.remove(cw);
-		System.out.println(cw.getTabText());
+		// ChatWindow aus Gruppe entfernen (MSGListener abschalten):
 		ce.group_leave(cw.getTabText());
+		// Falls keine ChatWindows mehr wird public geöffnet:
 		if(chatList.isEmpty()){
-			addChat(new ChatWindow("public"));
+			//TODO: Hier evtl. noch anderen Programmablauf implementier
+			// z.B. schließen des Programms wenn letztes ChatWindow geschlossen wird
+			addChat(new ChatWindow("public  "));
 		}
 	}
 	
@@ -280,6 +307,7 @@ public class GUI extends JFrame implements Observer {
 	 * @return File
 	 */
 	public File request_File(){
+		//TODO: hier stimmt noch nix! später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showSaveDialog(getGUI());
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
@@ -305,9 +333,7 @@ public class GUI extends JFrame implements Observer {
  	 * @param args
  	 */
  	public static void main(String[] args) {
-
 		getGUI();
-		
 	}
 
 	/* (non-Javadoc)
@@ -319,6 +345,13 @@ public class GUI extends JFrame implements Observer {
 		
 	}
 
+	/**
+	 * Diese Methode stellt das Node bereit
+	 * 
+	 * Diese Methode ist ein Getter für das Node
+	 * @param sender
+	 * @return Node
+	 */
 	public Node getNode(long sender) {
 		for (Node x : nodes) if(x.getNodeID()==sender)return x;
 		return null;
@@ -326,6 +359,8 @@ public class GUI extends JFrame implements Observer {
 	
 	/**
 	 * ActionListener für Design wechsel (LookAndFeel)
+	 * 
+	 * hier wird das Umschalten des LookAndFeels im laufenden Betrieb ermöglicht
 	 * @author ABerthold
 	 *
 	 */

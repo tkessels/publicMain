@@ -5,6 +5,7 @@ public class GruppenKanal extends Kanal {
 
 
 	public GruppenKanal(String gruppe) {
+		super();
 		this.referenz=gruppe.toLowerCase();
 	}
 	
@@ -13,6 +14,7 @@ public class GruppenKanal extends Kanal {
 		if(nachricht.getGroup().equals(this.referenz)){
 			setChanged();
 			notifyObservers(nachricht);
+			messages.add(nachricht);
 			return true;
 		}
 		return false;

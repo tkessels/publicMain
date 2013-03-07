@@ -22,8 +22,9 @@ public class MSG implements Serializable{
 
 	private static final byte GROUP_POLL		=		50;
 	private static final byte GROUP_REPLY		=		51;
-	private static final byte GROUP_EMPTY		=		52;
-	private static final byte GROUP_USER		=		53;
+	private static final byte GROUP_JOIN		=		52;
+	private static final byte GROUP_LEAVE		=		53;
+	private static final byte GROUP_EMPTY		=		54;
 	
 	private static final byte NODE_SHUTDOWN		=		40;
 	private static final byte CMD_SHUTDOWN		=		70;

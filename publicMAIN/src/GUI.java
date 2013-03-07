@@ -61,9 +61,9 @@ public class GUI extends JFrame implements Observer {
 	private GUI(){
 		try {
 			this.ce = ChatEngine.getCE();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 		
 		

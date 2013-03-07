@@ -10,7 +10,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
-
 /**
  * @author tkessels
  *
@@ -95,7 +94,7 @@ public class ChatEngine extends Observable{
 	 * @return Array aller verbundener Nodes
 	 */
 	public	Node[]	getUsers(){
-		return (Node[]) Node.toArray();
+		return (Node[]) nodes.toArray();
 	}
 	
 	/** tritt einer Gruppe bei

@@ -159,10 +159,15 @@ public class GUI extends JFrame implements Observer {
 	 */
 	public void addChat(final ChatWindow cw){
 		//evtl noch Typunterscheidung hinzufügn
+		
 		String title = cw.getTabText();
 		
 		this.chatList.add(cw);
 		this.jTabbedPane.addTab(title, cw);
+		
+		
+//		ce.group_join(title);
+		ce.add_MSGListener(cw, title);
 		
 		int index = jTabbedPane.indexOfComponent(cw);
 		
@@ -197,7 +202,6 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
-		
 		JButton btnClose = new JButton("x");
 		btnClose.setFont(new Font("mei", Font.PLAIN, 10));
 		btnClose.setOpaque(false);
@@ -230,9 +234,6 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
-		
-		
-		
 		pnlTab.add(lblTitle, BorderLayout.CENTER);
 		pnlTab.add(btnClose, BorderLayout.EAST);
 		
@@ -250,6 +251,8 @@ public class GUI extends JFrame implements Observer {
 	public void delChat(ChatWindow cw){
 		this.jTabbedPane.remove(cw);
 		this.chatList.remove(cw);
+		System.out.println(cw.getTabText());
+		ce.group_leave(cw.getTabText());
 		if(chatList.isEmpty()){
 			addChat(new ChatWindow("public"));
 		}

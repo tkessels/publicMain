@@ -169,10 +169,6 @@ public class ChatEngine extends Observable{
 			tmp.addObserver(chatPanel);
 			group_channels.add(tmp);
 		}
-		
-
-		
-		
 	}
 	
 	

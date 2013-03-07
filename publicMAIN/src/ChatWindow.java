@@ -20,10 +20,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 
 	private String name;
 	private JButton sendenBtn;
-	private JTextArea jTextArea;
+	private JTextArea msgTextArea;
 	private JScrollPane jScrollPane;
 	private JTextField eingabeFeld;
-//	private String cwTyp;
+	private String cwTyp;
 	private String gruppe;
 	private long user;
 	
@@ -38,12 +38,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		this.setLayout(new BorderLayout());
 	
 		this.sendenBtn = new JButton("send");
-		this.jTextArea = new JTextArea(10,30);
-		this.jScrollPane = new JScrollPane(jTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.msgTextArea = new JTextArea(10,30);
+		this.jScrollPane = new JScrollPane(msgTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
 		
-		jTextArea.setEditable(true); // später ändern!!!
-		jTextArea.setLineWrap(true);
+		msgTextArea.setEditable(true); // später ändern!!!
+		msgTextArea.setLineWrap(true);
 		
 		sendenBtn.addActionListener(this);
 		eingabeFeld.addActionListener(this);
@@ -60,6 +60,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	public ChatWindow(long uid, String username){
 		this.user=uid;
 		this.name=username;
+		this.cwTyp="privat";
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
 	}
@@ -67,9 +68,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	public ChatWindow(String gruppenname){
 		gruppe=gruppenname;
 		this.name=gruppenname;
+		this.cwTyp="gruppe";
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
-		
 	}
 	
 	/**
@@ -79,13 +80,51 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		return name;
 	}
 	
+	public String getCwTyp(){
+		return this.cwTyp;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		if(!eingabeFeld.getText().equals("")){
 
-		if(eingabeFeld.getText().startsWith("/")){ //commando
-			//TODO:Commandos erkennen und ausführen
+		//Prüfen ob die Eingabe mit "/" beginnt und diese dann in drei Teile zerlegt ins Array speichern.
+		if(eingabeFeld.getText().startsWith("/")){ 
+			
+			// für UserID vom Empfänger zwischen zu speichern! falls Alias nicht gefunden wird, wird Nachricht an einen selbst geschickt
+			long tmpUid = user; 
+			
+			String[] tmp;
+			tmp = eingabeFeld.getText().split(" ", 3);
+						
+			for(int i = 0; i < gui.ce.getUsers().length; i++){
+				if(tmp[1].equals(gui.ce.getUsers()[i].getAlias())){
+					tmpUid = gui.ce.getUsers()[i].getUserID();
+				} else {
+					//TODO: Hier muss noch Fehlermeldung in der msgTextArea erzeugt werden!! am besten bund
+					System.err.println("Alias (User) nicht gefunden! [ChatWindow:actionPerformed:eingabeFeld]");
+				}
+			}
+			
+			switch(tmp[0]){
+			
+			case "/w":
+				//TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon vorhanden das focusiert werden 
+				gui.ce.send_private(tmpUid, tmp[2]);
+				
+				break;
+			case "/g":
+				//TODO: Hier muss noch der gruppenname eingefügt werden;
+//				gui.ce.send_group(group, tmp[2]);
+				System.out.println("Senden an Gruppen noch nicht möglich [ChatWindow:actionPerformed:eingabeFeld]");
+				break;
+			default :
+				//TODO:  Hier muss noch Fehlermeldung in der msgTextArea erzeugt werden!! am besten BUND 
+				System.err.println("kein gültiger Befehl!");
+				break;
+				
+			}
 			
 		} else { //ansonsten senden
 			if(gruppe==null) {
@@ -101,11 +140,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	}
 
 	private void echo(){
-		if(jTextArea.getText().equals("")){
-			jTextArea.setText(eingabeFeld.getText());
+		if(msgTextArea.getText().equals("")){
+			msgTextArea.setText(eingabeFeld.getText());
 			eingabeFeld.setText("");
 		} else {
-			jTextArea.setText(jTextArea.getText() + "\n" + eingabeFeld.getText());
+			msgTextArea.setText(msgTextArea.getText() + "\n" + eingabeFeld.getText());
 			eingabeFeld.setText("");
 		}
 	}

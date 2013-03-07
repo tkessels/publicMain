@@ -54,7 +54,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		sendenBtn.addActionListener(this);
 		eingabeFeld.addActionListener(this);
 		
-		
 		this.add(jScrollPane, BorderLayout.CENTER);
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(eingabeFeld, BorderLayout.CENTER);
@@ -63,8 +62,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		
 		this.setVisible(true);
 	}
-	
-
 	
 	public ChatWindow(long uid, String username){
 		this.user=uid;
@@ -78,8 +75,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		this.name=gruppenname;
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
-		
-		
 	}
 	
 	/**
@@ -88,7 +83,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	public String getTabText(){
 		return name;
 	}
-	
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -111,8 +105,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		
 	}
 
-	
-	
 	private void echo(){
 		if(jTextArea.getText().equals("")){
 			jTextArea.setText(eingabeFeld.getText());
@@ -122,9 +114,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 			eingabeFeld.setText("");
 		}
 	}
-	
-	
-	
 	
 	@Override
 	public void update(Observable sourceChannel, Object msg) {

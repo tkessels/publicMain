@@ -19,9 +19,15 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	public GUI gui;
+//	private GUI gui;
 	private Set<Node> nodes;
-	private List<Kanal> channels;
+	private List<GruppenKanal> group_channels;
+	private List<KnotenKanal> private_channels;
+	
+	private Thread msgSorterBot;//verteilt eingehende MSGs
+	private Thread neMaintenance;//warted die NE
+	
+	
 	private BlockingQueue<MSG> inbox;
 	
 	
@@ -29,7 +35,7 @@ public class ChatEngine extends Observable{
 	/**Liefert die Instanz der CE
 	 * @return
 	 */
-	public static synchronized ChatEngine getCE(){
+	public static synchronized ChatEngine getCE() throws Exception{
 		if(ce==null) ce=new ChatEngine();
 		return ce;
 	}
@@ -37,7 +43,8 @@ public class ChatEngine extends Observable{
 	
 	private ChatEngine(){
 		ne=NodeEngine.getNE();
-		channels=new ArrayList<Kanal>();
+		group_channels=new ArrayList<GruppenKanal>();
+		private_channels=new ArrayList<KnotenKanal>();
 		nodes=new HashSet<Node>();
 		nodes.addAll(Arrays.asList(ne.getNodes()));
 		inbox=new LinkedBlockingQueue<MSG>();
@@ -94,6 +101,10 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name){
+		/*Lege KAnal an 
+		 * informiere NodeEngine über neue gruppe wenn noch nicht vorhanden so das ander nodes diese anzeigen
+		 * vielleicht machen wirdas auch einfach indem wir ein group announce paket forgen
+		*/
 		//TODO: CODE HERE
 	}
 	
@@ -120,7 +131,7 @@ public class ChatEngine extends Observable{
 	 */
 	public	File	request_File(){
 		//TODO: CODE HERE
-		return gui.request_File();
+		return GUI.getGUI().request_File();
 	}
 	
 	/**Veranlasst das Nachrichten vom user mit der <code>uid</code> nicht mehr angezeigt werden.
@@ -150,7 +161,13 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel,String gruppen_name){
-		for (Kanal x : channels) {
+		//gibt es den Kanal schon
+		group_channels.contains(new GruppenKanal(gruppen_name));
+		
+		//neues CW an Kanal anmelden
+
+		
+		/*for (Kanal x : channels) {
 			if(x.is(gruppen_name)){
 				x.addObserver(chatPanel);
 				return;
@@ -158,7 +175,8 @@ public class ChatEngine extends Observable{
 		}
 		
 		GruppenKanal tmp =new GruppenKanal(gruppen_name);
-		channels.add(tmp);
+		channels.add(tmp);*/
+		
 	}
 	
 	
@@ -181,7 +199,7 @@ public class ChatEngine extends Observable{
 	 * @param nachricht Die neue Nachricht
 	 */
 	public void put(MSG nachricht){
-		
+		inbox.add(nachricht);
 	}
 	
 
@@ -190,7 +208,6 @@ public class ChatEngine extends Observable{
 	
 	public static void main(String[] args) {
 		
-//		System.out.println(string2long("HelloWorld"));
 	}
 
 	

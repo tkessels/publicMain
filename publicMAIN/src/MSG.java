@@ -12,14 +12,18 @@ public class MSG implements Serializable{
 	//SystemMessage Codes
 	private static final byte NODE_UPDATE		=		0;
 	private static final byte ALIAS_UPDATE		=		1;
-	
 	private static final byte ECHO_REQUEST		=		10;
 	private static final byte ECHO_RESPONSE		=	-	10;
 	private static final byte ROOT_DISCOVERY	=		20;
-	private static final byte ROOT_REPLAY		=	-	20;
+	private static final byte ROOT_REPLY		=	-	20;
 	private static final byte POLL_CHILDNODES	=		30;
 	private static final byte REPORT_CHILDNODES	=	-	30;
 	private static final byte NODE_SHUTDOWN		=		40;
+	private static final byte GROUP_ANNOUNCE	=		50;
+	private static final byte GROUP_EMPTY		=		51;
+	private static final byte GROUP_POLL		=		55;
+	private static final byte GROUP_REPLY		=		55;
+	
 	private static final byte CMD_SHUTDOWN		=		70;
 	private static final byte CMD_RESTART		=		71;
 	

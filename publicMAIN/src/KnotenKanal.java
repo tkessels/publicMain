@@ -1,14 +1,13 @@
 
 public class KnotenKanal extends Kanal{
 	
-	private long node;
 	public KnotenKanal(long node) {
-		this.node=node;
+		this.referenz=node;
 	}
 
 	@Override
 	public boolean add(MSG nachricht) {
-		if((nachricht.getSender()==(long)node)||nachricht.getEmpfänger()==(long)node){
+		if((nachricht.getSender()==(long)referenz)||nachricht.getEmpfänger()==(long)referenz){
 			setChanged();
 			notifyObservers(nachricht);
 			return true;
@@ -18,7 +17,7 @@ public class KnotenKanal extends Kanal{
 
 	@Override
 	public boolean is(Object vergleich) {
-		return (node==(long)vergleich);
+		return (referenz==vergleich);
 	}
 
 }

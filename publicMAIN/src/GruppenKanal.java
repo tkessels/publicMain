@@ -1,16 +1,16 @@
 
 public class GruppenKanal extends Kanal {
 
-	String gruppe;
+
 
 
 	public GruppenKanal(String gruppe) {
-		this.gruppe=gruppe.toLowerCase();
+		this.referenz=gruppe.toLowerCase();
 	}
 	
 
 	public boolean add(MSG nachricht){
-		if(nachricht.getGroup().equals(this.gruppe)){
+		if(nachricht.getGroup().equals(this.referenz)){
 			setChanged();
 			notifyObservers(nachricht);
 			return true;
@@ -21,7 +21,7 @@ public class GruppenKanal extends Kanal {
 
 
 	public boolean is(Object vergleich) {
-		return (this.gruppe.equals(vergleich));
+		return (this.referenz.equals(vergleich));
 	}
 	
 	@Override

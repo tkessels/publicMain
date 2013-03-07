@@ -56,8 +56,8 @@ public class ChatEngine extends Observable{
 	 * @param text Nachricht
 	 */
 	public void send_private(long uid, String text){
-		
-		//TODO: CODE HERE
+		MSG tmp = new MSG(uid,text);
+		ne.send(tmp);
 	}
 	
 	/**Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu schicken.
@@ -65,7 +65,8 @@ public class ChatEngine extends Observable{
 	 * @param text Nachricht
 	 */
 	public void send_group(String group, String text){
-		//TODO: CODE HERE	
+		MSG tmp = new MSG(group,text);
+		ne.send(tmp);
 	}
 	
 	/**Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden <code>uid</code> zu schicken.
@@ -94,7 +95,7 @@ public class ChatEngine extends Observable{
 	 * @return Array aller verbundener Nodes
 	 */
 	public	Node[]	getUsers(){
-		return (Node[]) nodes.toArray();
+		return (Node[]) Node.toArray();
 	}
 	
 	/** tritt einer Gruppe bei
@@ -161,15 +162,17 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel,String gruppen_name){
-		for (Kanal x : channels) {
-			if(x.is(gruppen_name)){
-				x.addObserver(chatPanel);
-				return;
-			}
+		int i = group_channels.indexOf(new GruppenKanal(gruppen_name));
+		if(i>=0)group_channels.get(i).addObserver(chatPanel);
+		else{
+			GruppenKanal tmp =new GruppenKanal(gruppen_name);
+			tmp.addObserver(chatPanel);
+			group_channels.add(tmp);
 		}
 		
-		GruppenKanal tmp =new GruppenKanal(gruppen_name);
-		channels.add(tmp);
+
+		
+		
 	}
 	
 	

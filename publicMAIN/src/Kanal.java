@@ -5,7 +5,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public abstract class Kanal extends Observable {
-	Object 	referenz;
+	protected Object 	referenz;
+
 
 	protected TreeSet<MSG> messages = new TreeSet<MSG>(new Comparator<MSG>() {
 		public int compare(MSG o1, MSG o2) {
@@ -26,7 +27,7 @@ public abstract class Kanal extends Observable {
 	 */
 	public Set<MSG> getLastMSGs(int count) {
 		if (messages.size() >= count) {
-			Iterator x = messages.descendingIterator();
+			Iterator<MSG> x = messages.descendingIterator();
 			MSG last = messages.last();
 			while (x.hasNext() && (count > 0)) {
 				count--;
@@ -46,8 +47,8 @@ public abstract class Kanal extends Observable {
 	
 	@Override
 	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
-		return false;
+		return referenz.equals(((Kanal)obj).referenz);
+		
 	}
 	
 }

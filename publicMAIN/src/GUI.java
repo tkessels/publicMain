@@ -8,8 +8,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -24,8 +22,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 //import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -37,80 +36,122 @@ public class GUI extends JFrame implements Observer {
 	
 	public ChatEngine ce;
 	public LogEngine log;
-
 	
 	private static GUI me;
 	private List<Node> nodes;
-
 	private List<ChatWindow> chatList;
 	private JTabbedPane jTabbedPane;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
-	private JMenuItem menuItem;
+	private JMenuItem menuItemRequestFile;
+	private JMenu lafMenu;
+	private JMenuItem lafNimROD;
+	private JToggleButton userListBtn;
+	private UserList userListWin;
+	
 	
 	/**
 	 * Konstruktor für GUI 
 	 */
 	private GUI(){
-		ce = ChatEngine.getCE();
-		log = new LogEngine();
-		
-		GUI.me=this;
 		try {
-			// LookAndFeel auf NimRODLookAndFeel setzen:
-			// hier müssen noch die Farben angepasst werden!
-			UIManager.setLookAndFeel(new NimRODLookAndFeel());
-		} 
-		catch (UnsupportedLookAndFeelException e) {
-			System.out.println(e.getMessage());
+			this.ce = ChatEngine.getCE();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		
+		this.log = new LogEngine();
+		this.me=this;
 		this.menuBar = new JMenuBar();
 		this.fileMenu = new JMenu("Datei");
-		this.menuItem = new JMenuItem("request_File()");
+		this.menuItemRequestFile = new JMenuItem("request_File()");
+		this.lafMenu = new JMenu("Design wechsel");
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
+		this.userListBtn = new JToggleButton("<");
+		this.lafNimROD = new JMenuItem("NimROD");
 		
-		jTabbedPane.setTabPlacement(JTabbedPane.TOP);
-//		jTp.setBackground(Color.CYAN);
-//		jTp.setForeground(Color.RED);
 		
+		for(UIManager.LookAndFeelInfo laf:UIManager.getInstalledLookAndFeels()){
+			JMenuItem tempJMenuItem = new JMenuItem(laf.getName());
+			lafMenu.add(tempJMenuItem);
+			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));
+		}
 		
 		// Listener zu den einzelen Komponenten hinzufügen:
-		// ActionListener für die MenuItems:
-		menuItem.addActionListener(new ActionListener() {
-			
+		// ActionListener für das MenuItemNimRoD
+//		this.lafNimROD.addActionListener(new ActionListener() {
+//			
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				try{
+//					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+//				} catch (Exception ex){
+//					System.out.println(ex.getMessage());
+//				}
+//				SwingUtilities.updateComponentTreeUI(GUI.me);
+//				GUI.me.pack();
+//			}
+//		});
+		
+		// ActionListener für die MenuItemRequestFile:
+		this.menuItemRequestFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				request_File();
 			}
 		});
 		
+		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
+		this.userListBtn.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JToggleButton source = (JToggleButton)e.getSource();
+				System.out.println(me.getBounds());
+				if(source.isSelected()){
+					userListWin = new UserList(GUI.me);
+					userListWin.aufklappen();
+				} else {
+					userListWin.zuklappen();
+				}
+			}
+		});
 		
-		fileMenu.add(menuItem);
+		
+		// Menüs hinzufügen:
+		this.fileMenu.add(menuItemRequestFile);
+		this.fileMenu.add(lafMenu);
+		this.lafMenu.add(lafNimROD);
+		this.menuBar.add(userListBtn);
 		this.menuBar.add(fileMenu);
 		this.setJMenuBar(menuBar);
 		
 		
+		// GUI Komponenten hinzufügen:
 		this.add(jTabbedPane);
-		
-		addChat(new ChatWindow("public"));
-		
+		this.addChat(new ChatWindow("public"));
 
-		this.setIconImage(new ImageIcon("pM_Logo2.png").getImage());
+		
+		// GUI Einstellungen:
+		this.setIconImage(new ImageIcon("res/pM_Logo2.png").getImage());
 		this.setLocationRelativeTo(null);
 		this.pack();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setTitle("pMain");
+		this.setTitle("pMAIN");
 		this.setVisible(true);
 	}
 	
+	/**
+	 * Diese Methode fügt ein ChatWindow hinzu
+	 * @param cw
+	 */
 	public void addChat(final ChatWindow cw){
 		//evtl noch Typunterscheidung hinzufügn
 		String title = cw.getTabText();
 		
-		chatList.add(cw);
-		jTabbedPane.addTab(title, cw);
+		this.chatList.add(cw);
+		this.jTabbedPane.addTab(title, cw);
 		
 		int index = jTabbedPane.indexOfComponent(cw);
 		
@@ -182,7 +223,7 @@ public class GUI extends JFrame implements Observer {
 		pnlTab.add(lblTitle, BorderLayout.CENTER);
 		pnlTab.add(btnClose, BorderLayout.EAST);
 		
-		jTabbedPane.setTabComponentAt(index, pnlTab);
+		this.jTabbedPane.setTabComponentAt(index, pnlTab);
 		
 	}
 	
@@ -194,8 +235,8 @@ public class GUI extends JFrame implements Observer {
 	 * @param cw
 	 */
 	public void delChat(ChatWindow cw){
-		jTabbedPane.remove(cw);
-		chatList.remove(cw);
+		this.jTabbedPane.remove(cw);
+		this.chatList.remove(cw);
 		if(chatList.isEmpty()){
 			addChat(new ChatWindow("public"));
 		}
@@ -224,13 +265,11 @@ public class GUI extends JFrame implements Observer {
 	 */
 	public File request_File(){
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal = fileChooser.showSaveDialog(getParent());
+		int returnVal = fileChooser.showSaveDialog(getGUI());
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 	       System.out.println("You chose to save this file: " +
 	            fileChooser.getSelectedFile().getName());
 	    }
-
-		
 		return fileChooser.getSelectedFile();
 	}
 	
@@ -268,7 +307,33 @@ public class GUI extends JFrame implements Observer {
 		for (Node x : nodes) if(x.getNodeID()==sender)return x;
 		return null;
 		}
-
+	
+	/**
+	 * ActionListener für Design wechsel (LookAndFeel)
+	 * @author ABerthold
+	 *
+	 */
+	class lafController implements ActionListener{
 		
+		private JMenuItem lafMenu;
+		private UIManager.LookAndFeelInfo laf;
+		
+		public lafController(JMenuItem lafMenu, UIManager.LookAndFeelInfo laf){
+			this.lafMenu = lafMenu;
+			this.laf = laf;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try{
+				UIManager.setLookAndFeel(laf.getClassName());
+			} catch (Exception ex){
+				System.out.println(ex.getMessage());
+			}
+			SwingUtilities.updateComponentTreeUI(GUI.me);
+			GUI.me.pack();
+		}
 	}
+		
+}
 

@@ -18,8 +18,8 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-//	private GUI gui;
 	private Set<Node> nodes;
+	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
 	private List<KnotenKanal> private_channels;
 	
@@ -45,6 +45,7 @@ public class ChatEngine extends Observable{
 		group_channels=new ArrayList<GruppenKanal>();
 		private_channels=new ArrayList<KnotenKanal>();
 		nodes=new HashSet<Node>();
+		ignored=new HashSet<Node>();
 		nodes.addAll(Arrays.asList(ne.getNodes()));
 		inbox=new LinkedBlockingQueue<MSG>();
 	}
@@ -193,7 +194,15 @@ public class ChatEngine extends Observable{
 	 * @param chatPanel
 	 */
 	public	void	remove_MSGListener(Observer chatPanel){
-		//TODO:Code Here		
+		for (Kanal x : group_channels) {
+			x.deleteObserver(chatPanel);
+		}
+		
+		for (Kanal x : private_channels) {
+			x.deleteObserver(chatPanel);
+		}
+		
+		
 	}
 	
 	
@@ -204,14 +213,23 @@ public class ChatEngine extends Observable{
 		inbox.add(nachricht);
 	}
 	
-
+	/**Findet zu UserID zugehörigen Node in der Liste
+	 * @param uid UserID
+	 * @return Node-Objekt zu angegebenem User
+	 */
+	private Node getNodeforUser(long uid){
+		for (Node x : nodes) {
+			if(x.getUserID()==uid) return x;
+		}
+		return null;
+	}
 	
 	
 	
 	public static void main(String[] args) {
 		
-//		System.out.println(string2long("HelloWorld"));
 	}
+	
 
 	
 

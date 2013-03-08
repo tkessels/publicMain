@@ -1,7 +1,16 @@
+import java.awt.BorderLayout;
+import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
+
+import org.omg.CORBA.Bounds;
 
 /**
  * 
@@ -11,16 +20,20 @@ import javax.swing.SwingUtilities;
  * @author ABerthold
  *
  */
-public class UserList extends JWindow {
+public class UserList extends JWindow implements ComponentListener, WindowListener {
 	private int hoehe;
 	private int breite;
 	private JFrame parent;
 	
 	
 	public UserList(JFrame parent) {
+//		this.setLayout(new BorderLayout());
 		this.parent=parent;
 		this.hoehe = parent.getHeight();
 		this.breite = 150;
+		parent.addComponentListener(this);
+		parent.addWindowListener(this);
+		
 	}
 	
 	public void aufklappen(){
@@ -42,6 +55,68 @@ public class UserList extends JWindow {
 //		}
 		
 		this.setVisible(false);
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		Rectangle tmp = e.getComponent().getBounds();
+		this.setBounds((int)(tmp.getX()-getBounds().width),(int)tmp.getY(), getBounds().width, getBounds().height);
+	}
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+		Rectangle tmp = e.getComponent().getBounds();
+		this.setBounds((int)(tmp.getX()-getBounds().width),(int)tmp.getY(), getBounds().width, tmp.height);
+		this.validate();
+		this.repaint();
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		this.setVisible(true);
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		this.setVisible(false);
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

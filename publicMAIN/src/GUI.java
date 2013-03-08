@@ -116,14 +116,15 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
-		
+		// Konfiguration userListBtn 
 		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
-		this.userListBtn.setToolTipText("Userlist anzeigen");
+		this.userListBtn.setToolTipText("Userlist einblenden");
 		this.userListBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton)e.getSource();
 				if(source.isSelected()){
+					userListBtn.setToolTipText("Userlist ausblenden");
 					userListBtn.setText(">");
 					userListWin = new UserList(GUI.me);
 					userListWin.aufklappen();
@@ -148,7 +149,7 @@ public class GUI extends JFrame implements Observer {
 		this.addChat(new ChatWindow("public  "));
 
 		
-		// GUI Einstellungen:
+		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon("res/pM_Logo2.png").getImage());
 		this.setLocationRelativeTo(null);
 		this.pack();

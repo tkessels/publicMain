@@ -18,6 +18,7 @@ import javax.swing.JTextField;
  */
 public class ChatWindow extends JPanel implements ActionListener, Observer{
 
+	// Deklarationen:
 	private String name;
 	private JButton sendenBtn;
 	private JTextArea msgTextArea;
@@ -37,10 +38,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//Layout für ChatWindow (JPanel) festlegen auf BorderLayout:
 		this.setLayout(new BorderLayout());
 	
+		// Initialisierungen:
 		this.sendenBtn = new JButton("send");
 		this.msgTextArea = new JTextArea(10,30);
 		this.jScrollPane = new JScrollPane(msgTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
+		
 		
 		msgTextArea.setEditable(true); // später ändern!!!
 		msgTextArea.setLineWrap(true);

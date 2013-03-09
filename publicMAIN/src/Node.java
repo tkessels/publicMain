@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.net.InetAddress;
 
-public class Node {
+public class Node implements Serializable {
 
 	private long nodeID;
 	private long userID;

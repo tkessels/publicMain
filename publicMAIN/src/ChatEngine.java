@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -40,8 +41,10 @@ public class ChatEngine extends Observable{
 	}
 
 	
-	private ChatEngine(){
-		ne=NodeEngine.getNE();
+	private ChatEngine() throws IOException{
+		
+		ne = new NodeEngine(this);
+		
 		group_channels=new ArrayList<GruppenKanal>();
 		private_channels=new ArrayList<KnotenKanal>();
 		nodes=new HashSet<Node>();
@@ -50,18 +53,25 @@ public class ChatEngine extends Observable{
 		inbox=new LinkedBlockingQueue<MSG>();
 		group_join("public");
 		
+		//hier müssten die default kanäle angelegt werden und die GUI müsste angebunden werden.
 		
-		msgSorterBot=new Thread(new Runnable() {
-			
+		
+		
+		msgSorterBot=new Thread(new Runnable() { //nimmt Nachrichten aus der inbox und verteilt sie auf die Kanäle
 			public void run() {
 				while (true) {
-					MSG tmp = inbox.remove();//versuche alle kanäle für jeweil gruppen und private nachrichten
-					if (tmp.getTyp() == NachrichtenTyp.GROUP) for (GruppenKanal x : group_channels) if (x.add(tmp)) break;
-					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) for (KnotenKanal y : private_channels) if (y.add(tmp))break;
+					try {
+						MSG tmp = inbox.take(); 
+						if (tmp.getTyp() == NachrichtenTyp.GROUP) for (GruppenKanal x : group_channels) if (x.add(tmp)) break;
+						else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) for (KnotenKanal y : private_channels) if (y.add(tmp))break;
+					} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
 					}
 				}
-
-		});
+			}}
+		);
+		msgSorterBot.start();
+		
+		
 	}
 	
 	

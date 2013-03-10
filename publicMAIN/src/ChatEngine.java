@@ -51,7 +51,7 @@ public class ChatEngine extends Observable{
 		ignored=new HashSet<Node>();
 		nodes.addAll(Arrays.asList(ne.getNodes()));
 		inbox=new LinkedBlockingQueue<MSG>();
-		group_join("public");
+		//group_join("public");
 		
 		//hier müssten die default kanäle angelegt werden und die GUI müsste angebunden werden.
 		

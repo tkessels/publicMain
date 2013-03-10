@@ -62,6 +62,7 @@ public class NodeEngine {
 				
 			}
 		});
+		msgRecieverBot.start();
 		
 		
 
@@ -124,7 +125,7 @@ public class NodeEngine {
 	 * getMe() gibt das eigene NodeObjekt zurück
 	 */
 	public Node getME (){
-		return meinNode;					//nur zum test
+		return meinNode;					//TODO:nur zum test
 		
 	}
 	
@@ -133,7 +134,7 @@ public class NodeEngine {
 	 * Nodes beinhaltet.
 	 */
 	public Node[] getNodes (){
-		return meinNodeArray;				//nur zum test
+		return meinNodeArray;				//TODO:nur zum test
 	}
 	
 	
@@ -143,7 +144,7 @@ public class NodeEngine {
 	 */
 	public String[] getGroups	(){
 		String[] grouparray = {"public","GruppeA", "GruppeB"};
-		return grouparray;					// to implement
+		return grouparray;					//TODO:to implement
 	}
 	
 	/**
@@ -160,6 +161,7 @@ public class NodeEngine {
 			LogEngine.log(e);
 		}
 		
+		
 	}
 	
 	/**
@@ -173,6 +175,16 @@ public class NodeEngine {
 	
 	public static void main(String[] args) {
 		System.out.println(getMyIPs());
+		
+	}
+	
+	
+
+	/**Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich von den ConnectionHandlern aufgerufen um empfange Pakete verarbeiten zu lassen.
+	 * @param paket neue 
+	 */
+	public void handle(MSG paket) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
+		// TODO Auto-generated method stub
 		
 	}
 

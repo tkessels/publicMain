@@ -8,17 +8,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.DefaultListCellRenderer.UIResource;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -62,27 +57,26 @@ public class GUI extends JFrame implements Observer {
 	 * Konstruktor für GUI 
 	 */
 	private GUI(){
+		//Initialisierungen:
 		try {
 			this.ce = ChatEngine.getCE();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
-		
-		//Initialisierungen:
 		this.me = this;
 		this.log = new LogEngine();
 		this.menuBar = new JMenuBar();
 		this.fileMenu = new JMenu("Datei");
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
-		this.lafMenu = new JMenu("Design wechsel");
+		this.lafMenu = new JMenu("Designwechsel");
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton("<");
 		this.lafNimROD = new JMenuItem("NimROD");
 		
-		// Anlegen der Menüeinträge für Design wechsel (installierte LookAndFeels)
-		// + hinzufügen zum lafMenu ("Design wechsel")
+		// Anlegen der Menüeinträge für Designwechsel (installierte LookAndFeels)
+		// + hinzufügen zum lafMenu ("Designwechsel")
 		// + hinzufügen der ActionListener (lafController)
 		for(UIManager.LookAndFeelInfo laf:UIManager.getInstalledLookAndFeels()){
 			JMenuItem tempJMenuItem = new JMenuItem(laf.getName());
@@ -90,43 +84,22 @@ public class GUI extends JFrame implements Observer {
 			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));
 		}
 		
-		//TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
-		// Listener zu den einzelen Komponenten hinzufügen:
-		// ActionListener für das MenuItemNimRoD
-//		this.lafNimROD.addActionListener(new ActionListener() {
-//			
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//				try{
-//					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-//				} catch (Exception ex){
-//					System.out.println(ex.getMessage());
-//				}
-//				SwingUtilities.updateComponentTreeUI(GUI.me);
-//				GUI.me.pack();
-//			}
-//		});
-
-		
-		// ActionListener für die MenuItemRequestFile:
-		this.menuItemRequestFile.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				request_File();
-			}
-		});
-		
+		// Anlegen benötigter Controller und Listener:
+		// WindowListener für das GUI-Fenster:
 		this.addWindowListener(new WindowListener() {
 			@Override
 			public void windowOpened(WindowEvent arg0) {
 				// TODO Auto-generated method stub
 			}
 			@Override
+			// Wird das GUI minimiert wird die Userlist zugeklappt und der userListBtn zurückgesetzt:
 			public void windowIconified(WindowEvent arg0) {
-				userListBtn.setText("<");
-				userListBtn.setToolTipText("Userlist einblenden");
-				userListBtn.setSelected(false);
-				userListWin.zuklappen();
+				if(userListBtn.isSelected()){
+					userListBtn.setText("<");
+					userListBtn.setToolTipText("Userlist einblenden");
+					userListBtn.setSelected(false);
+					userListWin.zuklappen();
+				}
 			}
 			@Override
 			public void windowDeiconified(WindowEvent arg0) {
@@ -147,6 +120,29 @@ public class GUI extends JFrame implements Observer {
 			@Override
 			public void windowActivated(WindowEvent arg0) {
 				// TODO Auto-generated method stub
+			}
+		});
+		
+		//TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
+		// ActionListener für das MenuItemNimRoD
+//		this.lafNimROD.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				try{
+//					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+//				} catch (Exception ex){
+//					System.out.println(ex.getMessage());
+//				}
+//				SwingUtilities.updateComponentTreeUI(GUI.me);
+//				GUI.me.pack();
+//			}
+//		});
+		
+		// ActionListener für die MenuItemRequestFile:
+		this.menuItemRequestFile.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				request_File();
 			}
 		});
 		
@@ -177,12 +173,10 @@ public class GUI extends JFrame implements Observer {
 		this.menuBar.add(userListBtn);
 		this.menuBar.add(fileMenu);
 		
-		
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
 		this.addChat(new ChatWindow("public"));
-
 		
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon("res/pM_Logo2.png").getImage());
@@ -317,7 +311,7 @@ public class GUI extends JFrame implements Observer {
 		if(chatList.isEmpty()){
 			//TODO: Hier evtl. noch anderen Programmablauf implementier
 			// z.B. schließen des Programms wenn letztes ChatWindow geschlossen wird
-			addChat(new ChatWindow("public  "));
+			addChat(new ChatWindow("public"));
 		}
 	}
 	

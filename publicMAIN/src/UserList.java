@@ -2,8 +2,14 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JTextArea;
 import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /**
  * 
@@ -17,13 +23,20 @@ public class UserList extends JWindow {
 	private int hoehe;
 	private int breite;
 	private JFrame parent;
+	private JInternalFrame internalFrame;
 	
 	
 	public UserList(JFrame parent) {
 //		this.setLayout(new BorderLayout());
 		this.parent=parent;
+		this.internalFrame = new JInternalFrame("Userlist");
 		this.hoehe = parent.getHeight();
 		this.breite = 150;
+		
+		this.add(internalFrame);
+		
+		internalFrame.setVisible(true);
+		
 		parent.addComponentListener(new ComponentListener() {
 			@Override
 			public void componentHidden(ComponentEvent e) {

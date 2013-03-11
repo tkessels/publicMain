@@ -133,7 +133,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 			if(gruppe==null) {
 				gui.ce.send_private(user, eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
 			} else {
-				gui.ce.send_group(gruppe, eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
+				gui.ce.send_group("public", eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
 			}
 		}
 		

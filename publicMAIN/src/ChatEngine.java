@@ -44,6 +44,7 @@ public class ChatEngine extends Observable{
 	private ChatEngine() throws IOException{
 		
 		ne = new NodeEngine(this);
+		ce=this;
 		
 		group_channels=new ArrayList<GruppenKanal>();
 		private_channels=new ArrayList<KnotenKanal>();

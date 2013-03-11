@@ -29,6 +29,7 @@ public class NodeEngine {
 	private boolean isConnected;
 	private boolean isRoot;
 	private ChatEngine ce;
+	private final InetAddress group = InetAddress.getByName("230.223.223.223");
 	
 	Thread msgRecieverBot;
 
@@ -37,9 +38,10 @@ public class NodeEngine {
 
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
-		
+		ich=this;
+		ce=parent;
 		meinNode=Node.getMe();
-		final InetAddress group = InetAddress.getByName("230.223.223.223");
+		
 		multi_socket = new MulticastSocket(6789);
 		multi_socket.joinGroup(group);
 		multi_socket.setTimeToLive(10);
@@ -151,8 +153,9 @@ public class NodeEngine {
 	 */
 	public void send (MSG nachricht){
 		byte[] buf = MSG.getBytes(nachricht);
+		LogEngine.log("sende nachricht:" + nachricht.toString(), this, LogEngine.INFO);
 		try {
-			multi_socket.send(new DatagramPacket(buf,buf.length));
+			multi_socket.send(new DatagramPacket(buf,buf.length,group,6789));
 		} catch (IOException e) {
 			LogEngine.log(e);
 		}

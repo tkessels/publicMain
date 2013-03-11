@@ -14,7 +14,7 @@ public class ConnectionHandler {
 	private Socket line;
 	private ObjectOutputStream line_out;
 	private ObjectInputStream line_in;
-	private BlockingQueue<MSG> outbox;
+	//private BlockingQueue<MSG> outbox;
 	private Thread pakets_rein_hol_bot;
 	private NodeEngine ne;
 	
@@ -22,7 +22,7 @@ public class ConnectionHandler {
 	public ConnectionHandler(Socket underlying) throws IOException{
 		ne=NodeEngine.getNE();
 		line = underlying;
-		outbox = new LinkedBlockingQueue<MSG>();
+		//outbox = new LinkedBlockingQueue<MSG>();
 		line_out=new ObjectOutputStream(line.getOutputStream());
 		line_in=new ObjectInputStream(line.getInputStream());
 		

@@ -1,3 +1,5 @@
+package org.publicmain.gui;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +11,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
 
 //import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 

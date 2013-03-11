@@ -1,3 +1,4 @@
+package org.publicmain.common;
 /**
  *	Enum der möglichen Nachrichtentypen 
  */

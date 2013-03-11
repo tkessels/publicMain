@@ -1,3 +1,5 @@
+package org.publicmain.gui;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -27,6 +29,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+
+import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.Node;
 
 //import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 

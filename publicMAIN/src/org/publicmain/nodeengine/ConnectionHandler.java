@@ -1,9 +1,14 @@
+package org.publicmain.nodeengine;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
 
 
 /**Wir eine Facade für unsere Sockets um Messeges zu empfangen und zu versenden

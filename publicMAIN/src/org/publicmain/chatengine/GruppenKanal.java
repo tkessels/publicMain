@@ -1,3 +1,7 @@
+package org.publicmain.chatengine;
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
+
 
 public class GruppenKanal extends Kanal {
 	
@@ -33,6 +37,9 @@ public class GruppenKanal extends Kanal {
 		// TODO Auto-generated method stub
 		return super.toString()+messages.toString();
 	}
+
+
+
 	
 }
 /*

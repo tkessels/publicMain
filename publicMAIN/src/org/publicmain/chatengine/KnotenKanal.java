@@ -1,3 +1,6 @@
+package org.publicmain.chatengine;
+import org.publicmain.common.MSG;
+
 
 public class KnotenKanal extends Kanal{
 	

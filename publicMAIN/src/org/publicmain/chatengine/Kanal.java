@@ -1,8 +1,11 @@
+package org.publicmain.chatengine;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.publicmain.common.MSG;
 
 public abstract class Kanal extends Observable {
 	protected Object 	referenz;

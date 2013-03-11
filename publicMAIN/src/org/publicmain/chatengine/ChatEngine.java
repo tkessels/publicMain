@@ -1,3 +1,5 @@
+package org.publicmain.chatengine;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +11,13 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
+import org.publicmain.common.NachrichtenTyp;
+import org.publicmain.common.Node;
+import org.publicmain.gui.GUI;
+import org.publicmain.nodeengine.NodeEngine;
 
 
 /**
@@ -249,11 +258,7 @@ public class ChatEngine extends Observable{
 	}
 	
 	
-	
-	public static void main(String[] args) {
-		
-	}
-	
+
 
 	
 

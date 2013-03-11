@@ -116,6 +116,40 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
+		this.addWindowListener(new WindowListener() {
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void windowIconified(WindowEvent arg0) {
+				userListBtn.setText("<");
+				userListBtn.setToolTipText("Userlist einblenden");
+				userListBtn.setSelected(false);
+				userListWin.zuklappen();
+			}
+			@Override
+			public void windowDeiconified(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void windowDeactivated(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void windowActivated(WindowEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+		});
+		
 		// Konfiguration userListBtn 
 		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
 		this.userListBtn.setToolTipText("Userlist einblenden");
@@ -129,6 +163,7 @@ public class GUI extends JFrame implements Observer {
 					userListWin = new UserList(GUI.me);
 					userListWin.aufklappen();
 				} else {
+					userListBtn.setToolTipText("Userlist einblenden");
 					userListBtn.setText("<");
 					userListWin.zuklappen();
 				}

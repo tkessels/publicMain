@@ -174,7 +174,7 @@ public class GUI extends JFrame implements Observer {
 				JDialog aboutPMAINdialog = new JDialog(me, "About pMAIN", true);
 				JTextArea aboutPMAINtextArea = new JTextArea("pMAIN: " + "\n\n\n" + "(c) Copyright pMAIN-CREW.  All rights reserved." + "\n\n" + "Visit http://www.publicmain.de");
 				aboutPMAINtextArea.setEditable(false);
-				aboutPMAINdialog.add(new JLabel(new ImageIcon("res/Mainbluepersp.png")), BorderLayout.WEST);
+				aboutPMAINdialog.add(new JLabel(new ImageIcon("media/Mainbluepersp.png")), BorderLayout.WEST);
 				aboutPMAINdialog.add(aboutPMAINtextArea, BorderLayout.CENTER);
 				aboutPMAINdialog.getContentPane().setBackground(new Color(255, 255, 255, 0));
 				aboutPMAINdialog.pack();
@@ -220,7 +220,7 @@ public class GUI extends JFrame implements Observer {
 		this.addChat(new ChatWindow("public"));
 		
 		// GUI JFrame Einstellungen:
-		this.setIconImage(new ImageIcon("res/pM_Logo2.png").getImage());
+		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

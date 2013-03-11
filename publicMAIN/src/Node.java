@@ -1,7 +1,10 @@
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Random;
 
 public class Node implements Serializable {
+	private static Node me;
 
 	private long nodeID;
 	private long userID;
@@ -9,6 +12,23 @@ public class Node implements Serializable {
 	private InetAddress[] sockets;
 	private String hostname;
 	private boolean isRoot;
+	
+	private Node() {
+		Random myrnd = new Random();
+		nodeID = myrnd.nextLong();
+		userID = myrnd.nextLong(); //noch zufällig später aus config
+		alias = System.getProperties().getProperty("user.name");
+		try {
+			hostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Node getMe(){
+		if(me==null)me=new Node();
+		return me;
+	}
 
 	public long getNodeID() {
 		return nodeID;

@@ -36,7 +36,7 @@ public class LogEngine {
 	 */
 	public static void log(String meldung, Object source,int errorLevel){
 		if(errorLevel<=verbosity){
-			System.err.println(new Time(System.currentTimeMillis()).toString()+":"+source.getClass().getName()+":meldung");
+			System.err.println(new Time(System.currentTimeMillis()).toString()+":"+source.getClass().getName()+":"+meldung);
 		}
 	}
 

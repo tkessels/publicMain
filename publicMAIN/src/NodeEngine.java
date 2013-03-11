@@ -24,7 +24,7 @@ public class NodeEngine {
 	
 	
 	//-----nur zum test--------
-	private Node meinNode = new Node();
+	private Node meinNode;
 	private Node[] meinNodeArray = new Node[2];
 	private boolean isConnected;
 	private boolean isRoot;
@@ -38,6 +38,7 @@ public class NodeEngine {
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
 		
+		meinNode=Node.getMe();
 		final InetAddress group = InetAddress.getByName("230.223.223.223");
 		multi_socket = new MulticastSocket(6789);
 		multi_socket.joinGroup(group);
@@ -59,14 +60,9 @@ public class NodeEngine {
 						LogEngine.log(e);
 					}
 				}
-				
 			}
 		});
 		msgRecieverBot.start();
-		
-		
-
-		
 	}
 	
 	

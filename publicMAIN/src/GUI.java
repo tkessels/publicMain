@@ -151,8 +151,8 @@ public class GUI extends JFrame implements Observer {
 		
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon("res/pM_Logo2.png").getImage());
-		this.setLocationRelativeTo(null);
 		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("pMAIN");
 		this.setVisible(true);

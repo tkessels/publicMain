@@ -115,16 +115,19 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 			case "/w":
 				//TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon vorhanden das focusiert werden 
 				gui.ce.send_private(tmpUid, tmp[2]);
+				eingabeFeld.setText("");
 				
 				break;
 			case "/g":
 				//TODO: Hier muss noch der gruppenname eingefügt werden;
 //				gui.ce.send_group(group, tmp[2]);
 				System.out.println("Senden an Gruppen noch nicht möglich [ChatWindow:actionPerformed:eingabeFeld]");
+				eingabeFeld.setText("");
 				break;
 			default :
 				//TODO:  Hier muss noch Fehlermeldung in der msgTextArea erzeugt werden!! am besten BUND 
 				System.err.println("kein gültiger Befehl!");
+				eingabeFeld.setText("");
 				break;
 				
 			}
@@ -132,8 +135,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		} else { //ansonsten senden
 			if(gruppe==null) {
 				gui.ce.send_private(user, eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
+				eingabeFeld.setText("");
 			} else {
 				gui.ce.send_group("public", eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
+				eingabeFeld.setText("");
 			}
 		}
 		}
@@ -147,7 +152,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
 		msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
-		eingabeFeld.setText("");
 		LogEngine.log("Nachricht für ausgabe:" + tmp.toString(), this, LogEngine.INFO);
 		
 	}

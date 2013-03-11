@@ -147,6 +147,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
 		msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
+		eingabeFeld.setText("");
 		LogEngine.log("Nachricht für ausgabe:" + tmp.toString(), this, LogEngine.INFO);
 		
 	}

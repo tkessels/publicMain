@@ -119,7 +119,9 @@ public class GUI extends JFrame implements Observer {
 			}
 			@Override
 			public void windowActivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
+				if(userListBtn.isSelected()){
+					userListWin.toFront();
+				}
 			}
 		});
 		

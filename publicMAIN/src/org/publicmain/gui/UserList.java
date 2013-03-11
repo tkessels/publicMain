@@ -1,4 +1,5 @@
 package org.publicmain.gui;
+
 import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;

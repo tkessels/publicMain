@@ -2,6 +2,7 @@ package org.publicmain.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
@@ -26,9 +27,11 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -37,7 +40,7 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
-//import com.nilo.plaf.nimrod.NimRODLookAndFeel;
+import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
  * @author ABerthold
@@ -63,6 +66,7 @@ public class GUI extends JFrame implements Observer {
 	private JTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
 	private UserList userListWin;
+	private pMTrayIcon trayIcon;
 	
 	
 	/**
@@ -94,6 +98,7 @@ public class GUI extends JFrame implements Observer {
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton("<");
 		this.lafNimROD = new JMenuItem("NimROD");
+		this.trayIcon.createTrayIcon();
 		
 		// Anlegen der Menüeinträge für Designwechsel (installierte LookAndFeels)
 		// + hinzufügen zum lafMenu ("Designwechsel")
@@ -135,7 +140,11 @@ public class GUI extends JFrame implements Observer {
 			}
 			@Override
 			public void windowClosed(WindowEvent arg0) {
-				// TODO Auto-generated method stub
+				
+				Object[] eventCache = {"super, so ne scheisse","deine Mama liegt im Systemtray"};
+				Object anchor = true;
+				JOptionPane.showInputDialog(me, "pMAIN wird ins Systemtray gelegt!",
+						"pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new ImageIcon("media/pM16x16.png"), eventCache, anchor);
 			}
 			@Override
 			public void windowActivated(WindowEvent arg0) {
@@ -147,18 +156,18 @@ public class GUI extends JFrame implements Observer {
 		
 		//TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
 		// ActionListener für das MenuItemNimRoD
-//		this.lafNimROD.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent arg0) {
-//				try{
-//					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-//				} catch (Exception ex){
-//					System.out.println(ex.getMessage());
-//				}
-//				SwingUtilities.updateComponentTreeUI(GUI.me);
-//				GUI.me.pack();
-//			}
-//		});
+		this.lafNimROD.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+				} catch (Exception ex){
+					System.out.println(ex.getMessage());
+				}
+				SwingUtilities.updateComponentTreeUI(GUI.me);
+				GUI.me.pack();
+			}
+		});
 		
 		// ActionListener für die MenuItemRequestFile:
 		this.menuItemRequestFile.addActionListener(new ActionListener() {
@@ -223,14 +232,14 @@ public class GUI extends JFrame implements Observer {
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
 		this.addChat(new ChatWindow("public"));
-		
-		
+
+		this.requestFocusInWindow();
 		
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setTitle("pMAIN");
 		this.setVisible(true);
 	}

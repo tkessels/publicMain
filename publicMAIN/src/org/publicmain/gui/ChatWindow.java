@@ -21,6 +21,10 @@ import org.publicmain.common.MSG;
  * @author ABerthold
  *
  */
+/**
+ * @author ABerthold
+ *
+ */
 public class ChatWindow extends JPanel implements ActionListener, Observer{
 
 	// Deklarationen:
@@ -51,6 +55,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		
 		msgTextArea.setEditable(false);
 		msgTextArea.setLineWrap(true);
+		
+		eingabeFeld.setDocument(new SetMaxText(200));
 		
 		sendenBtn.addActionListener(this);
 		eingabeFeld.addActionListener(this);
@@ -84,9 +90,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	 * @return String für Tab..
 	 */
 	public String getTabText(){
-		return name;
+		return this.name;
 	}
 	
+	/**
+	 * @return String ChatWindow Typ
+	 */
 	public String getCwTyp(){
 		return this.cwTyp;
 	}

@@ -57,6 +57,7 @@ public class NodeEngine {
 					try {
 						multi_socket.receive(tmp);
 						MSG nachricht = MSG.getMSG(tmp.getData());
+						LogEngine.log("nachricht empfange: " + nachricht.toString(),this,LogEngine.INFO);
 						ce.put(nachricht);
 					} catch (IOException e) {
 						LogEngine.log(e);

@@ -146,7 +146,7 @@ public class GUI extends JFrame implements Observer {
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
-		this.addChat(new ChatWindow("public  "));
+		this.addChat(new ChatWindow("public"));
 
 		
 		// GUI JFrame Einstellungen:

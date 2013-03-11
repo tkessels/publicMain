@@ -18,6 +18,7 @@ import java.util.Observer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,6 +27,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -51,6 +53,9 @@ public class GUI extends JFrame implements Observer {
 	private List<ChatWindow> chatList;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
+	private JMenu configMenu;
+	private JMenu helpMenu;
+	private JMenuItem aboutPMAIN;
 	private JMenuItem menuItemRequestFile;
 	private JMenu lafMenu;
 	private JMenuItem lafNimROD;
@@ -63,6 +68,11 @@ public class GUI extends JFrame implements Observer {
 	 * Konstruktor für GUI 
 	 */
 	private GUI(){
+		try{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception ex){
+			System.out.println(ex.getMessage());
+		}
 		//Initialisierungen:
 		try {
 			this.ce = ChatEngine.getCE();
@@ -73,9 +83,12 @@ public class GUI extends JFrame implements Observer {
 		this.me = this;
 		this.log = new LogEngine();
 		this.menuBar = new JMenuBar();
-		this.fileMenu = new JMenu("Datei");
+		this.fileMenu = new JMenu("File");
+		this.configMenu = new JMenu("Settings");
+		this.helpMenu = new JMenu("Help");
+		this.aboutPMAIN = new JMenuItem("About pMAIN");
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
-		this.lafMenu = new JMenu("Designwechsel");
+		this.lafMenu = new JMenu("Switch Design");
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton("<");
@@ -154,6 +167,23 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
+		// ActionListener für Hilfe/Über pMAIN:
+		this.aboutPMAIN.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JDialog aboutPMAINdialog = new JDialog(me, "About pMAIN", true);
+				JTextArea aboutPMAINtextArea = new JTextArea("pMAIN: " + "\n\n\n" + "(c) Copyright pMAIN-CREW.  All rights reserved." + "\n\n" + "Visit http://www.publicmain.de");
+				aboutPMAINtextArea.setEditable(false);
+				aboutPMAINdialog.add(new JLabel(new ImageIcon("res/Mainbluepersp.png")), BorderLayout.WEST);
+				aboutPMAINdialog.add(aboutPMAINtextArea, BorderLayout.CENTER);
+				aboutPMAINdialog.getContentPane().setBackground(new Color(255, 255, 255, 0));
+				aboutPMAINdialog.pack();
+				aboutPMAINdialog.setLocationRelativeTo(null);
+				aboutPMAINdialog.setVisible(true);
+				
+			}
+		});
+		
 		// Konfiguration userListBtn 
 		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
 		this.userListBtn.setToolTipText("Userlist einblenden");
@@ -175,11 +205,14 @@ public class GUI extends JFrame implements Observer {
 		});
 		
 		// Menüs hinzufügen:
-		this.fileMenu.add(menuItemRequestFile);
-		this.fileMenu.add(lafMenu);
 		this.lafMenu.add(lafNimROD);
+		this.configMenu.add(lafMenu);
+		this.fileMenu.add(menuItemRequestFile);
+		this.helpMenu.add(aboutPMAIN);
 		this.menuBar.add(userListBtn);
 		this.menuBar.add(fileMenu);
+		this.menuBar.add(configMenu);
+		this.menuBar.add(helpMenu);
 		
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);

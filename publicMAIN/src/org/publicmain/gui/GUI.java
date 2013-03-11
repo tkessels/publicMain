@@ -2,6 +2,7 @@ package org.publicmain.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -172,8 +173,12 @@ public class GUI extends JFrame implements Observer {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JDialog aboutPMAINdialog = new JDialog(me, "About pMAIN", true);
-				JTextArea aboutPMAINtextArea = new JTextArea("pMAIN: " + "\n\n\n" + "(c) Copyright pMAIN-CREW.  All rights reserved." + "\n\n" + "Visit http://www.publicmain.de");
+				JTextArea aboutPMAINtextArea = new JTextArea("pMAIN:" + "\n\n" +
+						"Public Messaging Appliance of Independent Nodes" + "\n\n" +
+						"(c) Copyright pMAIN.  All rights reserved." + "\n\n" + "Visit: http://www.publicmain.de");
 				aboutPMAINtextArea.setEditable(false);
+				aboutPMAINtextArea.setBackground(Color.BLACK);
+				aboutPMAINtextArea.setForeground(Color.WHITE);
 				aboutPMAINdialog.add(new JLabel(new ImageIcon("media/Mainbluepersp.png")), BorderLayout.WEST);
 				aboutPMAINdialog.add(aboutPMAINtextArea, BorderLayout.CENTER);
 				aboutPMAINdialog.getContentPane().setBackground(new Color(255, 255, 255, 0));
@@ -185,7 +190,7 @@ public class GUI extends JFrame implements Observer {
 		});
 		
 		// Konfiguration userListBtn 
-		this.userListBtn.setMargin(new Insets(5, 5, 5, 5));
+		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.userListBtn.setToolTipText("Userlist einblenden");
 		this.userListBtn.addActionListener(new ActionListener() {
 			@Override
@@ -218,6 +223,8 @@ public class GUI extends JFrame implements Observer {
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
 		this.addChat(new ChatWindow("public"));
+		
+		
 		
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
@@ -397,16 +404,6 @@ public class GUI extends JFrame implements Observer {
 		// mit den Observerpattern machen...
 	}
 	
- 	/**
- 	 * MAIN
- 	 * 
- 	 * Diese Methode startet das Programm und erstellt ein GUI Objekt 
- 	 * @param args
- 	 */
- 	public static void main(String[] args) {
-		getGUI();
-	}
-
 	/* (non-Javadoc)
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */

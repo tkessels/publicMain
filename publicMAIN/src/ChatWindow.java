@@ -44,8 +44,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		this.jScrollPane = new JScrollPane(msgTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
 		
-		
-		msgTextArea.setEditable(true); // später ändern!!!
+		msgTextArea.setEditable(false);
 		msgTextArea.setLineWrap(true);
 		
 		sendenBtn.addActionListener(this);
@@ -152,6 +151,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
 		msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
+		msgTextArea.setCaretPosition(msgTextArea.getText().length());
 		LogEngine.log("Nachricht für ausgabe:" + tmp.toString(), this, LogEngine.INFO);
 		
 	}

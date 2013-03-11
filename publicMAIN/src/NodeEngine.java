@@ -20,7 +20,7 @@ public class NodeEngine {
 	
 	private ServerSocket server_socket;
 	private MulticastSocket multi_socket;
-	//private List<ConnectionHandler> connections;
+	private List<ConnectionHandler> connections;
 	
 	
 	//-----nur zum test--------
@@ -30,6 +30,7 @@ public class NodeEngine {
 	private boolean isRoot;
 	private ChatEngine ce;
 	private final InetAddress group = InetAddress.getByName("230.223.223.223");
+	private final int port = 6789;
 	
 	Thread msgRecieverBot;
 
@@ -42,7 +43,7 @@ public class NodeEngine {
 		ce=parent;
 		meinNode=Node.getMe();
 		
-		multi_socket = new MulticastSocket(6789);
+		multi_socket = new MulticastSocket(port);
 		multi_socket.joinGroup(group);
 		multi_socket.setTimeToLive(10);
 		isConnected=true;
@@ -70,9 +71,10 @@ public class NodeEngine {
 	
 	
 	public static NodeEngine getNE(){
-	/*	if(ich==null){			//factory Method überflüssig? NE wird sofort am anfang instanzier
+		
+	/* if(ich==null){			//factory Method überflüssig? NE wird sofort am anfang instanzier
 			synchronized (NodeEngine.class) {
-				ich=new NodeEngine();				
+				if(ich==null)ich=new NodeEngine();				
 			}
 		}*/ 
 		return ich;

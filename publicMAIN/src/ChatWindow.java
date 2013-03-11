@@ -136,28 +136,17 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				gui.ce.send_group("public", eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
 			}
 		}
-		
-		echo();
 		}
 		
 	}
 
-	private void echo(){
-		if(msgTextArea.getText().equals("")){
-			msgTextArea.setText(eingabeFeld.getText());
-			eingabeFeld.setText("");
-		} else {
-			msgTextArea.setText(msgTextArea.getText() + "\n" + eingabeFeld.getText());
-			eingabeFeld.setText("");
-		}
-	}
 	
 	@Override
 	public void update(Observable sourceChannel, Object msg) {
 		//String ausgabe="";
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
-		msgTextArea.setText(msgTextArea.getText() + (String)tmp.getData());
+		msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
 		LogEngine.log("Nachricht für ausgabe:" + tmp.toString(), this, LogEngine.INFO);
 		
 	}

@@ -35,15 +35,15 @@ public class pMTrayIcon {
         });
     }
     
-    private static void createAndShowGUI() {
+    public static void createAndShowGUI() {
         //Check the SystemTray support
         if (!SystemTray.isSupported()) {
-            System.out.println("SystemTray is not supported");
+            System.err.println("SystemTray is not supported");
             return;
         }
         final PopupMenu popup = new PopupMenu();
         final TrayIcon trayIcon =
-                new TrayIcon(createImage("/pM.gif", "tray icon"));
+        new TrayIcon(new ImageIcon("media/pM.gif").getImage());
         final SystemTray tray = SystemTray.getSystemTray();
         
         // Create a popup menu components
@@ -100,7 +100,7 @@ public class pMTrayIcon {
         		fenster.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         		BufferedImage image;
 				try {
-					image = ImageIO.read(fenster.getClass().getResource("/bulb.gif"));
+					image = ImageIO.read(fenster.getClass().getResource("media/pM.gif"));
 					fenster.setIconImage(image);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block

@@ -3,6 +3,10 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -33,7 +37,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	private JTextArea msgTextArea;
 	private JScrollPane jScrollPane;
 	private JTextField eingabeFeld;
-	private String cwTyp;
 	private String gruppe;
 	private long user;
 	
@@ -67,13 +70,24 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		panel.add(sendenBtn, BorderLayout.EAST);
 		this.add(panel, BorderLayout.SOUTH);
 		
+		this.addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				//Focus auf eingabeFeld setzen:
+				eingabeFeld.requestFocusInWindow();
+			}
+		});
+		
 		this.setVisible(true);
 	}
 	
 	public ChatWindow(long uid, String username){
 		this.user=uid;
 		this.name=username;
-		this.cwTyp="privat";
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
 	}
@@ -81,7 +95,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	public ChatWindow(String gruppenname){
 		gruppe=gruppenname;
 		this.name=gruppenname;
-		this.cwTyp="gruppe";
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
 	}
@@ -89,16 +102,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	/**
 	 * @return String für Tab..
 	 */
-	public String getTabText(){
+	public String getChatWindowName(){
 		return this.name;
 	}
 	
-	/**
-	 * @return String ChatWindow Typ
-	 */
-	public String getCwTyp(){
-		return this.cwTyp;
-	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -133,7 +140,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				break;
 			case "/g":
 				//TODO: Hier muss noch der gruppenname eingefügt werden;
-//				gui.ce.send_group(group, tmp[2]);
+				gui.ce.send_group(tmp[1], tmp[2]);
 				System.out.println("Senden an Gruppen noch nicht möglich [ChatWindow:actionPerformed:eingabeFeld]");
 				eingabeFeld.setText("");
 				break;
@@ -150,7 +157,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				gui.ce.send_private(user, eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
 				eingabeFeld.setText("");
 			} else {
-				gui.ce.send_group("public", eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
+				gui.ce.send_group(gruppe, eingabeFeld.getText()); //ggf.: eingabeFeld.getText() durch Methode filtern
 				eingabeFeld.setText("");
 			}
 		}

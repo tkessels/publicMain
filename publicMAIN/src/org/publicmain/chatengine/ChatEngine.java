@@ -199,10 +199,10 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel,String gruppen_name){
-		int i = group_channels.indexOf(new GruppenKanal(gruppen_name));
+		GruppenKanal tmp =new GruppenKanal(gruppen_name);
+		int i = group_channels.indexOf(tmp);
 		if(i>=0)group_channels.get(i).addObserver(chatPanel);
 		else{
-			GruppenKanal tmp =new GruppenKanal(gruppen_name);
 			tmp.addObserver(chatPanel);
 			group_channels.add(tmp);
 		}
@@ -214,10 +214,11 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void	add_MSGListener(Observer chatPanel,long uid){
-		int i = group_channels.indexOf(new KnotenKanal(uid));
+		KnotenKanal tmp =new KnotenKanal(uid);
+		int i = group_channels.indexOf(tmp);
 		if(i>=0)group_channels.get(i).addObserver(chatPanel);
 		else{
-			KnotenKanal tmp =new KnotenKanal(uid);
+			
 			tmp.addObserver(chatPanel);
 			private_channels.add(tmp);
 		}

@@ -285,14 +285,8 @@ public class GUI extends JFrame implements Observer {
 				// TODO Auto-generated method stub
 			}
 			@Override
-			// Mittlere Maustastenklick (=2048) auf Label schließt das ChatWindow
-			// jeder andere Klick führt zur Auswahl des ChatWindows:
 			public void mousePressed(MouseEvent e) {
-				if(e.getModifiersEx() == 2048){ 
-					getGUI().delChat(cw);
-				} else {
-					jTabbedPane.setSelectedComponent(cw);
-				}
+				// TODO Auto-generated method stub
 			}
 			@Override
 			// beim verlassen der Maus von JLabel (lblTitle) wird die Schrift schwarz
@@ -307,8 +301,14 @@ public class GUI extends JFrame implements Observer {
 				source.setForeground(Color.RED);
 			}
 			@Override
+			// Mittlere Maustastenklick (=512) auf Label schließt das ChatWindow
+			// jeder andere Klick führt zur Auswahl des ChatWindows:
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
+				if(e.getModifiersEx() == 512){ 
+					getGUI().delChat(cw);
+				} else {
+					jTabbedPane.setSelectedComponent(cw);
+				}
 			}
 		});
 		

@@ -276,7 +276,7 @@ public class GUI extends JFrame implements Observer {
 		((FlowLayout) pnlTab.getLayout()).setHgap(5);
 		pnlTab.setOpaque(false);
 		
-		// Label für Tabbeschriftung erzeugen:
+		// TitelLabel für Tabbeschriftung erzeugen:
 		JLabel lblTitle = new JLabel(title);
 		// MouseListener zu JLabel (lblTitle) hinzufügen:
 		lblTitle.addMouseListener(new MouseListener() {
@@ -312,12 +312,8 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
-		// Schließenbutton für Tabbeschriftung erzeugen und gestalten:
+		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
 		JLabel lblClose = new JLabel("X");
-//		btnClose.setFont(new Font("fontBtnClose", Font.PLAIN, 10));
-		lblClose.setOpaque(false);
-//		btnClose.setMargin(new Insets(0, 4, 2, 4));
-//		btnClose.setBorderPainted(false);
 		// MouseListener für Schließenlabel (lblClose) hinzufügen:
 		lblClose.addMouseListener(new MouseListener() {
 			@Override
@@ -347,7 +343,7 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 		
-		// Label (lblTitle) + Schließenbutton (btnClose) zum Tab (pnlTab) hinzufügen:
+		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
 		pnlTab.add(lblTitle);
 		pnlTab.add(lblClose, BorderLayout.EAST);
 		

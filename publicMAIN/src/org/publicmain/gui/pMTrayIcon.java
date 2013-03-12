@@ -46,7 +46,7 @@ public class pMTrayIcon {
         final SystemTray tray = SystemTray.getSystemTray();
         
         // Create a popup menu components
-        MenuItem aboutItem = new MenuItem("pMain öffnen");
+        MenuItem openItem = new MenuItem("pMain öffnen");
        
         Menu alerts = new Menu("Alert me");
         CheckboxMenuItem alertPrivMsg = new CheckboxMenuItem("private Messages");
@@ -55,7 +55,7 @@ public class pMTrayIcon {
         MenuItem exitItem = new MenuItem("Exit");
         
         //Add components to popup menu
-        popup.add(aboutItem);
+        popup.add(openItem);
         popup.addSeparator();
         popup.add(alerts);
         alerts.add(alertPrivMsg);
@@ -69,32 +69,26 @@ public class pMTrayIcon {
         try {
             tray.add(trayIcon);
         } catch (AWTException e) {
-            System.out.println("TrayIcon konnte nicht hinzugefügt werden.");
+        	//TODO: logger für fehler hinzufügen
+            System.err.println("TrayIcon konnte nicht hinzugefügt werden.");
             return;
         }
         
         trayIcon.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null,
-                        "This dialog box is run from System Tray");
+            	if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
+        			GUI.getGUI().setExtendedState(JFrame.NORMAL);
+        		}
+            	GUI.getGUI().setVisible(true);
             }
         });
         
-        aboutItem.addActionListener(new ActionListener() {
+        openItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
-//                JOptionPane.showMessageDialog(null,
-//                        "This dialog box is run from the About menu item");
-        		GUI.getGUI().setVisible(true);
-//        		BufferedImage image;
-//				try {
-//					image = ImageIO.read(fenster.getClass().getResource("media/pM.gif"));
-//					fenster.setIconImage(image);
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-                
-            	
+        		if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
+        			GUI.getGUI().setExtendedState(JFrame.NORMAL);
+        		}
+            	GUI.getGUI().setVisible(true);
             }
         });
         

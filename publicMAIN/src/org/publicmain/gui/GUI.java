@@ -138,10 +138,10 @@ public class GUI extends JFrame implements Observer {
 			@Override
 			public void windowClosed(WindowEvent arg0) {
 				
-				Object[] eventCache = {"super, so ne scheisse","deine Mama liegt im Systemtray"};
-				Object anchor = true;
-				JOptionPane.showInputDialog(me, "pMAIN wird ins Systemtray gelegt!",
-						"pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new ImageIcon("media/pM16x16.png"), eventCache, anchor);
+//				Object[] eventCache = {"super, so ne scheisse","deine Mama liegt im Systemtray"};
+//				Object anchor = true;
+//				JOptionPane.showInputDialog(me, "pMAIN wird ins Systemtray gelegt!",
+//						"pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new ImageIcon("media/pM16x16.png"), eventCache, anchor);
 			}
 			@Override
 			public void windowActivated(WindowEvent arg0) {
@@ -244,7 +244,7 @@ public class GUI extends JFrame implements Observer {
 		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("pMAIN");
 		this.setVisible(true);
 	}
@@ -398,7 +398,7 @@ public class GUI extends JFrame implements Observer {
 	public File request_File(){
 		//TODO: hier stimmt noch nix! später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal = fileChooser.showSaveDialog(getGUI());
+		int returnVal = fileChooser.showSaveDialog(me);
 	    if(returnVal == JFileChooser.APPROVE_OPTION) {
 	       System.out.println("You chose to save this file: " +
 	            fileChooser.getSelectedFile().getName());
@@ -410,6 +410,7 @@ public class GUI extends JFrame implements Observer {
 	 * Diese Methode soll über Änderungen informieren
 	 */
 	public void notifyGUI(){
+		//TODO:
 		// da muss noch was gemacht werden !!!
 		// evtl fliegt die Methode auch raus wenn wir das
 		// mit den Observerpattern machen...

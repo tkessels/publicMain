@@ -40,7 +40,7 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
-import com.nilo.plaf.nimrod.NimRODLookAndFeel;
+//import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
  * @author ABerthold
@@ -156,18 +156,18 @@ public class GUI extends JFrame implements Observer {
 		
 		//TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
 		// ActionListener für das MenuItemNimRoD
-		this.lafNimROD.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-				} catch (Exception ex){
-					System.out.println(ex.getMessage());
-				}
-				SwingUtilities.updateComponentTreeUI(GUI.me);
-				GUI.me.pack();
-			}
-		});
+//		this.lafNimROD.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				try{
+//					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+//				} catch (Exception ex){
+//					System.out.println(ex.getMessage());
+//				}
+//				SwingUtilities.updateComponentTreeUI(GUI.me);
+//				GUI.me.pack();
+//			}
+//		});
 		
 		// ActionListener für die MenuItemRequestFile:
 		this.menuItemRequestFile.addActionListener(new ActionListener() {

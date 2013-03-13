@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -141,13 +142,20 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				eingabeFeld.setText("");
 				break;
 
+			case "/exit":
+				printMessage("Node wird angehalten...");
+				System.exit(0);
+				eingabeFeld.setText("");
+				// TODO: Methode zur ordentlichen herunterfahren des Nodes in GUI (gem. Tobi) implementieren. 
+				break;
+
 			case "/clear":
 				msgTextArea.setText("");
 				eingabeFeld.setText("");
 				break;
 
 			case "/w":
-				//TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon vorhanden das focusiert werden 
+				//TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon vorhanden das focusiert werden.
 				gui.ce.send_private(tmpUid, tmp[2]);
 				eingabeFeld.setText("");
 				break;
@@ -160,11 +168,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				break;
 				
 			default :
-				//TODO:  Hier muss noch Fehlermeldung in der msgTextArea erzeugt werden!! am besten BUND 
 				printMessage("Kein gültiger Befehl...");
 				eingabeFeld.setText("");
 				break;
-				
 			}
 			
 		} else { //ansonsten senden

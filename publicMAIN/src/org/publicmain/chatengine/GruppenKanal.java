@@ -2,6 +2,10 @@ package org.publicmain.chatengine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 
+/**
+ * @author ATRM
+ *
+ */
 
 public class GruppenKanal extends Kanal {
 

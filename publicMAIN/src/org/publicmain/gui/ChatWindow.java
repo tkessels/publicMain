@@ -26,6 +26,7 @@ import org.publicmain.common.MSG;
  * @author ATRM
  *
  */
+
 public class ChatWindow extends JPanel implements ActionListener, Observer{
 
 	// Deklarationen:

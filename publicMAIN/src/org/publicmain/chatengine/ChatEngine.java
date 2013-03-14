@@ -19,11 +19,11 @@ import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
 
-
 /**
  * @author ATRM
  *
  */
+
 public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;

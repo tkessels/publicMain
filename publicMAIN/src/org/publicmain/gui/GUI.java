@@ -346,7 +346,7 @@ public class GUI extends JFrame implements Observer {
 		
 		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
 		pnlTab.add(lblTitle);
-		pnlTab.add(lblClose, BorderLayout.EAST);
+		pnlTab.add(lblClose);
 		
 		// den neuen Tab an die Stelle von index setzen:
 		this.jTabbedPane.setTabComponentAt(index, pnlTab);

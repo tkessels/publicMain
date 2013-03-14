@@ -1,4 +1,6 @@
-import javax.swing.SwingUtilities;
+import org.publicmain.gui.GUI;
+
+
 
 public class publicMAIN {
 
@@ -7,7 +9,7 @@ public class publicMAIN {
 	 */
 	public static void main(String[] args) {
 
-		org.publicmain.gui.GUI.getGUI();
+		GUI.getGUI();
 
 	}
 

@@ -1,5 +1,7 @@
 package org.publicmain.nodeengine;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -28,8 +30,9 @@ public class ConnectionHandler {
 		ne=NodeEngine.getNE();
 		line = underlying;
 		//outbox = new LinkedBlockingQueue<MSG>();
-		line_out=new ObjectOutputStream(line.getOutputStream());
-		line_in=new ObjectInputStream(line.getInputStream());
+		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
+		line_out.flush();
+		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		
 		pakets_rein_hol_bot = new Thread(new Runnable() {
 			public void run() {

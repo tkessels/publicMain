@@ -57,7 +57,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		msgTextArea.setEditable(false);
 		msgTextArea.setLineWrap(true);
 		
-		eingabeFeld.setDocument(new SetMaxText(200));
+		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 		
 		sendenBtn.addActionListener(this);
 		eingabeFeld.addActionListener(this);

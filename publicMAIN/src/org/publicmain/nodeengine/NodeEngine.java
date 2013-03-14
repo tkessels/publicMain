@@ -37,7 +37,7 @@ public class NodeEngine {
 	private final InetAddress group = InetAddress.getByName("230.223.223.223");
 	private final int port = 6789;
 	
-	Thread msgRecieverBot;
+	private Thread msgRecieverBot;
 
 	// -------------------------
 	
@@ -107,11 +107,7 @@ public class NodeEngine {
 	 * "false" wenn nicht.
 	 */
 	public	boolean	isConnected	(){
-		if(isConnected){
-			return true;
-		}else {
-			return false;	
-		}
+		return isConnected;
 	}
 	
 	/**
@@ -119,11 +115,7 @@ public class NodeEngine {
 	 * "false" wenn nicht.
 	 */
 	public boolean	isRoot (){
-		if(isRoot){
-			return true;
-		}else {
-			return false;	
-		}
+		return isRoot;
 	}
 	
 	

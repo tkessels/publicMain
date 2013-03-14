@@ -23,11 +23,7 @@ import org.publicmain.common.MSG;
 //import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
- * @author ABerthold
- *
- */
-/**
- * @author ABerthold
+ * @author ATRM
  *
  */
 public class ChatWindow extends JPanel implements ActionListener, Observer{
@@ -143,10 +139,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				break;
 
 			case "/exit":
+				// TODO: Methode zur ordentlichen herunterfahren des Nodes in GUI (gem. Tobi) implementieren.
 				printMessage("Node wird angehalten...");
-				System.exit(0);
 				eingabeFeld.setText("");
-				// TODO: Methode zur ordentlichen herunterfahren des Nodes in GUI (gem. Tobi) implementieren. 
+				System.exit(0);
 				break;
 
 			case "/clear":
@@ -168,7 +164,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				break;
 				
 			default :
-				printMessage("Kein gültiger Befehl...");
+				printMessage(eingabeFeld.getText() + " ist kein gültiger Befehl...");
 				eingabeFeld.setText("");
 				break;
 			}

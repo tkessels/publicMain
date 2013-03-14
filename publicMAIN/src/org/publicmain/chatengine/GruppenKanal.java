@@ -4,16 +4,11 @@ import org.publicmain.common.MSG;
 
 
 public class GruppenKanal extends Kanal {
-	
-
-
-
 
 	public GruppenKanal(String gruppe) {
 		//super();
 		this.referenz=gruppe.toLowerCase();
 	}
-	
 	
 	public boolean add(MSG nachricht){
 		LogEngine.log("Nachricht auf Kanal " + referenz + " empfangen benachrichtige : " + this.countObservers(), this, LogEngine.INFO);
@@ -26,8 +21,6 @@ public class GruppenKanal extends Kanal {
 		return false;
 	}
 
-
-
 	public boolean is(Object vergleich) {
 		return (this.referenz.equals(vergleich));
 	}
@@ -37,10 +30,6 @@ public class GruppenKanal extends Kanal {
 		// TODO Auto-generated method stub
 		return super.toString()+messages.toString();
 	}
-
-
-
-	
 }
 /*
 

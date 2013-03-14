@@ -21,7 +21,7 @@ import org.publicmain.nodeengine.NodeEngine;
 
 
 /**
- * @author tkessels
+ * @author ATRM
  *
  */
 public class ChatEngine extends Observable{
@@ -257,12 +257,6 @@ public class ChatEngine extends Observable{
 		}
 		return null;
 	}
-	
-	
-
-
-	
-
 }
 
 

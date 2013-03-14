@@ -35,7 +35,7 @@ public class UserList extends JWindow {
 		this.hoehe = parent.getHeight();
 		this.breite = 150;
 		//TODO: prüfen ob man nicht besser ständig das selbe logo verwendet.
-		internalFrame.setFrameIcon(new ImageIcon("media/pM16x16.png"));
+		internalFrame.setFrameIcon(new ImageIcon("media/g18050.png"));
 		
 		this.add(internalFrame);
 		

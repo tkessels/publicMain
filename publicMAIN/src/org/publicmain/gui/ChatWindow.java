@@ -1,10 +1,13 @@
 package org.publicmain.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Observable;
@@ -60,6 +63,31 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 		
 		sendenBtn.addActionListener(this);
+		sendenBtn.addMouseListener(new MouseListener() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				JButton source = (JButton)e.getSource();
+				source.setForeground(Color.BLACK);
+			}
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				JButton source = (JButton)e.getSource();
+				source.setForeground(new Color(255,130,13));
+			}
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+			}
+		});
+		
 		eingabeFeld.addActionListener(this);
 		
 		this.add(jScrollPane, BorderLayout.CENTER);
@@ -189,9 +217,17 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//String ausgabe="";
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
-		msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
-		msgTextArea.setCaretPosition(msgTextArea.getText().length());
-		LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+		if(msgTextArea.getText().equals("")){
+			msgTextArea.setText(msgTextArea.getText() + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
+			// Position des Scrollbars auf letzte zeile:
+			msgTextArea.setCaretPosition(msgTextArea.getText().length());
+			LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+		} else {
+			msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
+			// Position des Scrollbars auf letzte zeile:
+			msgTextArea.setCaretPosition(msgTextArea.getText().length());
+			LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+		}
 	}
 	
 	/**

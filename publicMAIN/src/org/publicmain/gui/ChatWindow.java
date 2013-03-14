@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -120,36 +121,56 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 			
 			String[] tmp;
 			tmp = eingabeFeld.getText().split(" ", 3);
-						
-			for(int i = 0; i < gui.ce.getUsers().length; i++){
-				if(tmp[1].equals(gui.ce.getUsers()[i].getAlias())){
-					tmpUid = gui.ce.getUsers()[i].getUserID();
-				} else {
-					//TODO: Hier muss noch Fehlermeldung in der msgTextArea erzeugt werden!! am besten bund
-					System.err.println("Alias (User) nicht gefunden! [ChatWindow:actionPerformed:eingabeFeld]");
-				}
-			}
+
+//			TODO: Erstmal auskommentiert solange es die User/Node-Liste noch nicht existiert.
+//			
+//			for(int i = 0; i < gui.ce.getUsers().length; i++){
+//				if(tmp[1].equals(gui.ce.getUsers()[i].getAlias())){
+//					tmpUid = gui.ce.getUsers()[i].getUserID();
+//				} else {
+//					printMessage("Benutzer nicht gefunden...");
+//					eingabeFeld.setText("");
+//				}
+//			}
 			
 			switch(tmp[0]){
 			
+			case "/holz":
+				printMessage("Datenbank geschrottet...");
+				printMessage("Quellcode wird gegen Einsicht gesichert...");
+				printMessage("vsclean der Festplatte/n in wenigen Sekunden abgeschlossen..");
+				eingabeFeld.setText("");
+				break;
+
+			case "/exit":
+				printMessage("Node wird angehalten...");
+				System.exit(0);
+				eingabeFeld.setText("");
+				// TODO: Methode zur ordentlichen herunterfahren des Nodes in GUI (gem. Tobi) implementieren. 
+				break;
+
+			case "/clear":
+				msgTextArea.setText("");
+				eingabeFeld.setText("");
+				break;
+
 			case "/w":
-				//TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon vorhanden das focusiert werden 
+				//TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon vorhanden das focusiert werden.
 				gui.ce.send_private(tmpUid, tmp[2]);
 				eingabeFeld.setText("");
-				
 				break;
+				
 			case "/g":
 				//TODO: Hier muss noch der gruppenname eingefügt werden;
 				gui.ce.send_group(tmp[1], tmp[2]);
-				System.out.println("Senden an Gruppen noch nicht möglich [ChatWindow:actionPerformed:eingabeFeld]");
-				eingabeFeld.setText("");
-				break;
-			default :
-				//TODO:  Hier muss noch Fehlermeldung in der msgTextArea erzeugt werden!! am besten BUND 
-				System.err.println("kein gültiger Befehl!");
+				printMessage("Senden an Gruppen noch nicht möglich...");
 				eingabeFeld.setText("");
 				break;
 				
+			default :
+				printMessage("Kein gültiger Befehl...");
+				eingabeFeld.setText("");
+				break;
 			}
 			
 		} else { //ansonsten senden
@@ -173,8 +194,18 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		MSG tmp=(MSG)msg;
 		msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
 		msgTextArea.setCaretPosition(msgTextArea.getText().length());
-		LogEngine.log("Nachricht für ausgabe:" + tmp.toString(), this, LogEngine.INFO);
-		
+		LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+	}
+	
+	/**
+	 * Methode zur Benachrichtigung des Benutzers über das Textausgabefeld
+	 * (msgTextArea), gleichzeitig wird die LogEngine informiert.
+	 * 
+	 * @param reason
+	 */
+	public void printMessage(String reason){
+		msgTextArea.setText(msgTextArea.getText() + "\n " + reason);
+		LogEngine.log("Benachrichtigung an den Nutzer: " + reason, this, LogEngine.INFO);
 	}
 	
 }

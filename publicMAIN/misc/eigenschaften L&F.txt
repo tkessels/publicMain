@@ -1,4 +1,3 @@
-19:49:01:org.publicmain.nodeengine.NodeEngine:Multicast Socket geöffnet
 AATextInfoPropertyKey
 	sun.swing.SwingUtilities2$AATextInfo@5f7860a1
 Application.useSystemFontSettings

@@ -2,6 +2,7 @@ package org.publicmain.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -10,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -19,9 +21,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.w3c.dom.html.HTMLCollection;
 
 //import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -35,7 +43,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	// Deklarationen:
 	private String name;
 	private JButton sendenBtn;
-	private JTextArea msgTextArea;
+	private JTextPane msgTextPane;
+	private HTMLEditorKit htmlKit;
+	private HTMLDocument htmlDoc;
 	private JScrollPane jScrollPane;
 	private JTextField eingabeFeld;
 	private String gruppe;
@@ -53,12 +63,16 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	
 		// Initialisierungen:
 		this.sendenBtn = new JButton("send");
-		this.msgTextArea = new JTextArea(10,30);
-		this.jScrollPane = new JScrollPane(msgTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.msgTextPane = new JTextPane();
+		this.htmlKit = new HTMLEditorKit();
+		this.htmlDoc = new HTMLDocument();
+		this.jScrollPane = new JScrollPane(msgTextPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
 		
-		msgTextArea.setEditable(false);
-		msgTextArea.setLineWrap(true);
+		msgTextPane.setEditable(false);
+		msgTextPane.setPreferredSize(new Dimension(300,200));
+		msgTextPane.setEditorKit(htmlKit);
+		msgTextPane.setDocument(htmlDoc);
 		
 		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 		
@@ -158,6 +172,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 //				}
 //			}
 			
+			
 			switch(tmp[0]){
 			
 			case "/holz":
@@ -175,7 +190,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 				break;
 
 			case "/clear":
-				msgTextArea.setText("");
+				msgTextPane.setText("");
 				eingabeFeld.setText("");
 				break;
 
@@ -217,17 +232,23 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//String ausgabe="";
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
-		if(msgTextArea.getText().equals("")){
-			msgTextArea.setText(msgTextArea.getText() + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
-			// Position des Scrollbars auf letzte zeile:
-			msgTextArea.setCaretPosition(msgTextArea.getText().length());
-			LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
-		} else {
-			msgTextArea.setText(msgTextArea.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
-			// Position des Scrollbars auf letzte zeile:
-			msgTextArea.setCaretPosition(msgTextArea.getText().length());
-			LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+		try {
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='black'>" + ((String)tmp.getData()).replaceAll("sex", "<b>SEX</b>") + "</font>", 0, 0, null);
+		} catch ( BadLocationException | IOException e){
+			System.out.println(e.getMessage());
 		}
+		LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+//		if(msgTextPane.getText().equals("")){
+//			msgTextPane.setText(msgTextPane.getText() + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
+//			// Position des Scrollbars auf letzte zeile:
+//			msgTextPane.setCaretPosition(msgTextPane.getText().length());
+//			LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+//		} else {
+//			msgTextPane.setText(msgTextPane.getText() + "\n" + String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
+//			// Position des Scrollbars auf letzte zeile:
+//			msgTextPane.setCaretPosition(msgTextPane.getText().length());
+//			LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+//		}
 	}
 	
 	/**
@@ -237,7 +258,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	 * @param reason
 	 */
 	public void printMessage(String reason){
-		msgTextArea.setText(msgTextArea.getText() + "\n " + reason);
+//		msgTextPane.setText(msgTextPane.getText() + "\n " + reason);
+		try {
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + reason + "</font>", 0, 0, null);
+		} catch ( BadLocationException | IOException e){
+			System.out.println(e.getMessage());
+		}
+		
 		LogEngine.log("Benachrichtigung an den Nutzer: " + reason, this, LogEngine.INFO);
 	}
 	

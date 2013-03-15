@@ -107,6 +107,11 @@ public class GUI extends JFrame implements Observer {
 		// + hinzufügen der ActionListener (lafController)
 		for (UIManager.LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
 			JRadioButtonMenuItem tempJMenuItem = new JRadioButtonMenuItem(laf.getName());
+			System.out.println();
+			if((laf.getName().equals("Windows")) &&
+					(UIManager.getSystemLookAndFeelClassName().equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))){
+				tempJMenuItem.setSelected(true);
+			}
 			lafMenu.add(tempJMenuItem);
 			btnGrp.add(tempJMenuItem);
 			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));

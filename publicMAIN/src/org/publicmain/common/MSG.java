@@ -52,6 +52,8 @@ public class MSG implements Serializable{
 	private byte code;
 	//Quelle und Eindeutigkeit
 	private long sender;
+	private String alias;
+
 	private long timestamp;
 	private int id;
 	//Empfänger
@@ -68,6 +70,7 @@ public class MSG implements Serializable{
 		}
 		this.timestamp=System.currentTimeMillis();
 		this.sender= NodeEngine.getNE().getME().getNodeID();
+		this.alias=NodeEngine.getNE().getME().getAlias();
 	}
 	
 	public MSG(String text){
@@ -120,13 +123,19 @@ public class MSG implements Serializable{
 		return id;
 	}
 
+	
 	@Override
 	public String toString() {
 		return "MSG [" + (typ != null ? "typ=" + typ + ", " : "") + "code="
-				+ code + ", sender=" + sender + ", timestamp=" + timestamp
-				+ ", id=" + id + ", empfänger=" + empfänger + ", "
+				+ code + ", sender=" + sender + ", "
+				+ (alias != null ? "alias=" + alias + ", " : "") + "timestamp="
+				+ timestamp + ", id=" + id + ", empfänger=" + empfänger + ", "
 				+ (group != null ? "group=" + group + ", " : "")
 				+ (data != null ? "data=" + data : "") + "]";
+	}
+
+	public String getAlias() {
+		return alias;
 	}
 	
 	

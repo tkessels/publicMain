@@ -233,7 +233,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		//gui.getNode(((MSG)msg).getSender());
 		MSG tmp=(MSG)msg;
 		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='black'>" + ((String)tmp.getData()).replaceAll("sex", "<b>SEX</b>") + "</font>", 0, 0, null);
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>"+tmp.getAlias()+": </font>"+"<font color='black'>" + ((String)tmp.getData()).replaceAll("sex", "<b>SEX</b>") + "</font>", 0, 0, null);
 		} catch ( BadLocationException | IOException e){
 			System.out.println(e.getMessage());
 		}

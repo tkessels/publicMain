@@ -1,6 +1,9 @@
 import org.publicmain.gui.GUI;
 
-
+/**
+ * @author ATRM
+ * 
+ */
 
 public class publicMAIN {
 

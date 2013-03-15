@@ -2,12 +2,13 @@ package org.publicmain.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
-
-import javax.imageio.ImageIO;
 import javax.swing.*;
+
+/**
+ * @author ATRM
+ * 
+ */
 
 public class pMTrayIcon {
 //    public static void main(String[] args) {

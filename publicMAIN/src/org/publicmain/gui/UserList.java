@@ -3,30 +3,21 @@ package org.publicmain.gui;
 import java.awt.Rectangle;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JTextArea;
 import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
 /**
+ * @author ATRM
  * 
  */
 
-/**
- * @author ABerthold
- *
- */
 public class UserList extends JWindow {
 	private int hoehe;
 	private int breite;
 	private JFrame parent;
 	private JInternalFrame internalFrame;
-	
 	
 	public UserList(JFrame parent) {
 //		this.setLayout(new BorderLayout());
@@ -63,7 +54,6 @@ public class UserList extends JWindow {
 				// TODO Auto-generated method stub
 			}
 		});
-		
 	}
 	
 	public void aufklappen(){
@@ -85,7 +75,4 @@ public class UserList extends JWindow {
 //		}
 		this.setVisible(false);
 	}
-
-	
-	
 }

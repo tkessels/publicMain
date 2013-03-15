@@ -46,7 +46,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private ArrayList<String> eingabeHistorie;
 	private String eingabe;
 	private int eingabeAktuell;
-
 	private GUI gui;
 
 	/**
@@ -166,7 +165,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 	/**
 	 * In dieser Methode werden die Texteingaben aus dem eingabeFeld verarbeitet
-	 * TODO: alle eingabeFeld.getText() durch den String eingabe ersetzen
 	 */
 	public void actionPerformed(ActionEvent e) {
 
@@ -178,7 +176,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 			// Eingabe in der ArrayList eingabeHistorie speichern und
 			// Eingabezähler
-			// auf die neue Länge der ArrayList eingabeHistorie-1 setzen
+			// auf die neue Länge der ArrayList eingabeHistorie setzen
 			eingabeHistorie.add(eingabe);
 			eingabeAktuell = eingabeHistorie.size();
 
@@ -193,23 +191,24 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					// TODO: Hilfetext in das Ausgabefeld schreiben
 				} else if (eingabe.equals("/exit")) {
 					// TODO: Ordentliches herunterfahren des Nodes
-					printMessage("Node wird angehalten...");
+					printMessage("Node wird heruntergefahren...");
 					System.exit(0);
 				}
 
-				// Prüfen ob es ein Befehl mit Parametern ist und ob diese
-				// vorhanden sind
+				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
 				else if (eingabe.startsWith("/w") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch ein ChatWindow ins GUI oder
 					// wenn schon vorhanden das focusiert werden.
 					// long tmpUid = user;
 					//gui.ce.send_private(tmpUid, tmp[2]);
 					printMessage("Flüsternachrichten noch nicht möglich...");
-				} else if (eingabe.startsWith("/g")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
+				}
+				else if (eingabe.startsWith("/g")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch der Gruppenname eingefügt werden
 					// gui.ce.send_group(tmp[1], tmp[2]);
 					printMessage("Gruppennachrichten noch nicht möglich...");
-				} else {
+				}
+				else {
 					printMessage("Befehl nicht gültig oder vollständig...");
 				}
 			}
@@ -218,7 +217,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			else if (gruppe == null) {
 				// ggf. eingabe durch Methode filtern
 				gui.ce.send_private(user, eingabe);
-			} else {
+			}
+			else {
 				// ggf. eingabe durch Methode filtern
 				gui.ce.send_group(gruppe, eingabe);
 			}
@@ -312,6 +312,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		MSG tmp = (MSG) msg;
 		try {
 			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + String.valueOf(tmp.getSender() % 10000) + ": </font><font color='black'>" + (String) tmp.getData() + "</font>", 0, 0, null);
+			msgTextPane.setCaretPosition(htmlDoc.getLength());
 		} catch (BadLocationException | IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -342,6 +343,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	public void printMessage(String reason) {
 		try {
 			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='red'>" + reason + "</font>", 0, 0, null);
+			msgTextPane.setCaretPosition(htmlDoc.getLength());
 		} catch (BadLocationException | IOException e) {
 			System.out.println(e.getMessage());
 		}

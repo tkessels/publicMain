@@ -39,12 +39,11 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
-//import com.nilo.plaf.nimrod.NimRODLookAndFeel;
-
 /**
- * @author ABerthold
+ * @author ATRM
  * 
  */
+
 public class GUI extends JFrame implements Observer {
 
 	// Deklarationen:

@@ -44,7 +44,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private String gruppe;
 	private long user;
 	private ArrayList<String> eingabeHistorie;
-	private String eingabe;
 	private int eingabeAktuell;
 	private GUI gui;
 
@@ -63,7 +62,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.jScrollPane = new JScrollPane(msgTextPane,	JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
 		this.eingabeHistorie = new ArrayList<String>();
-		this.eingabe = "";
 		this.eingabeAktuell = 0;
 
 		msgTextPane.setEditable(false);
@@ -73,31 +71,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 
-		/**
-		 * KeyListener für Nachrichtenhistorie
-		 */
-		eingabeFeld.addKeyListener(new KeyListener() {
-			public void keyTyped(KeyEvent arg0) {
-			}
-
-			public void keyReleased(KeyEvent arg0) {
-			}
-
-			public void keyPressed(KeyEvent arg0) {
-				if (arg0.getKeyCode() == 38 && eingabeAktuell > 0) {
-					eingabeAktuell--;
-					eingabeFeld.setText(eingabeHistorie.get(eingabeAktuell));
-				} else if (arg0.getKeyCode() == 40 && eingabeAktuell < eingabeHistorie.size()) {
-					eingabeAktuell++;
-					if (eingabeAktuell < eingabeHistorie.size()) {
-						eingabeFeld.setText(eingabeHistorie.get(eingabeAktuell));
-					} else
-						eingabeFeld.setText("");
-				} else {
-
-				}
-			}
-		});
+		// KeyListener für Nachrichtenhistorie hinzufügen
+		eingabeFeld.addKeyListener(kl);
 
 		sendenBtn.addActionListener(this);
 		sendenBtn.addMouseListener(new MouseListener() {
@@ -172,7 +147,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		if (!eingabeFeld.getText().equals("")) {
 
 			// Eingabe aus dem Textfeld in String eingabe speichern
-			eingabe = eingabeFeld.getText();
+			String eingabe = eingabeFeld.getText();
 
 			// Eingabe in der ArrayList eingabeHistorie speichern und
 			// Eingabezähler
@@ -200,7 +175,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					// TODO: Hier muss noch ein ChatWindow ins GUI oder
 					// wenn schon vorhanden das focusiert werden.
 					// long tmpUid = user;
-					//gui.ce.send_private(tmpUid, tmp[2]);
+					// gui.ce.send_private(tmpUid, tmp[2]);
 					printMessage("Flüsternachrichten noch nicht möglich...");
 				}
 				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
@@ -225,90 +200,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		// In jedem Fall wird das Eingabefeld gelöscht
 		eingabeFeld.setText("");
 		}
-
-		// //Prüfen ob die Eingabe mit "/" beginnt und diese dann in drei Teile
-		// zerlegt ins Array speichern.
-		// if(eingabe.startsWith("/")){
-		//
-		// // für UserID vom Empfänger zwischen zu speichern! falls Alias nicht
-		// gefunden wird, wird Nachricht an einen selbst geschickt
-		// long tmpUid = user;
-		//
-		// String[] tmp;
-		// tmp = eingabeFeld.getText().split(" ", 3);
-		//
-		// // TODO: Erstmal auskommentiert solange es die User/Node-Liste noch
-		// nicht existiert.
-		// //
-		// // for(int i = 0; i < gui.ce.getUsers().length; i++){
-		// // if(tmp[1].equals(gui.ce.getUsers()[i].getAlias())){
-		// // tmpUid = gui.ce.getUsers()[i].getUserID();
-		// // } else {
-		// // printMessage("Benutzer nicht gefunden...");
-		// // eingabeFeld.setText("");
-		// // }
-		// // }
-		//
-		// switch(tmp[0]){
-		//
-		// case "/holz":
-		// printMessage("Datenbank geschrottet...");
-		// printMessage("Quellcode wird gegen Einsicht gesichert...");
-		// printMessage("vsclean der Festplatte/n in wenigen Sekunden abgeschlossen..");
-		// eingabeFeld.setText("");
-		// break;
-		//
-		// case "/exit":
-		// // TODO: Methode zur ordentlichen herunterfahren des Nodes in GUI
-		// (gem. Tobi) implementieren.
-		// printMessage("Node wird angehalten...");
-		// eingabeFeld.setText("");
-		// System.exit(0);
-		// break;
-		//
-		// case "/clear":
-		// msgTextPane.setText("");
-		// eingabeFeld.setText("");
-		// break;
-		//
-		// case "/w":
-		// //TODO: Hier muss noch ein ChatWindow ins GUI, oder wenn schon
-		// vorhanden das focusiert werden.
-		// gui.ce.send_private(tmpUid, tmp[2]);
-		// eingabeFeld.setText("");
-		// break;
-		//
-		// case "/g":
-		// //TODO: Hier muss noch der gruppenname eingefügt werden;
-		// gui.ce.send_group(tmp[1], tmp[2]);
-		// printMessage("Senden an Gruppen noch nicht möglich...");
-		// eingabeFeld.setText("");
-		// break;
-		//
-		// default :
-		// printMessage(eingabeFeld.getText() + " ist kein gültiger Befehl...");
-		// eingabeFeld.setText("");
-		// break;
-		// }
-		//
-		// } else { //ansonsten senden
-		// if(gruppe==null) {
-		// gui.ce.send_private(user, eingabeFeld.getText()); //ggf.:
-		// eingabeFeld.getText() durch Methode filtern
-		// eingabeFeld.setText("");
-		// } else {
-		// gui.ce.send_group(gruppe, eingabeFeld.getText()); //ggf.:
-		// eingabeFeld.getText() durch Methode filtern
-		// eingabeFeld.setText("");
-		// }
-		// }
-		// }
 	}
 
-	@Override
 	public void update(Observable sourceChannel, Object msg) {
-		// String ausgabe="";
-		// gui.getNode(((MSG)msg).getSender());
 		MSG tmp = (MSG) msg;
 		try {
 			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + String.valueOf(tmp.getSender() % 10000) + ": </font><font color='black'>" + (String) tmp.getData() + "</font>", 0, 0, null);
@@ -317,21 +211,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			System.out.println(e.getMessage());
 		}
 		LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
-		// if(msgTextPane.getText().equals("")){
-		// msgTextPane.setText(msgTextPane.getText() +
-		// String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
-		// // Position des Scrollbars auf letzte zeile:
-		// msgTextPane.setCaretPosition(msgTextPane.getText().length());
-		// LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this,
-		// LogEngine.INFO);
-		// } else {
-		// msgTextPane.setText(msgTextPane.getText() + "\n" +
-		// String.valueOf(tmp.getSender()%10000) +": "+ (String)tmp.getData());
-		// // Position des Scrollbars auf letzte zeile:
-		// msgTextPane.setCaretPosition(msgTextPane.getText().length());
-		// LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this,
-		// LogEngine.INFO);
-		// }
 	}
 
 	/**
@@ -349,4 +228,31 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 		LogEngine.log("Benachrichtigung an den Nutzer: " + reason, this, LogEngine.INFO);
 	}
+	
+	/**
+	 * KeyListener für Nachrichtenhistorie ggf. für andere Dinge verwendbar
+	 */
+	public KeyListener kl = new KeyListener() {
+		
+		public void keyTyped(KeyEvent arg0) {
+		}
+
+		public void keyReleased(KeyEvent arg0) {
+		}
+
+		public void keyPressed(KeyEvent arg0) {
+			if (arg0.getKeyCode() == 38 && eingabeAktuell > 0) {
+				eingabeAktuell--;
+				eingabeFeld.setText(eingabeHistorie.get(eingabeAktuell));
+			} else if (arg0.getKeyCode() == 40 && eingabeAktuell < eingabeHistorie.size()) {
+				eingabeAktuell++;
+				if (eingabeAktuell < eingabeHistorie.size()) {
+					eingabeFeld.setText(eingabeHistorie.get(eingabeAktuell));
+				} else
+					eingabeFeld.setText("");
+			} else {
+
+			}
+		}
+	};
 }

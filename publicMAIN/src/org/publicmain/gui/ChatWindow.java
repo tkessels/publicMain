@@ -196,14 +196,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 
 				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
-				else if (eingabe.startsWith("/w") && (tmp = eingabe.split(" ", 3)).length == 3) {
+				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch ein ChatWindow ins GUI oder
 					// wenn schon vorhanden das focusiert werden.
 					// long tmpUid = user;
 					//gui.ce.send_private(tmpUid, tmp[2]);
 					printMessage("Flüsternachrichten noch nicht möglich...");
 				}
-				else if (eingabe.startsWith("/g")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
+				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch der Gruppenname eingefügt werden
 					// gui.ce.send_group(tmp[1], tmp[2]);
 					printMessage("Gruppennachrichten noch nicht möglich...");

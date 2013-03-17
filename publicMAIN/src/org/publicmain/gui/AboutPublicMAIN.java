@@ -1,27 +1,21 @@
-/**
- * 
- */
 package org.publicmain.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Frame;
-
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
 /**
- * Diese Klasse stellt den Dialog für Help/About pMAIN bereit
+ * @author ATRM
  * 
- * @author Alfred
- *
  */
+
 public class AboutPublicMAIN extends JDialog {
 
 	private JTextArea aboutPMAINtextArea;
-	
 	
 	/**
 	 * Konstruktor
@@ -44,7 +38,5 @@ public class AboutPublicMAIN extends JDialog {
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-		
 	}
-	
 }

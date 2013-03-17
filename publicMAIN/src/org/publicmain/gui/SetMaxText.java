@@ -3,6 +3,11 @@ package org.publicmain.gui;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.*;
 
+/**
+ * @author ATRM
+ * 
+ */
+
 public class SetMaxText extends PlainDocument {
   private int limit;
   // optional uppercase conversion

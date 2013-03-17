@@ -20,6 +20,7 @@ import java.util.Observer;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -59,6 +60,7 @@ public class GUI extends JFrame implements Observer {
 	private JMenu configMenu;
 	private JMenu helpMenu;
 	private JMenuItem aboutPMAIN;
+	private JMenuItem helpContents;
 	private JMenuItem menuItemRequestFile;
 	private JMenu lafMenu;
 	private ButtonGroup btnGrp;
@@ -92,6 +94,7 @@ public class GUI extends JFrame implements Observer {
 		this.configMenu = new JMenu("Settings");
 		this.helpMenu = new JMenu("Help");
 		this.aboutPMAIN = new JMenuItem("About pMAIN");
+		this.helpContents = new JMenuItem("Help Contents", new ImageIcon("media/HelpContentsIcon.png"));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
 		this.lafMenu = new JMenu("Switch Design");
 		this.btnGrp = new ButtonGroup();
@@ -204,6 +207,16 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 
+		// ActionListener für HelpContents
+		this.helpContents.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				new HelpContents();										// HelpContents() schreiben (HTML)
+			}
+		});
+		
+		
+		
 		// Konfiguration userListBtn
 		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.userListBtn.setToolTipText("Userlist einblenden");
@@ -232,6 +245,7 @@ public class GUI extends JFrame implements Observer {
 		this.configMenu.add(lafMenu);
 		this.fileMenu.add(menuItemRequestFile);
 		this.helpMenu.add(aboutPMAIN);
+		this.helpMenu.add(helpContents);
 		this.menuBar.add(userListBtn);
 		this.menuBar.add(fileMenu);
 		this.menuBar.add(configMenu);

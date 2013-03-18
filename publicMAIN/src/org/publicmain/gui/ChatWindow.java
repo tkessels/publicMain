@@ -61,7 +61,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.jScrollPane = new JScrollPane(msgTextPane,	JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
 
-
 		msgTextPane.setEditable(false);
 		msgTextPane.setPreferredSize(new Dimension(300, 200));
 		msgTextPane.setEditorKit(htmlKit);
@@ -160,6 +159,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					msgTextPane.setText("");
 				} else if (eingabe.equals("/help")) {
 					// TODO: Hilfetext in das Ausgabefeld schreiben
+					printMessage("<br><table color='red'>" +
+							"<tr><td>/clear</td><td colspan='2'>Anzeige löschen</td></tr>" +
+							"<tr><td>/exit</td><td colspan='2'>Programm beenden</td></tr>" +
+							"<tr><td>/help</td><td colspan='2'>Hilfe anzeigen</td></tr>" +
+							"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td></tr>" +
+							"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td></tr>" +
+							"</table><br>");
 				} else if (eingabe.equals("/exit")) {
 					// TODO: Ordentliches herunterfahren des Nodes
 					printMessage("Node wird heruntergefahren...");
@@ -228,7 +234,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	/**
 	 * KeyListener für Nachrichtenhistorie ggf. für andere Dinge verwendbar
 	 */
-		
 		class History implements KeyListener{
 
 			private ArrayList<String> eingabeHistorie;

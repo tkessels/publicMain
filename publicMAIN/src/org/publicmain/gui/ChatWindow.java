@@ -163,6 +163,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 							"<tr><td>/clear</td><td colspan='2'>Anzeige löschen</td></tr>" +
 							"<tr><td>/exit</td><td colspan='2'>Programm beenden</td></tr>" +
 							"<tr><td>/help</td><td colspan='2'>Hilfe anzeigen</td></tr>" +
+							"<tr><td>/i</td><td>&lt;username&gt;</td><td></td></tr>" +
 							"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td></tr>" +
 							"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td></tr>" +
 							"</table><br>");
@@ -173,6 +174,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 
 				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
+				else if (eingabe.startsWith("/i ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
+					// TODO: Dieses Kommando ist für das hinzufügen von Nutzern zur Ignorierliste gedacht
+					printMessage("Ignorieren noch nicht möglich...");
+				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch ein ChatWindow ins GUI oder
 					// wenn schon vorhanden das focusiert werden.

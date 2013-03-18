@@ -20,7 +20,6 @@ import java.util.Observer;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -39,6 +38,9 @@ import javax.swing.UIManager;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
+
+import com.nilo.plaf.nimrod.*;
+
 
 /**
  * @author ATRM
@@ -66,8 +68,10 @@ public class GUI extends JFrame implements Observer {
 	private JMenuItem lafNimROD;
 	private JTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
+	private boolean userListActive;
 	private UserList userListWin;
 	private pMTrayIcon trayIcon;
+	
 
 	/**
 	 * Konstruktor für GUI
@@ -100,6 +104,7 @@ public class GUI extends JFrame implements Observer {
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton(new ImageIcon("media/UserListAusklappen.png"));
+		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon.createTrayIcon();
 		
@@ -121,51 +126,7 @@ public class GUI extends JFrame implements Observer {
 
 		// Anlegen benötigter Controller und Listener:
 		// WindowListener für das GUI-Fenster:
-		this.addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			// Wird das GUI minimiert wird die Userlist zugeklappt und der
-			// userListBtn zurückgesetzt:
-			public void windowIconified(WindowEvent arg0) {
-				if (userListBtn.isSelected()) {
-					userListBtn.setIcon(new ImageIcon("media/UserListAusklappen.png"));
-					userListBtn.setToolTipText("Userlist einblenden");
-					userListBtn.setSelected(false);
-					userListWin.zuklappen();
-				}
-			}
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// Object[] eventCache =
-				// {"super, so ne scheisse","deine Mama liegt im Systemtray"};
-				// Object anchor = true;
-				// JOptionPane.showInputDialog(me,
-				// "pMAIN wird ins Systemtray gelegt!",
-				// "pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new
-				// ImageIcon("media/pM16x16.png"), eventCache, anchor);
-			}
-			@Override
-			public void windowActivated(WindowEvent arg0) {
-				if (userListBtn.isSelected()) {
-					userListWin.toFront();
-				}
-			}
-		});
+		this.addWindowListener(new winController());
 
 		// Focus Listener auf ChatWindow
 		this.addWindowFocusListener(new WindowAdapter() {
@@ -175,48 +136,13 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 
-		// TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
-		// ActionListener für das JRadioButtonMenuItemNimRoD
-		// this.lafNimROD.addActionListener(new ActionListener() {
-		// @Override
-		// public void actionPerformed(ActionEvent arg0) {
-		// try{
-		// UIManager.setLookAndFeel(new NimRODLookAndFeel());
-		// } catch (Exception ex){
-		// System.out.println(ex.getMessage());
-		// }
-		// SwingUtilities.updateComponentTreeUI(GUI.me);
-		// GUI.me.pack();
-		// }
-		// });
-
-		// ActionListener für die MenuItemRequestFile:
-		this.menuItemRequestFile.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				request_File();
-			}
-		});
-
-		// ActionListener für Help/About pMAIN:
-		this.aboutPMAIN.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new AboutPublicMAIN(me, "About publicMAIN", true);
-			}
-		});
-
-		// ActionListener für HelpContents
-		this.helpContents.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new HelpContents();										// HelpContents() schreiben (HTML)
-			}
-		});
+		// ActionListener für Menu's:
+		this.menuItemRequestFile.addActionListener(new menuContoller());
+		this.aboutPMAIN.addActionListener(new menuContoller());
+		this.helpContents.addActionListener(new menuContoller());
+		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
 		
-		
-		
-		// Konfiguration userListBtn
+		// Konfiguration userListBtn:
 		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.userListBtn.setToolTipText("Userlist einblenden");
 		this.userListBtn.addActionListener(new ActionListener() {
@@ -224,16 +150,9 @@ public class GUI extends JFrame implements Observer {
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton) e.getSource();
 				if (source.isSelected()) {
-					userListBtn.setToolTipText("Userlist ausblenden");
-					userListBtn.setIcon(new ImageIcon(
-							"media/UserListEinklappen.png"));
-					userListWin = new UserList(GUI.me);
-					userListWin.aufklappen();
+					userListAufklappen();
 				} else {
-					userListBtn.setToolTipText("Userlist einblenden");
-					userListBtn.setIcon(new ImageIcon(
-							"media/UserListAusklappen.png"));
-					userListWin.zuklappen();
+					userListZuklappen();
 				}
 			}
 		});
@@ -264,6 +183,53 @@ public class GUI extends JFrame implements Observer {
 		this.setVisible(true);
 	}
 
+	/**
+	 * Diese Methode klappt die Userliste auf
+	 * 
+	 * 
+	 */
+	private void userListAufklappen(){
+		if(!userListActive){
+			this.userListBtn.setToolTipText("Userlist ausblenden");
+			this.userListBtn.setIcon(new ImageIcon(
+					"media/UserListEinklappen.png"));
+			this.userListBtn.setSelected(true);
+			this.userListWin = new UserList(GUI.me);
+			this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
+			this.userListWin.setVisible(true);
+			this.userListActive = true;
+		}
+	}
+	
+	/**
+	 * Diese Methode klappt die Userliste zu
+	 * 
+	 * 
+	 */
+	private void userListZuklappen(){
+		// Falls wir das animiert haben wollen:
+//		for (int i = 150; i > 0; i--){
+//			try {
+//				Thread.sleep(3);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			setBounds((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
+//			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
+//		}
+		if(userListActive){
+			this.userListBtn.setToolTipText("Userlist einblenden");
+			this.userListBtn.setIcon(new ImageIcon(
+					"media/UserListAusklappen.png"));
+			this.userListBtn.setSelected(false);
+			this.userListWin.setVisible(false);
+			this.userListActive = false;
+		}
+		
+	}
+	
+	
 	/**
 	 * Diese Methode fügt ein ChatWindow hinzu
 	 * 
@@ -479,6 +445,7 @@ public class GUI extends JFrame implements Observer {
 
 		private JMenuItem lafMenu;
 		private UIManager.LookAndFeelInfo laf;
+		private boolean userListWasActive;
 
 		public lafController(JMenuItem lafMenu, UIManager.LookAndFeelInfo laf) {
 			this.lafMenu = lafMenu;
@@ -487,16 +454,116 @@ public class GUI extends JFrame implements Observer {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			
+			userListWasActive = userListActive;
+			JMenuItem source = (JMenuItem)e.getSource();
+			
+			userListZuklappen();
+			
 			try {
 				UIManager.setLookAndFeel(laf.getClassName());
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 			}
+			
+			if(source.getText().equals("NimROD")){
+				try{
+					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+				} catch (Exception ex){
+					System.out.println(ex.getMessage());
+				}
+			}
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
+			if(userListWasActive)userListAufklappen();
+			
 		}
 	}
+	
+	/**
+	 * ActionListener für Menu's
+	 * 
+	 * @author ABerthold
+	 *
+	 */
+	class menuContoller implements ActionListener{
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			JMenuItem source = (JMenuItem)e.getSource();
+			
+			switch(source.getText()){
+			
+			case "Test(request_File)":
+				request_File();
+				break;
+			case "About pMAIN":
+				new AboutPublicMAIN(me, "About publicMAIN", true);
+				break;
+			case "Help Contents":
+				//TODO: HelpContents HTML schreiben
+				new HelpContents();
+				break;
+			
+			}
+			
+		}
+		
+	}
+	
+	/**
+	 * WindowListener für GUI
+	 * 
+	 * 
+	 * 
+	 * @author ABerthold
+	 *
+	 */
+	class winController implements WindowListener{
+		public void windowOpened(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		// Wird das GUI minimiert wird die Userlist zugeklappt und der
+		// userListBtn zurückgesetzt:
+		public void windowIconified(WindowEvent arg0) {
+			if (userListBtn.isSelected()) {
+				userListZuklappen();
+			}
+		}
+		@Override
+		public void windowDeiconified(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void windowDeactivated(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void windowClosing(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void windowClosed(WindowEvent arg0) {
+			// Object[] eventCache =
+			// {"super, so ne scheisse","deine Mama liegt im Systemtray"};
+			// Object anchor = true;
+			// JOptionPane.showInputDialog(me,
+			// "pMAIN wird ins Systemtray gelegt!",
+			// "pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new
+			// ImageIcon("media/pM16x16.png"), eventCache, anchor);
+		}
+		@Override
+		public void windowActivated(WindowEvent arg0) {
+			if (userListBtn.isSelected()) {
+				userListWin.toFront();
+			}
+		}
+	}
+	
+
+	
 	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
 		Vector<?> vec = new Vector<Object>(def.keySet());

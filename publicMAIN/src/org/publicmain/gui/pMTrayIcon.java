@@ -43,7 +43,7 @@ public class pMTrayIcon {
             return;
         }
         final PopupMenu popup = new PopupMenu();
-        final TrayIcon trayIcon = new TrayIcon(new ImageIcon("media/pM.gif").getImage());
+        final TrayIcon trayIcon = new TrayIcon(new ImageIcon("media/TrayIcon.png").getImage());
         final SystemTray tray = SystemTray.getSystemTray();
         
         // Create a popup menu components

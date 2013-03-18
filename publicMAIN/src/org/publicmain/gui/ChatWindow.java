@@ -43,9 +43,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private JTextField eingabeFeld;
 	private String gruppe;
 	private long user;
-	private ArrayList<String> eingabeHistorie;
-	private int eingabeAktuell;
 	private GUI gui;
+	private History keyHistory;
 
 	/**
 	 * Erstellt Content und macht Layout für das Chatpanel
@@ -61,8 +60,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.htmlDoc = new HTMLDocument();
 		this.jScrollPane = new JScrollPane(msgTextPane,	JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
-		this.eingabeHistorie = new ArrayList<String>();
-		this.eingabeAktuell = 0;
+
 
 		msgTextPane.setEditable(false);
 		msgTextPane.setPreferredSize(new Dimension(300, 200));
@@ -72,7 +70,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 
 		// KeyListener für Nachrichtenhistorie hinzufügen
-		eingabeFeld.addKeyListener(kl);
+		eingabeFeld.addKeyListener(keyHistory);
 
 		sendenBtn.addActionListener(this);
 		sendenBtn.addMouseListener(new MouseListener() {
@@ -121,6 +119,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.user = uid;
 		this.name = username;
 		this.gui = GUI.getGUI();
+		keyHistory = new History();
 		doWindowbuildingstuff();
 	}
 
@@ -128,6 +127,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		gruppe = gruppenname;
 		this.name = gruppenname;
 		this.gui = GUI.getGUI();
+		keyHistory = new History();
 		doWindowbuildingstuff();
 	}
 
@@ -142,19 +142,16 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * In dieser Methode werden die Texteingaben aus dem eingabeFeld verarbeitet
 	 */
 	public void actionPerformed(ActionEvent e) {
+		// Eingabe aus dem Textfeld in String eingabe speichern
+		String eingabe = eingabeFeld.getText();
 
 		// Prüfen ob etwas eingegeben wurde, wenn nicht dann auch nichts machen
-		if (!eingabeFeld.getText().equals("")) {
-
-			// Eingabe aus dem Textfeld in String eingabe speichern
-			String eingabe = eingabeFeld.getText();
+		if (!eingabe.equals("")) {
 
 			// Eingabe in der ArrayList eingabeHistorie speichern und
 			// Eingabezähler
 			// auf die neue Länge der ArrayList eingabeHistorie setzen
-			eingabeHistorie.add(eingabe);
-			eingabeAktuell = eingabeHistorie.size();
-
+			keyHistory.add(eingabe);
 			// Prüfen ob die Eingabe ein Befehl ist
 			if (eingabe.startsWith("/")) {
 				String[] tmp;
@@ -232,27 +229,44 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	/**
 	 * KeyListener für Nachrichtenhistorie ggf. für andere Dinge verwendbar
 	 */
-	public KeyListener kl = new KeyListener() {
 		
-		public void keyTyped(KeyEvent arg0) {
-		}
+		class History implements KeyListener{
 
-		public void keyReleased(KeyEvent arg0) {
-		}
-
-		public void keyPressed(KeyEvent arg0) {
-			if (arg0.getKeyCode() == 38 && eingabeAktuell > 0) {
-				eingabeAktuell--;
-				eingabeFeld.setText(eingabeHistorie.get(eingabeAktuell));
-			} else if (arg0.getKeyCode() == 40 && eingabeAktuell < eingabeHistorie.size()) {
-				eingabeAktuell++;
-				if (eingabeAktuell < eingabeHistorie.size()) {
-					eingabeFeld.setText(eingabeHistorie.get(eingabeAktuell));
-				} else
-					eingabeFeld.setText("");
-			} else {
-
+			private ArrayList<String> eingabeHistorie;
+			private int eingabeAktuell;
+			
+			public History() {
+				eingabeHistorie=new ArrayList<String>();
+				eingabeAktuell=0;
 			}
+
+			public void keyTyped(KeyEvent arg0) {
+			}
+
+			public void add(String eingabe) {
+				eingabeHistorie.add(eingabe);
+				eingabeAktuell = eingabeHistorie.size();
+			}
+
+			public void keyReleased(KeyEvent arg0) {
+			}
+
+			public void keyPressed(KeyEvent arg0) {
+				JTextField tmp = (JTextField) arg0.getSource();
+				if (arg0.getKeyCode() == 38 && eingabeAktuell > 0) {
+					eingabeAktuell--;
+					tmp.setText(eingabeHistorie.get(eingabeAktuell));
+				} else if (arg0.getKeyCode() == 40 && eingabeAktuell < eingabeHistorie.size()) {
+					eingabeAktuell++;
+					if (eingabeAktuell < eingabeHistorie.size()) {
+						tmp.setText(eingabeHistorie.get(eingabeAktuell));
+					} else
+						tmp.setText("");
+				} else {
+
+				}
+			
+			
 		}
 	};
 }

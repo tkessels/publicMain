@@ -50,8 +50,8 @@ import com.nilo.plaf.nimrod.*;
 public class GUI extends JFrame implements Observer {
 
 	// Deklarationen:
-	public ChatEngine ce;
-	public LogEngine log;
+	ChatEngine ce;
+	LogEngine log;
 
 	private static GUI me;
 	private List<Node> nodes;
@@ -80,15 +80,14 @@ public class GUI extends JFrame implements Observer {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
+			log.log(ex);
 		}
 
 		// Initialisierungen:
 		try {
 			this.ce = ChatEngine.getCE();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			log.log(e);
 		}
 		this.me = this;
 		this.log = new LogEngine();
@@ -106,7 +105,7 @@ public class GUI extends JFrame implements Observer {
 		this.userListBtn = new JToggleButton(new ImageIcon("media/UserListAusklappen.png"));
 		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
-		this.trayIcon.createTrayIcon();
+		this.trayIcon = new pMTrayIcon();
 		
 		// Anlegen der Menüeinträge für Designwechsel (installierte
 		// LookAndFeels)
@@ -114,7 +113,6 @@ public class GUI extends JFrame implements Observer {
 		// + hinzufügen der ActionListener (lafController)
 		for (UIManager.LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
 			JRadioButtonMenuItem tempJMenuItem = new JRadioButtonMenuItem(laf.getName());
-			System.out.println();
 			if((laf.getName().equals("Windows")) &&
 					(UIManager.getSystemLookAndFeelClassName().equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))){
 				tempJMenuItem.setSelected(true);
@@ -190,13 +188,16 @@ public class GUI extends JFrame implements Observer {
 	 */
 	private void userListAufklappen(){
 		if(!userListActive){
+			
 			this.userListBtn.setToolTipText("Userlist ausblenden");
 			this.userListBtn.setIcon(new ImageIcon(
 					"media/UserListEinklappen.png"));
 			this.userListBtn.setSelected(true);
+			
 			this.userListWin = new UserList(GUI.me);
-			this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
+			this.userListWin.repaint();
 			this.userListWin.setVisible(true);
+			
 			this.userListActive = true;
 		}
 	}
@@ -207,28 +208,18 @@ public class GUI extends JFrame implements Observer {
 	 * 
 	 */
 	private void userListZuklappen(){
-		// Falls wir das animiert haben wollen:
-//		for (int i = 150; i > 0; i--){
-//			try {
-//				Thread.sleep(3);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			setBounds((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
-//			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
-//		}
 		if(userListActive){
+			
 			this.userListBtn.setToolTipText("Userlist einblenden");
 			this.userListBtn.setIcon(new ImageIcon(
 					"media/UserListAusklappen.png"));
 			this.userListBtn.setSelected(false);
+			
 			this.userListWin.setVisible(false);
+			
 			this.userListActive = false;
 		}
-		
 	}
-	
 	
 	/**
 	 * Diese Methode fügt ein ChatWindow hinzu
@@ -460,16 +451,16 @@ public class GUI extends JFrame implements Observer {
 			
 			userListZuklappen();
 			
-			try {
-				UIManager.setLookAndFeel(laf.getClassName());
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
-			}
-			
 			if(source.getText().equals("NimROD")){
 				try{
 					UIManager.setLookAndFeel(new NimRODLookAndFeel());
 				} catch (Exception ex){
+					System.out.println(ex.getMessage());
+				}
+			} else {
+				try {
+					UIManager.setLookAndFeel(laf.getClassName());
+				} catch (Exception ex) {
 					System.out.println(ex.getMessage());
 				}
 			}
@@ -562,8 +553,9 @@ public class GUI extends JFrame implements Observer {
 		}
 	}
 	
-
-	
+	/**
+	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus
+	 */
 	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
 		Vector<?> vec = new Vector<Object>(def.keySet());

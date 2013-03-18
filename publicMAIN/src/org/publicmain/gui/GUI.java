@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
@@ -40,6 +39,9 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
+import com.nilo.plaf.nimrod.*;
+
+
 /**
  * @author ATRM
  * 
@@ -66,8 +68,10 @@ public class GUI extends JFrame implements Observer {
 	private JMenuItem lafNimROD;
 	private JTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
+	private boolean userListActive;
 	private UserList userListWin;
 	private pMTrayIcon trayIcon;
+	
 
 	/**
 	 * Konstruktor für GUI
@@ -100,6 +104,7 @@ public class GUI extends JFrame implements Observer {
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton(new ImageIcon("media/UserListAusklappen.png"));
+		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon.createTrayIcon();
 		
@@ -131,27 +136,13 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 
-		// TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
-		// ActionListener für das JRadioButtonMenuItemNimRoD
-		// this.lafNimROD.addActionListener(new ActionListener() {
-		// @Override
-		// public void actionPerformed(ActionEvent arg0) {
-		// try{
-		// UIManager.setLookAndFeel(new NimRODLookAndFeel());
-		// } catch (Exception ex){
-		// System.out.println(ex.getMessage());
-		// }
-		// SwingUtilities.updateComponentTreeUI(GUI.me);
-		// GUI.me.pack();
-		// }
-		// });
-
-		// ActionListener für Menu's hinzufügen
+		// ActionListener für Menu's:
 		this.menuItemRequestFile.addActionListener(new menuContoller());
 		this.aboutPMAIN.addActionListener(new menuContoller());
 		this.helpContents.addActionListener(new menuContoller());
+		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
 		
-		// Konfiguration userListBtn
+		// Konfiguration userListBtn:
 		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.userListBtn.setToolTipText("Userlist einblenden");
 		this.userListBtn.addActionListener(new ActionListener() {
@@ -193,18 +184,26 @@ public class GUI extends JFrame implements Observer {
 	}
 
 	/**
+	 * Diese Methode klappt die Userliste auf
+	 * 
 	 * 
 	 */
 	private void userListAufklappen(){
-		this.userListBtn.setToolTipText("Userlist ausblenden");
-		this.userListBtn.setIcon(new ImageIcon(
-				"media/UserListEinklappen.png"));
-		this.userListWin = new UserList(GUI.me);
-		this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
-		this.userListWin.setVisible(true);
+		if(!userListActive){
+			this.userListBtn.setToolTipText("Userlist ausblenden");
+			this.userListBtn.setIcon(new ImageIcon(
+					"media/UserListEinklappen.png"));
+			this.userListBtn.setSelected(true);
+			this.userListWin = new UserList(GUI.me);
+			this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
+			this.userListWin.setVisible(true);
+			this.userListActive = true;
+		}
 	}
 	
 	/**
+	 * Diese Methode klappt die Userliste zu
+	 * 
 	 * 
 	 */
 	private void userListZuklappen(){
@@ -219,11 +218,15 @@ public class GUI extends JFrame implements Observer {
 //			setBounds((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
 //			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
 //		}
-		this.userListBtn.setToolTipText("Userlist einblenden");
-		this.userListBtn.setIcon(new ImageIcon(
-				"media/UserListAusklappen.png"));
-		this.userListBtn.setSelected(false);
-		this.userListWin.setVisible(false);
+		if(userListActive){
+			this.userListBtn.setToolTipText("Userlist einblenden");
+			this.userListBtn.setIcon(new ImageIcon(
+					"media/UserListAusklappen.png"));
+			this.userListBtn.setSelected(false);
+			this.userListWin.setVisible(false);
+			this.userListActive = false;
+		}
+		
 	}
 	
 	
@@ -442,6 +445,7 @@ public class GUI extends JFrame implements Observer {
 
 		private JMenuItem lafMenu;
 		private UIManager.LookAndFeelInfo laf;
+		private boolean userListWasActive;
 
 		public lafController(JMenuItem lafMenu, UIManager.LookAndFeelInfo laf) {
 			this.lafMenu = lafMenu;
@@ -450,15 +454,29 @@ public class GUI extends JFrame implements Observer {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			
+			userListWasActive = userListActive;
+			JMenuItem source = (JMenuItem)e.getSource();
+			
 			userListZuklappen();
+			
 			try {
 				UIManager.setLookAndFeel(laf.getClassName());
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 			}
+			
+			if(source.getText().equals("NimROD")){
+				try{
+					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+				} catch (Exception ex){
+					System.out.println(ex.getMessage());
+				}
+			}
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
-			userListAufklappen();
+			if(userListWasActive)userListAufklappen();
+			
 		}
 	}
 	

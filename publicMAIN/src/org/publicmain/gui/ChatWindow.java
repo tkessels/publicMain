@@ -70,7 +70,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 
 		// KeyListener für Nachrichtenhistorie hinzufügen
-		eingabeFeld.addKeyListener(keyHistory);
+		eingabeFeld.addKeyListener(new History(eingabeFeld));
 
 		sendenBtn.addActionListener(this);
 		sendenBtn.addMouseListener(new MouseListener() {
@@ -95,6 +95,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		});
 
 		eingabeFeld.addActionListener(this);
+		keyHistory=new History(eingabeFeld);
 
 		this.add(jScrollPane, BorderLayout.CENTER);
 		JPanel panel = new JPanel(new BorderLayout());
@@ -119,7 +120,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.user = uid;
 		this.name = username;
 		this.gui = GUI.getGUI();
-		keyHistory = new History();
 		doWindowbuildingstuff();
 	}
 
@@ -127,7 +127,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		gruppe = gruppenname;
 		this.name = gruppenname;
 		this.gui = GUI.getGUI();
-		keyHistory = new History();
 		doWindowbuildingstuff();
 	}
 
@@ -151,7 +150,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			// Eingabe in der ArrayList eingabeHistorie speichern und
 			// Eingabezähler
 			// auf die neue Länge der ArrayList eingabeHistorie setzen
-			keyHistory.add(eingabe);
+			//keyHistory.add(eingabe);
 			// Prüfen ob die Eingabe ein Befehl ist
 			if (eingabe.startsWith("/")) {
 				String[] tmp;
@@ -235,9 +234,15 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			private ArrayList<String> eingabeHistorie;
 			private int eingabeAktuell;
 			
-			public History() {
+			public History(JTextField target) {
 				eingabeHistorie=new ArrayList<String>();
 				eingabeAktuell=0;
+				target.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+					add(((JTextField)e.getSource()).getText());	
+					}
+				});
+				target.addKeyListener(this);
 			}
 
 			public void keyTyped(KeyEvent arg0) {
@@ -265,8 +270,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				} else {
 
 				}
-			
-			
 		}
 	};
 }

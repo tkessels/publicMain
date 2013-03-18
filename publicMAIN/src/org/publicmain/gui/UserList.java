@@ -39,13 +39,10 @@ public class UserList extends JWindow {
 			}
 			@Override
 			public void componentMoved(ComponentEvent e) {
-				Rectangle tmp = e.getComponent().getBounds();
-				setBounds((int)(tmp.getX()-getBounds().width),(int)tmp.getY(), getBounds().width, getBounds().height);
+				repaint();
 			}
 			@Override
 			public void componentResized(ComponentEvent e) {
-				Rectangle tmp = e.getComponent().getBounds();
-				setBounds((int)(tmp.getX()-getBounds().width),(int)tmp.getY(), getBounds().width, tmp.height);
 				validate();
 				repaint();
 			}
@@ -56,12 +53,12 @@ public class UserList extends JWindow {
 		});
 	}
 
-	public int getHoehe() {
-		return hoehe;
-	}
-
-	public int getBreite() {
-		return breite;
+	@Override
+	public void repaint() {
+		Rectangle tmp=parent.getBounds();
+		setBounds((int)(tmp.getX()-breite),(int)tmp.getY(), breite, tmp.height);
+		super.repaint();
+		
 	}
 	
 }

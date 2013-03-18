@@ -3,11 +3,13 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.MultipleGradientPaint.ColorSpaceType;
 import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -26,7 +28,8 @@ public class HelpContents {
 
 	private JFrame hcframe;
 	private JTextField searchField;
-	private JButton SearchButton;
+	private JButton searchButton;
+	private JPanel searchPanel;
 	private JTextPane helpContentTxt;
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
@@ -35,26 +38,30 @@ public class HelpContents {
 
 	public HelpContents() {
 		this.hcframe = new JFrame("Help Contents");
-		this.searchField = new JTextField("What are you searchting for?");
-		this.SearchButton = new JButton("Search");
+		this.searchField = new JTextField("What to hell are you searchting for?");
+		this.searchButton = new JButton("Search");
+		this.searchPanel = new JPanel();
 		this.helpContentTxt = new JTextPane();
 		this.htmlKit = new HTMLEditorKit();
 		this.htmlDoc = new HTMLDocument();
 
 		hcframe.setLocationRelativeTo(null);
 		hcframe.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
-
-		searchField.setPreferredSize(new Dimension(500, 1));
-
-		helpContentTxt.setBackground(Color.YELLOW);
+		hcframe.setMinimumSize(new Dimension(250, 400));
+		
+		helpContentTxt.setBackground(new Color(229, 195, 0));
 		helpContentTxt.setEditable(false);
 		helpContentTxt.setEditorKit(htmlKit);
 		helpContentTxt.setDocument(htmlDoc);
 
+		searchPanel.setLayout(new BorderLayout());
+		
+		
 		// hinzufügen
-		hcframe.add(searchField, BorderLayout.WEST);
-		hcframe.add(SearchButton, BorderLayout.EAST);
-		hcframe.add(helpContentTxt, BorderLayout.SOUTH);
+		hcframe.add(searchPanel, BorderLayout.NORTH);
+		searchPanel.add(searchField, BorderLayout.CENTER);
+		searchPanel.add(searchButton, BorderLayout.EAST);
+		hcframe.add(helpContentTxt, BorderLayout.CENTER);
 
 		addIndex();
 		addChapter();

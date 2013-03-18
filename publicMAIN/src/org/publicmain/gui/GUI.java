@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
@@ -120,48 +121,7 @@ public class GUI extends JFrame implements Observer {
 
 		// Anlegen benötigter Controller und Listener:
 		// WindowListener für das GUI-Fenster:
-		this.addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			// Wird das GUI minimiert wird die Userlist zugeklappt und der
-			// userListBtn zurückgesetzt:
-			public void windowIconified(WindowEvent arg0) {
-				if (userListBtn.isSelected()) {
-					userListZuklappen();
-				}
-			}
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// Object[] eventCache =
-				// {"super, so ne scheisse","deine Mama liegt im Systemtray"};
-				// Object anchor = true;
-				// JOptionPane.showInputDialog(me,
-				// "pMAIN wird ins Systemtray gelegt!",
-				// "pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new
-				// ImageIcon("media/pM16x16.png"), eventCache, anchor);
-			}
-			@Override
-			public void windowActivated(WindowEvent arg0) {
-				if (userListBtn.isSelected()) {
-					userListWin.toFront();
-				}
-			}
-		});
+		this.addWindowListener(new winController());
 
 		// Focus Listener auf ChatWindow
 		this.addWindowFocusListener(new WindowAdapter() {
@@ -186,31 +146,10 @@ public class GUI extends JFrame implements Observer {
 		// }
 		// });
 
-		// ActionListener für die MenuItemRequestFile:
-		this.menuItemRequestFile.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				request_File();
-			}
-		});
-
-		// ActionListener für Help/About pMAIN:
-		this.aboutPMAIN.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new AboutPublicMAIN(me, "About publicMAIN", true);
-			}
-		});
-
-		// ActionListener für HelpContents
-		this.helpContents.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new HelpContents();										// HelpContents() schreiben (HTML)
-			}
-		});
-		
-		
+		// ActionListener für Menu's hinzufügen
+		this.menuItemRequestFile.addActionListener(new menuContoller());
+		this.aboutPMAIN.addActionListener(new menuContoller());
+		this.helpContents.addActionListener(new menuContoller());
 		
 		// Konfiguration userListBtn
 		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
@@ -522,7 +461,91 @@ public class GUI extends JFrame implements Observer {
 			userListAufklappen();
 		}
 	}
+	
+	/**
+	 * ActionListener für Menu's
+	 * 
+	 * @author ABerthold
+	 *
+	 */
+	class menuContoller implements ActionListener{
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			JMenuItem source = (JMenuItem)e.getSource();
+			
+			switch(source.getText()){
+			
+			case "Test(request_File)":
+				request_File();
+				break;
+			case "About pMAIN":
+				new AboutPublicMAIN(me, "About publicMAIN", true);
+				break;
+			case "Help Contents":
+				//TODO: HelpContents HTML schreiben
+				new HelpContents();
+				break;
+			
+			}
+			
+		}
+		
+	}
+	
+	/**
+	 * WindowListener für GUI
+	 * 
+	 * 
+	 * 
+	 * @author ABerthold
+	 *
+	 */
+	class winController implements WindowListener{
+		public void windowOpened(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		// Wird das GUI minimiert wird die Userlist zugeklappt und der
+		// userListBtn zurückgesetzt:
+		public void windowIconified(WindowEvent arg0) {
+			if (userListBtn.isSelected()) {
+				userListZuklappen();
+			}
+		}
+		@Override
+		public void windowDeiconified(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void windowDeactivated(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void windowClosing(WindowEvent arg0) {
+			// TODO Auto-generated method stub
+		}
+		@Override
+		public void windowClosed(WindowEvent arg0) {
+			// Object[] eventCache =
+			// {"super, so ne scheisse","deine Mama liegt im Systemtray"};
+			// Object anchor = true;
+			// JOptionPane.showInputDialog(me,
+			// "pMAIN wird ins Systemtray gelegt!",
+			// "pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new
+			// ImageIcon("media/pM16x16.png"), eventCache, anchor);
+		}
+		@Override
+		public void windowActivated(WindowEvent arg0) {
+			if (userListBtn.isSelected()) {
+				userListWin.toFront();
+			}
+		}
+	}
+	
+
+	
 	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
 		Vector<?> vec = new Vector<Object>(def.keySet());

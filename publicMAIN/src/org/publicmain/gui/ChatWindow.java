@@ -43,6 +43,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private JTextField eingabeFeld;
 	private String gruppe;
 	private long user;
+	private boolean isPrivCW;
 	private GUI gui;
 	private History keyHistory;
 
@@ -118,6 +119,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	public ChatWindow(long uid, String username) {
 		this.user = uid;
 		this.name = username;
+		this.isPrivCW = true;
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
 	}
@@ -125,6 +127,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	public ChatWindow(String gruppenname) {
 		gruppe = gruppenname;
 		this.name = gruppenname;
+		this.isPrivCW = false;
 		this.gui = GUI.getGUI();
 		doWindowbuildingstuff();
 	}
@@ -134,6 +137,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 */
 	public String getChatWindowName() {
 		return this.name;
+	}
+	
+	public boolean isThisPrivCW(){
+		return this.isPrivCW;
 	}
 
 	/**

@@ -171,6 +171,8 @@ public class GUI extends JFrame implements Observer {
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
 		this.addChat(new ChatWindow("public"));
+		this.addChat(new ChatWindow("grupp1"));
+		this.addChat(new ChatWindow(123 ,"private1"));
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
@@ -324,7 +326,14 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 
+		JLabel lblIcon = new JLabel();
+		if(cw.isThisPrivCW()){
+			lblIcon.setIcon(new ImageIcon("media/private.png"));
+		} else {
+			lblIcon.setIcon(new ImageIcon("media/gruppe.png"));
+		}
 		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
+		pnlTab.add(lblIcon);
 		pnlTab.add(lblTitle);
 		pnlTab.add(lblClose);
 

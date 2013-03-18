@@ -20,7 +20,6 @@ import java.util.Observer;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -131,10 +130,7 @@ public class GUI extends JFrame implements Observer {
 			// userListBtn zurückgesetzt:
 			public void windowIconified(WindowEvent arg0) {
 				if (userListBtn.isSelected()) {
-					userListBtn.setIcon(new ImageIcon("media/UserListAusklappen.png"));
-					userListBtn.setToolTipText("Userlist einblenden");
-					userListBtn.setSelected(false);
-					userListWin.zuklappen();
+					userListZuklappen();
 				}
 			}
 			@Override
@@ -224,16 +220,9 @@ public class GUI extends JFrame implements Observer {
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton) e.getSource();
 				if (source.isSelected()) {
-					userListBtn.setToolTipText("Userlist ausblenden");
-					userListBtn.setIcon(new ImageIcon(
-							"media/UserListEinklappen.png"));
-					userListWin = new UserList(GUI.me);
-					userListWin.aufklappen();
+					userListAufklappen();
 				} else {
-					userListBtn.setToolTipText("Userlist einblenden");
-					userListBtn.setIcon(new ImageIcon(
-							"media/UserListAusklappen.png"));
-					userListWin.zuklappen();
+					userListZuklappen();
 				}
 			}
 		});
@@ -264,6 +253,41 @@ public class GUI extends JFrame implements Observer {
 		this.setVisible(true);
 	}
 
+	/**
+	 * 
+	 */
+	private void userListAufklappen(){
+		this.userListBtn.setToolTipText("Userlist ausblenden");
+		this.userListBtn.setIcon(new ImageIcon(
+				"media/UserListEinklappen.png"));
+		this.userListWin = new UserList(GUI.me);
+		this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
+		this.userListWin.setVisible(true);
+	}
+	
+	/**
+	 * 
+	 */
+	private void userListZuklappen(){
+		// Falls wir das animiert haben wollen:
+//		for (int i = 150; i > 0; i--){
+//			try {
+//				Thread.sleep(3);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			setBounds((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
+//			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
+//		}
+		this.userListBtn.setToolTipText("Userlist einblenden");
+		this.userListBtn.setIcon(new ImageIcon(
+				"media/UserListAusklappen.png"));
+		this.userListBtn.setSelected(false);
+		this.userListWin.setVisible(false);
+	}
+	
+	
 	/**
 	 * Diese Methode fügt ein ChatWindow hinzu
 	 * 
@@ -487,6 +511,7 @@ public class GUI extends JFrame implements Observer {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			userListZuklappen();
 			try {
 				UIManager.setLookAndFeel(laf.getClassName());
 			} catch (Exception ex) {
@@ -494,6 +519,7 @@ public class GUI extends JFrame implements Observer {
 			}
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
+			userListAufklappen();
 		}
 	}
 

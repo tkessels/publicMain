@@ -55,24 +55,13 @@ public class UserList extends JWindow {
 			}
 		});
 	}
-	
-	public void aufklappen(){
-		setBounds(parent.getX()-breite, parent.getY(), breite, hoehe);
-		this.setVisible(true);
+
+	public int getHoehe() {
+		return hoehe;
+	}
+
+	public int getBreite() {
+		return breite;
 	}
 	
-	public void zuklappen(){
-		// Falls wir das animiert haben wollen:
-//		for (int i = 150; i > 0; i--){
-//			try {
-//				Thread.sleep(3);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			setBounds((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
-//			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
-//		}
-		this.setVisible(false);
-	}
 }

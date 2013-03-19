@@ -7,58 +7,48 @@ import javax.swing.*;
 
 import org.images.Help;
 
+import org.publicmain.common.LogEngine;
+
 /**
  * @author ATRM
  * 
  */
 
 public class pMTrayIcon {
-//    public static void main(String[] args) {
-//        /* Use an appropriate Look and Feel */
-//        try {
-//            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-//            //UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-//        } catch (UnsupportedLookAndFeelException ex) {
-//            ex.printStackTrace();
-//        } catch (IllegalAccessException ex) {
-//            ex.printStackTrace();
-//        } catch (InstantiationException ex) {
-//            ex.printStackTrace();
-//        } catch (ClassNotFoundException ex) {
-//            ex.printStackTrace();
-//        }
-//        /* Turn off metal's use of bold fonts */
-//        UIManager.put("swing.boldMetal", Boolean.FALSE);
-//        //Schedule a job for the event-dispatching thread:
-//        //adding TrayIcon.
-//        SwingUtilities.invokeLater(new Runnable() {
-//            public void run() {
-//                createAndShowGUI();
-//            }
-//        });
-//    }
     
-    public static void createTrayIcon() {
+	private LogEngine log;
+	private TrayIcon trayIcon;
+	private SystemTray sysTray;
+	private PopupMenu popup;
+	private MenuItem pMainOpenItem;
+	private MenuItem exitItem;
+	private Menu alerts;
+	private CheckboxMenuItem alertPrivMsg;
+	private CheckboxMenuItem alertGroupMsg;
+	private CheckboxMenuItem alertPublicMsg;
+	
+	
+	
+    public pMTrayIcon() {
+    	this.log = new LogEngine();
         // Prüfung ob Systemtray unterstützt:
         if (!SystemTray.isSupported()) {
-            System.err.println("SystemTray is not supported");
+            log.log("SystemTray is not supported", this, LogEngine.ERROR);
             return;
         }
-        final PopupMenu popup = new PopupMenu();
-        final TrayIcon trayIcon = new TrayIcon(new ImageIcon(new Help().getClass().getResource("TrayIcon.png")).getImage());
-        final SystemTray tray = SystemTray.getSystemTray();
         
-        // Create a popup menu components
-        MenuItem openItem = new MenuItem("pMain öffnen");
-       
-        Menu alerts = new Menu("Alert me");
-        CheckboxMenuItem alertPrivMsg = new CheckboxMenuItem("private Messages");
-        CheckboxMenuItem alertGroupMsg = new CheckboxMenuItem("group Messages");
-        CheckboxMenuItem alertPublicMsg = new CheckboxMenuItem("public Massages");
-        MenuItem exitItem = new MenuItem("Exit");
+        this.popup = new PopupMenu();
+        this.trayIcon = new TrayIcon(new ImageIcon("media/TrayIcon.png").getImage());
+        this.sysTray = SystemTray.getSystemTray();
+        this.pMainOpenItem = new MenuItem("pMain öffnen");
+        this.alerts = new Menu("Alert me");
+        this.alertPrivMsg = new CheckboxMenuItem("private Messages");
+        this.alertGroupMsg = new CheckboxMenuItem("group Messages");
+        this.alertPublicMsg = new CheckboxMenuItem("public Massages");
+        this.exitItem = new MenuItem("Exit");
         
         //Add components to popup menu
-        popup.add(openItem);
+        popup.add(pMainOpenItem);
         popup.addSeparator();
         popup.add(alerts);
         alerts.add(alertPrivMsg);
@@ -70,10 +60,9 @@ public class pMTrayIcon {
         trayIcon.setPopupMenu(popup);
         
         try {
-            tray.add(trayIcon);
+            sysTray.add(trayIcon);
         } catch (AWTException e) {
-        	//TODO: logger für fehler hinzufügen
-            System.err.println("TrayIcon konnte nicht hinzugefügt werden.");
+        	log.log("TrayIcon konnte nicht hinzugefügt werden.", this, LogEngine.ERROR);
             return;
         }
         
@@ -86,7 +75,7 @@ public class pMTrayIcon {
             }
         });
         
-        openItem.addActionListener(new ActionListener() {
+        pMainOpenItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
         		if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
         			GUI.getGUI().setExtendedState(JFrame.NORMAL);
@@ -122,7 +111,7 @@ public class pMTrayIcon {
         
         exitItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                tray.remove(trayIcon);
+                sysTray.remove(trayIcon);
                 System.exit(0);
             }
         });

@@ -9,7 +9,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
@@ -41,6 +40,8 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
+import com.nilo.plaf.nimrod.*;
+
 /**
  * @author ATRM
  * 
@@ -49,8 +50,8 @@ import org.publicmain.common.Node;
 public class GUI extends JFrame implements Observer {
 
 	// Deklarationen:
-	public ChatEngine ce;
-	public LogEngine log;
+	ChatEngine ce;
+	LogEngine log;
 
 	private static GUI me;
 	private List<Node> nodes;
@@ -67,26 +68,26 @@ public class GUI extends JFrame implements Observer {
 	private JMenuItem lafNimROD;
 	private JTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
+	private boolean userListActive;
 	private UserList userListWin;
 	private pMTrayIcon trayIcon;
+	
 
 	/**
 	 * Konstruktor für GUI
 	 */
 	private GUI() {
-		super();
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
+			log.log(ex);
 		}
 
 		// Initialisierungen:
 		try {
 			this.ce = ChatEngine.getCE();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			log.log(e);
 		}
 		this.me = this;
 		this.log = new LogEngine();
@@ -102,8 +103,9 @@ public class GUI extends JFrame implements Observer {
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
 		this.userListBtn = new JToggleButton(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
+		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
-		this.trayIcon.createTrayIcon();
+		this.trayIcon = new pMTrayIcon();
 		
 		// Anlegen der Menüeinträge für Designwechsel (installierte
 		// LookAndFeels)
@@ -111,7 +113,6 @@ public class GUI extends JFrame implements Observer {
 		// + hinzufügen der ActionListener (lafController)
 		for (UIManager.LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
 			JRadioButtonMenuItem tempJMenuItem = new JRadioButtonMenuItem(laf.getName());
-			System.out.println();
 			if((laf.getName().equals("Windows")) &&
 					(UIManager.getSystemLookAndFeelClassName().equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))){
 				tempJMenuItem.setSelected(true);
@@ -133,27 +134,13 @@ public class GUI extends JFrame implements Observer {
 			}
 		});
 
-		// TODO: Später auskommentieren damit NimRODLookAndFeel läuft!
-		// ActionListener für das JRadioButtonMenuItemNimRoD
-		// this.lafNimROD.addActionListener(new ActionListener() {
-		// @Override
-		// public void actionPerformed(ActionEvent arg0) {
-		// try{
-		// UIManager.setLookAndFeel(new NimRODLookAndFeel());
-		// } catch (Exception ex){
-		// System.out.println(ex.getMessage());
-		// }
-		// SwingUtilities.updateComponentTreeUI(GUI.me);
-		// GUI.me.pack();
-		// }
-		// });
-
-		// ActionListener für Menu's hinzufügen
+		// ActionListener für Menu's:
 		this.menuItemRequestFile.addActionListener(new menuContoller());
 		this.aboutPMAIN.addActionListener(new menuContoller());
 		this.helpContents.addActionListener(new menuContoller());
+		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
 		
-		// Konfiguration userListBtn
+		// Konfiguration userListBtn:
 		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.userListBtn.setToolTipText("Userlist einblenden");
 		this.userListBtn.addActionListener(new ActionListener() {
@@ -196,37 +183,43 @@ public class GUI extends JFrame implements Observer {
 	}
 
 	/**
+	 * Diese Methode klappt die Userliste auf
+	 * 
 	 * 
 	 */
 	private void userListAufklappen(){
-		this.userListBtn.setToolTipText("Userlist ausblenden");
-		this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListEinklappen.png")));
-		this.userListWin = new UserList(GUI.me);
-		this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
-		this.userListWin.setVisible(true);
+
+		if(!userListActive){
+			
+			this.userListBtn.setToolTipText("Userlist ausblenden");
+			this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListEinklappen.png")));	
+			this.userListBtn.setSelected(true);
+			this.userListWin = new UserList(GUI.me);
+			this.userListWin.repaint();
+			this.userListWin.setVisible(true);
+			userListActive = true;
+		}
+
 	}
 	
 	/**
+	 * Diese Methode klappt die Userliste zu
+	 * 
 	 * 
 	 */
 	private void userListZuklappen(){
-		// Falls wir das animiert haben wollen:
-//		for (int i = 150; i > 0; i--){
-//			try {
-//				Thread.sleep(3);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			setBounds((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
-//			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
-//		}
-		this.userListBtn.setToolTipText("Userlist einblenden");
-		this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
-		this.userListBtn.setSelected(false);
-		this.userListWin.setVisible(false);
+
+		if(userListActive){
+			
+			this.userListBtn.setToolTipText("Userlist einblenden");
+			this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
+			this.userListBtn.setSelected(false);
+			
+			this.userListWin.setVisible(false);
+			
+			this.userListActive = false;
+		}
 	}
-	
 	
 	/**
 	 * Diese Methode fügt ein ChatWindow hinzu
@@ -443,6 +436,7 @@ public class GUI extends JFrame implements Observer {
 
 		private JMenuItem lafMenu;
 		private UIManager.LookAndFeelInfo laf;
+		private boolean userListWasActive;
 
 		public lafController(JMenuItem lafMenu, UIManager.LookAndFeelInfo laf) {
 			this.lafMenu = lafMenu;
@@ -451,15 +445,29 @@ public class GUI extends JFrame implements Observer {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			
+			userListWasActive = userListActive;
+			JMenuItem source = (JMenuItem)e.getSource();
+			
 			userListZuklappen();
-			try {
-				UIManager.setLookAndFeel(laf.getClassName());
-			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
+			
+			if(source.getText().equals("NimROD")){
+				try{
+					UIManager.setLookAndFeel(new NimRODLookAndFeel());
+				} catch (Exception ex){
+					System.out.println(ex.getMessage());
+				}
+			} else {
+				try {
+					UIManager.setLookAndFeel(laf.getClassName());
+				} catch (Exception ex) {
+					System.out.println(ex.getMessage());
+				}
 			}
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
-			userListAufklappen();
+			if(userListWasActive)userListAufklappen();
+			
 		}
 	}
 	
@@ -545,8 +553,9 @@ public class GUI extends JFrame implements Observer {
 		}
 	}
 	
-
-	
+	/**
+	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus
+	 */
 	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
 		Vector<?> vec = new Vector<Object>(def.keySet());

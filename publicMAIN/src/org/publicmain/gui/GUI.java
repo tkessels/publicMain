@@ -42,6 +42,7 @@ import org.publicmain.common.Node;
 
 import com.nilo.plaf.nimrod.*;
 
+
 /**
  * @author ATRM
  * 
@@ -174,7 +175,6 @@ public class GUI extends JFrame implements Observer {
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon(new Help().getClass().getResource("pM_Logo2.png")).getImage());
-		System.out.println(new Help().getClass().getResource("pM_Logo2.png"));
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

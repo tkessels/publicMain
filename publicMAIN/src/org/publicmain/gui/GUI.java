@@ -36,6 +36,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
+import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
@@ -73,6 +74,7 @@ public class GUI extends JFrame implements Observer {
 	 * Konstruktor für GUI
 	 */
 	private GUI() {
+		super();
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
@@ -93,13 +95,13 @@ public class GUI extends JFrame implements Observer {
 		this.configMenu = new JMenu("Settings");
 		this.helpMenu = new JMenu("Help");
 		this.aboutPMAIN = new JMenuItem("About pMAIN");
-		this.helpContents = new JMenuItem("Help Contents", new ImageIcon("media/HelpContentsIcon.png"));	// evtl. noch anderes Icon wählen
+		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(new Help().getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
 		this.lafMenu = new JMenu("Switch Design");
 		this.btnGrp = new ButtonGroup();
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
-		this.userListBtn = new JToggleButton(new ImageIcon("media/UserListAusklappen.png"));
+		this.userListBtn = new JToggleButton(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon.createTrayIcon();
 		
@@ -184,7 +186,8 @@ public class GUI extends JFrame implements Observer {
 		this.addChat(new ChatWindow("public"));
 
 		// GUI JFrame Einstellungen:
-		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
+		this.setIconImage(new ImageIcon(new Help().getClass().getResource("pM_Logo2.png")).getImage());
+		System.out.println(new Help().getClass().getResource("pM_Logo2.png"));
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -197,8 +200,7 @@ public class GUI extends JFrame implements Observer {
 	 */
 	private void userListAufklappen(){
 		this.userListBtn.setToolTipText("Userlist ausblenden");
-		this.userListBtn.setIcon(new ImageIcon(
-				"media/UserListEinklappen.png"));
+		this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListEinklappen.png")));
 		this.userListWin = new UserList(GUI.me);
 		this.userListWin.setBounds(me.getX()-userListWin.getBreite(), me.getY(), userListWin.getBreite(), userListWin.getHoehe());
 		this.userListWin.setVisible(true);
@@ -220,8 +222,7 @@ public class GUI extends JFrame implements Observer {
 //			repaint((int) (getBounds().getX()+1),parent.getY(),i,parent.getHeight());
 //		}
 		this.userListBtn.setToolTipText("Userlist einblenden");
-		this.userListBtn.setIcon(new ImageIcon(
-				"media/UserListAusklappen.png"));
+		this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
 		this.userListBtn.setSelected(false);
 		this.userListWin.setVisible(false);
 	}
@@ -297,7 +298,7 @@ public class GUI extends JFrame implements Observer {
 		});
 
 		// ImageIcon für SchließenLabel erstellen:
-		final ImageIcon tabCloseImgIcon = new ImageIcon("media/TabCloseBlack.png");
+		final ImageIcon tabCloseImgIcon = new ImageIcon(new Help().getClass().getResource("TabCloseBlack.png"));
 		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
 		JLabel lblClose = new JLabel(tabCloseImgIcon);
 		// Observer für das Image auf das lblClose setzen:
@@ -320,13 +321,13 @@ public class GUI extends JFrame implements Observer {
 			@Override
 			// bei Mouseover wird das "x" des Schließenbutton (btnClose) rot:
 			public void mouseEntered(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon("media/TabCloseOrange.png").getImage());
+				tabCloseImgIcon.setImage(new ImageIcon(new Help().getClass().getResource("TabCloseOrange.png")).getImage());
 			}
 			@Override
 			// beim verlassen der Maus wird das "x" des Schließenbutton
 			// (btnClose) schwarz:
 			public void mouseExited(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon("media/TabCloseBlack.png").getImage());
+				tabCloseImgIcon.setImage(new ImageIcon(new Help().getClass().getResource("TabCloseBlack.png")).getImage());
 			}
 		});
 

@@ -15,6 +15,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.images.Help;
+
 /**
  * Diese Klasse stellt das HilfeFenster und den dazugehörogen Inhalt bereit
  * 
@@ -42,7 +44,7 @@ public class HelpContents {
 		this.htmlDoc = new HTMLDocument();
 
 		hcframe.setLocationRelativeTo(null);
-		hcframe.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
+		hcframe.setIconImage(new ImageIcon(new Help().getClass().getResource("pM_Logo2.png")).getImage());
 
 		searchField.setPreferredSize(new Dimension(500, 1));
 

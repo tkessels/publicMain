@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.ByteOrder;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 
@@ -20,25 +23,29 @@ public class MSG implements Serializable{
 	private static Integer id_counter=0;
 	private static final long serialVersionUID = -2010661171218754968L;
 	//SystemMessage Codes
-	private static final byte NODE_UPDATE		=		0;
-	private static final byte ALIAS_UPDATE		=		1;
+	public static final byte NODE_UPDATE		=		0;
+	public static final byte ALIAS_UPDATE		=		1;
 	
-	private static final byte ECHO_REQUEST		=		10;
-	private static final byte ECHO_RESPONSE		=	-	10;
-	private static final byte ROOT_DISCOVERY	=		20;
-	private static final byte ROOT_REPLY		=	-	20;
-	private static final byte POLL_CHILDNODES	=		30;
-	private static final byte REPORT_CHILDNODES	=	-	30;
+	public static final byte ECHO_REQUEST		=		10;
+	public static final byte ECHO_RESPONSE		=	-	10;
+	public static final byte ROOT_DISCOVERY		=		20;
+	public static final byte ROOT_REPLY			=	-	20;
+	public static final byte POLL_CHILDNODES	=		30;
+	public static final byte REPORT_CHILDNODES	=	-	30;
 
-	private static final byte GROUP_POLL		=		50;
-	private static final byte GROUP_REPLY		=		51;
-	private static final byte GROUP_JOIN		=		52;
-	private static final byte GROUP_LEAVE		=		53;
-	private static final byte GROUP_EMPTY		=		54;
+	public static final byte NODE_SHUTDOWN		=		40;
 	
-	private static final byte NODE_SHUTDOWN		=		40;
-	private static final byte CMD_SHUTDOWN		=		70;
-	private static final byte CMD_RESTART		=		71;
+	
+	public static final byte GROUP_POLL			=		50;
+	public static final byte GROUP_REPLY		=		51;
+	public static final byte GROUP_JOIN			=		52;
+	public static final byte GROUP_LEAVE		=		53;
+	public static final byte GROUP_EMPTY		=		54;
+	
+	public static final byte FILE_REQUEST		=		60;
+	
+	public static final byte CMD_SHUTDOWN		=		70;
+	public static final byte CMD_RESTART		=		71;
 	
 
 	
@@ -127,6 +134,23 @@ public class MSG implements Serializable{
 				+ ", id=" + id + ", empfänger=" + empfänger + ", "
 				+ (group != null ? "group=" + group + ", " : "")
 				+ (data != null ? "data=" + data : "") + "]";
+	}
+	
+	
+	/**Erzeugt eine Liste aller lokal vergebenen IP-Adressen mit ausnahme von Loopbacks und IPV6 Adressen
+	 * @return Liste aller lokalen IPs
+	 */
+	public static List<InetAddress> getMyIPs() {
+		List<InetAddress> addrList = new ArrayList<InetAddress>();
+		try {
+			for (InetAddress inetAddress : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) { //Finde alle IPs die mit meinem hostname assoziert sind und 
+			if (inetAddress.getAddress().length==4)addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
+			}
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return addrList;
 	}
 	
 	

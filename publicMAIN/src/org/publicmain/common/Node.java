@@ -2,16 +2,20 @@ package org.publicmain.common;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Node implements Serializable {
+
 	private static Node me;
 
 	private long nodeID;
 	private long userID;
 	private String alias;
-	private InetAddress[] sockets;
+	private List<InetAddress> sockets;
 	private String hostname;
+	private int server_port;
 	private boolean isRoot;
 	
 	private Node() {
@@ -19,6 +23,7 @@ public class Node implements Serializable {
 		nodeID = myrnd.nextLong();
 		userID = myrnd.nextLong(); //noch zufällig später aus config
 		alias = System.getProperties().getProperty("user.name");
+		sockets=getMyIPs();
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException e) {
@@ -55,13 +60,10 @@ public class Node implements Serializable {
 		this.alias = alias;
 	}
 
-	public InetAddress[] getSockets() {
+	public List<InetAddress> getSockets() {
 		return sockets;
 	}
 
-	public void setSockets(InetAddress[] sockets) {
-		this.sockets = sockets;
-	}
 
 	public String getHostname() {
 		return hostname;
@@ -77,6 +79,22 @@ public class Node implements Serializable {
 
 	public void setRoot(boolean isRoot) {
 		this.isRoot = isRoot;
+	}
+	
+	/**Erzeugt eine Liste aller lokal vergebenen IP-Adressen mit ausnahme von Loopbacks und IPV6 Adressen
+	 * @return Liste aller lokalen IPs
+	 */
+	public static List<InetAddress> getMyIPs() {
+		List<InetAddress> addrList = new ArrayList<InetAddress>();
+		try {
+			for (InetAddress inetAddress : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) { //Finde alle IPs die mit meinem hostname assoziert sind und 
+			if (inetAddress.getAddress().length==4)addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
+			}
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return addrList;
 	}
 
 }

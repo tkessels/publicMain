@@ -5,6 +5,8 @@ import java.awt.event.*;
 import java.net.URL;
 import javax.swing.*;
 
+import org.images.Help;
+
 /**
  * @author ATRM
  * 
@@ -43,7 +45,7 @@ public class pMTrayIcon {
             return;
         }
         final PopupMenu popup = new PopupMenu();
-        final TrayIcon trayIcon = new TrayIcon(new ImageIcon("media/TrayIcon.png").getImage());
+        final TrayIcon trayIcon = new TrayIcon(new ImageIcon(new Help().getClass().getResource("TrayIcon.png")).getImage());
         final SystemTray tray = SystemTray.getSystemTray();
         
         // Create a popup menu components

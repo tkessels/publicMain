@@ -4,11 +4,13 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.net.Socket;
 import java.util.List;
-import org.publicmain.common.*;
+
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
+import org.publicmain.common.Node;
 
 
 
@@ -21,10 +23,12 @@ import org.publicmain.chatengine.ChatEngine;
  * und ist für das Routing zuständig 
  */
 public class NodeEngine {
-	private static volatile NodeEngine ich;
+	private static volatile NodeEngine ne;
 	
 	private ServerSocket server_socket;
+	private Socket root_connection;
 	private MulticastSocket multi_socket;
+	
 	private List<ConnectionHandler> connections;
 	
 	
@@ -32,10 +36,11 @@ public class NodeEngine {
 	private Node meinNode;
 	private Node[] meinNodeArray = new Node[2];
 	private boolean isConnected;
-	private boolean isRoot;
+	//private boolean isRoot;
 	private ChatEngine ce;
 	private final InetAddress group = InetAddress.getByName("230.223.223.223");
-	private final int port = 6789;
+	private final int multicast_port = 6789;
+	private final int server_port = 6790;
 	
 	private Thread msgRecieverBot;
 
@@ -44,11 +49,13 @@ public class NodeEngine {
 
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
-		ich=this;
+		ne=this;
 		ce=parent;
 		meinNode=Node.getMe();
 		
-		multi_socket = new MulticastSocket(port);
+		server_socket = new ServerSocket();
+		
+		multi_socket = new MulticastSocket(multicast_port);
 		multi_socket.joinGroup(group);
 		multi_socket.setTimeToLive(10);
 		isConnected=true;
@@ -82,25 +89,11 @@ public class NodeEngine {
 				if(ich==null)ich=new NodeEngine();				
 			}
 		}*/ 
-		return ich;
+		return ne;
 	}
 	
 
-	/**Erzeugt eine Liste aller lokal vergebenen IP-Adressen mit ausnahme von Loopbacks und IPV6 Adressen
-	 * @return Liste aller lokalen IPs
-	 */
-	public static List<InetAddress> getMyIPs() {
-		List<InetAddress> addrList = new ArrayList<InetAddress>();
-		try {
-			for (InetAddress inetAddress : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) { //Finde alle IPs die mit meinem hostname assoziert sind und 
-			if (inetAddress.getAddress().length==4)addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
-			}
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return addrList;
-	}
+
 	
 	/**
 	 * isConnected() gibt "true" zurück wenn die laufende Nodeengin hochgefahren und mit anderen Nodes verbunden oder root ist,
@@ -115,7 +108,7 @@ public class NodeEngine {
 	 * "false" wenn nicht.
 	 */
 	public boolean	isRoot (){
-		return isRoot;
+		return ((root_connection==null)||!root_connection.isConnected());
 	}
 	
 	
@@ -172,10 +165,8 @@ public class NodeEngine {
 		
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(getMyIPs());
-		
-	}
+	
+	
 	
 	
 

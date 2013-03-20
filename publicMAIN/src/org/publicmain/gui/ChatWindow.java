@@ -9,27 +9,21 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
-import org.w3c.dom.html.HTMLCollection;
 
 //import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -260,7 +254,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 	public void printMessage(String reason){
 //		msgTextPane.setText(msgTextPane.getText() + "\n " + reason);
 		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + reason + "</font>", 0, 0, null);
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='red'>" + reason + "</font>", 0, 0, null);
 		} catch ( BadLocationException | IOException e){
 			System.out.println(e.getMessage());
 		}

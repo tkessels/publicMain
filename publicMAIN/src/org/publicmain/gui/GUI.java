@@ -97,7 +97,7 @@ public class GUI extends JFrame implements Observer {
 		this.btnGrp = new ButtonGroup();
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
-		this.userListBtn = new JToggleButton(new ImageIcon("media/UserListAusklappen.png"));
+		this.userListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon.createTrayIcon();
 		
@@ -129,7 +129,7 @@ public class GUI extends JFrame implements Observer {
 			// userListBtn zurückgesetzt:
 			public void windowIconified(WindowEvent arg0) {
 				if (userListBtn.isSelected()) {
-					userListBtn.setIcon(new ImageIcon("media/UserListAusklappen.png"));
+					userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 					userListBtn.setToolTipText("Userlist einblenden");
 					userListBtn.setSelected(false);
 					userListWin.zuklappen();
@@ -213,14 +213,12 @@ public class GUI extends JFrame implements Observer {
 				JToggleButton source = (JToggleButton) e.getSource();
 				if (source.isSelected()) {
 					userListBtn.setToolTipText("Userlist ausblenden");
-					userListBtn.setIcon(new ImageIcon(
-							"media/UserListEinklappen.png"));
+					userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListEinklappen.png")));
 					userListWin = new UserList(GUI.me);
 					userListWin.aufklappen();
 				} else {
 					userListBtn.setToolTipText("Userlist einblenden");
-					userListBtn.setIcon(new ImageIcon(
-							"media/UserListAusklappen.png"));
+					userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 					userListWin.zuklappen();
 				}
 			}
@@ -243,7 +241,7 @@ public class GUI extends JFrame implements Observer {
 		this.addChat(new ChatWindow("public"));
 
 		// GUI JFrame Einstellungen:
-		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
+		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -321,7 +319,7 @@ public class GUI extends JFrame implements Observer {
 		});
 
 		// ImageIcon für SchließenLabel erstellen:
-		final ImageIcon tabCloseImgIcon = new ImageIcon("media/TabCloseBlack.png");
+		final ImageIcon tabCloseImgIcon = new ImageIcon(getClass().getResource("TabCloseBlack.png"));
 		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
 		JLabel lblClose = new JLabel(tabCloseImgIcon);
 		// Observer für das Image auf das lblClose setzen:
@@ -344,13 +342,13 @@ public class GUI extends JFrame implements Observer {
 			@Override
 			// bei Mouseover wird das "x" des Schließenbutton (btnClose) rot:
 			public void mouseEntered(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon("media/TabCloseOrange.png").getImage());
+				tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseOrange.png")).getImage());
 			}
 			@Override
 			// beim verlassen der Maus wird das "x" des Schließenbutton
 			// (btnClose) schwarz:
 			public void mouseExited(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon("media/TabCloseBlack.png").getImage());
+				tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
 			}
 		});
 

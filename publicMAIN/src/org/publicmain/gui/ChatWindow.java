@@ -257,6 +257,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		try {
 			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='red'>" + reason + "</font>", 0, 0, null);
 			msgTextPane.setCaretPosition(htmlDoc.getLength());
+
 		} catch ( BadLocationException | IOException e){
 			System.out.println(e.getMessage());
 		}

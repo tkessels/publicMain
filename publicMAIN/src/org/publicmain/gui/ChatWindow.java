@@ -228,6 +228,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 		MSG tmp=(MSG)msg;
 		try {
 			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>"+tmp.getAlias()+": </font>"+"<font color='black'>" + ((String)tmp.getData()).replaceAll("sex", "<b>SEX</b>") + "</font>", 0, 0, null);
+			msgTextPane.setCaretPosition(htmlDoc.getLength());
 		} catch ( BadLocationException | IOException e){
 			System.out.println(e.getMessage());
 		}
@@ -255,6 +256,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer{
 //		msgTextPane.setText(msgTextPane.getText() + "\n " + reason);
 		try {
 			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='red'>" + reason + "</font>", 0, 0, null);
+			msgTextPane.setCaretPosition(htmlDoc.getLength());
 		} catch ( BadLocationException | IOException e){
 			System.out.println(e.getMessage());
 		}

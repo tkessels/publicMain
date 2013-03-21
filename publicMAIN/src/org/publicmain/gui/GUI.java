@@ -92,13 +92,13 @@ public class GUI extends JFrame implements Observer {
 		this.configMenu = new JMenu("Settings");
 		this.helpMenu = new JMenu("Help");
 		this.aboutPMAIN = new JMenuItem("About pMAIN");
-		this.helpContents = new JMenuItem("Help Contents", new ImageIcon("media/HelpContentsIcon.png"));	// evtl. noch anderes Icon wählen
+		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("media/HelpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
 		this.lafMenu = new JMenu("Switch Design");
 		this.btnGrp = new ButtonGroup();
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
-		this.userListBtn = new JToggleButton(new ImageIcon("media/UserListAusklappen.png"));
+		this.userListBtn = new JToggleButton(new ImageIcon(getClass().getResource("media/UserListAusklappen.png")));
 		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon = new pMTrayIcon();
@@ -171,7 +171,7 @@ public class GUI extends JFrame implements Observer {
 		this.addChat(new ChatWindow(123 ,"private1"));
 
 		// GUI JFrame Einstellungen:
-		this.setIconImage(new ImageIcon("media/pM_Logo2.png").getImage());
+		this.setIconImage(new ImageIcon(getClass().getResource("media/pM_Logo2.png")).getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -188,8 +188,7 @@ public class GUI extends JFrame implements Observer {
 		if(!userListActive){
 			
 			this.userListBtn.setToolTipText("Userlist ausblenden");
-			this.userListBtn.setIcon(new ImageIcon(
-					"media/UserListEinklappen.png"));
+			this.userListBtn.setIcon(new ImageIcon(getClass().getResource("media/UserListEinklappen.png")));
 			this.userListBtn.setSelected(true);
 			
 			this.userListWin = new UserList(GUI.me);
@@ -209,8 +208,7 @@ public class GUI extends JFrame implements Observer {
 		if(userListActive){
 			
 			this.userListBtn.setToolTipText("Userlist einblenden");
-			this.userListBtn.setIcon(new ImageIcon(
-					"media/UserListAusklappen.png"));
+			this.userListBtn.setIcon(new ImageIcon(getClass().getResource("media/UserListAusklappen.png")));
 			this.userListBtn.setSelected(false);
 			
 			this.userListWin.setVisible(false);

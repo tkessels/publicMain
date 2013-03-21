@@ -1,12 +1,8 @@
 package org.publicmain.gui;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -23,11 +19,9 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
@@ -36,10 +30,12 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.chatengine.GruppenKanal;
+import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
-import com.nilo.plaf.nimrod.*;
+import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 
 /**
@@ -250,95 +246,8 @@ public class GUI extends JFrame implements Observer {
 		// einzufügen:
 		int index = jTabbedPane.indexOfComponent(cw);
 
-		// JPanel für Tabbeschriftung erzeugen und durchsichtig machen:
-		JPanel pnlTab = new JPanel();
-		((FlowLayout) pnlTab.getLayout()).setHgap(5);
-		pnlTab.setOpaque(false);
-
-		// TitelLabel für Tabbeschriftung erzeugen:
-		JLabel lblTitle = new JLabel(title);
-		// MouseListener zu JLabel (lblTitle) hinzufügen:
-		lblTitle.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			// beim verlassen der Maus von JLabel (lblTitle) wird die Schrift
-			// schwarz
-			public void mouseExited(MouseEvent e) {
-				JLabel source = (JLabel) e.getSource();
-				source.setForeground(Color.BLACK);
-			}
-			@Override
-			// beim betreten der Maus von JLabel (lblTitle) wird die Schrift rot
-			public void mouseEntered(MouseEvent e) {
-				JLabel source = (JLabel) e.getSource();
-				source.setForeground(new Color(255, 130, 13));
-			}
-			@Override
-			// Mittlere Maustastenklick (=512) auf Label schließt das ChatWindow
-			// jeder andere Klick führt zur Auswahl des ChatWindows:
-			public void mouseClicked(MouseEvent e) {
-				if (e.getModifiersEx() == 512) {
-					getGUI().delChat(cw);
-				} else {
-					jTabbedPane.setSelectedComponent(cw);
-				}
-			}
-		});
-
-		// ImageIcon für SchließenLabel erstellen:
-		final ImageIcon tabCloseImgIcon = new ImageIcon("media/TabCloseBlack.png");
-		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
-		JLabel lblClose = new JLabel(tabCloseImgIcon);
-		// Observer für das Image auf das lblClose setzen:
-		tabCloseImgIcon.setImageObserver(lblClose);
-		// MouseListener für Schließenlabel (lblClose) hinzufügen:
-		lblClose.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			// Bei Klick ChatWindow (cw) schliesen:
-			public void mouseClicked(MouseEvent arg0) {
-				getGUI().delChat(cw);
-			}
-			@Override
-			// bei Mouseover wird das "x" des Schließenbutton (btnClose) rot:
-			public void mouseEntered(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon("media/TabCloseOrange.png").getImage());
-			}
-			@Override
-			// beim verlassen der Maus wird das "x" des Schließenbutton
-			// (btnClose) schwarz:
-			public void mouseExited(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon("media/TabCloseBlack.png").getImage());
-			}
-		});
-
-		JLabel lblIcon = new JLabel();
-		if(cw.isThisPrivCW()){
-			lblIcon.setIcon(new ImageIcon("media/private.png"));
-		} else {
-			lblIcon.setIcon(new ImageIcon("media/gruppe.png"));
-		}
-		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
-		pnlTab.add(lblIcon);
-		pnlTab.add(lblTitle);
-		pnlTab.add(lblClose);
-
 		// den neuen Tab an die Stelle von index setzen:
-		this.jTabbedPane.setTabComponentAt(index, pnlTab);
+		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab(jTabbedPane));
 	}
 
 	/**
@@ -415,6 +324,18 @@ public class GUI extends JFrame implements Observer {
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
+		if (o instanceof GruppenKanal){
+			if (o.countObservers()==1){
+			//erzeuge gruppenfenster füge nachricht ein sei happy
+			}
+			else{
+				//
+			}
+			
+		}
+		if(o instanceof KnotenKanal&&o.countObservers()==1){
+			//erzeuge gruppen
+		}
 		// TODO Auto-generated method stub
 	}
 

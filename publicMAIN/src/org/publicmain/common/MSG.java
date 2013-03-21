@@ -17,28 +17,33 @@ import java.nio.ByteOrder;
  *
  */
 public class MSG implements Serializable{
-	private static Integer id_counter=0;
-	private static final long serialVersionUID = -2010661171218754968L;
+	public static Integer id_counter=0;
+	public static final long serialVersionUID = -2010661171218754968L;
 	//SystemMessage Codes
-	private static final byte NODE_UPDATE		=		0;
-	private static final byte ALIAS_UPDATE		=		1;
+	public static final byte NODE_UPDATE		=		0;
+	public static final byte ALIAS_UPDATE		=		1;
 	
-	private static final byte ECHO_REQUEST		=		10;
-	private static final byte ECHO_RESPONSE		=	-	10;
-	private static final byte ROOT_DISCOVERY	=		20;
-	private static final byte ROOT_REPLY		=	-	20;
-	private static final byte POLL_CHILDNODES	=		30;
-	private static final byte REPORT_CHILDNODES	=	-	30;
+	public static final byte ECHO_REQUEST		=		10;
+	public static final byte ECHO_RESPONSE		=	-	10;
+	public static final byte ROOT_DISCOVERY	=		20;
+	public static final byte ROOT_REPLY		=	-	20;
+	public static final byte POLL_CHILDNODES	=		30;
+	public static final byte REPORT_CHILDNODES	=	-	30;
 
-	private static final byte GROUP_POLL		=		50;
-	private static final byte GROUP_REPLY		=		51;
-	private static final byte GROUP_JOIN		=		52;
-	private static final byte GROUP_LEAVE		=		53;
-	private static final byte GROUP_EMPTY		=		54;
+	public static final byte GROUP_POLL		=		50;
+	public static final byte GROUP_REPLY		=		51;
+	public static final byte GROUP_JOIN		=		52;
+	public static final byte GROUP_LEAVE		=		53;
+	public static final byte GROUP_EMPTY		=		54;
 	
-	private static final byte NODE_SHUTDOWN		=		40;
-	private static final byte CMD_SHUTDOWN		=		70;
-	private static final byte CMD_RESTART		=		71;
+	public static final byte NODE_SHUTDOWN		=		40;
+	public static final byte CMD_SHUTDOWN		=		70;
+	public static final byte CMD_RESTART		=		71;
+	
+	public static final byte CW_INFO_TEXT		=		80;
+	public static final byte CW_WARNING_TEXT	=		81;
+	public static final byte CW_ERROR_TEXT		=		82;
+	
 	
 
 	
@@ -70,8 +75,11 @@ public class MSG implements Serializable{
 		this.sender= NodeEngine.getNE().getME().getNodeID();
 	}
 	
-	public MSG(String text){
-		this("public",text);
+	public MSG(Object payload, byte code){
+		this();
+		this.typ=NachrichtenTyp.SYSTEM;
+		this.code = code;
+		this.data = payload;
 	}
 	
 	public MSG(String group,String text){

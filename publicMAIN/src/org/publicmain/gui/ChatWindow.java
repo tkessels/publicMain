@@ -62,6 +62,20 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td>/s</td><td  colspan='2'>&lt;message&gt;</td>schreien</tr>" +
 			"</table><br>";
 
+	public ChatWindow(long uid, String username) {
+		this.user = uid;
+		this.name = username;
+		this.isPrivCW = true;
+		doWindowbuildingstuff();
+	}
+
+	public ChatWindow(String gruppenname) {
+		gruppe = gruppenname;
+		this.name = gruppenname;
+		this.isPrivCW = false;
+		doWindowbuildingstuff();
+	}
+
 	/**
 	 * Erstellt Content und macht Layout für das Chatpanel
 	 */
@@ -133,21 +147,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 		this.setVisible(true);
 	}
-
-	public ChatWindow(long uid, String username) {
-		this.user = uid;
-		this.name = username;
-		this.isPrivCW = true;
-		doWindowbuildingstuff();
-	}
-
-	public ChatWindow(String gruppenname) {
-		gruppe = gruppenname;
-		this.name = gruppenname;
-		this.isPrivCW = false;
-		doWindowbuildingstuff();
-	}
-
+	
 	/**
 	 * @return String für Tab..
 	 */
@@ -156,25 +156,36 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 	
 	/**
-	 * @return
+	 * @return ture wenn privates ChatWindow
 	 */
 	public boolean isPrivate(){
 		return this.isPrivCW;
 	}
 	
 	/**
-	 * @return
+	 * @return true wenn Gruppen ChatWindow 
 	 */
 	public boolean isGroup(){
 		return !this.isPrivCW;
 	}
 	
+	/**
+	 * @param x
+	 */
 	private void info(String x){
 		putMSG(new MSG(x,MSG.CW_INFO_TEXT));
 	}
+	
+	/**
+	 * @param x
+	 */
 	private void warn(String x){
 		putMSG(new MSG(x,MSG.CW_WARNING_TEXT));
 	}
+	
+	/**
+	 * @param x
+	 */
 	private void error(String x){
 		putMSG(new MSG(x,MSG.CW_ERROR_TEXT));
 	}
@@ -189,10 +200,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		// Prüfen ob etwas eingegeben wurde, wenn nicht dann auch nichts machen
 		if (!eingabe.equals("")) {
 
-			// Eingabe in der ArrayList eingabeHistorie speichern und
-			// Eingabezähler
-			// auf die neue Länge der ArrayList eingabeHistorie setzen
-			//keyHistory.add(eingabe);
 			// Prüfen ob die Eingabe ein Befehl ist
 			if (eingabe.startsWith("/")) {
 				String[] tmp;
@@ -241,7 +248,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 	public void update(Observable sourceChannel, Object msg) {
-		if(!hasFocus()){
+		if(GUI.getGUI().getTabbedPane().indexOfComponent(this)!=GUI.getGUI().getTabbedPane().getSelectedIndex()){
 			myTab.startBlink();
 		}
 		MSG tmpMSG = (MSG) msg;
@@ -341,8 +348,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 	};
 	
-	public JPanel getWindowTab(JTabbedPane parent){
-		this.myTab =  new ChatWindowTab(name, parent, this); 
+	public JPanel getWindowTab(){
+		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
 		return myTab;
 	}
 }

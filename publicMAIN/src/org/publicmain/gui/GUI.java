@@ -247,7 +247,7 @@ public class GUI extends JFrame implements Observer {
 		int index = jTabbedPane.indexOfComponent(cw);
 
 		// den neuen Tab an die Stelle von index setzen:
-		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab(jTabbedPane));
+		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
 	}
 
 	/**
@@ -352,6 +352,10 @@ public class GUI extends JFrame implements Observer {
 			if (x.getNodeID() == sender)
 				return x;
 		return null;
+	}
+	
+	JTabbedPane getTabbedPane(){
+		return this.jTabbedPane;
 	}
 
 	/**

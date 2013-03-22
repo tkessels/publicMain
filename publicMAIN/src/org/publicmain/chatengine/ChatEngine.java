@@ -157,7 +157,7 @@ public class ChatEngine extends Observable{
 	/**Liefert eine Liste der verfügbaren Gruppenstrings
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
-	public	String[]	group_list(){
+	public	String[] getGroupList(){
 		//TODO: CODE HERE		
 		return null;
 	}

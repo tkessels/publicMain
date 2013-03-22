@@ -156,6 +156,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 	
 	/**
+	 * @return
+	 */
+	public JPanel getWindowTab(){
+		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
+		return myTab;
+	}
+	
+	/**
 	 * @return ture wenn privates ChatWindow
 	 */
 	public boolean isPrivate(){
@@ -298,7 +306,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		
 		}
 		msgTextPane.setCaretPosition(htmlDoc.getLength());
-		LogEngine.log("Benachrichtigung an den Nutzer: " + msg, this, LogEngine.INFO);
+		LogEngine.log("printMSG : " + msg, this, LogEngine.INFO);
 	}
 	
 	/**
@@ -347,9 +355,4 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 		}
 	};
-	
-	public JPanel getWindowTab(){
-		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
-		return myTab;
-	}
 }

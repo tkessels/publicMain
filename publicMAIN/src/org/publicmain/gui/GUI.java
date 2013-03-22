@@ -1,12 +1,8 @@
 package org.publicmain.gui;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -23,11 +19,9 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
@@ -37,10 +31,12 @@ import javax.swing.UIManager;
 
 import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.chatengine.GruppenKanal;
+import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
-import com.nilo.plaf.nimrod.*;
+import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 
 /**
@@ -97,13 +93,13 @@ public class GUI extends JFrame implements Observer {
 		this.configMenu = new JMenu("Settings");
 		this.helpMenu = new JMenu("Help");
 		this.aboutPMAIN = new JMenuItem("About pMAIN");
-		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(new Help().getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
+		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("HelpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
 		this.lafMenu = new JMenu("Switch Design");
 		this.btnGrp = new ButtonGroup();
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new JTabbedPane();
-		this.userListBtn = new JToggleButton(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
+		this.userListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon = new pMTrayIcon();
@@ -172,9 +168,11 @@ public class GUI extends JFrame implements Observer {
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
 		this.addChat(new ChatWindow("public"));
+		this.addChat(new ChatWindow("grupp1"));
+		this.addChat(new ChatWindow(123 ,"private1"));
 
 		// GUI JFrame Einstellungen:
-		this.setIconImage(new ImageIcon(new Help().getClass().getResource("pM_Logo2.png")).getImage());
+		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -192,7 +190,7 @@ public class GUI extends JFrame implements Observer {
 		if(!userListActive){
 			
 			this.userListBtn.setToolTipText("Userlist ausblenden");
-			this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListEinklappen.png")));	
+			this.userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListEinklappen.png")));
 			this.userListBtn.setSelected(true);
 			this.userListWin = new UserList(GUI.me);
 			this.userListWin.repaint();
@@ -212,7 +210,7 @@ public class GUI extends JFrame implements Observer {
 		if(userListActive){
 			
 			this.userListBtn.setToolTipText("Userlist einblenden");
-			this.userListBtn.setIcon(new ImageIcon(new Help().getClass().getResource("UserListAusklappen.png")));
+			this.userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 			this.userListBtn.setSelected(false);
 			
 			this.userListWin.setVisible(false);
@@ -247,89 +245,8 @@ public class GUI extends JFrame implements Observer {
 		// Index vom ChatWindow im JTabbedPane holen um am richtigen Ort
 		// einzufügen:
 		int index = jTabbedPane.indexOfComponent(cw);
-
-		// JPanel für Tabbeschriftung erzeugen und durchsichtig machen:
-		JPanel pnlTab = new JPanel();
-		((FlowLayout) pnlTab.getLayout()).setHgap(5);
-		pnlTab.setOpaque(false);
-
-		// TitelLabel für Tabbeschriftung erzeugen:
-		JLabel lblTitle = new JLabel(title);
-		// MouseListener zu JLabel (lblTitle) hinzufügen:
-		lblTitle.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			// beim verlassen der Maus von JLabel (lblTitle) wird die Schrift
-			// schwarz
-			public void mouseExited(MouseEvent e) {
-				JLabel source = (JLabel) e.getSource();
-				source.setForeground(Color.BLACK);
-			}
-			@Override
-			// beim betreten der Maus von JLabel (lblTitle) wird die Schrift rot
-			public void mouseEntered(MouseEvent e) {
-				JLabel source = (JLabel) e.getSource();
-				source.setForeground(new Color(255, 130, 13));
-			}
-			@Override
-			// Mittlere Maustastenklick (=512) auf Label schließt das ChatWindow
-			// jeder andere Klick führt zur Auswahl des ChatWindows:
-			public void mouseClicked(MouseEvent e) {
-				if (e.getModifiersEx() == 512) {
-					getGUI().delChat(cw);
-				} else {
-					jTabbedPane.setSelectedComponent(cw);
-				}
-			}
-		});
-
-		// ImageIcon für SchließenLabel erstellen:
-		final ImageIcon tabCloseImgIcon = new ImageIcon(new Help().getClass().getResource("TabCloseBlack.png"));
-		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
-		JLabel lblClose = new JLabel(tabCloseImgIcon);
-		// Observer für das Image auf das lblClose setzen:
-		tabCloseImgIcon.setImageObserver(lblClose);
-		// MouseListener für Schließenlabel (lblClose) hinzufügen:
-		lblClose.addMouseListener(new MouseListener() {
-			@Override
-			public void mouseReleased(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			// Bei Klick ChatWindow (cw) schliesen:
-			public void mouseClicked(MouseEvent arg0) {
-				getGUI().delChat(cw);
-			}
-			@Override
-			// bei Mouseover wird das "x" des Schließenbutton (btnClose) rot:
-			public void mouseEntered(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon(new Help().getClass().getResource("TabCloseOrange.png")).getImage());
-			}
-			@Override
-			// beim verlassen der Maus wird das "x" des Schließenbutton
-			// (btnClose) schwarz:
-			public void mouseExited(MouseEvent e) {
-				tabCloseImgIcon.setImage(new ImageIcon(new Help().getClass().getResource("TabCloseBlack.png")).getImage());
-			}
-		});
-
-		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
-		pnlTab.add(lblTitle);
-		pnlTab.add(lblClose);
-
 		// den neuen Tab an die Stelle von index setzen:
-		this.jTabbedPane.setTabComponentAt(index, pnlTab);
+		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
 	}
 
 	/**
@@ -406,6 +323,18 @@ public class GUI extends JFrame implements Observer {
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
+		if (o instanceof GruppenKanal){
+			if (o.countObservers()==1){
+			//erzeuge gruppenfenster füge nachricht ein sei happy
+			}
+			else{
+				//
+			}
+			
+		}
+		if(o instanceof KnotenKanal&&o.countObservers()==1){
+			//erzeuge gruppen
+		}
 		// TODO Auto-generated method stub
 	}
 
@@ -422,6 +351,10 @@ public class GUI extends JFrame implements Observer {
 			if (x.getNodeID() == sender)
 				return x;
 		return null;
+	}
+	
+	JTabbedPane getTabbedPane(){
+		return this.jTabbedPane;
 	}
 
 	/**

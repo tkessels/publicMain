@@ -40,7 +40,7 @@ public class HelpContents {
 
 	public HelpContents() {
 		this.hcframe = new JFrame("Help Contents");
-		this.searchField = new JTextField("What to hell are you searchting for?");
+		this.searchField = new JTextField("What to hell are you searching for?");
 		this.searchButton = new JButton("Search");
 		this.searchPanel = new JPanel();
 		this.helpContentTxt = new JTextPane();
@@ -48,7 +48,7 @@ public class HelpContents {
 		this.htmlDoc = new HTMLDocument();
 
 		hcframe.setLocationRelativeTo(null);
-		hcframe.setIconImage(new ImageIcon(new Help().getClass().getResource("pM_Logo2.png")).getImage());
+		hcframe.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		hcframe.setMinimumSize(new Dimension(250, 400));
 		
 		helpContentTxt.setBackground(new Color(229, 195, 0));

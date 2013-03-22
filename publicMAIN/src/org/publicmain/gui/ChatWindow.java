@@ -18,6 +18,7 @@ import java.util.Observer;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -35,6 +36,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 	// Deklarationen:
 	private String name;
+	private ArrayList<MSG> msgList;
 	private JButton sendenBtn;
 	private JTextPane msgTextPane;
 	private HTMLEditorKit htmlKit;
@@ -43,8 +45,36 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private JTextField eingabeFeld;
 	private String gruppe;
 	private long user;
+	private boolean isPrivCW;
 	private GUI gui;
 	private History keyHistory;
+	private ChatWindowTab myTab;
+	private String helptext="<br><table color='green'>" +
+			"<tr><td colspan='3'><b>Kurzbefehl</b></td><td><b>Erleuterung</b></td></tr>" +
+			"<tr><td colspan='3'>/clear</td><td>Anzeige löschen</td></tr>" +
+			"<tr><td colspan='3'>/exit</td><td>Programm beenden</td></tr>" +
+			"<tr><td colspan='3'>/help</td><td>zeigt diese Hilfe an</td></tr>" +
+			"<tr><td>/ignore</td><td colspan='2'>&lt;username&gt;</td><td>User ignorieren</td></tr>" +
+			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>User nicht weiter ignorieren</td></tr>" +
+			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>Informationen über User erhalten</td></tr>" +
+			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>Nachricht an Gruppe</tr>" +
+			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>Flüsternachricht</tr>" +
+			"<tr><td>/s</td><td  colspan='2'>&lt;message&gt;</td>schreien</tr>" +
+			"</table><br>";
+
+	public ChatWindow(long uid, String username) {
+		this.user = uid;
+		this.name = username;
+		this.isPrivCW = true;
+		doWindowbuildingstuff();
+	}
+
+	public ChatWindow(String gruppenname) {
+		gruppe = gruppenname;
+		this.name = gruppenname;
+		this.isPrivCW = false;
+		doWindowbuildingstuff();
+	}
 
 	/**
 	 * Erstellt Content und macht Layout für das Chatpanel
@@ -54,6 +84,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.setLayout(new BorderLayout());
 
 		// Initialisierungen:
+		this.gui = GUI.getGUI();
+		this.msgList = new ArrayList<MSG>();
 		this.sendenBtn = new JButton("send");
 		this.msgTextPane = new JTextPane();
 		this.htmlKit = new HTMLEditorKit();
@@ -62,7 +94,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.eingabeFeld = new JTextField();
 
 		msgTextPane.setEditable(false);
-		msgTextPane.setPreferredSize(new Dimension(300, 200));
+		msgTextPane.setPreferredSize(new Dimension(400, 300));
 		msgTextPane.setEditorKit(htmlKit);
 		msgTextPane.setDocument(htmlDoc);
 
@@ -109,33 +141,63 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			public void focusGained(FocusEvent arg0) {
 				// Focus auf eingabeFeld setzen:
 				eingabeFeld.requestFocusInWindow();
+				myTab.stopBlink();
 			}
 		});
 
 		this.setVisible(true);
 	}
-
-	public ChatWindow(long uid, String username) {
-		this.user = uid;
-		this.name = username;
-		this.gui = GUI.getGUI();
-		doWindowbuildingstuff();
-	}
-
-	public ChatWindow(String gruppenname) {
-		gruppe = gruppenname;
-		this.name = gruppenname;
-		this.gui = GUI.getGUI();
-		doWindowbuildingstuff();
-	}
-
+	
 	/**
 	 * @return String für Tab..
 	 */
 	public String getChatWindowName() {
 		return this.name;
 	}
-
+	
+	/**
+	 * @return
+	 */
+	public JPanel getWindowTab(){
+		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
+		return myTab;
+	}
+	
+	/**
+	 * @return ture wenn privates ChatWindow
+	 */
+	public boolean isPrivate(){
+		return this.isPrivCW;
+	}
+	
+	/**
+	 * @return true wenn Gruppen ChatWindow 
+	 */
+	public boolean isGroup(){
+		return !this.isPrivCW;
+	}
+	
+	/**
+	 * @param x
+	 */
+	private void info(String x){
+		putMSG(new MSG(x,MSG.CW_INFO_TEXT));
+	}
+	
+	/**
+	 * @param x
+	 */
+	private void warn(String x){
+		putMSG(new MSG(x,MSG.CW_WARNING_TEXT));
+	}
+	
+	/**
+	 * @param x
+	 */
+	private void error(String x){
+		putMSG(new MSG(x,MSG.CW_ERROR_TEXT));
+	}
+	
 	/**
 	 * In dieser Methode werden die Texteingaben aus dem eingabeFeld verarbeitet
 	 */
@@ -146,10 +208,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		// Prüfen ob etwas eingegeben wurde, wenn nicht dann auch nichts machen
 		if (!eingabe.equals("")) {
 
-			// Eingabe in der ArrayList eingabeHistorie speichern und
-			// Eingabezähler
-			// auf die neue Länge der ArrayList eingabeHistorie setzen
-			//keyHistory.add(eingabe);
 			// Prüfen ob die Eingabe ein Befehl ist
 			if (eingabe.startsWith("/")) {
 				String[] tmp;
@@ -158,40 +216,28 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				if (eingabe.equals("/clear")) {
 					msgTextPane.setText("");
 				} else if (eingabe.equals("/help")) {
-					// TODO: Hilfetext in das Ausgabefeld schreiben
-					printMessage("<br><table color='red'>" +
-							"<tr><td>/clear</td><td colspan='2'>Anzeige löschen</td></tr>" +
-							"<tr><td>/exit</td><td colspan='2'>Programm beenden</td></tr>" +
-							"<tr><td>/help</td><td colspan='2'>Hilfe anzeigen</td></tr>" +
-							"<tr><td>/i</td><td>&lt;username&gt;</td><td></td></tr>" +
-							"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td></tr>" +
-							"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td></tr>" +
-							"</table><br>");
-				} else if (eingabe.equals("/exit")) {
-					// TODO: Ordentliches herunterfahren des Nodes
-					printMessage("Node wird heruntergefahren...");
-					System.exit(0);
+					info(helptext);
 				}
 
 				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
 				else if (eingabe.startsWith("/i ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
 					// TODO: Dieses Kommando ist für das hinzufügen von Nutzern zur Ignorierliste gedacht
-					printMessage("Ignorieren noch nicht möglich...");
+					warn("Ignorieren noch nicht möglich...");
 				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch ein ChatWindow ins GUI oder
 					// wenn schon vorhanden das focusiert werden.
 					// long tmpUid = user;
 					// gui.ce.send_private(tmpUid, tmp[2]);
-					printMessage("Flüsternachrichten noch nicht möglich...");
+					warn("Flüsternachrichten noch nicht möglich...");
 				}
 				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
 					// TODO: Hier muss noch der Gruppenname eingefügt werden
 					// gui.ce.send_group(tmp[1], tmp[2]);
-					printMessage("Gruppennachrichten noch nicht möglich...");
+					warn("Gruppennachrichten noch nicht möglich...");
 				}
 				else {
-					printMessage("Befehl nicht gültig oder vollständig...");
+					error("Befehl nicht gültig oder vollständig...");
 				}
 			}
 
@@ -210,30 +256,57 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 	public void update(Observable sourceChannel, Object msg) {
-		MSG tmp = (MSG) msg;
-		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + String.valueOf(tmp.getSender() % 10000) + ": </font><font color='black'>" + (String) tmp.getData() + "</font>", 0, 0, null);
-			msgTextPane.setCaretPosition(htmlDoc.getLength());
-		} catch (BadLocationException | IOException e) {
-			System.out.println(e.getMessage());
+		if(GUI.getGUI().getTabbedPane().indexOfComponent(this)!=GUI.getGUI().getTabbedPane().getSelectedIndex()){
+			myTab.startBlink();
 		}
-		LogEngine.log("Nachricht für Ausgabe:" + tmp.toString(), this, LogEngine.INFO);
+		MSG tmpMSG = (MSG) msg;
+		this.putMSG(tmpMSG);
+		LogEngine.log("Nachricht für Ausgabe:" + tmpMSG.toString(), this, LogEngine.INFO);
 	}
-
+	
+	/**
+	 * @param msg
+	 */
+	public void putMSG(MSG msg){
+		this.msgList.add(msg);
+		this.printMSG(msg);
+	}
 	/**
 	 * Methode zur Benachrichtigung des Benutzers über das Textausgabefeld
 	 * (msgTextArea), gleichzeitig wird die LogEngine informiert.
 	 * 
 	 * @param reason
 	 */
-	public void printMessage(String reason) {
-		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='red'>" + reason + "</font>", 0, 0, null);
-			msgTextPane.setCaretPosition(htmlDoc.getLength());
-		} catch (BadLocationException | IOException e) {
-			System.out.println(e.getMessage());
+	private void printMSG(MSG msg) {
+		
+		switch(msg.getTyp()){
+		
+		case SYSTEM:
+			try {
+				String color = (msg.getCode()==MSG.CW_INFO_TEXT)? "green" : "red";
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),"<font color='" + color + "'>System: " + (String) msg.getData() + "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
+				LogEngine.log(e);
+			}
+			break;
+		case GROUP:
+			try {
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + String.valueOf(msg.getSender() % 10000) + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
+				LogEngine.log(e);
+			}
+			break;
+		case PRIVATE:
+			try {
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + String.valueOf(msg.getSender() % 10000) + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
+				LogEngine.log(e);
+			}
+			break;
+		
 		}
-		LogEngine.log("Benachrichtigung an den Nutzer: " + reason, this, LogEngine.INFO);
+		msgTextPane.setCaretPosition(htmlDoc.getLength());
+		LogEngine.log("printMSG : " + msg, this, LogEngine.INFO);
 	}
 	
 	/**

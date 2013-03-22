@@ -6,10 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.ByteOrder;
 
 
 
@@ -47,6 +44,11 @@ public class MSG implements Serializable{
 	public static final byte CMD_SHUTDOWN		=		70;
 	public static final byte CMD_RESTART		=		71;
 	
+	public static final byte CW_INFO_TEXT		=		80;
+	public static final byte CW_WARNING_TEXT	=		81;
+	public static final byte CW_ERROR_TEXT		=		82;
+	
+	
 
 	
 	
@@ -77,8 +79,11 @@ public class MSG implements Serializable{
 		this.sender= NodeEngine.getNE().getME().getNodeID();
 	}
 	
-	public MSG(String text){
-		this("public",text);
+	public MSG(Object payload, byte code){
+		this();
+		this.typ=NachrichtenTyp.SYSTEM;
+		this.code = code;
+		this.data = payload;
 	}
 	
 	public MSG(String group,String text){
@@ -137,21 +142,6 @@ public class MSG implements Serializable{
 	}
 	
 	
-	/**Erzeugt eine Liste aller lokal vergebenen IP-Adressen mit ausnahme von Loopbacks und IPV6 Adressen
-	 * @return Liste aller lokalen IPs
-	 */
-	public static List<InetAddress> getMyIPs() {
-		List<InetAddress> addrList = new ArrayList<InetAddress>();
-		try {
-			for (InetAddress inetAddress : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) { //Finde alle IPs die mit meinem hostname assoziert sind und 
-			if (inetAddress.getAddress().length==4)addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
-			}
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return addrList;
-	}
 	
 	
 	public static byte[] getBytes(MSG x){

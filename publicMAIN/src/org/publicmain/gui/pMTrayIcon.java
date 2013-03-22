@@ -36,7 +36,7 @@ public class pMTrayIcon {
         }
         
         this.popup = new PopupMenu();
-        this.trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("media/TrayIcon.png")).getImage());
+        this.trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("TrayIcon.png")).getImage());
         this.sysTray = SystemTray.getSystemTray();
         this.pMainOpenItem = new MenuItem("pMain öffnen");
         this.alerts = new Menu("Alert me");

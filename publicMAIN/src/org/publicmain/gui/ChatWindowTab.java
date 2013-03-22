@@ -39,7 +39,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		lblTitle.addMouseListener(this);
 
 		// ImageIcon für SchließenLabel erstellen:
-		tabCloseImgIcon = new ImageIcon(getClass().getResource("media/TabCloseBlack.png"));
+		tabCloseImgIcon = new ImageIcon(getClass().getResource("TabCloseBlack.png"));
 		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
 		lblClose = new JLabel(tabCloseImgIcon);
 		// Observer für das Image auf das lblClose setzen:
@@ -49,9 +49,9 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 
 		lblIcon = new JLabel();
 		if(owner.isPrivate()){
-			lblIcon.setIcon(new ImageIcon(getClass().getResource("media/private.png")));
+			lblIcon.setIcon(new ImageIcon(getClass().getResource("private.png")));
 		} else {
-			lblIcon.setIcon(new ImageIcon(getClass().getResource("media/gruppe.png")));
+			lblIcon.setIcon(new ImageIcon(getClass().getResource("gruppe.png")));
 		}
 		
 		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
@@ -79,7 +79,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		if (e.getSource() == lblClose){
-			tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("media/TabCloseOrange.png")).getImage());
+			tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseOrange.png")).getImage());
 		} else {
 			JLabel source = (JLabel) e.getSource();
 			source.setForeground(new Color(255, 130, 13));
@@ -89,7 +89,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	@Override
 	public void mouseExited(MouseEvent e) {
 		if (e.getSource() == lblClose){
-			tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("media/TabCloseBlack.png")).getImage());
+			tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
 		} else {
 			JLabel source = (JLabel) e.getSource();
 			source.setForeground(Color.BLACK);

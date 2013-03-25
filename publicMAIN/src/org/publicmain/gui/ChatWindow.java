@@ -217,24 +217,32 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					msgTextPane.setText("");
 				} else if (eingabe.equals("/help")) {
 					info(helptext);
+				} else if (eingabe.equals("/exit")) {
+					gui.shutdown();
 				}
 
 				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
-				else if (eingabe.startsWith("/i ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
-					// TODO: Dieses Kommando ist für das hinzufügen von Nutzern zur Ignorierliste gedacht
-					warn("Ignorieren noch nicht möglich...");
+				else if (eingabe.startsWith("/ignore ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
+					if(gui.ignoreUser(tmp[1])){
+						info(tmp[1] + " wird ignoriert!");
+					} else {
+						warn("Ignorieren nicht möglich! " + tmp[1] + " wurde nicht gefunden!");
+					}
 				}
+				else if (eingabe.startsWith("/unignore ")&& (tmp = eingabe.split(" ", 2)).length == 2){
+					if(gui.unignoreUser(tmp[1])){
+						info(tmp[1] + " wird nicht weiter ignoriert!");
+					} else {
+						warn(tmp[1] + "wurde nicht gefunden!");
+					}
+				}
+				//TODO: evtl. auch die Möglichkeit umsetzen, dass man mit /w und /g nur ein ChatWindow anlegt ohne Nachricht zu schicken
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
-					// TODO: Hier muss noch ein ChatWindow ins GUI oder
-					// wenn schon vorhanden das focusiert werden.
-					// long tmpUid = user;
-					// gui.ce.send_private(tmpUid, tmp[2]);
+					gui.privSend(tmp[1], tmp[2], this);
 					warn("Flüsternachrichten noch nicht möglich...");
 				}
 				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
-					// TODO: Hier muss noch der Gruppenname eingefügt werden
-					// gui.ce.send_group(tmp[1], tmp[2]);
-					warn("Gruppennachrichten noch nicht möglich...");
+					gui.groupSend(tmp[1], tmp[2], this);
 				}
 				else {
 					error("Befehl nicht gültig oder vollständig...");
@@ -244,12 +252,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			// Wenn es kein Befehl ist muss es wohl eine Nachricht sein
 			else if (gruppe == null) {
 				// ggf. eingabe durch Methode filtern
-				gui.ce.send_private(user, eingabe);
+				gui.privSend(user, eingabe, this);
 			}
 			else {
 				// ggf. eingabe durch Methode filtern
-				gui.ce.send_group(gruppe, eingabe);
-			}
+				gui.groupSend(gruppe, eingabe, this);
+						}
 		// In jedem Fall wird das Eingabefeld gelöscht
 		eingabeFeld.setText("");
 		}

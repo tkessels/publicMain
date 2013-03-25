@@ -274,20 +274,108 @@ public class GUI extends JFrame implements Observer {
 	}
 
 	/**
-	 * Diese Methode stellt das GUI bereit
-	 * 
-	 * Diese Methode stellt das GUI für andere Klassen bereit um einen Zugriff
-	 * auf GUI Attribute zu ermöglichen
-	 * 
-	 * @return GUI
+	 * Fährt das Programm ordnungsgemäß runter
 	 */
-	public static GUI getGUI() {
-		if (me == null) {
-			me = new GUI();
-		}
-		return me;
+	void shutdown(){
+		//TODO: ordentlicher shutdown
+		System.exit(0);
 	}
 
+	/**
+	 * Diese Methode wird in einem privaten ChatWindow zum versenden der Nachricht verwendet
+	 * @param empfUID long EmpfängerUID
+	 * @param msg String die Nachricht
+	 * @param cw ChatWindow das aufrufende ChatWindow
+	 */
+	void privSend(long empfUID,String msg, ChatWindow cw){
+		ce.send_private(empfUID, msg);
+	}
+	
+	/**
+	 * Diese Methode sendet eine private Nachricht durch /w
+	 * 
+	 * Diese Methode wird vom ChatWindow durch die Eingabe von /w aufgerufen
+	 * zunächst wird geprüft ob schon ein ChatWindow für den privaten Chat existiert
+	 * falls nicht wird eines angelegt und die private nachricht an die UID versendet
+	 * @param empfAlias String Empfänger Alias
+	 * @param msg String die Nachricht
+	 * @param cw ChatWindow das aufrufende ChatWindow
+	 */
+	void privSend(String empfAlias, String msg, ChatWindow cw){
+		boolean cwExist = false;
+		long tmpUID;
+		for(ChatWindow x : chatList){
+			if(x.getChatWindowName().equals(cw.getChatWindowName())){
+				cwExist = true;
+			}
+		}
+		for(Node x : nodes){
+			if(x.getAlias().equals(empfAlias)){
+				tmpUID = x.getNodeID();
+				if(!cwExist){
+					addChat(new ChatWindow(tmpUID, empfAlias));
+				}
+				ce.send_private(tmpUID, msg);
+			}
+		}
+	}
+	
+	/**
+	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet
+	 * Falls noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
+	 * @param empfGrp String Empfängergruppe
+	 * @param msg String die Nachricht/Msg
+	 * @param cw ChatWindow das aufrufende ChatWindow
+	 */
+	void groupSend(String empfGrp, String msg, ChatWindow cw){
+		boolean cwExist = false;
+		for(ChatWindow x : chatList){
+			if(x.getChatWindowName().equals(empfGrp)){
+				cwExist = true;
+			}
+		}
+		if(!cwExist){
+			addChat(new ChatWindow(empfGrp));
+		}
+		ce.send_group(empfGrp, msg);
+	}
+	
+	/**
+	 * Diese Methode ist für das Ignorien eines users
+	 * @param alias String Alias des Users
+	 * @returns true Wenn User gefunden
+	 */
+	boolean ignoreUser(String alias){
+		long tmpUID; 
+		for(Node x : nodes){
+			if(x.getAlias().equals(alias)){
+				tmpUID = x.getUserID();
+				ce.ignore_user(tmpUID);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Diese Methode ist für das nicht weitere Ignorieren eines users
+	 * @param alias String Alias des Users
+	 * @return true Wenn User gefunden
+	 */
+	boolean unignoreUser(String alias){
+		long tmpUID;
+		for(Node x : nodes){
+			if(x.getAlias().equals(alias)){
+				tmpUID = x.getUserID();
+				ce.unignore_user(tmpUID);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
 	/**
 	 * Diese Methode liefert ein Fileobjekt
 	 * 
@@ -353,10 +441,30 @@ public class GUI extends JFrame implements Observer {
 		return null;
 	}
 	
+	/**
+	 * Diese Methode stellt das GUI bereit
+	 * 
+	 * Diese Methode stellt das GUI für andere Klassen bereit um einen Zugriff
+	 * auf GUI Attribute zu ermöglichen
+	 * 
+	 * @return GUI
+	 */
+	public static GUI getGUI() {
+		if (me == null) {
+			me = new GUI();
+		}
+		return me;
+	}
+	
+	/**
+	 * @return
+	 */
 	JTabbedPane getTabbedPane(){
 		return this.jTabbedPane;
 	}
 
+	
+	
 	/**
 	 * ActionListener für Design wechsel (LookAndFeel)
 	 * 

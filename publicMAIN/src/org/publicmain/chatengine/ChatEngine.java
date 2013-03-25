@@ -179,6 +179,14 @@ public class ChatEngine extends Observable{
 		//TODO: CODE HERE
 	}
 	
+	/**
+	 * Veranlasst das Nachrichten vom user mit der <code>uid</code> wieder angezeigt werden.
+	 * @param uid
+	 */
+	public void 	unignore_user(long uid){
+		//TODO: CODE HERE
+	}
+	
 	/**Verändert den Anzeigenamen des Nutzers
 	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
 	 */

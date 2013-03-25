@@ -175,6 +175,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("publicMAIN");
 		this.setVisible(true);
+		chatList.get(0).focusEingabefeld();
 	}
 
 	/**
@@ -610,6 +611,5 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
-		
 	}
 }

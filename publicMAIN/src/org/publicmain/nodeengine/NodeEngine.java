@@ -31,7 +31,7 @@ public class NodeEngine {
 	private ConnectionHandler root_connection;
 	private MulticastSocket multi_socket;
 	
-	private List<ConnectionHandler> connections;
+	public List<ConnectionHandler> connections;
 	
 	
 	//-----nur zum test--------
@@ -45,7 +45,7 @@ public class NodeEngine {
 	//private final int server_port = 6790;
 	private final int MAX_CLIENTS = 5;
 	
-	private Thread msgRecieverBot;
+	private Thread multicastRecieverBot;
 	private Thread connectionsAcceptBot;
 
 	// -------------------------
@@ -66,6 +66,7 @@ public class NodeEngine {
 		
 		multi_socket = new MulticastSocket(multicast_port);
 		multi_socket.joinGroup(group);
+		multi_socket.setLoopbackMode(true);
 		multi_socket.setTimeToLive(10);
 		isOnline=false;
 		LogEngine.log("Multicast Socket geöffnet",this,LogEngine.INFO);
@@ -87,7 +88,7 @@ public class NodeEngine {
 		});
 		
 		
-		msgRecieverBot=new Thread(new Runnable() {
+		multicastRecieverBot=new Thread(new Runnable() {
 			public void run() {
 				while(true){
 					byte[] buff = new byte[65535];
@@ -96,14 +97,14 @@ public class NodeEngine {
 						multi_socket.receive(tmp);
 						MSG nachricht = MSG.getMSG(tmp.getData());
 						LogEngine.log(nachricht,this);
-						handle(nachricht);
+						handle(nachricht,-2);
 					} catch (IOException e) {
 						LogEngine.log(e);
 					}
 				}
 			}
 		});
-		msgRecieverBot.start();
+		multicastRecieverBot.start();
 		
 		discover();
 		Thread selbstZumRootErklärer = new Thread(new Runnable() {
@@ -213,12 +214,35 @@ public class NodeEngine {
 	
 	
 
-	/**Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich von den ConnectionHandlern aufgerufen um empfange Pakete verarbeiten zu lassen.
+	/**
+	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich von den ConnectionHandlern aufgerufen um empfange Pakete verarbeiten zu lassen.
+	 * 
 	 * @param paket neue 
+	 * @param i index der Quelle <ul>	<li>-2 MulticastSocket
+	 * 									<li>-1 RootConnectionSocket
+	 * 									<li>0> ChildSocketIndex
+	 * 							</ul>
 	 */
-	public void handle(MSG paket) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
+	public void handle(MSG paket, int i) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
 		LogEngine.log(paket,this);
 		switch (paket.getTyp()){
+		case GROUP:
+			try{
+				if(i!=-1)root_connection.send(paket);
+			}
+			catch (IOException e) {
+				LogEngine.log(e);
+			}
+			for (int j = 0; j < connections.size(); j++) {
+				if(j!=i)
+					try {
+						connections.get(j).send(paket);
+					} catch (IOException e) {
+						LogEngine.log(e);
+					}
+			}
+			ce.put(paket);
+			break;
 		case SYSTEM:
 			switch(paket.getCode()){
 			case MSG.ROOT_REPLY:
@@ -233,6 +257,7 @@ public class NodeEngine {
 				break;
 			case MSG.ROOT_DISCOVERY:
 				if(isRoot&&isOnline) sendDiscoverReply((Node)paket.getData());
+				break;
 			}
 			// TODO
 			break;

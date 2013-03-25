@@ -7,11 +7,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.swing.text.StyledEditorKit.UnderlineAction;
-
-import org.publicmain.chatengine.ChatEngine;
-import org.publicmain.common.*;
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
+import org.publicmain.common.NachrichtenTyp;
+import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 
 
@@ -31,43 +33,21 @@ public class ConnectionHandler {
 	private ObjectInputStream line_in;
 	private Thread pakets_rein_hol_bot;
 	private Node connectedWith;
+	private Set<Node> childs;
 	private NodeEngine ne;
 	private int zustand=NOT_CONNECTED;
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
 		ne=NodeEngine.getNE();
+		childs = new HashSet<Node>(); 
 		pakets_rein_hol_bot = new Thread(new reciever());
 		line = underlying;
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		zustand=CONNECTED;
-		line_out.writeObject(ne.getME());
-		line_out.flush();
-		
-		
-		
-		try {//versuche erstes Paket zu interpretieren
-			Object first=line_in.readObject();
-			System.out.println("lese");	
-			if (first instanceof Node){
-				connectedWith = (Node) first;
-				zustand=CHATMODE;
-				LogEngine.log("Verbindung mit " + connectedWith + " hergestellt.", this, LogEngine.INFO);
-				pakets_rein_hol_bot.start();
-			}
-			
-			else if(first instanceof MSG &&((MSG)first).getTyp()==NachrichtenTyp.SYSTEM &&((MSG)first).getCode()==MSG.FILE_REQUEST ){
-				LogEngine.log("Datenempfang gefordert von " + ((MSG)first).getSender() + ".", this, LogEngine.INFO);
-				zustand=DATAMODE;
-				File tmp = GUI.getGUI().request_File();
-				//hier stream ich den Netzwerk müll in die Datei auf die Platte
-			}
-			
-		} catch (ClassNotFoundException e) {
-			LogEngine.log(e);
-		}
+		pakets_rein_hol_bot.start();
 	}
 
 	/**Verschickt ein MSG-Objekt über den Soket.
@@ -88,7 +68,11 @@ public class ConnectionHandler {
 				try 
 				{
 					MSG tmp = (MSG) line_in.readObject();
-					ne.handle(tmp);
+					if (tmp.getCode()==MSG.NODE_UPDATE){
+						childs.add((Node)tmp.getData());
+						if(connectedWith==null)connectedWith=(Node)tmp.getData();
+					}
+					ne.handle(tmp,getIndexOfME());
 				} 
 				catch (ClassNotFoundException|IOException e) 
 				{
@@ -104,5 +88,8 @@ public class ConnectionHandler {
 
 	public boolean isConnected() {
 		return line.isConnected();
+	}
+	private int getIndexOfME(){
+		return NodeEngine.getNE().connections.indexOf(this);
 	}
 }

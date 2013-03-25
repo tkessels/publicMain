@@ -28,7 +28,7 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	private Set<Node> nodes;
+	//private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
 	private List<KnotenKanal> private_channels;
@@ -57,9 +57,9 @@ public class ChatEngine extends Observable{
 		
 		group_channels=new ArrayList<GruppenKanal>();
 		private_channels=new ArrayList<KnotenKanal>();
-		nodes=new HashSet<Node>();
+		//nodes=new HashSet<Node>();
 		ignored=new HashSet<Node>();
-		nodes.addAll(ne.getNodes());
+		//nodes.addAll(ne.getNodes());
 		inbox=new LinkedBlockingQueue<MSG>();
 		//group_join("public");
 		//hier müssten die default kanäle angelegt werden und die GUI müsste angebunden werden.
@@ -91,6 +91,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void send_private(long uid, String text){
 		MSG tmp = new MSG(uid,text);
+		put(tmp);
 		ne.send(tmp);
 	}
 	
@@ -100,6 +101,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void send_group(String group, String text){
 		MSG tmp = new MSG(group,text);
+		put(tmp);
 		ne.send(tmp);
 	}
 	
@@ -128,8 +130,8 @@ public class ChatEngine extends Observable{
 	/**Fragt ein Array alle User ab 
 	 * @return Array aller verbundener Nodes
 	 */
-	public	Node[]	getUsers(){
-		return (Node[]) nodes.toArray();
+	public	List<Node>	getUsers(){
+		return ne.getNodes();
 	}
 	
 	/** tritt einer Gruppe bei
@@ -259,7 +261,7 @@ public class ChatEngine extends Observable{
 	 * @return Node-Objekt zu angegebenem User
 	 */
 	private Node getNodeforUser(long uid){
-		for (Node x : nodes) {
+		for (Node x : ne.getNodes()) {
 			if(x.getUserID()==uid) return x;
 		}
 		return null;

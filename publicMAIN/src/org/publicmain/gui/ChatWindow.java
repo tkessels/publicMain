@@ -205,6 +205,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		// Eingabe aus dem Textfeld in String eingabe speichern
 		String eingabe = eingabeFeld.getText();
 
+		// HTML-Elemente verhindern
+		eingabe = eingabe.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+		// erlaubte HTML-Elemente mit anderem Syntax einfügen
+		eingabe = eingabe.replaceAll("(\\[)(?=/?(b|u|i|strike)\\])", "<");
+		eingabe = eingabe.replaceAll("(?<=((</?)(b|u|i|strike)))(\\])", ">");
+		
 		// Prüfen ob etwas eingegeben wurde, wenn nicht dann auch nichts machen
 		if (!eingabe.equals("")) {
 
@@ -212,13 +219,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			if (eingabe.startsWith("/")) {
 				String[] tmp;
 				
-				// HTML-Elemente verhindern
-				eingabe = eingabe.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-
-				// erlaubte HTML-Elemente mit anderem Syntax einfügen
-				eingabe = eingabe.replaceAll("(\\[)(?=/?(b|u|i|strike)\\])", "<");
-				eingabe = eingabe.replaceAll("(?<=((</?)(b|u|i|strike)))(\\])", ">");
-
 				// Prüfen ob die Eingabe ein einfacher Befehl ist
 				if (eingabe.equals("/clear")) {
 					msgTextPane.setText("");

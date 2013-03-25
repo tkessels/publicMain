@@ -211,6 +211,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			// Prüfen ob die Eingabe ein Befehl ist
 			if (eingabe.startsWith("/")) {
 				String[] tmp;
+				
+				// HTML-Elemente verhindern
+				eingabe = eingabe.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+				// erlaubte HTML-Elemente mit anderem Syntax einfügen
+				eingabe = eingabe.replaceAll("(\\[)(?=/?(b|u|i|strike)\\])", "<");
+				eingabe = eingabe.replaceAll("(?<=((</?)(b|u|i|strike)))(\\])", ">");
 
 				// Prüfen ob die Eingabe ein einfacher Befehl ist
 				if (eingabe.equals("/clear")) {

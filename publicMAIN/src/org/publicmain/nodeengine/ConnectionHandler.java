@@ -36,16 +36,29 @@ public class ConnectionHandler {
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
+		System.out.println("Connected");
 		ne=NodeEngine.getNE();
+		System.out.println("Connected");
 		pakets_rein_hol_bot = new Thread(new reciever());
+		System.out.println("Connected");
 		line = underlying;
+		System.out.println("Connected");
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
+		System.out.println("Connected");
 		line_out.flush();
+		System.out.println("Connected");
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
+		System.out.println("Connected");
 		zustand=CONNECTED;
+		System.out.println("Connected");
+		line_out.writeObject(ne.getME());
+		line_out.flush();
+		
+		
 		
 		try {//versuche erstes Paket zu interpretieren
 			Object first=line_in.readObject();
+			System.out.println("lese");	
 			if (first instanceof Node){
 				connectedWith = (Node) first;
 				zustand=CHATMODE;
@@ -65,13 +78,16 @@ public class ConnectionHandler {
 		}
 
 		
-		
+		System.out.println("Finished");
 		
 		
 	}
 	
 	
 	
+
+
+
 	/**Verschickt ein MSG-Objekt über den Soket.
 	 * @param paket Das zu versendende Paket
 	 * @throws IOException Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt

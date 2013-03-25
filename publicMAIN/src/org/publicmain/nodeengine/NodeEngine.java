@@ -36,13 +36,13 @@ public class NodeEngine {
 	
 	//-----nur zum test--------
 	private Node meinNode;
-	private Node[] meinNodeArray = new Node[2];
+	private List<Node> allNodes=new ArrayList<Node>();
 	private boolean isOnline;
 	private boolean isRoot;
 	private ChatEngine ce;
 	private final InetAddress group = InetAddress.getByName("230.223.223.223");
 	private final int multicast_port = 6789;
-	private final int server_port = 6790;
+	//private final int server_port = 6790;
 	private final int MAX_CLIENTS = 5;
 	
 	private Thread msgRecieverBot;
@@ -59,6 +59,8 @@ public class NodeEngine {
 		ce=parent;
 		server_socket = new ServerSocket(0);
 		meinNode=Node.getMe();
+		allNodes.add(meinNode);
+		
 		connections=new ArrayList<ConnectionHandler>();
 		
 		
@@ -95,7 +97,6 @@ public class NodeEngine {
 						MSG nachricht = MSG.getMSG(tmp.getData());
 						LogEngine.log(nachricht,this);
 						handle(nachricht);
-//						ce.put(nachricht);
 					} catch (IOException e) {
 						LogEngine.log(e);
 					}
@@ -133,12 +134,6 @@ public class NodeEngine {
 
 
 	public static NodeEngine getNE(){
-		
-	/* if(ich==null){			//factory Method überflüssig? NE wird sofort am anfang instanzier
-			synchronized (NodeEngine.class) {
-				if(ich==null)ich=new NodeEngine();				
-			}
-		}*/ 
 		return ne;
 	}
 	
@@ -167,17 +162,15 @@ public class NodeEngine {
 	 */
 	public Node getME (){
 		return meinNode;					//TODO:nur zum test
-		
 	}
 	
 	/**
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen
 	 * Nodes beinhaltet.
 	 */
-	public Node[] getNodes (){
-		return meinNodeArray;				//TODO:nur zum test
+	public List<Node> getNodes (){
+		return allNodes;					//TODO:nur zum test
 	}
-	
 	
 	/**
 	 * Gibt ein StringArray aller vorhandenen Groups zurück
@@ -278,6 +271,7 @@ public class NodeEngine {
 
 	private Node getBestNode() {
 		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sicher der Neue Verbinden darf.
+		
 		return meinNode;
 	}
 
@@ -287,28 +281,27 @@ public class NodeEngine {
 	 * @throws IOException 
 	 */
 	private void connectTo(Node knoten) throws IOException {
-		
-		Socket tmp_socket = null ;
-		for (InetAddress x : knoten.getSockets()){
+
+		Socket tmp_socket = null;
+		for (InetAddress x : knoten.getSockets()) {
 			try {
-				tmp_socket = new Socket(x.getHostAddress(), knoten.getServer_port());
-				
+				tmp_socket = new Socket(x.getHostAddress(),
+						knoten.getServer_port());
+
 			} catch (UnknownHostException e) {
 				LogEngine.log(e);
 			} catch (IOException e) {
 				LogEngine.log(e);
 			}
-			if(tmp_socket!=null&&tmp_socket.isConnected())break;
+			if (tmp_socket != null && tmp_socket.isConnected())
+				break;
 		}
-			if(tmp_socket!=null){
-			root_connection=new ConnectionHandler(tmp_socket);
-			isOnline=true;
-			
-			}
+		if (tmp_socket != null) {
+			root_connection = new ConnectionHandler(tmp_socket);
+			isOnline = true;
 
-		
+		}
 	}
-
 
 	public int getServer_port(){
 		return server_socket.getLocalPort();

@@ -261,7 +261,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		// ChatWindow aus Chatliste entfernen:
 		this.chatList.remove(cw);
 		// ChatWindow aus Gruppe entfernen (MSGListener abschalten):
-		ce.group_leave(cw.getChatWindowName());
+		ce.remove_MSGListener(cw);
 		// Falls keine ChatWindows mehr wird public geöffnet:
 		if (chatList.isEmpty()) {
 			// TODO: Hier evtl. noch anderen Programmablauf implementier

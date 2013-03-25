@@ -40,5 +40,13 @@ public class LogEngine {
 			System.err.println(new Time(System.currentTimeMillis()).toString()+":"+source.getClass().getName()+":"+meldung);
 		}
 	}
+	
+	public static void log(MSG x, Object source){
+		System.err.println("Msg:" + x.toString() + " wird von [" + source.getClass() + "] verarbeitet");
+	}
+	
+	public static void log(Object source,String action,MSG x){
+		System.err.println(source.getClass() + ":" + action+ ":"+x.toString());
+	}
 
 }

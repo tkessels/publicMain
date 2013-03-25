@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.publicmain.nodeengine.NodeEngine;
+
 public class Node implements Serializable {
 
 	private static Node me;
@@ -24,6 +26,7 @@ public class Node implements Serializable {
 		userID = myrnd.nextLong(); //noch zufällig später aus config
 		alias = System.getProperties().getProperty("user.name");
 		sockets=getMyIPs();
+		server_port = NodeEngine.getNE().getServer_port();
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException e) {
@@ -96,5 +99,11 @@ public class Node implements Serializable {
 		}
 		return addrList;
 	}
+
+	public int getServer_port() {
+		return server_port;
+	}
+
+	
 
 }

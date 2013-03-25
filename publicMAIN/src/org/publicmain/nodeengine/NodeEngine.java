@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.publicmain.chatengine.ChatEngine;
@@ -17,16 +19,16 @@ import org.publicmain.common.Node;
 
 
 /**
- * @author rpfaffner
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig.
  * Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein 
  * und ist für das Routing zuständig 
  */
 public class NodeEngine {
+	protected static final long CONNECTION_TIMEOUT = 5000;
 	private static volatile NodeEngine ne;
 	
 	private ServerSocket server_socket;
-	private Socket root_connection;
+	private ConnectionHandler root_connection;
 	private MulticastSocket multi_socket;
 	
 	private List<ConnectionHandler> connections;
@@ -35,43 +37,65 @@ public class NodeEngine {
 	//-----nur zum test--------
 	private Node meinNode;
 	private Node[] meinNodeArray = new Node[2];
-	private boolean isConnected;
-	//private boolean isRoot;
+	private boolean isOnline;
+	private boolean isRoot;
 	private ChatEngine ce;
 	private final InetAddress group = InetAddress.getByName("230.223.223.223");
 	private final int multicast_port = 6789;
 	private final int server_port = 6790;
+	private final int MAX_CLIENTS = 5;
 	
 	private Thread msgRecieverBot;
+	private Thread connectionsAcceptBot;
 
 	// -------------------------
 	
 
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
+		//server_socket=new ServerSocket(server_port);
+		
 		ne=this;
 		ce=parent;
+		server_socket = new ServerSocket(0);
 		meinNode=Node.getMe();
+		connections=new ArrayList<ConnectionHandler>();
 		
-		server_socket = new ServerSocket();
 		
 		multi_socket = new MulticastSocket(multicast_port);
 		multi_socket.joinGroup(group);
 		multi_socket.setTimeToLive(10);
-		isConnected=true;
+		isOnline=false;
 		LogEngine.log("Multicast Socket geöffnet",this,LogEngine.INFO);
+		
+		
+		connectionsAcceptBot = new Thread(new Runnable() {
+			public void run() {
+				while (isOnline&&connections.size()<=MAX_CLIENTS) {
+					System.out.println("Listening on Port:" + server_socket.getLocalPort());
+					try {
+						ConnectionHandler tmp = new ConnectionHandler(server_socket.accept());
+						connections.add(tmp);
+						LogEngine.log("Verbindung angenommen von:" + tmp.getConnectionPartner(), this, LogEngine.INFO);
+					} catch (IOException e) {
+						LogEngine.log(e);
+					}
+				}
+			}
+		});
 		
 		
 		msgRecieverBot=new Thread(new Runnable() {
 			public void run() {
-				while(isConnected){
+				while(true){
 					byte[] buff = new byte[65535];
 					DatagramPacket tmp = new DatagramPacket(buff, buff.length);
 					try {
 						multi_socket.receive(tmp);
 						MSG nachricht = MSG.getMSG(tmp.getData());
-						LogEngine.log("nachricht empfange: " + nachricht.toString(),this,LogEngine.INFO);
-						ce.put(nachricht);
+						LogEngine.log(nachricht,this);
+						handle(nachricht);
+//						ce.put(nachricht);
 					} catch (IOException e) {
 						LogEngine.log(e);
 					}
@@ -79,9 +103,35 @@ public class NodeEngine {
 			}
 		});
 		msgRecieverBot.start();
+		
+		discover();
+		Thread selbstZumRootErklärer = new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(CONNECTION_TIMEOUT);
+				} catch (InterruptedException e) {
+				}
+				if(!isOnline){
+					isOnline=true;
+					isRoot=true;
+					connectionsAcceptBot.start();
+				}
+			}
+		});
+		selbstZumRootErklärer.start();
+		
+		
 	}
 	
 	
+	private void discover() throws IOException {
+		byte[] data=MSG.getBytes(new MSG(meinNode, MSG.ROOT_DISCOVERY));
+		DatagramPacket discover =new DatagramPacket(data,data.length,group,multicast_port);
+		multi_socket.send(discover);
+		
+	}
+
+
 	public static NodeEngine getNE(){
 		
 	/* if(ich==null){			//factory Method überflüssig? NE wird sofort am anfang instanzier
@@ -99,8 +149,8 @@ public class NodeEngine {
 	 * isConnected() gibt "true" zurück wenn die laufende Nodeengin hochgefahren und mit anderen Nodes verbunden oder root ist,
 	 * "false" wenn nicht.
 	 */
-	public	boolean	isConnected	(){
-		return isConnected;
+	public	boolean	isOnline(){
+		return isOnline;
 	}
 	
 	/**
@@ -174,8 +224,93 @@ public class NodeEngine {
 	 * @param paket neue 
 	 */
 	public void handle(MSG paket) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
-		// TODO Auto-generated method stub
+		LogEngine.log(paket,this);
+		switch (paket.getTyp()){
+		case SYSTEM:
+			switch(paket.getCode()){
+			case MSG.ROOT_REPLY:
+				
+				if(!isOnline){
+					try {
+						connectTo((Node)paket.getData());
+					} catch (IOException e) {
+						LogEngine.log(e);
+					}
+				}
+				break;
+			case MSG.ROOT_DISCOVERY:
+				if(isRoot&&isOnline) sendDiscoverReply((Node)paket.getData());
+			}
+			// TODO
+			break;
+		case DATA:
+			break;
+		default:
+				ce.put(paket);
+		}
 		
+	}
+	
+	private void sendDiscoverReply(Node quelle) {
+		// TODO Auto-generated method stub
+		byte[] data=MSG.getBytes(new MSG(getBestNode(), MSG.ROOT_REPLY));
+		LogEngine.log("sending Replay to " + quelle.toString(),this,LogEngine.INFO);
+/*		DatagramPacket discover =new DatagramPacket(data,data.length,group,multicast_port);//über Multicast
+		try {
+			multi_socket.send(discover);
+		} catch (IOException e) {
+			LogEngine.log(e);
+		}
+	*/
+		for(InetAddress x : quelle.getSockets()){
+			DatagramPacket discover =new DatagramPacket(data,data.length,x,multicast_port);//über Unicast
+			try {
+				multi_socket.send(discover);
+			} catch (IOException e) {
+				LogEngine.log(e);
+			}
+			
+		}
+
+		
+	}
+
+
+	private Node getBestNode() {
+		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sicher der Neue Verbinden darf.
+		return meinNode;
+	}
+
+
+	/** Stelle Verbindung mit diesem <code>NODE</code> her!!!!
+	 * @param knoten der Knoten
+	 * @throws IOException 
+	 */
+	private void connectTo(Node knoten) throws IOException {
+		
+		Socket tmp_socket = null ;
+		for (InetAddress x : knoten.getSockets()){
+			try {
+				tmp_socket = new Socket(x.getHostAddress(), knoten.getServer_port());
+				
+			} catch (UnknownHostException e) {
+				LogEngine.log(e);
+			} catch (IOException e) {
+				LogEngine.log(e);
+			}
+			if(tmp_socket!=null&&tmp_socket.isConnected())break;
+		}
+			if(tmp_socket!=null){
+			root_connection=new ConnectionHandler(tmp_socket);
+			isOnline=true;
+			}
+
+		
+	}
+
+
+	public int getServer_port(){
+		return server_socket.getLocalPort();
 	}
 
 }

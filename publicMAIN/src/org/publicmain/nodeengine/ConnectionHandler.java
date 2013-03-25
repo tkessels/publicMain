@@ -8,6 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import javax.swing.text.StyledEditorKit.UnderlineAction;
+
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.*;
 import org.publicmain.gui.GUI;
@@ -96,5 +98,13 @@ public class ConnectionHandler {
 				} 
 			}
 		}		
+	}
+	
+	public Node getConnectionPartner(){
+		return connectedWith;
+	}
+
+	public boolean isConnected() {
+		return line.isConnected();
 	}
 }

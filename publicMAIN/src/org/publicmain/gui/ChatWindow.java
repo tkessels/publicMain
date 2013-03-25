@@ -24,8 +24,11 @@ import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.Node;
 
 /**
  * @author ATRM
@@ -288,12 +291,29 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param reason
 	 */
 	private void printMSG(MSG msg) {
+		String color = "black";
+		String sender = "";
+
+		try {
+			for( Node x : ChatEngine.getCE().getUsers() ){
+				if(x.getNodeID() == msg.getSender()){
+					sender = x.getAlias();
+				}
+			}
+		} catch (Exception e) {
+			LogEngine.log(e);
+		}
+		
 		
 		switch(msg.getTyp()){
 		
 		case SYSTEM:
+			if(msg.getCode() == MSG.CW_INFO_TEXT){
+				color = "green";
+			} else {
+				color = "red";
+			}
 			try {
-				String color = (msg.getCode()==MSG.CW_INFO_TEXT)? "green" : "red";
 				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),"<font color='" + color + "'>System: " + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
@@ -301,14 +321,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			break;
 		case GROUP:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + String.valueOf(msg.getSender() % 10000) + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + sender + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}
 			break;
 		case PRIVATE:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + String.valueOf(msg.getSender() % 10000) + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + sender + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}

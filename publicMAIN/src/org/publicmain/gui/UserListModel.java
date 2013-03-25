@@ -6,15 +6,29 @@ import java.util.List;
 
 import javax.swing.AbstractListModel;
 
+import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.Node;
+
 public class UserListModel extends AbstractListModel{
 
 	private List users = new ArrayList();
 
     public UserListModel() {
-	    users.add("test1");
-	    users.add("test4");
-	    users.add("test2");
-	    users.add("test3");
+    	
+//    	try {
+//    		for(String grpName : ChatEngine.getCE().getGroupList()){
+//    			users.add(grpName);
+//    		}
+//			for(Node userAlias : ChatEngine.getCE().getUsers()){
+//				users.add(userAlias.getAlias());
+//			}
+//		} catch (Exception e) {
+//			LogEngine.log(e);
+//		}
+    	
+    	users.add("test");
+    	
 	    Collections.sort(users);
     }
 

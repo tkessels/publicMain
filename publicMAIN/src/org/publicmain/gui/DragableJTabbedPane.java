@@ -34,8 +34,7 @@ public class DragableJTabbedPane extends JTabbedPane {
 	public static final long serialVersionUID = 1L;
 	private static final int LINEWIDTH = 3;
 	private static final String NAME = "TabTransferData";
-	private final DataFlavor FLAVOR = new DataFlavor(
-			DataFlavor.javaJVMLocalObjectMimeType, NAME);
+	private final DataFlavor FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, NAME);
 	private static GhostGlassPane s_glassPane = new GhostGlassPane();
 
 	private boolean m_isDrawRect = false;
@@ -52,8 +51,7 @@ public class DragableJTabbedPane extends JTabbedPane {
 			}
 
 			public void dragExit(DragSourceEvent e) {
-				e.getDragSourceContext()
-						.setCursor(DragSource.DefaultMoveNoDrop);
+				e.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
 				m_lineRect.setRect(0, 0, 0, 0);
 				m_isDrawRect = false;
 				s_glassPane.setPoint(new Point(-1000, -1000));
@@ -66,8 +64,7 @@ public class DragableJTabbedPane extends JTabbedPane {
 
 				TabTransferData data = getTabTransferData(e);
 				if (data == null) {
-					e.getDragSourceContext().setCursor(
-							DragSource.DefaultMoveNoDrop);
+					e.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
 					return;
 				} // if
 

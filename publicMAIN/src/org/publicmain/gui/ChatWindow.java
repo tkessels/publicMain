@@ -80,6 +80,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * Erstellt Content und macht Layout für das Chatpanel
 	 */
 	private void doWindowbuildingstuff() {
+		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
 		// Layout für ChatWindow (JPanel) festlegen auf BorderLayout:
 		this.setLayout(new BorderLayout());
 
@@ -134,17 +135,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		panel.add(sendenBtn, BorderLayout.EAST);
 		this.add(panel, BorderLayout.SOUTH);
 
-		this.addFocusListener(new FocusListener() {
-			public void focusLost(FocusEvent arg0) {
-			}
-
-			public void focusGained(FocusEvent arg0) {
-				// Focus auf eingabeFeld setzen:
-				eingabeFeld.requestFocusInWindow();
-				myTab.stopBlink();
-			}
-		});
-
 		this.setVisible(true);
 	}
 	
@@ -159,8 +149,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @return
 	 */
 	public JPanel getWindowTab(){
-		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
+		
 		return myTab;
+	}
+	
+	void focusEingabefeld(){
+		this.eingabeFeld.requestFocusInWindow();
+		myTab.stopBlink();
 	}
 	
 	/**

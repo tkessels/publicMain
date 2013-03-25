@@ -28,6 +28,8 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
@@ -44,7 +46,7 @@ import com.nilo.plaf.nimrod.NimRODLookAndFeel;
  * 
  */
 
-public class GUI extends JFrame implements Observer {
+public class GUI extends JFrame implements Observer , ChangeListener{
 
 	// Deklarationen:
 	ChatEngine ce;
@@ -63,7 +65,7 @@ public class GUI extends JFrame implements Observer {
 	private JMenu lafMenu;
 	private ButtonGroup btnGrp;
 	private JMenuItem lafNimROD;
-	private JTabbedPane jTabbedPane;
+	private DragableJTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
 	private boolean userListActive;
 	private UserList userListWin;
@@ -98,7 +100,7 @@ public class GUI extends JFrame implements Observer {
 		this.lafMenu = new JMenu("Switch Design");
 		this.btnGrp = new ButtonGroup();
 		this.chatList = new ArrayList<ChatWindow>();
-		this.jTabbedPane = new JTabbedPane();
+		this.jTabbedPane = new DragableJTabbedPane();
 		this.userListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 		this.userListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
@@ -122,14 +124,9 @@ public class GUI extends JFrame implements Observer {
 		// Anlegen benötigter Controller und Listener:
 		// WindowListener für das GUI-Fenster:
 		this.addWindowListener(new winController());
-
-		// Focus Listener auf ChatWindow
-		this.addWindowFocusListener(new WindowAdapter() {
-			public void windowGainedFocus(WindowEvent e) {
-				// Focus auf erste ChatWindow in chatList setzen:
-				chatList.get(0).requestFocusInWindow();
-			}
-		});
+		
+		// ChangeListener für Focus auf Eingabefeld
+		this.jTabbedPane.addChangeListener(this);
 
 		// ActionListener für Menu's:
 		this.menuItemRequestFile.addActionListener(new menuContoller());
@@ -608,5 +605,11 @@ public class GUI extends JFrame implements Observer {
 		for (Object obj : vec) {
 			System.out.println(obj + "\n\t" + def.get(obj));
 		}
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
+		
 	}
 }

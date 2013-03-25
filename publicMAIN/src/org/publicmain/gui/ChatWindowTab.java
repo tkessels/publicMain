@@ -12,6 +12,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * @author ABerthold
@@ -53,6 +55,8 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		} else {
 			lblIcon.setIcon(new ImageIcon(getClass().getResource("gruppe.png")));
 		}
+		
+		
 		
 		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
 		this.add(lblIcon);
@@ -125,8 +129,8 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		if(blinker!=null){
 			blinker.stopit();
 			blinker=null;
-			lblTitle.setForeground(Color.BLACK);
 		}
+		lblTitle.setForeground(Color.BLACK);
 	}
 	
 	class Blinker extends Thread {
@@ -155,6 +159,8 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		}
 		
 	}
+
+
 }
 	
 	

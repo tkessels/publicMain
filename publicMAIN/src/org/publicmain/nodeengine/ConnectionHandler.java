@@ -6,9 +6,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
+import org.publicmain.common.Node;
 
 
 
@@ -17,30 +21,31 @@ import org.publicmain.common.MSG;
  *
  */
 public class ConnectionHandler {
-	private static final int NOT_CONNECTED = 0;
-	private static final int CONNECTED = 1;
-	private static final int CHATMODE = 2;
-	private static final int DATAMODE = 2;
-	
+	public List<Node> children;
+	private NodeEngine ne;
 	private Socket line;
 	private ObjectOutputStream line_out;
 	private ObjectInputStream line_in;
 	private Thread pakets_rein_hol_bot;
-	private NodeEngine ne;
-//	private int zustand=NOT_CONNECTED;
+	private ConnectionHandler me;
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
+		me=this;
 		ne=NodeEngine.getNE();
-		pakets_rein_hol_bot = new Thread(new reciever());
+		children=new ArrayList<Node>();
+		
+		
+		
 		line = underlying;
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
-//		zustand=CONNECTED;
-		System.out.println(this);
-		LogEngine.log("Verbindung", this, LogEngine.INFO);
+		
+		pakets_rein_hol_bot = new Thread(new reciever());
 		pakets_rein_hol_bot.start();
+		
+		LogEngine.log("Verbindung", this, LogEngine.INFO);
 	}
 
 
@@ -70,7 +75,7 @@ public class ConnectionHandler {
 				try 
 				{
 					MSG tmp = (MSG) line_in.readObject();
-					ne.handle(tmp,getIndexOfME());
+					ne.handle(tmp,me);
 				} 
 				catch (ClassNotFoundException|IOException e) 
 				{
@@ -83,11 +88,16 @@ public class ConnectionHandler {
 	public boolean isConnected() {
 		return line.isConnected();
 	}
-	private int getIndexOfME(){
-		System.out.println(NodeEngine.getNE().connections.indexOf(this));
-		return NodeEngine.getNE().connections.indexOf(this);
+	
+	public void disconnect(){
+		send(new MSG(ne.getME(),MSGCode.NODE_SHUTDOWN));
+		try {
+			line.close();
+		} catch (IOException e) {
+		}
+		ne.remove(this);
 	}
-
+	
 
 	@Override
 	public String toString() {

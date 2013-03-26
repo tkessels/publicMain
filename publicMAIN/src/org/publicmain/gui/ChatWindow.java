@@ -273,7 +273,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 		MSG tmpMSG = (MSG) msg;
 		this.putMSG(tmpMSG);
-		LogEngine.log("Nachricht für Ausgabe:" + tmpMSG.toString(), this, LogEngine.INFO);
+		LogEngine.log(this,"ausgabe",tmpMSG);
 	}
 	
 	/**

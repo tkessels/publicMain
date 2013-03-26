@@ -18,7 +18,7 @@ public class Node implements Serializable {
 	private List<InetAddress> sockets;
 	private String hostname;
 	private int server_port;
-	private boolean isRoot;
+	//private boolean isRoot;
 	
 	private Node() {
 		Random myrnd = new Random();
@@ -75,7 +75,7 @@ public class Node implements Serializable {
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
-
+/*
 	public boolean isRoot() {
 		return isRoot;
 	}
@@ -83,7 +83,7 @@ public class Node implements Serializable {
 	public void setRoot(boolean isRoot) {
 		this.isRoot = isRoot;
 	}
-	
+	*/
 	/**Erzeugt eine Liste aller lokal vergebenen IP-Adressen mit ausnahme von Loopbacks und IPV6 Adressen
 	 * @return Liste aller lokalen IPs
 	 */

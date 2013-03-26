@@ -69,7 +69,7 @@ public class ChatEngine extends Observable{
 				while (true) {
 					try {
 						MSG tmp = inbox.take(); 
-						LogEngine.log("verarbeite Nachricht: " + tmp.toString(), this, LogEngine.INFO);
+						LogEngine.log("msgSorterBot","sorting",tmp);
 						if (tmp.getTyp() == NachrichtenTyp.GROUP) for (GruppenKanal x : group_channels)if (x.add(tmp)) break;
 						else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) for (KnotenKanal y : private_channels) if (y.add(tmp))break;
 					} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?

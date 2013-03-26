@@ -43,10 +43,15 @@ public class LogEngine {
 		}
 	}
 	
+	private static String msg2String(MSG x){
+		return "MSG{"+x.getTyp()+"("+((x.getCode()!=null)?x.getCode():"")+x.getGroup()+")"+ "\t:"+Math.abs(x.getSender()%10000)+"("+x.getId()+")"+">"+Math.abs(x.getEmpfänger()%10000)+"["+x.getData()+"]}";
+	}
+	
 	
 	
 	public static void log(Object source,String action,MSG x){
-		log(source.getClass().getSimpleName() + " : " + action+ " : "+x.toString(),INFO);
+		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
+		log(sourceString+ " : " + action+ " : "+msg2String(x),INFO);
 	}
 	
 	public static void log(ConnectionHandler newConnection){

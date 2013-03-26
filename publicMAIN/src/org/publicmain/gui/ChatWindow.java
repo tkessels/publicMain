@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -15,10 +13,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -28,6 +26,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 
 /**
@@ -179,21 +178,21 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param x
 	 */
 	private void info(String x){
-		putMSG(new MSG(x,MSG.CW_INFO_TEXT));
+		putMSG(new MSG(x,MSGCode.CW_INFO_TEXT));
 	}
 	
 	/**
 	 * @param x
 	 */
 	private void warn(String x){
-		putMSG(new MSG(x,MSG.CW_WARNING_TEXT));
+		putMSG(new MSG(x,MSGCode.CW_WARNING_TEXT));
 	}
 	
 	/**
 	 * @param x
 	 */
 	private void error(String x){
-		putMSG(new MSG(x,MSG.CW_ERROR_TEXT));
+		putMSG(new MSG(x,MSGCode.CW_ERROR_TEXT));
 	}
 	
 	/**
@@ -293,12 +292,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private void printMSG(MSG msg) {
 		String color = "black";
 		Node sender = ChatEngine.getCE().getNodeforUser(msg.getSender());
-		System.out.println(sender);
 		
 		switch(msg.getTyp()){
 		
 		case SYSTEM:
-			if(msg.getCode() == MSG.CW_INFO_TEXT){
+			if(msg.getCode() == MSGCode.CW_INFO_TEXT){
 				color = "green";
 			} else {
 				color = "red";
@@ -311,7 +309,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			break;
 		case GROUP:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + sender.getAlias() + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}

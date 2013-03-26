@@ -2,19 +2,13 @@ package org.publicmain.nodeengine;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
-import org.publicmain.common.NachrichtenTyp;
-import org.publicmain.common.Node;
-import org.publicmain.gui.GUI;
 
 
 
@@ -32,33 +26,34 @@ public class ConnectionHandler {
 	private ObjectOutputStream line_out;
 	private ObjectInputStream line_in;
 	private Thread pakets_rein_hol_bot;
-	private Node connectedWith;
-	private Set<Node> childs;
 	private NodeEngine ne;
 	private int zustand=NOT_CONNECTED;
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
 		ne=NodeEngine.getNE();
-		childs = new HashSet<Node>(); 
 		pakets_rein_hol_bot = new Thread(new reciever());
 		line = underlying;
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
-		send(new MSG(ne.getME()));
-		//line_out.flush();
+		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		zustand=CONNECTED;
+		System.out.println(this);
 		LogEngine.log("Verbindung", this, LogEngine.INFO);
 		pakets_rein_hol_bot.start();
 	}
+
+
 
 	/**Verschickt ein MSG-Objekt über den Soket.
 	 * @param paket Das zu versendende Paket
 	 * @throws IOException Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt
 	 */
 	public void send(MSG paket) throws IOException{
+		if(isConnected()){
 			line_out.writeObject(paket);
 			line_out.flush();
+		}
 	}
 	
 	class reciever implements Runnable
@@ -70,10 +65,6 @@ public class ConnectionHandler {
 				try 
 				{
 					MSG tmp = (MSG) line_in.readObject();
-					if (tmp.getCode()==MSG.NODE_UPDATE){
-						childs.add((Node)tmp.getData());
-						if(connectedWith==null)connectedWith=(Node)tmp.getData();
-					}
 					ne.handle(tmp,getIndexOfME());
 				} 
 				catch (ClassNotFoundException|IOException e) 
@@ -84,20 +75,25 @@ public class ConnectionHandler {
 		}		
 	}
 	
-	public Node getConnectionPartner(){
-		while(connectedWith==null)
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				LogEngine.log(e);
-			}
-		return connectedWith;
-	}
-
 	public boolean isConnected() {
 		return line.isConnected();
 	}
 	private int getIndexOfME(){
 		return NodeEngine.getNE().connections.indexOf(this);
 	}
+
+
+	@Override
+	public String toString() {
+		return "ConnectionHandler ["
+				+ (line != null ? "line=" + line + ", " : "")
+				+ (line_out != null ? "line_out=" + line_out + ", " : "")
+				+ (line_in != null ? "line_in=" + line_in + ", " : "")
+				+ (pakets_rein_hol_bot != null ? "pakets_rein_hol_bot="
+						+ pakets_rein_hol_bot + ", " : "")
+				+ (ne != null ? "ne=" + ne + ", " : "") + "zustand=" + zustand
+				+ "]";
+	}
+	
+
 }

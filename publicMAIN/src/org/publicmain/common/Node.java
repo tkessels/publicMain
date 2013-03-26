@@ -103,6 +103,12 @@ public class Node implements Serializable {
 	public int getServer_port() {
 		return server_port;
 	}
+	
+	@Override
+	public String toString() {
+		// 
+		return alias+"@"+hostname;
+	}
 
 	
 

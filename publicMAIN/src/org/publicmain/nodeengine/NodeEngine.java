@@ -7,11 +7,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 
 
@@ -26,49 +29,49 @@ import org.publicmain.common.Node;
 public class NodeEngine {
 	protected static final long CONNECTION_TIMEOUT = 1000;
 	private static volatile NodeEngine ne;
+	private Node meinNode;
+	private ChatEngine ce;
 	
 	private ServerSocket server_socket;
 	private ConnectionHandler root_connection;
 	private MulticastSocket multi_socket;
 	
 	public List<ConnectionHandler> connections;
+	private List<Node> allNodes;
+	private Map<Integer,List<Node>> routing;
 	
 	
-	//-----nur zum test--------
-	private Node meinNode;
-	private List<Node> allNodes=new ArrayList<Node>();
 	private boolean isOnline;
 	private boolean isRoot;
-	private ChatEngine ce;
-	private final InetAddress group = InetAddress.getByName("230.223.223.223");
-	private final int multicast_port = 6789;
-	//private final int server_port = 6790;
-	private final int MAX_CLIENTS = 5;
-	
+
 	private Thread multicastRecieverBot;
 	private Thread connectionsAcceptBot;
 
-	// -------------------------
+	private final InetAddress group = InetAddress.getByName("230.223.223.223");
+	private final int multicast_port = 6789;
+	private final int MAX_CLIENTS = 5;
 	
+
 
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
-		//server_socket=new ServerSocket(server_port);
+		allNodes =new ArrayList<Node>(); 		
+		connections=new ArrayList<ConnectionHandler>();
 		
 		ne=this;
 		ce=parent;
+		
 		server_socket = new ServerSocket(0);
-		meinNode=Node.getMe();
-		allNodes.add(meinNode);
-		
-		connections=new ArrayList<ConnectionHandler>();
-		
-		
 		multi_socket = new MulticastSocket(multicast_port);
 		multi_socket.joinGroup(group);
 		multi_socket.setLoopbackMode(true);
 		multi_socket.setTimeToLive(10);
+
+		meinNode=Node.getMe();
+		allNodes.add(meinNode);
+		
 		isOnline=false;
+
 		LogEngine.log("Multicast Socket geöffnet",this,LogEngine.INFO);
 		
 		
@@ -79,7 +82,7 @@ public class NodeEngine {
 					try {
 						ConnectionHandler tmp = new ConnectionHandler(server_socket.accept());
 						connections.add(tmp);
-						LogEngine.log("Verbindung angenommen von:" + tmp.getConnectionPartner(), this, LogEngine.INFO);
+						LogEngine.log(tmp);
 					} catch (IOException e) {
 						LogEngine.log(e);
 					}
@@ -96,7 +99,7 @@ public class NodeEngine {
 					try {
 						multi_socket.receive(tmp);
 						MSG nachricht = MSG.getMSG(tmp.getData());
-						LogEngine.log(Thread.currentThread(),"multicastRecieve",nachricht);
+						LogEngine.log(this,"multicastRecieve",nachricht);
 						handle(nachricht,-2);
 					} catch (IOException e) {
 						LogEngine.log(e);
@@ -127,7 +130,7 @@ public class NodeEngine {
 	
 	
 	private void discover() throws IOException {
-		byte[] data=MSG.getBytes(new MSG(meinNode, MSG.ROOT_DISCOVERY));
+		byte[] data=MSG.getBytes(new MSG(meinNode, MSGCode.ROOT_DISCOVERY));
 		DatagramPacket discover =new DatagramPacket(data,data.length,group,multicast_port);
 		multi_socket.send(discover);
 		
@@ -173,6 +176,21 @@ public class NodeEngine {
 		return allNodes;					//TODO:nur zum test
 	}
 	
+	
+	private void updateNodes(){
+		if(isRoot){
+		allNodes.clear();
+		allNodes.add(getME());
+			for(List<Node>x :routing.values()){
+				allNodes.addAll(x);
+			}
+		}
+		else root_send(new MSG(null,MSGCode.POLL_ALLNODES));
+		
+	}
+	
+
+
 	/**
 	 * Gibt ein StringArray aller vorhandenen Groups zurück
 	 *
@@ -180,6 +198,16 @@ public class NodeEngine {
 	public String[] getGroups	(){
 		String[] grouparray = {"public","GruppeA", "GruppeB"};
 		return grouparray;					//TODO:to implement
+	}
+	
+	
+	private void root_send(MSG msg) {
+		try {
+			root_connection.send(msg);
+		} catch (IOException e) {
+			LogEngine.log(e);
+		}
+		
 	}
 	
 	/**
@@ -196,8 +224,6 @@ public class NodeEngine {
 		} catch (IOException e) {
 			LogEngine.log(e);
 		}
-		
-		
 	}
 	
 	/**
@@ -245,7 +271,7 @@ public class NodeEngine {
 			break;
 		case SYSTEM:
 			switch(paket.getCode()){
-			case MSG.ROOT_REPLY:
+			case ROOT_REPLY:
 				
 				if(!isOnline){
 					try {
@@ -255,7 +281,7 @@ public class NodeEngine {
 					}
 				}
 				break;
-			case MSG.ROOT_DISCOVERY:
+			case ROOT_DISCOVERY:
 				if(isRoot&&isOnline) sendDiscoverReply((Node)paket.getData());
 				break;
 			}
@@ -271,7 +297,7 @@ public class NodeEngine {
 	
 	private void sendDiscoverReply(Node quelle) {
 		// TODO Auto-generated method stub
-		byte[] data=MSG.getBytes(new MSG(getBestNode(), MSG.ROOT_REPLY));
+		byte[] data=MSG.getBytes(new MSG(getBestNode(), MSGCode.ROOT_REPLY));
 		LogEngine.log("sending Replay to " + quelle.toString(),this,LogEngine.INFO);
 /*		DatagramPacket discover =new DatagramPacket(data,data.length,group,multicast_port);//über Multicast
 		try {

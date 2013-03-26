@@ -1,6 +1,8 @@
 package org.publicmain.common;
 import java.sql.Time;
 
+import org.publicmain.nodeengine.ConnectionHandler;
+
 
 /**GGF mal über java.util.logging nachdenken
  * @author tkessels
@@ -47,7 +49,9 @@ public class LogEngine {
 		log(source.getClass().getSimpleName() + " : " + action+ " : "+x.toString(),INFO);
 	}
 	
-	
+	public static void log(ConnectionHandler newConnection){
+		
+	}
 	
 	public static void log(String meldung,int errorLevel){
 		if(errorLevel<=verbosity){

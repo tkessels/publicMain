@@ -3,7 +3,6 @@ package org.publicmain.chatengine;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
@@ -260,7 +259,9 @@ public class ChatEngine extends Observable{
 	 * @return Node-Objekt zu angegebenem User
 	 */
 	public Node getNodeforUser(long uid){
+		System.out.println("all NODES in getNodeforUser:");
 		for (Node x : ne.getNodes()) {
+			System.out.println(x);
 			if(x.getUserID()==uid) return x;
 		}
 		return null;

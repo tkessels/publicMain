@@ -1,12 +1,12 @@
 package org.publicmain.common;
-import org.publicmain.nodeengine.NodeEngine;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.ByteOrder;
+
+import org.publicmain.nodeengine.NodeEngine;
 
 
 
@@ -19,46 +19,10 @@ import java.nio.ByteOrder;
 public class MSG implements Serializable{
 	private static Integer id_counter=0;
 	private static final long serialVersionUID = -2010661171218754968L;
-	//SystemMessage Codes
-	public static final byte NODE_UPDATE		=		0;
-	public static final byte ALIAS_UPDATE		=		1;
-	
-	public static final byte ECHO_REQUEST		=		10;
-	public static final byte ECHO_RESPONSE		=	-	10;
-	public static final byte ROOT_DISCOVERY		=		20;
-	public static final byte ROOT_REPLY			=	-	20;
-	public static final byte POLL_CHILDNODES	=		30;
-	public static final byte REPORT_CHILDNODES	=	-	30;
 
-	public static final byte NODE_SHUTDOWN		=		40;
-	
-	
-	public static final byte GROUP_POLL			=		50;
-	public static final byte GROUP_REPLY		=		51;
-	public static final byte GROUP_JOIN			=		52;
-	public static final byte GROUP_LEAVE		=		53;
-	public static final byte GROUP_EMPTY		=		54;
-	
-	public static final byte FILE_REQUEST		=		60;
-	
-	public static final byte CMD_SHUTDOWN		=		70;
-	public static final byte CMD_RESTART		=		71;
-	
-	public static final byte CW_INFO_TEXT		=		80;
-	public static final byte CW_WARNING_TEXT	=		81;
-	public static final byte CW_ERROR_TEXT		=		82;
-	
-	
-
-	
-	
-	
-	
-	
-	
 	//Typisierung
 	private NachrichtenTyp typ;
-	private byte code;
+	private MSGCode code;
 	//Quelle und Eindeutigkeit
 	private long sender;
 	private long timestamp;
@@ -68,7 +32,6 @@ public class MSG implements Serializable{
 	private String group;
 	//Payload
 	private Object data;
-	
 
 	private MSG() {
 		synchronized (id_counter) {
@@ -78,35 +41,36 @@ public class MSG implements Serializable{
 		this.timestamp=System.currentTimeMillis();
 		this.sender= NodeEngine.getNE().getME().getNodeID();
 	}
-	
-	public MSG(Object payload, byte code){
+
+	public MSG(Object payload, MSGCode code){
 		this();
 		this.typ=NachrichtenTyp.SYSTEM;
 		this.code = code;
 		this.data = payload;
 	}
-	
+
 	public MSG(Node daNode){
 		this();
 		this.typ=NachrichtenTyp.SYSTEM;
-		this.code=NODE_UPDATE;
+		this.code=MSGCode.NODE_UPDATE;
 		this.data=daNode;
 	}
-	
+
 	public MSG(String group,String text){
 		this();
 		this.typ=NachrichtenTyp.GROUP;
 		this.group=group.toLowerCase();
 		this.data=text;
 	}
-	
+
 	public MSG(long user, String text){
 		this();
 		this.typ=NachrichtenTyp.PRIVATE;
 		this.empfänger=user;
 		this.data=text;
 	}
-	
+
+
 	public long getEmpfänger() {
 		return empfänger;
 	}
@@ -123,7 +87,7 @@ public class MSG implements Serializable{
 		return typ;
 	}
 
-	public byte getCode() {
+	public MSGCode getCode() {
 		return code;
 	}
 
@@ -149,8 +113,6 @@ public class MSG implements Serializable{
 	}
 	
 	
-	
-	
 	public static byte[] getBytes(MSG x){
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
@@ -174,9 +136,4 @@ public class MSG implements Serializable{
 		}
 		return null;
 	}
-
-	
-
-
-
 }

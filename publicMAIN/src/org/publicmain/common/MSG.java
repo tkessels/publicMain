@@ -103,16 +103,19 @@ public class MSG implements Serializable{
 		return id;
 	}
 
+
+	
+	
 	@Override
 	public String toString() {
-		return "MSG [" + (typ != null ? "typ=" + typ + ", " : "") + "code="
-				+ code + ", sender=" + sender + ", timestamp=" + timestamp
-				+ ", id=" + id + ", empfänger=" + empfänger + ", "
+		return "MSG [" + (typ != null ? "typ=" + typ + ", " : "")
+				+ (code != null ? "code=" + code + ", " : "") + "sender="
+				+ sender + ", timestamp=" + timestamp + ", id=" + id
+				+ ", empfänger=" + empfänger + ", "
 				+ (group != null ? "group=" + group + ", " : "")
 				+ (data != null ? "data=" + data : "") + "]";
 	}
-	
-	
+
 	public static byte[] getBytes(MSG x){
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {

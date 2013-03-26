@@ -27,7 +27,7 @@ public class ConnectionHandler {
 	private ObjectInputStream line_in;
 	private Thread pakets_rein_hol_bot;
 	private NodeEngine ne;
-	private int zustand=NOT_CONNECTED;
+//	private int zustand=NOT_CONNECTED;
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
@@ -37,7 +37,7 @@ public class ConnectionHandler {
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
-		zustand=CONNECTED;
+//		zustand=CONNECTED;
 		System.out.println(this);
 		LogEngine.log("Verbindung", this, LogEngine.INFO);
 		pakets_rein_hol_bot.start();
@@ -58,13 +58,14 @@ public class ConnectionHandler {
 				LogEngine.log(e);
 			}
 		}
+		else LogEngine.log(this,"dropped",paket);
 	}
 	
 	class reciever implements Runnable
 	{
 		public void run() 
 		{
-			while(zustand==CHATMODE&&line.isConnected())
+			while(line.isConnected())
 			{
 				try 
 				{
@@ -83,6 +84,7 @@ public class ConnectionHandler {
 		return line.isConnected();
 	}
 	private int getIndexOfME(){
+		System.out.println(NodeEngine.getNE().connections.indexOf(this));
 		return NodeEngine.getNE().connections.indexOf(this);
 	}
 
@@ -95,8 +97,7 @@ public class ConnectionHandler {
 				+ (line_in != null ? "line_in=" + line_in + ", " : "")
 				+ (pakets_rein_hol_bot != null ? "pakets_rein_hol_bot="
 						+ pakets_rein_hol_bot + ", " : "")
-				+ (ne != null ? "ne=" + ne + ", " : "") + "zustand=" + zustand
-				+ "]";
+				+ (ne != null ? "ne=" + ne + ", " : "") + "]";
 	}
 	
 

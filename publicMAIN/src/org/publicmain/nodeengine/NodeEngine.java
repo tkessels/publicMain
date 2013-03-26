@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class NodeEngine {
 	public NodeEngine(ChatEngine parent) throws IOException {
 		allNodes =new ArrayList<Node>();
 		connections=new ArrayList<ConnectionHandler>();
+		routing = new HashMap<Integer, List<Node>>();
 		
 		ne=this;
 		ce=parent;
@@ -83,6 +85,7 @@ public class NodeEngine {
 					try {
 						ConnectionHandler tmp = new ConnectionHandler(server_socket.accept());
 						connections.add(tmp);
+						routing.put(connections.indexOf(tmp),new ArrayList<Node>());
 						tmp.send(new MSG(allNodes,MSGCode.REPORT_ALLNODES));
 						LogEngine.log(tmp);
 					} catch (IOException e) {
@@ -256,6 +259,7 @@ public class NodeEngine {
 		case SYSTEM:
 			switch(paket.getCode()){
 			case NODE_UPDATE:
+				LogEngine.log(this, "NODE_UPDATE auf "+index, paket);
 				if(index==-2)allNodes.add((Node)paket.getData());
 				if(index>=0){
 					routing.get(index).add((Node) paket.getData());

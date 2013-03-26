@@ -84,7 +84,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 
 		// Initialisierungen:
 		try {
-			this.ce = ChatEngine.getCE();
+			if(ChatEngine.getCE()==null){
+				this.ce = new ChatEngine();
+			} else {
+				ce=ChatEngine.getCE();
+			}
 		} catch (Exception e) {
 			log.log(e);
 		}

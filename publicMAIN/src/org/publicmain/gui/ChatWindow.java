@@ -292,18 +292,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 */
 	private void printMSG(MSG msg) {
 		String color = "black";
-		String sender = "";
-
-		try {
-			for( Node x : ChatEngine.getCE().getUsers() ){
-				if(x.getNodeID() == msg.getSender()){
-					sender = x.getAlias();
-				}
-			}
-		} catch (Exception e) {
-			LogEngine.log(e);
-		}
-		
+		Node sender = ChatEngine.getCE().getNodeforUser(msg.getSender());
+		System.out.println(sender);
 		
 		switch(msg.getTyp()){
 		
@@ -321,14 +311,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			break;
 		case GROUP:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + sender + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + sender.getAlias() + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}
 			break;
 		case PRIVATE:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + sender + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + sender.getAlias() + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}

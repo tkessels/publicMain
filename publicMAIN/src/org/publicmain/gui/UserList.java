@@ -1,25 +1,24 @@
 package org.publicmain.gui;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
-import javax.swing.AbstractListModel;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JWindow;
-import javax.swing.ListModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.SwingConstants;
+import javax.swing.text.StyledEditorKit.AlignmentAction;
 
-import org.images.Help;
+import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.LogEngine;
+import org.publicmain.common.Node;
 
 /**
  * @author ATRM
@@ -41,9 +40,22 @@ public class UserList extends JWindow {
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
 		this.users = new JList(new UserListModel());
 		
-		this.internalFrame.add(users);
+		this.internalFrame.setLayout(new GridLayout(50,1));
+		
+		
+		try {
+//    		for(String grpName : ChatEngine.getCE().getGroupList()){
+//    			this.internalFrame.add(new JLabel(grpName));
+//    		}
+			for(Node userAlias : ChatEngine.getCE().getUsers()){
+				this.internalFrame.add(new JLabel(userAlias.getAlias()));
+			}
+		} catch (Exception e) {
+			LogEngine.log(e);
+		}
 		
 		this.add(internalFrame);
+		
 		
 		this.internalFrame.setVisible(true);
 		

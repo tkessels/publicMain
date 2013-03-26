@@ -44,13 +44,12 @@ public class ChatEngine extends Observable{
 	/**Liefert die Instanz der CE
 	 * @return
 	 */
-	public static synchronized ChatEngine getCE() throws Exception{
-		if(ce==null) ce=new ChatEngine();
+	public static ChatEngine getCE() {
 		return ce;
 	}
 
 	
-	private ChatEngine() throws IOException{
+	public ChatEngine() throws IOException{
 		
 		ne = new NodeEngine(this);
 		ce=this;
@@ -260,7 +259,7 @@ public class ChatEngine extends Observable{
 	 * @param uid UserID
 	 * @return Node-Objekt zu angegebenem User
 	 */
-	private Node getNodeforUser(long uid){
+	public Node getNodeforUser(long uid){
 		for (Node x : ne.getNodes()) {
 			if(x.getUserID()==uid) return x;
 		}

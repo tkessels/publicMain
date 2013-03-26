@@ -246,7 +246,7 @@ public class NodeEngine {
 	 * 							</ul>
 	 */
 	public void handle(MSG paket, int index) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
-		LogEngine.log(this,"handling",paket);
+		LogEngine.log(this,"handling ["+index+"]",paket);
 		switch (paket.getTyp()){
 		case GROUP:
 			if(!isRoot&&index!=-1)root_connection.send(paket);
@@ -383,7 +383,7 @@ public class NodeEngine {
 			if(data.length<64000){
 				DatagramPacket udp_paket =new DatagramPacket(data,data.length,group,multicast_port);
 				multi_socket.send(udp_paket);
-			}
+			}else LogEngine.log("Paket zu groß für UDP",this,LogEngine.ERROR);
 			} catch (IOException e) {
 				LogEngine.log(e);
 			}

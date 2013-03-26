@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -186,9 +187,13 @@ public class NodeEngine {
 			}
 		}
 		else root_send(new MSG(null,MSGCode.POLL_ALLNODES));
-		
 	}
 	
+	private void updateChilds(){
+		for(ConnectionHandler x : connections){
+			x.send(new MSG(null,MSGCode.POLL_CHILDNODES));
+		}
+	}
 
 
 	/**
@@ -202,11 +207,7 @@ public class NodeEngine {
 	
 	
 	private void root_send(MSG msg) {
-		try {
-			root_connection.send(msg);
-		} catch (IOException e) {
-			LogEngine.log(e);
-		}
+		root_connection.send(msg);
 		
 	}
 	
@@ -244,28 +245,19 @@ public class NodeEngine {
 	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich von den ConnectionHandlern aufgerufen um empfange Pakete verarbeiten zu lassen.
 	 * 
 	 * @param paket neue 
-	 * @param i index der Quelle <ul>	<li>-2 MulticastSocket
+	 * @param index index der Quelle <ul>	<li>-2 MulticastSocket
 	 * 									<li>-1 RootConnectionSocket
 	 * 									<li>0> ChildSocketIndex
 	 * 							</ul>
 	 */
-	public void handle(MSG paket, int i) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
+	public void handle(MSG paket, int index) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
 		LogEngine.log(this,"handling",paket);
 		switch (paket.getTyp()){
 		case GROUP:
-			try{
-				if(!isRoot&&i!=-1)root_connection.send(paket);
-			}
-			catch (IOException e) {
-				LogEngine.log(e);
-			}
+			if(!isRoot&&index!=-1)root_connection.send(paket);
 			for (int j = 0; j < connections.size(); j++) {
-				if(j!=i)
-					try {
-						connections.get(j).send(paket);
-					} catch (IOException e) {
-						LogEngine.log(e);
-					}
+				if(j!=index)
+					connections.get(j).send(paket);
 			}
 			ce.put(paket);
 			break;
@@ -284,8 +276,33 @@ public class NodeEngine {
 			case ROOT_DISCOVERY:
 				if(isRoot&&isOnline) sendDiscoverReply((Node)paket.getData());
 				break;
+				
+			case POLL_ALLNODES:
+				if(index>=0&&index<connections.size())connections.get(index).send(new MSG(allNodes,MSGCode.REPORT_ALLNODES));
+				else LogEngine.log("POLL_ALLNODES von komischer Qulle bekommen:"+index, this, LogEngine.WARNING);
+				break;
+			case REPORT_ALLNODES:
+				if(index==-1){
+					allNodes=(List<Node>)paket.getData();
+				}
+				else LogEngine.log("REPORT_ALLNODES von komischer Qulle bekommen:"+index, this, LogEngine.WARNING);
+				break;
+			case POLL_CHILDNODES:
+				if(index==-1){
+				List<Node> tmp=new ArrayList<Node>();
+				for(List<Node> x : routing.values()) tmp.addAll(x);
+				root_send(new MSG(tmp,MSGCode.REPORT_CHILDNODES));
+				}
+				else LogEngine.log("POLL_CHILDNODES von komischer Qulle bekommen:"+index, this, LogEngine.WARNING);
+				break;
+			case REPORT_CHILDNODES:
+				if(index>=0&&index<connections.size()){
+					routing.get(index).clear();
+					routing.get(index).addAll((List<Node>) paket.getData());
+				}
+				else LogEngine.log("REPORT_CHILDNODES von komischer Qulle bekommen:"+index, this, LogEngine.WARNING);
+				break;
 			}
-			// TODO
 			break;
 		case DATA:
 			break;

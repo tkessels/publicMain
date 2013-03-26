@@ -49,10 +49,14 @@ public class ConnectionHandler {
 	 * @param paket Das zu versendende Paket
 	 * @throws IOException Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt
 	 */
-	public void send(MSG paket) throws IOException{
+	public void send(MSG paket){
 		if(isConnected()){
-			line_out.writeObject(paket);
-			line_out.flush();
+			try {
+				line_out.writeObject(paket);
+				line_out.flush();
+			} catch (IOException e) {
+				LogEngine.log(e);
+			}
 		}
 	}
 	

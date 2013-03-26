@@ -24,7 +24,7 @@ import org.publicmain.common.Node;
  * und ist für das Routing zuständig 
  */
 public class NodeEngine {
-	protected static final long CONNECTION_TIMEOUT = 5000;
+	protected static final long CONNECTION_TIMEOUT = 1000;
 	private static volatile NodeEngine ne;
 	
 	private ServerSocket server_socket;
@@ -228,7 +228,7 @@ public class NodeEngine {
 		switch (paket.getTyp()){
 		case GROUP:
 			try{
-				if(i!=-1)root_connection.send(paket);
+				if(!isRoot&&i!=-1)root_connection.send(paket);
 			}
 			catch (IOException e) {
 				LogEngine.log(e);

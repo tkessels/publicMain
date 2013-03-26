@@ -309,7 +309,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			break;
 		case GROUP:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + sender.getAlias()+": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}

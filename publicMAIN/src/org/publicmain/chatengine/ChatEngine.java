@@ -254,15 +254,13 @@ public class ChatEngine extends Observable{
 		inbox.add(nachricht);
 	}
 	
-	/**Findet zu UserID zugehörigen Node in der Liste
-	 * @param uid UserID
-	 * @return Node-Objekt zu angegebenem User
+	/**Findet zu NodeID zugehörigen Node in der Liste
+	 * @param nid NodeID
+	 * @return Node-Objekt zu angegebenem NodeID
 	 */
-	public Node getNodeforUser(long uid){
-		System.out.println("all NODES in getNodeforUser:");
+	public Node getNodeforUser(long nid){
 		for (Node x : ne.getNodes()) {
-			System.out.println(x);
-			if(x.getUserID()==uid) return x;
+			if(x.getNodeID()==nid) return x;
 		}
 		return null;
 	}

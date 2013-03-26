@@ -56,7 +56,7 @@ public class NodeEngine {
 
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
-		allNodes =new ArrayList<Node>(); 		
+		allNodes =new ArrayList<Node>();
 		connections=new ArrayList<ConnectionHandler>();
 		
 		ne=this;
@@ -83,6 +83,7 @@ public class NodeEngine {
 					try {
 						ConnectionHandler tmp = new ConnectionHandler(server_socket.accept());
 						connections.add(tmp);
+						tmp.send(new MSG(allNodes,MSGCode.REPORT_ALLNODES));
 						LogEngine.log(tmp);
 					} catch (IOException e) {
 						LogEngine.log(e);
@@ -110,7 +111,7 @@ public class NodeEngine {
 		});
 		multicastRecieverBot.start();
 		
-		discover();
+		send(new MSG(meinNode, MSGCode.ROOT_DISCOVERY), -2);
 		Thread selbstZumRootErklärer = new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -128,15 +129,6 @@ public class NodeEngine {
 		
 		
 	}
-	
-	
-	private void discover() throws IOException {
-		byte[] data=MSG.getBytes(new MSG(meinNode, MSGCode.ROOT_DISCOVERY));
-		DatagramPacket discover =new DatagramPacket(data,data.length,group,multicast_port);
-		multi_socket.send(discover);
-		
-	}
-
 
 	public static NodeEngine getNE(){
 		return ne;
@@ -174,6 +166,7 @@ public class NodeEngine {
 	 * Nodes beinhaltet.
 	 */
 	public List<Node> getNodes (){
+		System.out.println(allNodes);
 		return allNodes;					//TODO:nur zum test
 	}
 	
@@ -208,7 +201,6 @@ public class NodeEngine {
 	
 	private void root_send(MSG msg) {
 		root_connection.send(msg);
-		
 	}
 	
 	/**
@@ -263,8 +255,14 @@ public class NodeEngine {
 			break;
 		case SYSTEM:
 			switch(paket.getCode()){
+			case NODE_UPDATE:
+				if(index==-2)allNodes.add((Node)paket.getData());
+				if(index>=0){
+					routing.get(index).add((Node) paket.getData());
+					send(paket,-1);
+				}
+				break;
 			case ROOT_REPLY:
-				
 				if(!isOnline){
 					try {
 						connectTo((Node)paket.getData());
@@ -366,8 +364,31 @@ public class NodeEngine {
 		}
 		if (tmp_socket != null) {
 			root_connection = new ConnectionHandler(tmp_socket);
+			send(new MSG(getME()),-1);
+			send(new MSG(getME()),-2);
 			isOnline = true;
 
+		}
+	}
+	
+	private void send(MSG paket, int socket){
+		switch (socket) {
+		case -2:
+			byte[] data=MSG.getBytes(paket);
+			try {
+			if(data.length<64000){
+				DatagramPacket udp_paket =new DatagramPacket(data,data.length,group,multicast_port);
+				multi_socket.send(udp_paket);
+			}
+			} catch (IOException e) {
+				LogEngine.log(e);
+			}
+			break;
+		case -1:
+			if(!isRoot&&root_connection!=null)root_connection.send(paket);
+			break;
+		default:
+			connections.get(socket).send(paket);
 		}
 	}
 

@@ -86,6 +86,13 @@ public class MSG implements Serializable{
 		this.data = payload;
 	}
 	
+	public MSG(Node daNode){
+		this();
+		this.typ=NachrichtenTyp.SYSTEM;
+		this.code=NODE_UPDATE;
+		this.data=daNode;
+	}
+	
 	public MSG(String group,String text){
 		this();
 		this.typ=NachrichtenTyp.GROUP;

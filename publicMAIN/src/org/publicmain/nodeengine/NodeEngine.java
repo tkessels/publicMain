@@ -96,7 +96,7 @@ public class NodeEngine {
 					try {
 						multi_socket.receive(tmp);
 						MSG nachricht = MSG.getMSG(tmp.getData());
-						LogEngine.log(nachricht,this);
+						LogEngine.log(Thread.currentThread(),"multicastRecieve",nachricht);
 						handle(nachricht,-2);
 					} catch (IOException e) {
 						LogEngine.log(e);
@@ -190,7 +190,7 @@ public class NodeEngine {
 	 */
 	public void send (MSG nachricht){
 		byte[] buf = MSG.getBytes(nachricht);
-		LogEngine.log("sende nachricht:" + nachricht.toString(), this, LogEngine.INFO);
+		LogEngine.log(this,"sende",nachricht);
 		try {
 			multi_socket.send(new DatagramPacket(buf,buf.length,group,6789));
 		} catch (IOException e) {
@@ -224,7 +224,7 @@ public class NodeEngine {
 	 * 							</ul>
 	 */
 	public void handle(MSG paket, int i) { // Muss Thread-Safe sein damit die ConnHandlers direkt damit arbeiten können.
-		LogEngine.log(paket,this);
+		LogEngine.log(this,"handling",paket);
 		switch (paket.getTyp()){
 		case GROUP:
 			try{

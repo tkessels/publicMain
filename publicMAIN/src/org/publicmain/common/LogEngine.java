@@ -18,8 +18,8 @@ public class LogEngine {
 	 */
 	public static void log(Exception e) {
 		if(verbosity>0){
-			System.err.println(e.getMessage());
-			e.printStackTrace();
+			log(e.getMessage(),ERROR);
+			//e.printStackTrace();
 		}
 	}
 	
@@ -37,16 +37,25 @@ public class LogEngine {
 	 */
 	public static void log(String meldung, Object source,int errorLevel){
 		if(errorLevel<=verbosity){
-			System.err.println(new Time(System.currentTimeMillis()).toString()+":"+source.getClass().getName()+":"+meldung);
+			log(source.getClass().getSimpleName()+" : "+meldung,errorLevel);
 		}
 	}
 	
-	public static void log(MSG x, Object source){
-		System.err.println("Msg:" + x.toString() + " wird von [" + source.getClass() + "] verarbeitet");
-	}
+	
 	
 	public static void log(Object source,String action,MSG x){
-		System.err.println(source.getClass() + ":" + action+ ":"+x.toString());
+		log(source.getClass().getSimpleName() + " : " + action+ " : "+x.toString(),INFO);
 	}
+	
+	
+	
+	public static void log(String meldung,int errorLevel){
+		if(errorLevel<=verbosity){
+			System.err.println(new Time(System.currentTimeMillis()).toString()+" : "+meldung);
+		}
+	}
+	
+	
+	
 
 }

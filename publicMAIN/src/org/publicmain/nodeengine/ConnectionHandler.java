@@ -44,9 +44,11 @@ public class ConnectionHandler {
 		pakets_rein_hol_bot = new Thread(new reciever());
 		line = underlying;
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
-		line_out.flush();
+		send(new MSG(ne.getME()));
+		//line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		zustand=CONNECTED;
+		LogEngine.log("Verbindung", this, LogEngine.INFO);
 		pakets_rein_hol_bot.start();
 	}
 
@@ -83,6 +85,12 @@ public class ConnectionHandler {
 	}
 	
 	public Node getConnectionPartner(){
+		while(connectedWith==null)
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				LogEngine.log(e);
+			}
 		return connectedWith;
 	}
 

@@ -292,6 +292,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private void printMSG(MSG msg) {
 		String color = "black";
 		Node sender = ChatEngine.getCE().getNodeforUser(msg.getSender());
+		String senderalias = (sender!=null)? sender.getAlias():"unknown";
 		
 		switch(msg.getTyp()){
 		
@@ -309,14 +310,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			break;
 		case GROUP:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + sender.getAlias()+": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='orange'>" + senderalias +": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}
 			break;
 		case PRIVATE:
 			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + sender.getAlias() + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font color='blue'>" + senderalias + ": </font><font color='black'>" + (String) msg.getData() + "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}

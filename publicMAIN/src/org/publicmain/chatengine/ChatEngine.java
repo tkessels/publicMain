@@ -90,7 +90,7 @@ public class ChatEngine extends Observable{
 	public void send_private(long uid, String text){
 		MSG tmp = new MSG(uid,text);
 		put(tmp);
-		ne.send(tmp);
+		ne.sendtcp(tmp);
 	}
 	
 	/**Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu schicken.
@@ -100,7 +100,7 @@ public class ChatEngine extends Observable{
 	public void send_group(String group, String text){
 		MSG tmp = new MSG(group,text);
 		put(tmp);
-		ne.send(tmp);
+		ne.sendtcp(tmp);
 	}
 	
 	/**Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden <code>uid</code> zu schicken.

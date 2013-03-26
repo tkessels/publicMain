@@ -212,7 +212,7 @@ public class NodeEngine {
 	 * send_file() wird sowohl das Ziel als auch die Daten mitgegeben. D.h., dass das
 	 * MSG-Paket hier in File und destination geteilt.
 	 */
-	public void send (MSG nachricht){
+	public void sendmutlicast (MSG nachricht){
 		byte[] buf = MSG.getBytes(nachricht);
 		LogEngine.log(this,"sende",nachricht);
 		try {
@@ -220,6 +220,11 @@ public class NodeEngine {
 		} catch (IOException e) {
 			LogEngine.log(e);
 		}
+	}
+	
+	public void sendtcp(MSG nachricht){
+		if(!isRoot)root_connection.send(nachricht);
+		for (ConnectionHandler x : connections) x.send(nachricht);
 	}
 	
 	/**
@@ -286,6 +291,7 @@ public class NodeEngine {
 			case REPORT_ALLNODES:
 				if(index==-1){
 					allNodes=(List<Node>)paket.getData();
+					allNodes.add(meinNode);
 				}
 				else LogEngine.log("REPORT_ALLNODES von komischer Qulle bekommen:"+index, this, LogEngine.WARNING);
 				break;
@@ -309,7 +315,7 @@ public class NodeEngine {
 		case DATA:
 			break;
 		default:
-				ce.put(paket);
+				//ce.put(paket);
 		}
 		
 	}

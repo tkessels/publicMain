@@ -101,7 +101,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.configMenu = new JMenu("Settings");
 		this.helpMenu = new JMenu("Help");
 		this.aboutPMAIN = new JMenuItem("About pMAIN");
-		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("HelpContentsIcon.png")));	// evtl. noch anderes Icon wählen
+		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
 		this.lafMenu = new JMenu("Switch Design");
 		this.btnGrp = new ButtonGroup();

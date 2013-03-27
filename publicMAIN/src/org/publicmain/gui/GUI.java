@@ -37,6 +37,7 @@ import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
+import org.publicmain.sql.DBConnection;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -70,7 +71,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private boolean userListActive;
 	private UserList userListWin;
 	private pMTrayIcon trayIcon;
-	
+	private DBConnection db;
 
 	/**
 	 * Konstruktor für GUI
@@ -94,6 +95,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me = this;
 		this.log = new LogEngine();
+		// this.db = DBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.menuBar = new JMenuBar();
 		this.fileMenu = new JMenu("File");
 		this.configMenu = new JMenu("Settings");

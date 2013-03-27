@@ -315,6 +315,7 @@ public class NodeEngine {
 			root_connection = new ConnectionHandler(tmp_socket);
 			sendmutlicast(new MSG(getME()));
 			sendroot(new MSG(getME()));
+			sendroot(new MSG(null,MSGCode.POLL_ALLNODES));
 			//hasConnectedRoot = true;
 
 		}

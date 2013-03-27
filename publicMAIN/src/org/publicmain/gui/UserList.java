@@ -14,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.text.StyledEditorKit.AlignmentAction;
 
 import org.publicmain.chatengine.ChatEngine;
@@ -39,6 +41,21 @@ public class UserList extends JWindow {
 		this.breite = 150;
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
 		this.users = new JList<String>(new UserListModel(this));
+		
+		this.users.getModel().addListDataListener(new ListDataListener() {
+			@Override
+			public void intervalRemoved(ListDataEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void intervalAdded(ListDataEvent arg0) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void contentsChanged(ListDataEvent arg0) {
+				users.revalidate();
+			}
+		});
 		
 		this.internalFrame.add(users);
 		
@@ -72,10 +89,5 @@ public class UserList extends JWindow {
 		Rectangle tmp=parent.getBounds();
 		setBounds((int)(tmp.getX()-breite),(int)tmp.getY(), breite, tmp.height);
 		super.repaint();
-	}
-	
-	void neuMalen(){
-		internalFrame.validate();
-		internalFrame.repaint();
 	}
 }

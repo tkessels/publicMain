@@ -500,13 +500,13 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 				try{
 					UIManager.setLookAndFeel(new NimRODLookAndFeel());
 				} catch (Exception ex){
-					System.out.println(ex.getMessage());
+					LogEngine.log(ex);
 				}
 			} else {
 				try {
 					UIManager.setLookAndFeel(laf.getClassName());
 				} catch (Exception ex) {
-					System.out.println(ex.getMessage());
+					LogEngine.log(ex);
 				}
 			}
 			SwingUtilities.updateComponentTreeUI(GUI.me);

@@ -2,7 +2,6 @@ package org.publicmain.gui;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import javax.swing.AbstractListModel;
 
@@ -10,24 +9,41 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
-public class UserListModel extends AbstractListModel{
+public class UserListModel extends AbstractListModel<String>{
 
-	private List users = new ArrayList();
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3915185276474553682L;
+	private ArrayList<String> users = new ArrayList<String>();
+	private Thread userListWriter;
+	private UserList parent;
+	
+	public UserListModel(final UserList parent) {
+    	this.parent = parent;
+		this.userListWriter = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					// for(String grpName : ChatEngine.getCE().getGroupList()){
+					// users.add(grpName);
+					// }
+					for (Node userAlias : ChatEngine.getCE().getUsers()) {
+						users.add(userAlias.getAlias());
+					}
 
-    public UserListModel() {
-    	
-//    	try {
-//    		for(String grpName : ChatEngine.getCE().getGroupList()){
-//    			users.add(grpName);
-//    		}
-//			for(Node userAlias : ChatEngine.getCE().getUsers()){
-//				users.add(userAlias.getAlias());
-//			}
-//		} catch (Exception e) {
-//			LogEngine.log(e);
-//		}
-    	
-    	users.add("test");
+					synchronized (ChatEngine.getCE().getUsers()) {
+						try {
+							ChatEngine.getCE().getUsers().wait();
+						} catch (InterruptedException e) {
+							LogEngine.log(e);
+						}
+					}
+					parent.neuMalen();
+				}
+			}
+		});
+    	userListWriter.start();
     	
 	    Collections.sort(users);
     }
@@ -38,9 +54,10 @@ public class UserListModel extends AbstractListModel{
     }
 
     @Override
-    public Object getElementAt(int index) {
+    public String getElementAt(int index) {
     return users.get(index);
     }
-
-	
+    
+   
+    
 }

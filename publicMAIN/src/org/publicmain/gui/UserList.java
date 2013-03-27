@@ -30,7 +30,7 @@ public class UserList extends JWindow {
 	private int breite;
 	private JFrame parent;
 	private JInternalFrame internalFrame;
-	private JList users;
+	private JList<String> users;
 	
 	public UserList(JFrame parent) {
 		this.parent=parent;
@@ -38,24 +38,11 @@ public class UserList extends JWindow {
 		this.hoehe = parent.getHeight();
 		this.breite = 150;
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
-		this.users = new JList(new UserListModel());
+		this.users = new JList<String>(new UserListModel(this));
 		
-		this.internalFrame.setLayout(new GridLayout(50,1));
-		
-		
-		try {
-//    		for(String grpName : ChatEngine.getCE().getGroupList()){
-//    			this.internalFrame.add(new JLabel(grpName));
-//    		}
-			for(Node userAlias : ChatEngine.getCE().getUsers()){
-				this.internalFrame.add(new JLabel(userAlias.getAlias()));
-			}
-		} catch (Exception e) {
-			LogEngine.log(e);
-		}
+		this.internalFrame.add(users);
 		
 		this.add(internalFrame);
-		
 		
 		this.internalFrame.setVisible(true);
 		
@@ -85,7 +72,10 @@ public class UserList extends JWindow {
 		Rectangle tmp=parent.getBounds();
 		setBounds((int)(tmp.getX()-breite),(int)tmp.getY(), breite, tmp.height);
 		super.repaint();
-		
 	}
 	
+	void neuMalen(){
+		internalFrame.validate();
+		internalFrame.repaint();
+	}
 }

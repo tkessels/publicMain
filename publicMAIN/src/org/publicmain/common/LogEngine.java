@@ -25,6 +25,15 @@ public class LogEngine {
 		}
 	}
 	
+	public static void log(Exception e, Object source) {
+		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
+		if(verbosity>0){
+			log(sourceString + ":"+e.getMessage(),ERROR);
+			//e.printStackTrace();
+		}
+	}
+	
+	
 	/** Setzt die Meldeschwelle ab welchem schweregrad eine Ausgabe erfolgen soll.
 	 * @param x Das Verbositätslevel ?!?!
 	 */
@@ -62,6 +71,11 @@ public class LogEngine {
 		if(errorLevel<=verbosity){
 			System.err.println(new Time(System.currentTimeMillis()).toString()+" : "+meldung);
 		}
+	}
+
+	public static void log(ConnectionHandler quelle, MSG paket) {
+		log(quelle.toString()+":"+paket,INFO);
+		
 	}
 	
 	

@@ -68,9 +68,10 @@ public class ConnectionHandler {
 	
 	class reciever implements Runnable
 	{
+		boolean isan=true;
 		public void run() 
 		{
-			while(line.isConnected())
+			while(line.isConnected()&&!line.isClosed()&&isan)
 			{
 				try 
 				{
@@ -79,7 +80,11 @@ public class ConnectionHandler {
 				} 
 				catch (ClassNotFoundException|IOException e) 
 				{
-					LogEngine.log(e);
+					//disconnect(); // das ist drin weil sie sonst keiner startet.... GUI sollte Chatengine disconnecten 
+					LogEngine.log(e,"ConnectionHandler");
+					isan=false;
+					ne.remove(me);
+					
 				} 
 			}
 		}		
@@ -92,6 +97,8 @@ public class ConnectionHandler {
 	public void disconnect(){
 		send(new MSG(ne.getME(),MSGCode.NODE_SHUTDOWN));
 		try {
+			line_out.close();
+			line_in.close();
 			line.close();
 		} catch (IOException e) {
 		}

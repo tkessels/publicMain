@@ -38,7 +38,7 @@ public class UserList extends JWindow {
 		this.hoehe = parent.getHeight();
 		this.breite = 150;
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
-		this.users = new JList<String>(new UserListModel());
+		this.users = new JList<String>(new UserListModel(this));
 		
 		this.internalFrame.add(users);
 		
@@ -72,5 +72,10 @@ public class UserList extends JWindow {
 		Rectangle tmp=parent.getBounds();
 		setBounds((int)(tmp.getX()-breite),(int)tmp.getY(), breite, tmp.height);
 		super.repaint();
+	}
+	
+	void neuMalen(){
+		internalFrame.validate();
+		internalFrame.repaint();
 	}
 }

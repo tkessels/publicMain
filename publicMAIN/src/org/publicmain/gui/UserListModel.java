@@ -16,42 +16,33 @@ public class UserListModel extends AbstractListModel<String>{
 	 */
 	private static final long serialVersionUID = 3915185276474553682L;
 	private ArrayList<String> users = new ArrayList<String>();
-
 	private Thread userListWriter;
-	private static final long TIMEOUT = 1000;
-	private int userListLength;
+	private UserList parent;
 	
-	public UserListModel() {
-    	
-    	userListLength = 0;
-    	
-		userListWriter = new Thread(new Runnable() {
+	public UserListModel(final UserList parent) {
+    	this.parent = parent;
+		this.userListWriter = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
-
 					// for(String grpName : ChatEngine.getCE().getGroupList()){
 					// users.add(grpName);
 					// }
-					// for (Node userAlias : ChatEngine.getCE().getUsers()) {
-					// users.add(userAlias.getAlias());
-					//
-					// }
+					for (Node userAlias : ChatEngine.getCE().getUsers()) {
+						users.add(userAlias.getAlias());
+					}
 
 					synchronized (ChatEngine.getCE().getUsers()) {
 						try {
 							ChatEngine.getCE().getUsers().wait();
-							System.out.println("Änderung");
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							LogEngine.log(e);
 						}
-
 					}
+					parent.neuMalen();
 				}
 			}
 		});
-    	//userListWriter.setDaemon(true);
     	userListWriter.start();
     	
 	    Collections.sort(users);

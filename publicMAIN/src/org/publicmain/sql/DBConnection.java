@@ -9,47 +9,57 @@ import java.sql.Statement;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
+import org.publicmain.gui.GUI;
 
-
+/**
+ * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
+ * Sie legt weiterhin alle zwingend notwendigen Datenbanken(1) und Tabellen an.
+ */
 public class DBConnection {
-// TODO Kommentieren
+
 	private Connection con;;
 	private Statement stmt;
-	private ResultSet rs;
+	//private ResultSet rs;
 	private String url;
 	private String dbName;
 	private String user;
 	private String passwd;
 	private String msgHistTbl;
-	private LogEngine le;
+	private static DBConnection me;
 	
-	public DBConnection(LogEngine le) {
+	private DBConnection() {
 		this.url = "jdbc:mysql://localhost:3306/";
 		this.user = "root";
 		this.passwd = "";
 		this.dbName = "db_javatest";
 		this.msgHistTbl= "t_msgHistory";
-		this.le = le;
-		if(dbVerbindHerstellen()){
+		if(connectToLocDBServer()){
 			createDbAndTables();
 		}
 	}
-	private boolean dbVerbindHerstellen(){
+	public static DBConnection getDBConnection() {
+		if (me == null) {
+			me = new DBConnection();
+		}
+		return me;
+	}
+	private boolean connectToLocDBServer(){	// wird nur vom Construktor aufgerufen
 		try {
 			this.con = DriverManager.getConnection(url, user, passwd);
 			this.stmt = con.createStatement();
-			le.log("DB-ServerVerbindung hergestellt", this, LogEngine.INFO);
+			LogEngine.log("DB-ServerVerbindung hergestellt", this, LogEngine.INFO);
 			return true;
 		} catch (SQLException e) {
-			le.log("DB-Verbindung fehlgeschlagen", this, LogEngine.ERROR);
+			LogEngine.log("DB-Verbindung fehlgeschlagen: " + e.getMessage(), this, LogEngine.ERROR);
 			return false;
 		}
 	}
-	private void createDbAndTables (){
+	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		try {
 			this.stmt = con.createStatement();
 			stmt.execute("create database if not exists " + dbName);
 			stmt.execute("use " + dbName);
+			// TODO Datentypen anpassen!
 			stmt.execute("create table if not exists "+ msgHistTbl + "(id int(200) NOT NULL," +
 																	"sender int(200) NOT NULL," +
 																	"timestamp int(200) NOT NULL," +
@@ -58,11 +68,13 @@ public class DBConnection {
 																	"data varchar(20) NOT NULL," +
 																	"primary key(id))" +
 																	"engine = INNODB");
-			le.log("createDbAndTables erstellt", this, LogEngine.INFO);
+			LogEngine.log("createDbAndTables erstellt", this, LogEngine.INFO);
 		} catch (SQLException e) {
-			le.log("createDbAndTables fehlgeschlagen: "+ e.getMessage(), this, LogEngine.ERROR);
+			LogEngine.log("createDbAndTables fehlgeschlagen: "+ e.getMessage(), this, LogEngine.ERROR);
 		}
 	}
+	
+	// TODO in seperate Klasse auslagern! 
 	public void saveMsg (MSG m){
 		if(m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE){
 			String saveStmt = ("insert into " + msgHistTbl + " id, sender, timestamp, empfänger,grp,data values (" +
@@ -74,12 +86,13 @@ public class DBConnection {
 					m.getData() + ")");
 			try {
 				stmt.execute(saveStmt);
-				le.log("Nachicht in DB-Tabelle " + msgHistTbl + " eingetragen.", this, LogEngine.INFO);
+				LogEngine.log("Nachicht in DB-Tabelle " + msgHistTbl + " eingetragen.", this, LogEngine.INFO);
 			} catch (Exception e) {
-				le.log("Fehler beim eintragen in : "+ msgHistTbl + " " + e.getMessage(), this, LogEngine.ERROR);
+				LogEngine.log("Fehler beim eintragen in : "+ msgHistTbl + " " + e.getMessage(), this, LogEngine.ERROR);
 			}
 		}
 		
 	}
 
 }
+

@@ -41,7 +41,6 @@ public class NodeEngine {
 	
 	public List<ConnectionHandler> connections;
 	private List<Node> allNodes;
-	//private Map<Integer,List<Node>> routing;
 	
 	//private boolean isOnline;
 	private boolean isRoot;
@@ -60,8 +59,6 @@ public class NodeEngine {
 	public NodeEngine(ChatEngine parent) throws IOException {
 		allNodes =new ArrayList<Node>();
 		connections=new ArrayList<ConnectionHandler>();
-		//routing = new HashMap<Integer, List<Node>>();
-		
 		ne=this;
 		ce=parent;
 		
@@ -105,7 +102,7 @@ public class NodeEngine {
 					try {
 						multi_socket.receive(tmp);
 						MSG nachricht = MSG.getMSG(tmp.getData());
-						LogEngine.log(this,"multicastRecieve",nachricht);
+						LogEngine.log("multicastRecieverBot","multicastRecieve",nachricht);
 						handleMulticast(nachricht);
 					} catch (IOException e) {
 						LogEngine.log(e);
@@ -333,8 +330,10 @@ public class NodeEngine {
 			//TODO:wir habeb die Verbindung nach oben verloren und müssten was tun
 		}
 		connections.remove(conn);
+		sendroot(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
+		sendmutlicast(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
 		updateChilds();
-		//updateNodes();
+		updateNodes();
 	}
 	
 
@@ -416,8 +415,13 @@ public class NodeEngine {
 				   quelle.children.clear();
 				   quelle.children.addAll((List<Node>) paket.getData());
 				}
-				else LogEngine.log("REPORT_CHILDNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
+				else LogEngine.log(quelle,paket);
 				break;
+			case CHILD_SHUTDOWN:
+				if(quelle!=root_connection){
+					quelle.children.removeAll((Collection<Node>) paket.getData());
+					sendroot(paket);
+				}
 			}
 			break;
 		case DATA:

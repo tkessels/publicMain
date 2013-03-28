@@ -63,8 +63,8 @@ public class LogEngine {
 		log(sourceString+ " : " + action+ " : "+msg2String(x),INFO);
 	}
 	
-	public static void log(ConnectionHandler newConnection){
-		
+	public static void log(ConnectionHandler quelle,String meldung){
+		log(quelle.toString()+":"+meldung,INFO);
 	}
 	
 	public static void log(String meldung,int errorLevel){
@@ -73,8 +73,8 @@ public class LogEngine {
 		}
 	}
 
-	public static void log(ConnectionHandler quelle, MSG paket) {
-		log(quelle.toString()+":"+paket,INFO);
+	public static void log(ConnectionHandler quelle, String action,MSG paket) {
+		log(quelle,action+":"+paket);
 		
 	}
 	

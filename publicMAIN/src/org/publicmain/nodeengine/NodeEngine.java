@@ -8,10 +8,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
@@ -31,6 +31,7 @@ import org.publicmain.common.Node;
  */
 public class NodeEngine {
 	protected static final long CONNECTION_TIMEOUT = 1000;
+	protected static final long	ROOT_ANNOUNCE_TIMEOUT	= 2000;
 	private static volatile NodeEngine ne;
 	private Node meinNode;
 	private ChatEngine ce;
@@ -40,7 +41,8 @@ public class NodeEngine {
 	private MulticastSocket multi_socket;
 	
 	public List<ConnectionHandler> connections;
-	private List<Node> allNodes;
+	public BlockingQueue<MSG> replies;
+	private Set<Node> allNodes;
 	
 	//private boolean isOnline;
 	private boolean isRoot;
@@ -48,6 +50,7 @@ public class NodeEngine {
 
 	private Thread multicastRecieverBot;
 	private Thread connectionsAcceptBot;
+	private Thread discoverGame;
 
 	private final InetAddress group = InetAddress.getByName("230.223.223.223");
 	private final int multicast_port = 6789;
@@ -57,7 +60,7 @@ public class NodeEngine {
 
 	
 	public NodeEngine(ChatEngine parent) throws IOException {
-		allNodes =new ArrayList<Node>();
+		allNodes =new HashSet<Node>();
 		connections=new ArrayList<ConnectionHandler>();
 		ne=this;
 		ce=parent;
@@ -85,7 +88,6 @@ public class NodeEngine {
 						connections.add(tmp);
 						//routing.put(connections.indexOf(tmp),new ArrayList<Node>());
 						//tmp.send(new MSG(allNodes,MSGCode.REPORT_ALLNODES));
-						LogEngine.log(tmp);
 					} catch (IOException e) {
 						LogEngine.log(e);
 					}
@@ -148,7 +150,7 @@ public class NodeEngine {
 	 * "false" wenn nicht.
 	 */
 	public boolean	isRoot (){
-		return ((root_connection==null)||!root_connection.isConnected()&&isRoot);
+		return ((root_connection==null)||(!root_connection.isConnected()&&isRoot));
 	}
 	
 	
@@ -157,9 +159,9 @@ public class NodeEngine {
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen
 	 * Nodes beinhaltet.
 	 */
-	public List<Node> getNodes (){
+	public Collection<Node> getNodes (){
 		System.out.println(allNodes);
-		return allNodes;					//TODO:nur zum test
+		return allNodes;				
 	}
 	
 	
@@ -188,7 +190,7 @@ public class NodeEngine {
 	 * send_file() wird sowohl das Ziel als auch die Daten mitgegeben. D.h., dass das
 	 * MSG-Paket hier in File und destination geteilt.
 	 */
-	public void sendmutlicast (MSG nachricht){
+	private void sendmutlicast (MSG nachricht){
 		byte[] buf = MSG.getBytes(nachricht);
 		LogEngine.log(this,"sende",nachricht);
 		try {
@@ -198,6 +200,19 @@ public class NodeEngine {
 			LogEngine.log(e);
 		}
 	}
+	
+	private void sendunicast(MSG msg, Node newRoot) {
+		byte[] data=MSG.getBytes(msg);
+		for(InetAddress x : newRoot.getSockets()){
+			DatagramPacket unicast =new DatagramPacket(data,data.length,x,multicast_port);//über Unicast
+			try {
+				multi_socket.send(unicast);
+			} catch (IOException e) {
+				LogEngine.log(e);
+			}
+		}
+}
+
 	
 	public void sendtcp(MSG nachricht){
 		if(!isRoot())root_connection.send(nachricht); //vielleicht sendroot verwenden?
@@ -224,10 +239,12 @@ public class NodeEngine {
 	
 	
 
-
+private void discover(Node newRoot) {
+	sendunicast(new MSG(meinNode,MSGCode.ROOT_DISCOVERY),newRoot);
+}
+	
 	private void discover() {
 		sendmutlicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY));
-		
 		Thread selbstZumRootErklärer = new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -236,28 +253,19 @@ public class NodeEngine {
 				}
 				if(!isOnline()){
 					isRoot=true;
-					connectionsAcceptBot.start();
 				}
+				connectionsAcceptBot.start();
 			}
 		});
 		selbstZumRootErklärer.start();
-		
-		
 	}
 	
 	private void sendDiscoverReply(Node quelle) {
-		// TODO Auto-generated method stub
-		byte[] data=MSG.getBytes(new MSG(getBestNode(), MSGCode.ROOT_REPLY));
 		LogEngine.log("sending Replay to " + quelle.toString(),this,LogEngine.INFO);
-/*		DatagramPacket discover =new DatagramPacket(data,data.length,group,multicast_port);//über Multicast
-		try {
-			multi_socket.send(discover);
-		} catch (IOException e) {
-			LogEngine.log(e);
-		}
-	*/
+		sendunicast(new MSG(getBestNode(), MSGCode.ROOT_REPLY), quelle);
+		/*byte[] data=MSG.getBytes(new MSG(getBestNode(), MSGCode.ROOT_REPLY));
 		for(InetAddress x : quelle.getSockets()){
-			DatagramPacket discover =new DatagramPacket(data,data.length,x,multicast_port);//über Unicast
+			DatagramPacket discover =new DatagramPacket(data,data.length,x,multicast_port);
 			try {
 				multi_socket.send(discover);
 			} catch (IOException e) {
@@ -265,12 +273,12 @@ public class NodeEngine {
 			}
 			
 		}
-
+*/
 		
 	}
 
 	private void updateNodes() {
-		if (isRoot) {
+		if (isRoot()) {
 			synchronized (allNodes) {
 				allNodes.clear();
 				allNodes.add(getME());
@@ -289,6 +297,12 @@ public class NodeEngine {
 		}
 	}
 	
+	private Set<Node> getChilds(){
+		Set<Node> rück = new HashSet<Node>();
+	   for(ConnectionHandler x :connections)rück.addAll(x.children);
+	   return rück;
+	}
+	
 
 
 
@@ -296,31 +310,36 @@ public class NodeEngine {
 	 * @param knoten der Knoten
 	 * @throws IOException 
 	 */
-	private void connectTo(Node knoten) throws IOException {
+	private void connectTo(Node knoten) {
 
 		Socket tmp_socket = null;
 		for (InetAddress x : knoten.getSockets()) {
 			try {
-				tmp_socket = new Socket(x.getHostAddress(),knoten.getServer_port());
+				tmp_socket = new Socket(x.getHostAddress(), knoten.getServer_port());
 
-			} catch (UnknownHostException e) {
-				LogEngine.log(e);
-			} catch (IOException e) {
+			}
+			catch (UnknownHostException e) {
 				LogEngine.log(e);
 			}
-			if (tmp_socket != null && tmp_socket.isConnected())
-				break;
+			catch (IOException e) {
+				LogEngine.log(e);
+			}
+			if (tmp_socket != null && tmp_socket.isConnected()) break;
 		}
 		if (tmp_socket != null) {
-			root_connection = new ConnectionHandler(tmp_socket);
+			try {
+				root_connection = new ConnectionHandler(tmp_socket);
+			}
+			catch (IOException e) {
+				LogEngine.log(e);
+			}
 			sendmutlicast(new MSG(getME()));
 			sendroot(new MSG(getME()));
-			sendroot(new MSG(null,MSGCode.POLL_ALLNODES));
+			sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 			//hasConnectedRoot = true;
 
 		}
 	}
-	
 
 
 
@@ -333,54 +352,82 @@ public class NodeEngine {
 			//TODO:wir habeb die Verbindung nach oben verloren und müssten was tun
 		}
 		connections.remove(conn);
-		sendroot(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
-		sendmutlicast(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
-		updateChilds();
-		updateNodes();
+		sendtcp(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
+		//sendmutlicast(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
+		//updateChilds();
+		//updateNodes();
 	}
 	
+	
+	private synchronized void discover_game(MSG paket) {
+		replies.add(paket);
+		if (discoverGame == null) {
+			Object[] payload = { allNodes, meinNode };
+			sendmutlicast(new MSG(payload, MSGCode.ROOT_ANNOUNCE));
+			discoverGame = new Thread(new Runnable() {
+				public void run() {
+					long until = System.currentTimeMillis() + ROOT_ANNOUNCE_TIMEOUT;
+					while (System.currentTimeMillis() < until)
+						try {Thread.sleep(100);}
+						catch (InterruptedException e) {}
+					Node toConnectTo = meinNode;
+					int maxPenunte = allNodes.size();
+					for (Object x : replies.toArray()) { 																					// extrahieren aller informationen dieses ROOTANNOUNCE
+						@SuppressWarnings("unchecked")
+						Set<Node> tmp_allnodes = (Set<Node>) ((Object[]) ((MSG) x).getData())[0]; 	// Caste Payload in ein Object Array und das 1. Object in ein Set aus Nodes
+						Node tmp_node = (Node) ((Object[]) ((MSG) x).getData())[1];  							//	Caste Payload in ein Object Array und das 2. Object dieses Arrays in einen Node
+						if (tmp_allnodes.size() > maxPenunte) {
+							toConnectTo = tmp_node;
+							maxPenunte = tmp_allnodes.size();
+						}
+					}
+					if (toConnectTo != meinNode) discover(toConnectTo);
+					try {
+						Thread.sleep(ROOT_ANNOUNCE_TIMEOUT);
+					}
+					catch (InterruptedException e) {
+					}
+					replies.clear();
+					discoverGame=null;
+				}
+			});
+		}
+	}
 
 	/**Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich vom MulticastSocketHandler aufegrufen.
 	 * @param paket  Das empfangene MulticastPaket
 	 */
-	public void handleMulticast(MSG paket){
-		LogEngine.log(this,"handling [MC]",paket);
-		if (paket.getTyp()==NachrichtenTyp.SYSTEM){
-			switch(paket.getCode()){
-			case NODE_UPDATE:
-				LogEngine.log(this, "NODE_UPDATE on MC", paket);
-				synchronized (allNodes) {
-					
-					allNodes.add((Node)paket.getData());
-					allNodes.notify();
-				}
-				break;
-			case ROOT_REPLY:
-				if(!isOnline()){
-					try {
-						connectTo((Node)paket.getData());
-					} catch (IOException e) {
-						LogEngine.log(e);
+	public void handleMulticast(MSG paket) {
+		LogEngine.log(this, "handling [MC]", paket);
+		if (paket.getTyp() == NachrichtenTyp.SYSTEM) {
+			switch (paket.getCode()) {
+				case ROOT_REPLY:
+					if (!isOnline()&&isRoot()) {
+							connectTo((Node) paket.getData());
 					}
-				}
-				break;
-			case ROOT_DISCOVERY:
-				if(isRoot()) sendDiscoverReply((Node)paket.getData());
-				break;
+					break;
+				case ROOT_DISCOVERY:
+					if (isRoot()) sendDiscoverReply((Node) paket.getData());
+					break;
+				case ROOT_ANNOUNCE:
+					discover_game(paket);
+					break;
 				default:
-					LogEngine.log(this,"handleMulticast:undefined",paket);
+					LogEngine.log(this, "handling [MC]:undefined",paket);
 			}
-			}
+		}
 	}
 
 	
-	
+
+
+
 	/**Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich von den ConnectionHandlern aufgerufen um empfange Pakete verarbeiten zu lassen.
 	 * @param paket Zu verarbeitendes Paket
 	 * @param quelle Quelle des Pakets
 	 */
 	public void handle(MSG paket, ConnectionHandler quelle) {
-		LogEngine.log(this,"handling ["+connections.indexOf(quelle)+"]",paket);
+		LogEngine.log(this,"handling["+quelle+"]",paket);
 		switch (paket.getTyp()){
 		case GROUP:
 			sendtcpexcept(paket, quelle);
@@ -389,17 +436,15 @@ public class NodeEngine {
 		case SYSTEM:
 			switch(paket.getCode()){
 			case NODE_UPDATE:
-				if(quelle!=root_connection){
-				LogEngine.log(this, "NODE_UPDATE auf "+connections.indexOf(quelle), paket);
-				quelle.children.add((Node) paket.getData());
-				sendroot(paket);
-				}
-				else LogEngine.log("NODE_UPDATE von root bekommen", this, LogEngine.WARNING);
+				allNodes.add((Node) paket.getData());
+				if(quelle!=root_connection)quelle.children.add((Node) paket.getData());
+				sendtcpexcept(paket, quelle);
+//				else LogEngine.log("NODE_UPDATE von root bekommen", this, LogEngine.WARNING);
 				break;
 			
 			case POLL_ALLNODES:
 				if(root_connection!=quelle)quelle.send(new MSG(allNodes,MSGCode.REPORT_ALLNODES));
-				else LogEngine.log("POLL_ALLNODES von root bekommen", this, LogEngine.WARNING);
+//				else LogEngine.log("POLL_ALLNODES von root bekommen", this, LogEngine.WARNING);
 				break;
 			case REPORT_ALLNODES:
 				if(quelle==root_connection){
@@ -407,7 +452,7 @@ public class NodeEngine {
 					allNodes.addAll((List<Node>)paket.getData());
 					allNodes.add(meinNode);
 				}
-				else LogEngine.log("REPORT_ALLNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
+//				else LogEngine.log("REPORT_ALLNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
 				break;
 			case POLL_CHILDNODES:
 				if(quelle==root_connection){
@@ -415,20 +460,28 @@ public class NodeEngine {
 				for(ConnectionHandler x :connections) tmp.addAll(x.children);
 				sendroot(new MSG(tmp,MSGCode.REPORT_CHILDNODES));
 				}
-				else LogEngine.log("POLL_CHILDNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
+//				else LogEngine.log("POLL_CHILDNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
 				break;
 			case REPORT_CHILDNODES:
 				if(quelle!=root_connection){
 				   quelle.children.clear();
 				   quelle.children.addAll((List<Node>) paket.getData());
 				}
-				else LogEngine.log(quelle,paket);
+//				else LogEngine.log(this,"handling ",paket);
 				break;
+			case NODE_SHUTDOWN:
+				sendtcpexcept(new MSG(quelle.children,MSGCode.CHILD_SHUTDOWN), quelle);
+				allNodes.removeAll(quelle.children);
+				quelle.close();
+				break;
+				
+			
 			case CHILD_SHUTDOWN:
-				if(quelle!=root_connection){
-					quelle.children.removeAll((Collection<Node>) paket.getData());
-					sendroot(paket);
-				}
+				if(quelle!=root_connection)quelle.children.removeAll((Collection<Node>) paket.getData());
+				allNodes.removeAll((Collection<Node>) paket.getData());
+				sendtcpexcept(paket, quelle);
+				
+				break;
 			}
 			break;
 		case DATA:

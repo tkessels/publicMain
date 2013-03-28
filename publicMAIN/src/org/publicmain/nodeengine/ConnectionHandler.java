@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -21,34 +21,33 @@ import org.publicmain.common.Node;
  *
  */
 public class ConnectionHandler {
-	public List<Node> children;
+	public Set<Node> children;
 	private NodeEngine ne;
 	private Socket line;
 	private ObjectOutputStream line_out;
 	private ObjectInputStream line_in;
 	private Thread pakets_rein_hol_bot;
 	private ConnectionHandler me;
+	private String endpoint;
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
 		me=this;
 		ne=NodeEngine.getNE();
-		children=new ArrayList<Node>();
-		
-		
+		children=new HashSet<Node>();
 		
 		line = underlying;
+		line.setTcpNoDelay(true);
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		
 		pakets_rein_hol_bot = new Thread(new reciever());
 		pakets_rein_hol_bot.start();
-		
-		LogEngine.log("Verbindung", this, LogEngine.INFO);
+		endpoint=line.getInetAddress().getHostName() ;
+		LogEngine.log(this,"Verbunden");
+
 	}
-
-
 
 	/**Verschickt ein MSG-Objekt über den Soket.
 	 * @param paket Das zu versendende Paket
@@ -57,6 +56,7 @@ public class ConnectionHandler {
 	public void send(MSG paket){
 		if(isConnected()){
 			try {
+				LogEngine.log(this,"sending",paket);
 				line_out.writeObject(paket);
 				line_out.flush();
 			} catch (IOException e) {
@@ -66,56 +66,66 @@ public class ConnectionHandler {
 		else LogEngine.log(this,"dropped",paket);
 	}
 	
-	class reciever implements Runnable
-	{
-		boolean isan=true;
-		public void run() 
-		{
-			while(line.isConnected()&&!line.isClosed()&&isan)
-			{
-				try 
-				{
-					MSG tmp = (MSG) line_in.readObject();
-					ne.handle(tmp,me);
-				} 
-				catch (ClassNotFoundException|IOException e) 
-				{
-					//disconnect(); // das ist drin weil sie sonst keiner startet.... GUI sollte Chatengine disconnecten 
-					LogEngine.log(e,"ConnectionHandler");
-					isan=false;
-					ne.remove(me);
-					
-				} 
-			}
-		}		
-	}
-	
 	public boolean isConnected() {
-		return line.isConnected();
+		return line.isConnected()&&!line.isClosed();
 	}
 	
 	public void disconnect(){
 		send(new MSG(ne.getME(),MSGCode.NODE_SHUTDOWN));
-		try {
-			line_out.close();
-			line_in.close();
-			line.close();
-		} catch (IOException e) {
-		}
-		ne.remove(this);
+		close();
 	}
 	
+	public void close() {
+		try {
+			line_out.close();
+		}
+		catch (IOException e) {
+		}
+		try {
+			line_in.close();
+		}
+		catch (IOException e) {
+		}
+		try {
+			line.close();
+		}
+		catch (IOException e) {
+		}
+		pakets_rein_hol_bot=null;
+		me=null;
+		ne.remove(this);
 
+		LogEngine.log(me,"closed");
+	}
+	
 	@Override
 	public String toString() {
-		return "ConnectionHandler ["
-				+ (line != null ? "line=" + line + ", " : "")
-				+ (line_out != null ? "line_out=" + line_out + ", " : "")
-				+ (line_in != null ? "line_in=" + line_in + ", " : "")
-				+ (pakets_rein_hol_bot != null ? "pakets_rein_hol_bot="
-						+ pakets_rein_hol_bot + ", " : "")
-				+ (ne != null ? "ne=" + ne + ", " : "") + "]";
+		return "ConnectionHandler [" +endpoint +"]" ;
 	}
+	
+	class reciever implements Runnable
+	{
+		public void run() 
+		{
+			while(me!=null&&me.isConnected())
+			{
+				try 
+				{
+					MSG tmp = (MSG) line_in.readObject();
+					ne.handle(tmp, me);
+				} 
+				catch (ClassNotFoundException e) {
+					LogEngine.log(e,"ConnectionHandler");
+				} 
+				catch (IOException e) 
+				{
+					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist Thread beenden
+				}
+			}
+			close();
+		}		
+	}
+	
 	
 
 }

@@ -129,7 +129,7 @@ public class ChatEngine extends Observable{
 	 * @return Array aller verbundener Nodes
 	 */
 	public	List<Node>	getUsers(){
-		return ne.getNodes();
+		return new ArrayList<Node>(ne.getNodes());
 	}
 	
 	/** tritt einer Gruppe bei

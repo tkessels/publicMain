@@ -110,6 +110,36 @@ public class Node implements Serializable {
 		return alias+"@"+hostname;
 	}
 
+
+	/* Liefert  Hashcode des Knoten über die beiden eindeutigen IDs 
+	 * 
+	 * Wird für die Haltung der Nodes in einem Hashset benötigt.
+	 */
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (nodeID ^ (nodeID >>> 32));	//da die NodeID 64Bit LONG ist und der Hash nur 32 bit INTus hat (omg ;) 
+		result = prime * result + (int) (userID ^ (userID >>> 32)); 		//werden hier die beiden 32 bit Hälften der IDs mit OR übereinander gelegt und zusammen gerechnet.
+		return result;																					//die Primzahl spreizt das ergebnis ausserdem sind Primzahlen total toll und sollten überall drin sein.
+	}
+
+	/* 
+	 * Liefert true wenn zwei Knoten die sowohl die Gleiche UserID als auch NodeID haben.
+	 * Allerdings nur wenn beide Nodes auch Nodes sind. 
+	 * Ist das Vergleichsobjekt kein Node gehen wir davon aus, dass es eine andere NodeID hätte und der User gerade in Vermont zum shoppen ist. (=Ungleicheit) 
+	 */
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Node other = (Node) obj;
+		if (nodeID != other.nodeID) return false;
+		if (userID != other.userID) return false;
+		return true;
+	}
+	
+	
+
 	
 
 }

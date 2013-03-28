@@ -38,6 +38,7 @@ import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 import org.publicmain.sql.DBConnection;
+import org.publicmain.sql.checkoutHistoryWindow;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -59,13 +60,20 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
 	private JMenu configMenu;
+	private JMenu lafMenu;
 	private JMenu helpMenu;
+	private JMenu historyMenu;
+	private JMenu backupServer;
+	private JMenuItem pullHistoryFromBackUpServer;
+	private JMenuItem pushHistoryToBackUpServer;
+	private JMenuItem backUpServerSettings;
+	private JMenuItem checkoutHistory;
 	private JMenuItem aboutPMAIN;
 	private JMenuItem helpContents;
 	private JMenuItem menuItemRequestFile;
-	private JMenu lafMenu;
-	private ButtonGroup btnGrp;
 	private JMenuItem lafNimROD;
+	private ButtonGroup btnGrp;
+	
 	private DragableJTabbedPane jTabbedPane;
 	private JToggleButton userListBtn;
 	private boolean userListActive;
@@ -96,21 +104,27 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.me = this;
 		this.log = new LogEngine();
 		// this.db = DBConnection.getDBConnection(); // bei bedarf einbinden!
-		this.menuBar = new JMenuBar();
-		this.fileMenu = new JMenu("File");
-		this.configMenu = new JMenu("Settings");
-		this.helpMenu = new JMenu("Help");
-		this.aboutPMAIN = new JMenuItem("About pMAIN");
-		this.helpContents = new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
-		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
-		this.lafMenu = new JMenu("Switch Design");
-		this.btnGrp = new ButtonGroup();
-		this.chatList = new ArrayList<ChatWindow>();
-		this.jTabbedPane = new DragableJTabbedPane();
-		this.userListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
+		this.menuBar 		= new JMenuBar();
+		this.fileMenu 		= new JMenu("File");
+		this.configMenu 	= new JMenu("Settings");
+		this.helpMenu 		= new JMenu("Help");
+		this.historyMenu 	= new JMenu("History");
+		this.backupServer	= new JMenu("Backup-Server");
+		this.pushHistoryToBackUpServer 		= new JMenuItem("push History to Backup-Server");
+		this.pullHistoryFromBackUpServer	= new JMenuItem("pull History from Backup-Server");
+		this.backUpServerSettings 			= new JMenuItem("Backup-Server Settings");
+		this.checkoutHistory				= new JMenuItem("checkout History");
+		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
+		this.helpContents 	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
+		this.menuItemRequestFile 			= new JMenuItem("Test(request_File)");
+		this.lafMenu 		= new JMenu("Switch Design");
+		this.btnGrp 		= new ButtonGroup();
+		this.chatList 		= new ArrayList<ChatWindow>();
+		this.jTabbedPane 	= new DragableJTabbedPane();
+		this.userListBtn 	= new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 		this.userListActive = false;
-		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
-		this.trayIcon = new pMTrayIcon();
+		this.lafNimROD 		= new JRadioButtonMenuItem("NimROD");
+		this.trayIcon 		= new pMTrayIcon();
 		
 		// Anlegen der Menüeinträge für Designwechsel (installierte
 		// LookAndFeels)
@@ -139,6 +153,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.aboutPMAIN.addActionListener(new menuContoller());
 		this.helpContents.addActionListener(new menuContoller());
 		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
+		this.checkoutHistory.addActionListener(new menuContoller());
 		
 		// Konfiguration userListBtn:
 		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
@@ -162,10 +177,16 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.fileMenu.add(menuItemRequestFile);
 		this.helpMenu.add(aboutPMAIN);
 		this.helpMenu.add(helpContents);
+		this.historyMenu.add(checkoutHistory);
+		this.historyMenu.add(backupServer);
+		this.backupServer.add(pushHistoryToBackUpServer);
+		this.backupServer.add(pullHistoryFromBackUpServer);
+		this.backupServer.add(backUpServerSettings);
 		this.menuBar.add(userListBtn);
 		this.menuBar.add(fileMenu);
 		this.menuBar.add(configMenu);
 		this.menuBar.add(helpMenu);
+		this.menuBar.add(historyMenu);
 
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
@@ -541,7 +562,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 				//TODO: HelpContents HTML schreiben
 				new HelpContents();
 				break;
-			
+			case "checkout History":
+				new checkoutHistoryWindow();
+				break;
 			}
 			
 		}

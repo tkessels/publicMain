@@ -39,14 +39,12 @@ public class NodeEngine {
 	private ServerSocket server_socket;
 	private ConnectionHandler root_connection;
 	private MulticastSocket multi_socket;
-	
 	public List<ConnectionHandler> connections;
-	public BlockingQueue<MSG> replies;
+	
+	private BlockingQueue<MSG> replies;
 	private Set<Node> allNodes;
 	
-	//private boolean isOnline;
 	private boolean isRoot;
-	
 
 	private Thread multicastRecieverBot;
 	private Thread connectionsAcceptBot;
@@ -159,7 +157,7 @@ public class NodeEngine {
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen
 	 * Nodes beinhaltet.
 	 */
-	public Collection<Node> getNodes (){
+	public Set<Node> getNodes (){
 		System.out.println(allNodes);
 		return allNodes;				
 	}
@@ -282,16 +280,14 @@ private void discover(Node newRoot) {
 			synchronized (allNodes) {
 				allNodes.clear();
 				allNodes.add(getME());
+				allNodes.addAll(getChilds());
 				allNodes.notify();
-			for (ConnectionHandler x : connections) {
-				allNodes.addAll(x.children);
-			}
 			}
 		} else
 			sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 	}
 	
-	private void updateChilds(){
+	private void pollChilds(){
 		for(ConnectionHandler x : connections){
 			x.send(new MSG(null,MSGCode.POLL_CHILDNODES));
 		}
@@ -349,10 +345,23 @@ private void discover(Node newRoot) {
 	public void remove(ConnectionHandler conn) {
 		if (conn==root_connection) {
 			root_connection=null;
-			//TODO:wir habeb die Verbindung nach oben verloren und müssten was tun
+			updateNodes();
+			new Thread(new Runnable() {
+				public void run() {
+					System.out.println("Starting TESt");
+					try {
+						Thread.sleep(2000);
+					}
+					catch (InterruptedException e) {
+					}
+					System.out.println("DONE");
+					
+				}
+			}).start();
 		}
 		connections.remove(conn);
 		sendtcp(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
+		allNodes.removeAll(conn.children);
 		//sendmutlicast(new MSG(conn.children,MSGCode.CHILD_SHUTDOWN));
 		//updateChilds();
 		//updateNodes();
@@ -449,14 +458,14 @@ private void discover(Node newRoot) {
 			case REPORT_ALLNODES:
 				if(quelle==root_connection){
 					allNodes.clear();
-					allNodes.addAll((List<Node>)paket.getData());
+					allNodes.addAll((Set<Node>)paket.getData());
 					allNodes.add(meinNode);
 				}
 //				else LogEngine.log("REPORT_ALLNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
 				break;
 			case POLL_CHILDNODES:
 				if(quelle==root_connection){
-				List<Node> tmp=new ArrayList<Node>();
+				Set<Node> tmp=new HashSet<Node>();
 				for(ConnectionHandler x :connections) tmp.addAll(x.children);
 				sendroot(new MSG(tmp,MSGCode.REPORT_CHILDNODES));
 				}
@@ -465,7 +474,7 @@ private void discover(Node newRoot) {
 			case REPORT_CHILDNODES:
 				if(quelle!=root_connection){
 				   quelle.children.clear();
-				   quelle.children.addAll((List<Node>) paket.getData());
+				   quelle.children.addAll((Set<Node>) paket.getData());
 				}
 //				else LogEngine.log(this,"handling ",paket);
 				break;

@@ -12,6 +12,7 @@ import java.util.Set;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
+import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 
 
@@ -29,6 +30,9 @@ public class ConnectionHandler {
 	private Thread pakets_rein_hol_bot;
 	private ConnectionHandler me;
 	private String endpoint;
+	private Thread pingpongBot=new Thread(new Pinger());
+	private long latency=Integer.MAX_VALUE;
+
 	
 	
 	public ConnectionHandler(Socket underlying) throws IOException{
@@ -38,14 +42,17 @@ public class ConnectionHandler {
 		
 		line = underlying;
 		line.setTcpNoDelay(true);
+		line.setKeepAlive(true);
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		
-		pakets_rein_hol_bot = new Thread(new reciever());
+		pakets_rein_hol_bot = new Thread(new Reciever());
 		pakets_rein_hol_bot.start();
 		endpoint=line.getInetAddress().getHostName() ;
+		
 		LogEngine.log(this,"Verbunden");
+		pingpongBot.start();
 
 	}
 
@@ -91,19 +98,20 @@ public class ConnectionHandler {
 		}
 		catch (IOException e) {
 		}
+		LogEngine.log(me,"closed");
 		pakets_rein_hol_bot=null;
 		me=null;
 		ne.remove(this);
 
-		LogEngine.log(me,"closed");
+
 	}
 	
 	@Override
 	public String toString() {
-		return "ConnectionHandler [" +endpoint +"]" ;
+		return "ConnectionHandler [" +endpoint +"]" +  ((latency<10000)?"["+latency+"]":"");
 	}
 	
-	class reciever implements Runnable
+	class Reciever implements Runnable
 	{
 		public void run() 
 		{
@@ -112,20 +120,43 @@ public class ConnectionHandler {
 				try 
 				{
 					MSG tmp = (MSG) line_in.readObject();
-					ne.handle(tmp, me);
+					if(tmp.getTyp()==NachrichtenTyp.SYSTEM&&tmp.getCode()==MSGCode.ECHO_REQUEST) {
+						send(new MSG(tmp.getTimestamp(), MSGCode.ECHO_RESPONSE));
+					}
+					else if(tmp.getTyp()==NachrichtenTyp.SYSTEM&&tmp.getCode()==MSGCode.ECHO_RESPONSE) {
+						latency=System.currentTimeMillis()-(Long)tmp.getData();
+					}
+					else ne.handle(tmp, me);
 				} 
 				catch (ClassNotFoundException e) {
 					LogEngine.log(e,"ConnectionHandler");
 				} 
 				catch (IOException e) 
 				{
-					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist Thread beenden
+					break; //wenn ein Empfangen vom Socket nicht mehr öglich ist Thread beenden
 				}
 			}
 			close();
 		}		
 	}
 	
+	class Pinger implements Runnable{
+		private static final long	PING_INTERVAL	= 5000;
+
+		public void run() {
+			while(isConnected()) {
+				try {
+					send(new MSG(null, MSGCode.ECHO_REQUEST));
+					Thread.sleep((long) (PING_INTERVAL*(1+Math.random()))); //ping randomly mit PING_INTERVAL bis 2xPING_INTERVAL Pausen
+				}
+				catch (InterruptedException e) {
+				}
+			}
+			
+		}
+		
+		
+	}
 	
 
 }

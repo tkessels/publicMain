@@ -1,8 +1,9 @@
-package org.publicmain.sql;
+package org.publicmain.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagLayout;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -14,7 +15,6 @@ import javax.swing.JTextPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.publicmain.gui.GUI;
 
 /**
  * Diese Klasse stellt das AnzeigeFenster und den dazugehörogen Inhalt für die History bereit
@@ -49,8 +49,7 @@ public class checkoutHistoryWindow {
 		this.htmlDoc = new HTMLDocument();
 
 		historyFrame.setLocationRelativeTo(null);
-		// TODO das mit dem Logo... geht das noch schöner ohne ne Kopie vom .png in das Packet zu haun?
-		historyFrame.setIconImage(new ImageIcon(GUI.getGUI().getClass().getResource("pM_Logo2.png")).getImage());
+		historyFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		historyFrame.setMinimumSize(new Dimension(250, 400));
 		
 		helpContentTxt.setBackground(new Color(229, 195, 0));
@@ -58,7 +57,7 @@ public class checkoutHistoryWindow {
 		helpContentTxt.setEditorKit(htmlKit);
 		helpContentTxt.setDocument(htmlDoc);
 
-		searchPanel.setLayout(new BorderLayout());
+		searchPanel.setLayout(new GridBagLayout());
 		
 		
 		// hinzufügen

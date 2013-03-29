@@ -38,7 +38,6 @@ import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 import org.publicmain.sql.DBConnection;
-import org.publicmain.sql.checkoutHistoryWindow;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 

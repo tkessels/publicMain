@@ -325,7 +325,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		
 		}
 		msgTextPane.setCaretPosition(htmlDoc.getLength());
-		LogEngine.log(this,"printing",msg);
+		//LogEngine.log(this,"printing",msg);
 	}
 	
 	/**

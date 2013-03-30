@@ -29,7 +29,7 @@ public class ChatEngine extends Observable{
 	public NodeEngine ne;
 	public LogEngine log;
 	public DBConnection db;
-	//private Set<Node> nodes;
+	private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
 	private List<KnotenKanal> private_channels;
@@ -93,7 +93,6 @@ public class ChatEngine extends Observable{
 	public void send_private(long uid, String text){
 		MSG tmp = new MSG(uid,text);
 		put(tmp);
-		
 		ne.sendtcp(tmp);
 	}
 	
@@ -267,7 +266,7 @@ public class ChatEngine extends Observable{
 		for (Node x : ne.getNodes()) {
 			if(x.getNodeID()==nid) return x;
 		}
-		return null;
+		return ne.retrieve(nid);
 	}
 }
 

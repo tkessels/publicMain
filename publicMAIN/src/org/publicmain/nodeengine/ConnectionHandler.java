@@ -43,38 +43,49 @@ public class ConnectionHandler {
 		line = underlying;
 		line.setTcpNoDelay(true);
 		line.setKeepAlive(true);
+		line.setSoTimeout(0);
 		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
 		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 		
+		endpoint=line.getInetAddress().getHostAddress();
 		pakets_rein_hol_bot = new Thread(new Reciever());
 		pakets_rein_hol_bot.start();
+		pingpongBot.start();
 		endpoint=line.getInetAddress().getHostName() ;
 		
 		LogEngine.log(this,"Verbunden");
-		pingpongBot.start();
 
 	}
 
-	/**Verschickt ein MSG-Objekt über den Soket.
-	 * @param paket Das zu versendende Paket
-	 * @throws IOException Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt
+	/**
+	 * Verschickt ein MSG-Objekt über den Soket.
+	 * 
+	 * @param paket
+	 *            Das zu versendende Paket
+	 * @throws IOException
+	 *             Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt
 	 */
-	public void send(MSG paket){
-		if(isConnected()){
+	public void send(MSG paket) {
+		if (isConnected()) {
 			try {
-				LogEngine.log(this,"sending",paket);
+				LogEngine.log(this, "sending", paket);
 				line_out.writeObject(paket);
 				line_out.flush();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				LogEngine.log(e);
 			}
 		}
-		else LogEngine.log(this,"dropped",paket);
+		else LogEngine.log(this, "dropped", paket);
 	}
 	
+	/**Prüft ob die Verbindung noch besteht.
+	 * @return <code>true</code> wenn die Verbindung noch besteht
+	 * <code>false</code> wenn nicht
+	 */
 	public boolean isConnected() {
-		return line.isConnected()&&!line.isClosed();
+		return (line!=null&&line.isConnected()&&!line.isClosed());
 	}
 	
 	public void disconnect(){
@@ -133,6 +144,7 @@ public class ConnectionHandler {
 				} 
 				catch (IOException e) 
 				{
+					LogEngine.log(e);
 					break; //wenn ein Empfangen vom Socket nicht mehr öglich ist Thread beenden
 				}
 			}
@@ -141,7 +153,7 @@ public class ConnectionHandler {
 	}
 	
 	class Pinger implements Runnable{
-		private static final long	PING_INTERVAL	= 5000;
+		private static final long	PING_INTERVAL	= 30000;
 
 		public void run() {
 			while(isConnected()) {

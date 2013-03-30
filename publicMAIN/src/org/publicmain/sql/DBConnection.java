@@ -53,10 +53,10 @@ public class DBConnection {
 		try {
 			this.con = DriverManager.getConnection(url, user, passwd);
 			this.stmt = con.createStatement();
-			LogEngine.log("DB-ServerVerbindung hergestellt", this, LogEngine.INFO);
+			LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
 			return true;
 		} catch (SQLException e) {
-			LogEngine.log("DB-Verbindung fehlgeschlagen: " + e.getMessage(), this, LogEngine.ERROR);
+			LogEngine.log(this, "DB-Verbindung fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
 			return false;
 		}
 	}
@@ -74,9 +74,9 @@ public class DBConnection {
 																	"data varchar(20) NOT NULL," +
 																	"primary key(id))" +
 																	"engine = INNODB");
-			LogEngine.log("createDbAndTables erstellt", this, LogEngine.INFO);
+			LogEngine.log(this, "createDbAndTables erstellt", LogEngine.INFO);
 		} catch (SQLException e) {
-			LogEngine.log("createDbAndTables fehlgeschlagen: "+ e.getMessage(), this, LogEngine.ERROR);
+			LogEngine.log(this, "createDbAndTables fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
 		}
 	}
 	
@@ -94,13 +94,13 @@ public class DBConnection {
 				try {
 					System.out.println(saveStmt);
 					stmt.execute(saveStmt);
-					LogEngine.log("Nachicht in DB-Tabelle " + msgHistTbl + " eingetragen.", this, LogEngine.INFO);
+					LogEngine.log(this, "Nachicht in DB-Tabelle " + msgHistTbl + " eingetragen.",  LogEngine.INFO);
 				} catch (Exception e) {
-					LogEngine.log("Fehler beim eintragen in : "+ msgHistTbl + " " + e.getMessage(), this, LogEngine.ERROR);
+					LogEngine.log(this, "Fehler beim eintragen in : "+ msgHistTbl + " " + e.getMessage(),  LogEngine.ERROR);
 				}
 			}
 		} else {
-			System.out.println("es besteht keine DB-Verbindung!");
+			System.out.println(this, "es besteht keine DB-Verbindung!");
 			if(connectToLocDBServer()){
 				isDBConnected = true;
 				createDbAndTables();

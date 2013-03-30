@@ -3,6 +3,8 @@ package org.publicmain.common;
 public enum MSGCode {
 	NODE_UPDATE,
 	ALIAS_UPDATE,
+	NODE_LOOKUP,
+	NODE_LOOKUP_REPLY,
 	
 	ECHO_REQUEST,
 	ECHO_RESPONSE,
@@ -33,5 +35,9 @@ public enum MSGCode {
 	
 	CW_INFO_TEXT,
 	CW_WARNING_TEXT,
-	CW_ERROR_TEXT;
+	CW_ERROR_TEXT,
+	CW_FILE_REQUEST,
+	
+	GUI_INFORM;
+	
 }

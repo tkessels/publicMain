@@ -100,7 +100,7 @@ public class DBConnection {
 				}
 			}
 		} else {
-			System.out.println(this, "es besteht keine DB-Verbindung!");
+			System.out.println("es besteht keine DB-Verbindung!");
 			if(connectToLocDBServer()){
 				isDBConnected = true;
 				createDbAndTables();

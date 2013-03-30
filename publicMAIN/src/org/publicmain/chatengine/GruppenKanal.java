@@ -15,7 +15,7 @@ public class GruppenKanal extends Kanal {
 	}
 	
 	public boolean add(MSG nachricht){
-		LogEngine.log("Nachricht auf Kanal " + referenz + " empfangen benachrichtige : " + this.countObservers(), this, LogEngine.INFO);
+		LogEngine.log(this, "Nachricht auf Kanal " + referenz + " empfangen benachrichtige : " + this.countObservers(), LogEngine.INFO);
 		if(nachricht.getGroup().equals(referenz)){
 			messages.add(nachricht);
 			setChanged();

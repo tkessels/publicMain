@@ -33,7 +33,7 @@ public class pMTrayIcon {
     	this.log = new LogEngine();
         // Prüfung ob Systemtray unterstützt:
         if (!SystemTray.isSupported()) {
-            log.log("SystemTray is not supported", this, LogEngine.ERROR);
+            log.log(this, "SystemTray is not supported", LogEngine.ERROR);
             return;
         }
         
@@ -62,7 +62,7 @@ public class pMTrayIcon {
         try {
             sysTray.add(trayIcon);
         } catch (AWTException e) {
-        	log.log("TrayIcon konnte nicht hinzugefügt werden.", this, LogEngine.ERROR);
+        	log.log(this, "TrayIcon konnte nicht hinzugefügt werden.", LogEngine.ERROR);
             return;
         }
         

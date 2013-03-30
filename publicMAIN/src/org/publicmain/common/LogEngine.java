@@ -9,7 +9,8 @@ import org.publicmain.nodeengine.ConnectionHandler;
  *
  */
 public class LogEngine {
-	private static int verbosity=3;
+	private static int verbosity=4;
+	public static final int TRACE=4;
 	public static final int INFO=3;
 	public static final int WARNING=2;
 	public static final int ERROR=1;
@@ -42,14 +43,13 @@ public class LogEngine {
 	}
 	
 	/**Gibt eine Fehlermeldung auf dem Fehlerstrom aus 
-	 * @param meldung Der Text der Fehlermeldung
 	 * @param source Die Quelle des Fehlers
+	 * @param meldung Der Text der Fehlermeldung
 	 * @param errorLevel Das Niveau des Fehlers (INFO, WARNING oder ERROR)
 	 */
-	public static void log(String meldung, Object source,int errorLevel){
-		if(errorLevel<=verbosity){
-			log(source.getClass().getSimpleName()+" : "+meldung,errorLevel);
-		}
+	public static void log(Object source, String meldung,int errorLevel){
+			String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName();
+			log(sourceString+" : "+meldung,errorLevel);
 	}
 	
 	private static String msg2String(MSG x){
@@ -60,7 +60,7 @@ public class LogEngine {
 	
 	public static void log(Object source,String action,MSG x){
 		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
-		log(sourceString+ " : " + action+ " : "+msg2String(x),INFO);
+		log(sourceString+ " : " + action+ " : "+msg2String(x),TRACE);
 	}
 	
 	public static void log(ConnectionHandler quelle,String meldung){
@@ -74,8 +74,7 @@ public class LogEngine {
 	}
 
 	public static void log(ConnectionHandler quelle, String action,MSG paket) {
-		log(quelle,action+":"+paket);
-		
+		log(quelle.toString(),action,paket);
 	}
 	
 	

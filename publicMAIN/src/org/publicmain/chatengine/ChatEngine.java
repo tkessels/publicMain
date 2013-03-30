@@ -27,7 +27,6 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	//private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
 	private List<KnotenKanal> private_channels;
@@ -262,7 +261,7 @@ public class ChatEngine extends Observable{
 		for (Node x : ne.getNodes()) {
 			if(x.getNodeID()==nid) return x;
 		}
-		return null;
+		return ne.retrieve(nid);
 	}
 }
 

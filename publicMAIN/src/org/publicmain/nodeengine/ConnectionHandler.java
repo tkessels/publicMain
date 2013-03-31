@@ -136,8 +136,8 @@ public class ConnectionHandler {
 				try {
 					readObject = line_in.readObject();
 					MSG tmp = (MSG) readObject;
-					if (tmp.getTyp() == NachrichtenTyp.SYSTEM&&tmp.getCode()==MSGCode.NODE_UPDATE)me.children.add((Node) tmp.getData());
-					/*
+					if (tmp.getTyp() == NachrichtenTyp.SYSTEM && tmp.getCode()==MSGCode.NODE_UPDATE) me.children.add((Node) tmp.getData());
+					
 					if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
 						if (tmp.getCode() == MSGCode.ECHO_REQUEST) {
 							send(MSG.createReply(tmp));
@@ -146,7 +146,7 @@ public class ConnectionHandler {
 							latency = System.currentTimeMillis() - (Long) tmp.getData();
 						}
 					}
-					else ne.handle(tmp, me);*/
+					
 					ne.handle(tmp, me);
 					
 				}

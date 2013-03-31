@@ -29,7 +29,7 @@ public class ChatEngine extends Observable{
 	public NodeEngine ne;
 	public LogEngine log;
 	public DBConnection db;
-	private Set<Node> nodes;
+	//private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
 	private List<KnotenKanal> private_channels;
@@ -53,7 +53,7 @@ public class ChatEngine extends Observable{
 	public ChatEngine() throws IOException{
 		
 		this.ne = new NodeEngine(this);
-		this.db = db.getDBConnection();
+		//this.db = db.getDBConnection();
 		this.ce = this;
 		
 		group_channels=new ArrayList<GruppenKanal>();
@@ -81,8 +81,6 @@ public class ChatEngine extends Observable{
 			}}
 		);
 		msgSorterBot.start();
-		
-		
 	}
 	
 	
@@ -255,7 +253,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
-		db.saveMsg(nachricht);
+		if(db!=null)db.saveMsg(nachricht);
 	}
 	
 	/**Findet zu NodeID zugehörigen Node in der Liste

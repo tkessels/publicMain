@@ -131,6 +131,10 @@ public class NodeEngine {
 		return (root_connection != null && root_connection.isConnected());
 	}
 
+	public int getServer_port() {
+		return server_socket.getLocalPort();
+	}
+	
 	/**
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen Nodes beinhaltet.
 	 */
@@ -138,9 +142,21 @@ public class NodeEngine {
 		return allNodes;
 	}
 
-	public int getServer_port() {
-		return server_socket.getLocalPort();
+
+	/**Findet zu NodeID zugehörigen Node in der Liste
+	 * @param nid NodeID
+	 * @return Node-Objekt zu angegebenem NodeID
+	 */
+	public Node getNodeforNID(long nid){
+		for (Node x : getNodes()) {
+			if(x.getNodeID()==nid) return x;
+		}
+		if(isRoot()) return retrieve(nid);
+		else return null;
 	}
+	
+	
+
 
 	/**
 	 * Gibt ein StringArray aller vorhandenen Groups zurück
@@ -313,19 +329,20 @@ public class NodeEngine {
 	 * @param conn
 	 */
 	public void remove(ConnectionHandler conn) {
+		LogEngine.log(conn, "removing");
 		System.out.println("Removing" + conn);
 		if (conn == root_connection) {
-			System.out.println("Lost ROOOT");
+			LogEngine.log(this, "Lost Root", LogEngine.INFO);
 			root_connection = null;
 			updateNodes();
 			if (online) {
 				Object[] payload = { allNodes, meinNode };
 				sendmutlicast(new MSG(payload, MSGCode.ROOT_ANNOUNCE));
-				new Thread(new RootMe()).start();
-				
+				discover_game(null);
 			}
 		}
 		else {
+			LogEngine.log(this, "Lost Child", LogEngine.INFO);
 			connections.remove(conn);
 			sendtcp(new MSG(conn.children, MSGCode.CHILD_SHUTDOWN));
 		}
@@ -333,7 +350,7 @@ public class NodeEngine {
 	}
 
 	private synchronized void discover_game(MSG paket) {
-		root_announce_stash.offer(paket);
+		if(paket!=null)root_announce_stash.offer(paket);
 		System.out.println(root_announce_stash);
 		if (discoverGame == null) {
 			System.out.println("erzeuge DiscoGamer");
@@ -533,7 +550,6 @@ public class NodeEngine {
 				catch (InterruptedException e) {
 				}
 			}
-			System.out.println("waited long enough");
 			Node toConnectTo = meinNode;
 			int maxPenunte = allNodes.size();
 			
@@ -548,7 +564,8 @@ public class NodeEngine {
 					maxPenunte = tmp_allnodes.size();
 				}
 			}
-			System.out.println(toConnectTo != meinNode);
+			
+			System.out.println("DiscoGame is over! I " + ((toConnectTo != meinNode)?"lost":"won")+" against " + root_announce_stash.size() +"roots");
 			if (toConnectTo != meinNode) discover(toConnectTo);
 			else root = true;
 			try {
@@ -616,19 +633,6 @@ public class NodeEngine {
 			}
 	}
 
-	/**Findet zu NodeID zugehörigen Node in der Liste
-	 * @param nid NodeID
-	 * @return Node-Objekt zu angegebenem NodeID
-	 */
-	public Node getNodeforNID(long nid){
-		for (Node x : getNodes()) {
-			if(x.getNodeID()==nid) return x;
-		}
-		if(isRoot()) return retrieve(nid);
-		else return null;
-	}
-	
-	
 	
 
 }

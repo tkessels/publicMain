@@ -81,36 +81,44 @@ public class DBConnection {
 	}
 	
 	// TODO in seperate Klasse auslagern! 
-	public void saveMsg (MSG m){
-		if (isDBConnected){
-			if(m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE){
-				String saveStmt = ("insert into " + msgHistTbl + " VALUES (" +
-						m.getId() + "," +
-						m.getSender() + "," +
-						m.getTimestamp() + "," +
-						m.getEmpfänger() + "," +
-						"'" + m.getGroup() + "'" + ","+
-						"'" + m.getData() + "'" + ")");
-				try {
-					System.out.println(saveStmt);
-					stmt.execute(saveStmt);
-					LogEngine.log(this, "Nachicht in DB-Tabelle " + msgHistTbl + " eingetragen.",  LogEngine.INFO);
-				} catch (Exception e) {
-					LogEngine.log(this, "Fehler beim eintragen in : "+ msgHistTbl + " " + e.getMessage(),  LogEngine.ERROR);
+	public void saveMsg (final MSG m){
+		Runnable tmp = new Runnable() {
+			public void run() {
+				if (isDBConnected) {
+					if (m.getTyp() == NachrichtenTyp.GROUP
+							|| m.getTyp() == NachrichtenTyp.PRIVATE) {
+						String saveStmt = ("insert into " + msgHistTbl
+								+ " VALUES (" + m.getId() + "," + m.getSender()
+								+ "," + m.getTimestamp() + ","
+								+ m.getEmpfänger() + "," + "'" + m.getGroup()
+								+ "'" + "," + "'" + m.getData() + "'" + ")");
+						try {
+							//System.out.println(saveStmt);
+							stmt.execute(saveStmt);
+							LogEngine.log(DBConnection.this,
+									"Nachicht in DB-Tabelle " + msgHistTbl
+											+ " eingetragen.", LogEngine.INFO);
+						} catch (Exception e) {
+							LogEngine.log(DBConnection.this,
+									"Fehler beim eintragen in : " + msgHistTbl
+											+ " " + e.getMessage(),
+									LogEngine.ERROR);
+						}
+					}
+				} else {
+					//System.out.println("es besteht keine DB-Verbindung!");
+					if (connectToLocDBServer()) {
+						isDBConnected = true;
+						createDbAndTables();
+						saveMsg(m);
+
+					} else {
+						//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
+					}
 				}
 			}
-		} else {
-			System.out.println("es besteht keine DB-Verbindung!");
-			if(connectToLocDBServer()){
-				isDBConnected = true;
-				createDbAndTables();
-				saveMsg(m);
-				
-			}else {
-				System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
-			}
-		}
-		
+		};
+		(new Thread(tmp)).start();
 		
 		
 	}

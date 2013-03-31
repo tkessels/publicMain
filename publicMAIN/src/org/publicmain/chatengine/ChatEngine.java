@@ -17,6 +17,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
+import org.publicmain.sql.DBConnection;
 
 /**
  * @author ATRM
@@ -27,6 +28,8 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
+	public DBConnection db;
+	private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
 	private List<KnotenKanal> private_channels;
@@ -49,8 +52,9 @@ public class ChatEngine extends Observable{
 	
 	public ChatEngine() throws IOException{
 		
-		ne = new NodeEngine(this);
-		ce=this;
+		this.ne = new NodeEngine(this);
+		this.db = db.getDBConnection();
+		this.ce = this;
 		
 		group_channels=new ArrayList<GruppenKanal>();
 		private_channels=new ArrayList<KnotenKanal>();
@@ -251,6 +255,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
+		db.saveMsg(nachricht);
 	}
 	
 	/**Findet zu NodeID zugehörigen Node in der Liste

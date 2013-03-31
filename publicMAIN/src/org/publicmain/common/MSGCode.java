@@ -3,8 +3,8 @@ package org.publicmain.common;
 public enum MSGCode {
 	NODE_UPDATE,
 	ALIAS_UPDATE,
+	
 	NODE_LOOKUP,
-	NODE_LOOKUP_REPLY,
 	
 	ECHO_REQUEST,
 	ECHO_RESPONSE,
@@ -18,10 +18,13 @@ public enum MSGCode {
 	
 	POLL_ALLNODES,
 	REPORT_ALLNODES,
-	
+	/*
+	TREE_DATA_POLL,
+	TREE_DATA,
+	*/
 	NODE_SHUTDOWN,
 	CHILD_SHUTDOWN,
-	
+	/*
 	GROUP_POLL,
 	GROUP_REPLY,
 	GROUP_JOIN,
@@ -32,7 +35,7 @@ public enum MSGCode {
 	
 	CMD_SHUTDOWN,
 	CMD_RESTART,
-	
+	*/
 	CW_INFO_TEXT,
 	CW_WARNING_TEXT,
 	CW_ERROR_TEXT,

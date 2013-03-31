@@ -151,10 +151,6 @@ public class MSG implements Serializable{
 					reply.code=MSGCode.ECHO_RESPONSE;
 					reply.data=x.getTimestamp();
 					break;
-				case NODE_LOOKUP:
-					reply.code=MSGCode.NODE_LOOKUP_REPLY;
-					reply.data=NodeEngine.getNE().getME();
-					break;
 			}
 			return reply;
 		}

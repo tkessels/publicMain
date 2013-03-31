@@ -257,11 +257,8 @@ public class ChatEngine extends Observable{
 	 * @param nid NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
 	 */
-	public Node getNodeforUser(long nid){
-		for (Node x : ne.getNodes()) {
-			if(x.getNodeID()==nid) return x;
-		}
-		return ne.retrieve(nid);
+	public Node getNodeforNID(long nid){
+		return ne.getNodeforNID(nid);
 	}
 }
 

@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.text.AsyncBoxView.ChildState;
+
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -23,6 +25,7 @@ import org.publicmain.common.Node;
  */
 public class ConnectionHandler {
 	public Set<Node> children;
+	public Node otherEnd;
 	private NodeEngine ne;
 	private Socket line;
 	private ObjectOutputStream line_out;
@@ -30,6 +33,7 @@ public class ConnectionHandler {
 	private Thread pakets_rein_hol_bot;
 	private ConnectionHandler me;
 	private String endpoint;
+	
 	private Thread pingpongBot=new Thread(new Pinger());
 	private long latency=Integer.MAX_VALUE;
 
@@ -74,7 +78,7 @@ public class ConnectionHandler {
 				line_out.flush();
 			}
 			catch (IOException e) {
-				LogEngine.log(e);
+				LogEngine.log(this, "failure", paket);
 			}
 		}
 		else LogEngine.log(this, "dropped", paket);
@@ -110,8 +114,9 @@ public class ConnectionHandler {
 		catch (IOException e) {
 		}
 		LogEngine.log(me,"closed");
-		pakets_rein_hol_bot=null;
 		me=null;
+		//pakets_rein_hol_bot.stop();
+		pakets_rein_hol_bot=null;
 		ne.remove(this);
 
 
@@ -126,26 +131,36 @@ public class ConnectionHandler {
 	{
 		public void run() 
 		{
-			while(me!=null&&me.isConnected())
-			{
-				try 
-				{
-					MSG tmp = (MSG) line_in.readObject();
-					if(tmp.getTyp()==NachrichtenTyp.SYSTEM&&tmp.getCode()==MSGCode.ECHO_REQUEST) {
-						send(new MSG(tmp.getTimestamp(), MSGCode.ECHO_RESPONSE));
+			while (me != null && me.isConnected()) {
+				Object readObject = null;
+				try {
+					readObject = line_in.readObject();
+					MSG tmp = (MSG) readObject;
+					if (tmp.getTyp() == NachrichtenTyp.SYSTEM&&tmp.getCode()==MSGCode.NODE_UPDATE)me.children.add((Node) tmp.getData());
+					/*
+					if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
+						if (tmp.getCode() == MSGCode.ECHO_REQUEST) {
+							send(MSG.createReply(tmp));
+						}
+						if (tmp.getCode() == MSGCode.ECHO_RESPONSE) {
+							latency = System.currentTimeMillis() - (Long) tmp.getData();
+						}
 					}
-					else if(tmp.getTyp()==NachrichtenTyp.SYSTEM&&tmp.getCode()==MSGCode.ECHO_RESPONSE) {
-						latency=System.currentTimeMillis()-(Long)tmp.getData();
-					}
-					else ne.handle(tmp, me);
-				} 
+					else ne.handle(tmp, me);*/
+					ne.handle(tmp, me);
+					
+				}
 				catch (ClassNotFoundException e) {
-					LogEngine.log(e,"ConnectionHandler");
-				} 
-				catch (IOException e) 
-				{
+					LogEngine.log(e, "ConnectionHandler");
+				}
+				catch (IOException e) {
 					LogEngine.log(e);
-					break; //wenn ein Empfangen vom Socket nicht mehr öglich ist Thread beenden
+					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist -> Thread beenden
+				}
+				catch (Exception e) {
+					System.out.println(readObject);
+					if (readObject != null) System.out.println((readObject instanceof MSG)?((MSG)readObject).toString():readObject.toString());
+					System.out.println(me);
 				}
 			}
 			close();
@@ -164,10 +179,7 @@ public class ConnectionHandler {
 				catch (InterruptedException e) {
 				}
 			}
-			
 		}
-		
-		
 	}
 	
 

@@ -8,12 +8,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
@@ -21,6 +25,7 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
+import org.publicmain.gui.GUI;
 
 /**
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
@@ -51,13 +56,14 @@ public class NodeEngine {
 	private Thread						multicastRecieverBot;												//Thread zum annehmen und verarbeiten der Multicast-Pakete
 	private Thread						connectionsAcceptBot;												//Thread akzeptiert und schachtelt eingehen Verbindungen auf dem ServerSocket
 	private Thread						discoverGame;														//Thread zur Aushandlung neuer Root Stellung Wenn der Baum segmentiert wurde 
-	
-	private List<Hook> hooks=new ArrayList<Hook>(); 
+
+	private List<Hook>					hooks					= new ArrayList<Hook>();
 
 	public NodeEngine(ChatEngine parent) throws IOException {
 		allNodes = new HashSet<Node>();
 		groups = new HashSet<String>();
 		connections = new ArrayList<ConnectionHandler>();
+		root_announce_stash = new LinkedBlockingQueue<MSG>();
 		ne = this;
 		ce = parent;
 		online = true;
@@ -91,12 +97,15 @@ public class NodeEngine {
 	 * getMe() gibt das eigene NodeObjekt zurück
 	 */
 	public Node getME() {
-		return meinNode; //TODO:nur zum test
+		return meinNode; 
 	}
 
 	private Node getBestNode() {
 		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sich der Neue Verbinden darf.
-
+		/*Random x = new Random(meinNode.getNodeID());
+		Node[] tmp = null;
+		allNodes.toArray(tmp);
+		return tmp[x.nextInt(allNodes.size())];*/
 		return meinNode;
 	}
 
@@ -115,10 +124,10 @@ public class NodeEngine {
 	 * isRoot() gibt "true" zurück wenn die laufende Nodeengin Root ist und "false" wenn nicht.
 	 */
 	public boolean isRoot() {
-		return root || !hasParrent();
+		return root && !hasParent();
 	}
 
-	public boolean hasParrent() {
+	public boolean hasParent() {
 		return (root_connection != null && root_connection.isConnected());
 	}
 
@@ -152,9 +161,11 @@ public class NodeEngine {
 	 */
 	private void sendmutlicast(MSG nachricht) {
 		byte[] buf = MSG.getBytes(nachricht);
-		LogEngine.log(this, "sende", nachricht);
 		try {
-			if (buf.length < 65000) multi_socket.send(new DatagramPacket(buf, buf.length, group, 6789));
+			if (buf.length < 65000) {
+				multi_socket.send(new DatagramPacket(buf, buf.length, group, 6789));
+				LogEngine.log(this, "sende [MC]", nachricht);
+			}
 			else LogEngine.log(this, "MSG zu groß für UDP-Paket", LogEngine.ERROR);
 		}
 		catch (IOException e) {
@@ -164,19 +175,22 @@ public class NodeEngine {
 
 	private void sendunicast(MSG msg, Node newRoot) {
 		byte[] data = MSG.getBytes(msg);
-		for (InetAddress x : newRoot.getSockets()) {
-			DatagramPacket unicast = new DatagramPacket(data, data.length, x, multicast_port);//über Unicast
-			try {
-				multi_socket.send(unicast);
-			}
-			catch (IOException e) {
-				LogEngine.log(e);
+		if (data.length < 65000) {
+			for (InetAddress x : newRoot.getSockets()) {
+				DatagramPacket unicast = new DatagramPacket(data, data.length, x, multicast_port);//über Unicast
+				try {
+					multi_socket.send(unicast);
+					LogEngine.log(this, "sende ["+x.toString()+"]", msg);
+				}
+				catch (IOException e) {
+					LogEngine.log(e);
+				}
 			}
 		}
 	}
 
 	public void sendtcp(MSG nachricht) {
-		if (!isRoot()) root_connection.send(nachricht); //vielleicht sendroot verwenden?
+		if (hasParent()) sendroot(nachricht); //vielleicht sendroot verwenden?
 		for (ConnectionHandler x : connections)
 			x.send(nachricht);
 	}
@@ -211,15 +225,17 @@ public class NodeEngine {
 	}
 
 	private void updateNodes() {
-		if (isRoot()) {
-			synchronized (allNodes) {
-				allNodes.clear();
-				allNodes.add(getME());
-				allNodes.addAll(getChilds());
-				allNodes.notify();
-			}
+		/*
+		 * if (isRoot()) { synchronized (allNodes) { allNodes.clear(); allNodes.add(getME()); allNodes.addAll(getChilds()); allNodes.notify(); } } else sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
+		 */
+		synchronized (allNodes) {
+			allNodes.clear();
+			allNodes.add(getME());
+			allNodes.addAll(getChilds());
+			allNodes.notify();
 		}
-		else sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
+		if (hasParent()) sendroot(new MSG(allNodes, MSGCode.REPORT_ALLNODES));
+
 	}
 
 	private void pollChilds() {
@@ -244,12 +260,10 @@ public class NodeEngine {
 	 *             Wenn der hergestellte Socket
 	 */
 	private void connectTo(Node knoten) {
-
 		Socket tmp_socket = null;
 		for (InetAddress x : knoten.getSockets()) {
 			try {
 				tmp_socket = new Socket(x.getHostAddress(), knoten.getServer_port());
-
 			}
 			catch (UnknownHostException e) {
 				LogEngine.log(e);
@@ -257,22 +271,25 @@ public class NodeEngine {
 			catch (IOException e) {
 				LogEngine.log(e);
 			}
-			if (tmp_socket != null && tmp_socket.isConnected()) break;
+			if (tmp_socket != null && tmp_socket.isConnected()) break; //wenn eine Verbindung mit einer der IPs des Knotenaufgebaut wurden konnte. Hör auf
 		}
 		if (tmp_socket != null) {
 			try {
 				root_connection = new ConnectionHandler(tmp_socket);
+				root = false;
+				sendroot(new MSG(getME()));
+				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 			}
 			catch (IOException e) {
 				LogEngine.log(e);
 			}
-			sendroot(new MSG(getME()));
-			sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 		}
 	}
 
 	public void disconnect() {
 		online = false;
+		connectionsAcceptBot.stop();
+		multicastRecieverBot.stop();
 		sendtcp(new MSG(meinNode, MSGCode.NODE_SHUTDOWN));
 		root_connection.disconnect();
 		for (final ConnectionHandler con : connections)
@@ -281,7 +298,13 @@ public class NodeEngine {
 					con.disconnect();
 				}
 			})).start();// Threadded Disconnect für jede Leitung
-		remove(root_connection);
+		multi_socket.close();
+		try {
+			server_socket.close();
+		}
+		catch (IOException e) {
+			LogEngine.log(e);
+		}
 	}
 
 	/**
@@ -290,23 +313,34 @@ public class NodeEngine {
 	 * @param conn
 	 */
 	public void remove(ConnectionHandler conn) {
+		System.out.println("Removing" + conn);
 		if (conn == root_connection) {
+			System.out.println("Lost ROOOT");
 			root_connection = null;
-			if (online == true) sendmutlicast(new MSG(allNodes, MSGCode.ROOT_ANNOUNCE));
+			updateNodes();
+			if (online) {
+				Object[] payload = { allNodes, meinNode };
+				sendmutlicast(new MSG(payload, MSGCode.ROOT_ANNOUNCE));
+				new Thread(new RootMe()).start();
+				
+			}
 		}
 		else {
 			connections.remove(conn);
 			sendtcp(new MSG(conn.children, MSGCode.CHILD_SHUTDOWN));
 		}
-		updateNodes();
+		//updateNodes();
 	}
 
 	private synchronized void discover_game(MSG paket) {
 		root_announce_stash.offer(paket);
+		System.out.println(root_announce_stash);
 		if (discoverGame == null) {
+			System.out.println("erzeuge DiscoGamer");
+			discoverGame = new Thread(new DiscoverGame());
+			discoverGame.start();
 			Object[] payload = { allNodes, meinNode };
 			sendmutlicast(new MSG(payload, MSGCode.ROOT_ANNOUNCE));
-			discoverGame = new Thread(new DiscoverGame());
 		}
 	}
 
@@ -318,10 +352,10 @@ public class NodeEngine {
 	 */
 	public void handleMulticast(MSG paket) {
 		LogEngine.log(this, "handling [MC]", paket);
-		if (paket.getTyp() == NachrichtenTyp.SYSTEM) {
+		if (online && (paket.getTyp() == NachrichtenTyp.SYSTEM)) {
 			switch (paket.getCode()) {
 				case ROOT_REPLY:
-					if (online && isRoot()) {
+					if (!hasParent()) {
 						connectTo((Node) paket.getData());
 					}
 					break;
@@ -329,8 +363,10 @@ public class NodeEngine {
 					if (isRoot()) sendDiscoverReply((Node) paket.getData());
 					break;
 				case ROOT_ANNOUNCE:
-					discover_game(paket);
+					if (!hasParent()) discover_game(paket);
 					break;
+				case NODE_LOOKUP:
+					if((long)paket.getData()==meinNode.getNodeID())sendroot(new MSG(meinNode));
 				default:
 					LogEngine.log(this, "handling [MC]:undefined", paket);
 			}
@@ -356,28 +392,17 @@ public class NodeEngine {
 			case SYSTEM:
 				switch (paket.getCode()) {
 					case NODE_UPDATE:
-						synchronized (allNodes) {
-							allNodes.add((Node) paket.getData());
-							allNodes.notifyAll();
-						}
-						if (quelle != root_connection) quelle.children.add((Node) paket.getData());
+						allnodes_add((Node) paket.getData());
 						sendtcpexcept(paket, quelle);
-						//				else LogEngine.log("NODE_UPDATE von root bekommen", this, LogEngine.WARNING);
 						break;
 
 					case POLL_ALLNODES:
-						if (root_connection != quelle) quelle.send(new MSG(allNodes, MSGCode.REPORT_ALLNODES));
+						//updateNodes();
+						if (quelle!=root_connection) quelle.send(new MSG(allNodes, MSGCode.REPORT_ALLNODES));
 						//				else LogEngine.log("POLL_ALLNODES von root bekommen", this, LogEngine.WARNING);
 						break;
 					case REPORT_ALLNODES:
-						if (quelle == root_connection) {
-							synchronized (allNodes) {
-								allNodes.clear();
-								allNodes.addAll((Set<Node>) paket.getData());
-								allNodes.add(meinNode);
-								allNodes.notifyAll();
-							}
-						}
+						allnodes_set((Set<Node>) paket.getData());
 						//				else LogEngine.log("REPORT_ALLNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
 						break;
 					case POLL_CHILDNODES:
@@ -398,24 +423,21 @@ public class NodeEngine {
 						break;
 					case NODE_SHUTDOWN:
 						//sendtcpexcept(new MSG(quelle.children,MSGCode.CHILD_SHUTDOWN), quelle);
-						synchronized (allNodes) {
-							allNodes.removeAll(quelle.children);
-							allNodes.notifyAll();
-						}
+						allnodes_remove(quelle.children);
 						quelle.close();
 						break;
 
 					case CHILD_SHUTDOWN:
 						if (quelle != root_connection) quelle.children.removeAll((Collection<Node>) paket.getData());
-						synchronized (allNodes) {
-							allNodes.removeAll((Collection<Node>) paket.getData());
-							allNodes.notifyAll();
-						}
+						allnodes_remove((Collection<Node>) paket.getData());
 						sendtcpexcept(paket, quelle);
-
 						break;
+						
 					case NODE_LOOKUP:
-						quelle.send(MSG.createReply(paket));
+						Node tmp=null;
+						if((tmp=getNodeforNID((long) paket.getData()))!=null)quelle.send(new MSG(tmp));
+						else sendroot(paket);
+						
 						break;
 					default:
 						LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
@@ -428,13 +450,58 @@ public class NodeEngine {
 		}
 	}
 
+	
+	private void allnodes_remove(Collection<Node> data) {
+		synchronized (allNodes) {
+			int hash = allNodes.hashCode();
+			allNodes.removeAll(data);
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+		}
+	}
+	
+	private void allnodes_remove(Node data) {
+		synchronized (allNodes) {
+			int hash = allNodes.hashCode();
+			allNodes.remove(data);
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+		}
+	}
+	
+	private void allnodes_add(Collection<Node> data) {
+		synchronized (allNodes) {
+			int hash = allNodes.hashCode();
+			allNodes.addAll(data);
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+		}
+	}
+	
+	private void allnodes_add(Node data) {
+		synchronized (allNodes) {
+			int hash = allNodes.hashCode();
+			allNodes.add(data);
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+		}
+	}
+	
+	private void allnodes_set(Collection<Node> data) {
+		synchronized (allNodes) {
+			int hash = allNodes.hashCode();
+			allNodes.clear();
+			allNodes.addAll(data);
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+		}
+	}
+	
+	
+	
+
+
 	private boolean hook(MSG paket) {
 		boolean tmp = false;
-		for (Hook x : hooks) tmp |= x.check(paket);
+		for (Hook x : hooks)
+			tmp |= x.check(paket);
 		return tmp;
 	}
-
-	
 
 	/**
 	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.
@@ -446,7 +513,8 @@ public class NodeEngine {
 			}
 			catch (InterruptedException e) {
 			}
-			if (!hasParrent()) {
+			if (!hasParent()&&discoverGame==null) {
+				LogEngine.log("RootMe", "no Nodes detected: turning me to ROOT", LogEngine.INFO);
 				root = true;
 			}
 		}
@@ -458,16 +526,19 @@ public class NodeEngine {
 	private final class DiscoverGame implements Runnable {
 		public void run() {
 			long until = System.currentTimeMillis() + ROOT_ANNOUNCE_TIMEOUT;
-			while (System.currentTimeMillis() < until)
+			while (System.currentTimeMillis() < until) {
 				try {
 					Thread.sleep(100);
 				}
 				catch (InterruptedException e) {
 				}
+			}
+			System.out.println("waited long enough");
 			Node toConnectTo = meinNode;
 			int maxPenunte = allNodes.size();
-			MSG[] ra_stash = (MSG[]) root_announce_stash.toArray(); //lokale Kopie aller RA um Nachzügler zu ignorieren
-			for (MSG x : ra_stash) {
+			
+			for (MSG x : root_announce_stash) {
+				System.out.println(x.toString());
 				@SuppressWarnings("unchecked")
 				// extrahieren aller informationen dieses ROOTANNOUNCE
 				Set<Node> tmp_allnodes = (Set<Node>) ((Object[]) x.getData())[0]; // Cast Payload in ein Object Array und das 1. Object in ein Set aus Nodes
@@ -477,7 +548,9 @@ public class NodeEngine {
 					maxPenunte = tmp_allnodes.size();
 				}
 			}
+			System.out.println(toConnectTo != meinNode);
 			if (toConnectTo != meinNode) discover(toConnectTo);
+			else root = true;
 			try {
 				Thread.sleep(ROOT_ANNOUNCE_TIMEOUT);
 			}
@@ -497,7 +570,7 @@ public class NodeEngine {
 					multi_socket.receive(tmp);
 					MSG nachricht = MSG.getMSG(tmp.getData());
 					LogEngine.log("multicastRecieverBot", "multicastRecieve", nachricht);
-					handleMulticast(nachricht);
+					if (nachricht != null) handleMulticast(nachricht);
 				}
 				catch (IOException e) {
 					LogEngine.log(e);
@@ -525,23 +598,37 @@ public class NodeEngine {
 	}
 
 	public Node retrieve(long nid) {
-		Hook x = new Hook(NachrichtenTyp.SYSTEM,MSGCode.NODE_LOOKUP_REPLY, nid, null, null,null);
-		sendtcp(new MSG(nid,MSGCode.NODE_LOOKUP));
-		hooks.add(x);
-		synchronized (x) {
-			try {
-				x.wait(1000);
+			Hook x = new Hook(NachrichtenTyp.SYSTEM, MSGCode.NODE_UPDATE, nid, null, null, null, false);
+			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
+			hooks.add(x);
+			synchronized (x) {
+				try {
+					x.wait(1000);
+				}
+				catch (InterruptedException e) {
+				}
 			}
-			catch (InterruptedException e) {
+			hooks.remove(x);
+			if (x.getHookedMSG() != null) return (Node) x.getHookedMSG().getData();
+			else {
+				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
+				return null;
 			}
-		}
-		if(x.getHookedMSG()!=null) {
-			return (Node)x.getHookedMSG().getData();
-		}
-		else return null;
-		
-		
-
 	}
+
+	/**Findet zu NodeID zugehörigen Node in der Liste
+	 * @param nid NodeID
+	 * @return Node-Objekt zu angegebenem NodeID
+	 */
+	public Node getNodeforNID(long nid){
+		for (Node x : getNodes()) {
+			if(x.getNodeID()==nid) return x;
+		}
+		if(isRoot()) return retrieve(nid);
+		else return null;
+	}
+	
+	
+	
 
 }

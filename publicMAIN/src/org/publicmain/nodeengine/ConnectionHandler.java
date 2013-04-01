@@ -9,56 +9,52 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.swing.text.AsyncBoxView.ChildState;
-
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 
-
-
-/**Wir eine Facade für unsere Sockets um Messeges zu empfangen und zu versenden
- * @author Kaddi
- *
+/**
+ * Hüll Klasse für einen TCP-Socket zur übertragung von MSG Objekten
+ * 
+ * 
  */
 public class ConnectionHandler {
-	public Set<Node> children;
-	public Node otherEnd;
-	private NodeEngine ne;
-	private Socket line;
-	private ObjectOutputStream line_out;
-	private ObjectInputStream line_in;
-	private Thread pakets_rein_hol_bot;
-	private ConnectionHandler me;
-	private String endpoint;
-	
-	private Thread pingpongBot=new Thread(new Pinger());
-	private long latency=Integer.MAX_VALUE;
+	public Set<Node>			children;
+	public Node					otherEnd;
+	private NodeEngine			ne;
+	private Socket				line;
+	private ObjectOutputStream	line_out;
+	private ObjectInputStream	line_in;
+	private ConnectionHandler	me;
+	private String				endpoint;
+	private long				latency				= Integer.MAX_VALUE;
 
-	
-	
-	public ConnectionHandler(Socket underlying) throws IOException{
-		me=this;
-		ne=NodeEngine.getNE();
-		children=new HashSet<Node>();
-		
+	private Thread				pakets_rein_hol_bot	= new Thread(new Reciever());
+	private Thread				pingpongBot			= new Thread(new Pinger());
+
+	public ConnectionHandler(Socket underlying) throws IOException {
+		me = this;
+		ne = NodeEngine.getNE();
+		children = new HashSet<Node>();
+
 		line = underlying;
 		line.setTcpNoDelay(true);
 		line.setKeepAlive(true);
 		line.setSoTimeout(0);
-		line_out=new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
+		line_out = new ObjectOutputStream(new BufferedOutputStream(line.getOutputStream()));
 		line_out.flush();
-		line_in=new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
-		
-		endpoint=line.getInetAddress().getHostAddress();
-		pakets_rein_hol_bot = new Thread(new Reciever());
+		line_in = new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
+
+		endpoint = line.getInetAddress().getHostAddress();
 		pakets_rein_hol_bot.start();
-		pingpongBot.start();
-		endpoint=line.getInetAddress().getHostName() ;
-		
-		LogEngine.log(this,"Verbunden");
+		ping();
+
+		endpoint = line.getInetAddress().getHostName();
+		//pingpongBot.start();
+
+		LogEngine.log(this, "Verbunden");
 
 	}
 
@@ -83,21 +79,23 @@ public class ConnectionHandler {
 		}
 		else LogEngine.log(this, "dropped", paket);
 	}
-	
-	/**Prüft ob die Verbindung noch besteht.
-	 * @return <code>true</code> wenn die Verbindung noch besteht
-	 * <code>false</code> wenn nicht
+
+	/**
+	 * Prüft ob die Verbindung noch besteht.
+	 * 
+	 * @return <code>true</code> wenn die Verbindung noch besteht <code>false</code> wenn nicht
 	 */
 	public boolean isConnected() {
-		return (line!=null&&line.isConnected()&&!line.isClosed());
+		return (line != null && line.isConnected() && !line.isClosed());
 	}
-	
-	public void disconnect(){
-		send(new MSG(ne.getME(),MSGCode.NODE_SHUTDOWN));
+
+	public void disconnect() {
+		send(new MSG(ne.getME(), MSGCode.NODE_SHUTDOWN));
 		close();
 	}
-	
+
 	public void close() {
+
 		try {
 			line_out.close();
 		}
@@ -113,42 +111,56 @@ public class ConnectionHandler {
 		}
 		catch (IOException e) {
 		}
-		LogEngine.log(me,"closed");
-		me=null;
+		LogEngine.log(me, "closed");
+		me = null;
 		//pakets_rein_hol_bot.stop();
-		pakets_rein_hol_bot=null;
+		pakets_rein_hol_bot = null;
 		ne.remove(this);
 
+	}
 
-	}
-	
-	@Override
 	public String toString() {
-		return "ConnectionHandler [" +endpoint +"]" +  ((latency<10000)?"["+latency+"]":"");
+		return "ConnectionHandler [" + endpoint + "]" + ((latency < 10000) ? "[" + latency + "]" : "");
+	}
+
+	private void ping() {
+		send(new MSG(null, MSGCode.ECHO_REQUEST));
 	}
 	
-	class Reciever implements Runnable
-	{
-		public void run() 
-		{
+
+	private void pong(final MSG ping) {
+		new Thread(new Runnable() {
+			public void run() {
+				send(new MSG(ping.getTimestamp(), MSGCode.ECHO_RESPONSE));
+			}
+		}).start();
+	}
+
+	class Reciever implements Runnable {
+		public void run() {
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
 				try {
 					readObject = line_in.readObject();
-					MSG tmp = (MSG) readObject;
-					if (tmp.getTyp() == NachrichtenTyp.SYSTEM && tmp.getCode()==MSGCode.NODE_UPDATE) me.children.add((Node) tmp.getData());
-					
-					if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
-						if (tmp.getCode() == MSGCode.ECHO_REQUEST) {
-							send(MSG.createReply(tmp));
+					if (readObject != null && readObject instanceof MSG) {
+						MSG tmp = (MSG) readObject;
+						if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
+							switch (tmp.getCode()) {
+								case ECHO_REQUEST:
+									pong(tmp);
+									break;
+								case ECHO_RESPONSE:
+									latency = System.currentTimeMillis() - (Long) tmp.getData();
+									break;
+								case NODE_UPDATE:
+									me.children.add((Node) tmp.getData());
+								default:
+									ne.handle(tmp, me);
+							}
 						}
-						if (tmp.getCode() == MSGCode.ECHO_RESPONSE) {
-							latency = System.currentTimeMillis() - (Long) tmp.getData();
-						}
+						else ne.handle(tmp, me);
 					}
-					
-					ne.handle(tmp, me);
-					
+					else LogEngine.log(me, "Empfangenes Objekt ist keine MSG");
 				}
 				catch (ClassNotFoundException e) {
 					LogEngine.log(e, "ConnectionHandler");
@@ -158,29 +170,32 @@ public class ConnectionHandler {
 					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist -> Thread beenden
 				}
 				catch (Exception e) {
-					System.out.println(readObject);
-					if (readObject != null) System.out.println((readObject instanceof MSG)?((MSG)readObject).toString():readObject.toString());
 					System.out.println(me);
+					System.out.println(readObject);
+					System.out.println(e.getMessage());
+					e.printStackTrace();
+					if (readObject != null) System.out.println((readObject instanceof MSG) ? ((MSG) readObject).toString() : readObject.toString());
 				}
 			}
 			close();
-		}		
-	}
+		}
+}
 	
-	class Pinger implements Runnable{
+
+	class Pinger implements Runnable {
 		private static final long	PING_INTERVAL	= 30000;
 
 		public void run() {
-			while(isConnected()) {
+			while (isConnected()) {
 				try {
-					send(new MSG(null, MSGCode.ECHO_REQUEST));
-					Thread.sleep((long) (PING_INTERVAL*(1+Math.random()))); //ping randomly mit PING_INTERVAL bis 2xPING_INTERVAL Pausen
+					ping();
+					Thread.sleep((long) (PING_INTERVAL * (1 + Math.random()))); //ping randomly mit PING_INTERVAL bis 2xPING_INTERVAL Pausen
 				}
 				catch (InterruptedException e) {
 				}
 			}
 		}
+
 	}
-	
 
 }

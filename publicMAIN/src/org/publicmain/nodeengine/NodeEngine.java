@@ -50,7 +50,7 @@ public class NodeEngine {
 	private BlockingQueue<MSG>			root_announce_stash;												//Queue für Bewerberpakete bei Neuaushandlung vom Root-Status 
 	private Set<Node>					allNodes;															//Alle dieser Nodenginge bekannten Knotten (sollten alle sein)
 
-	private boolean						root;																//Dieser Knoten möchte Wurzel sein (und benimmt sich auch so)
+	private boolean						rootMode;																//Dieser Knoten möchte Wurzel sein (und benimmt sich auch so)
 	private boolean						online;															//Dieser Knoten möchte an sein und verbunden bleiben (signalisiert allen Threads wenn die Anwendung beendet wird)
 
 	private Thread						multicastRecieverBot;												//Thread zum annehmen und verarbeiten der Multicast-Pakete
@@ -124,7 +124,7 @@ public class NodeEngine {
 	 * isRoot() gibt "true" zurück wenn die laufende Nodeengin Root ist und "false" wenn nicht.
 	 */
 	public boolean isRoot() {
-		return root && !hasParent();
+		return rootMode && !hasParent();
 	}
 
 	public boolean hasParent() {
@@ -292,7 +292,7 @@ public class NodeEngine {
 		if (tmp_socket != null) {
 			try {
 				root_connection = new ConnectionHandler(tmp_socket);
-				root = false;
+				setRootMode(false);
 				sendroot(new MSG(getME()));
 				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 			}
@@ -345,6 +345,7 @@ public class NodeEngine {
 			LogEngine.log(this, "Lost Child", LogEngine.INFO);
 			connections.remove(conn);
 			sendtcp(new MSG(conn.children, MSGCode.CHILD_SHUTDOWN));
+			allnodes_remove(conn.children);
 		}
 		//updateNodes();
 	}
@@ -472,6 +473,7 @@ public class NodeEngine {
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.removeAll(data);
+			allNodes.add(meinNode);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
@@ -505,6 +507,7 @@ public class NodeEngine {
 			int hash = allNodes.hashCode();
 			allNodes.clear();
 			allNodes.addAll(data);
+			allNodes.add(meinNode);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
@@ -532,7 +535,7 @@ public class NodeEngine {
 			}
 			if (!hasParent()&&discoverGame==null) {
 				LogEngine.log("RootMe", "no Nodes detected: turning me to ROOT", LogEngine.INFO);
-				root = true;
+				setRootMode(true);
 			}
 		}
 	}
@@ -567,7 +570,7 @@ public class NodeEngine {
 			
 			System.out.println("DiscoGame is over! I " + ((toConnectTo != meinNode)?"lost":"won")+" against " + root_announce_stash.size() +"roots");
 			if (toConnectTo != meinNode) discover(toConnectTo);
-			else root = true;
+			else setRootMode(true);
 			try {
 				Thread.sleep(ROOT_ANNOUNCE_TIMEOUT);
 			}
@@ -631,6 +634,11 @@ public class NodeEngine {
 				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
 				return null;
 			}
+	}
+
+	public void setRootMode(boolean rootmode) {
+		this.rootMode = rootmode;
+		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
 	}
 
 	

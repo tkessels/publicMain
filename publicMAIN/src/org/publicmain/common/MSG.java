@@ -140,20 +140,5 @@ public class MSG implements Serializable{
 		return null;
 	}
 	
-	public static MSG createReply(MSG x) {
-		if (x!=null&&x.typ==NachrichtenTyp.SYSTEM) {
-			MSG reply=new MSG();
-			reply.typ=NachrichtenTyp.SYSTEM;
-			reply.empfänger=x.sender;
-			
-			switch(x.code) {
-				case ECHO_REQUEST:
-					reply.code=MSGCode.ECHO_RESPONSE;
-					reply.data=x.getTimestamp();
-					break;
-			}
-			return reply;
-		}
-		throw new IllegalArgumentException();
-	}
+	
 }

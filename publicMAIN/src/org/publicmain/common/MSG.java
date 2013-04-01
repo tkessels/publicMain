@@ -82,6 +82,10 @@ public class MSG implements Serializable,Comparable<MSG>{
 	public long getTimestamp() {
 		return timestamp;
 	}
+	
+	public void reStamp() {
+		timestamp=System.currentTimeMillis();
+	}
 
 	public NachrichtenTyp getTyp() {
 		return typ;

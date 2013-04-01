@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -31,39 +33,41 @@ import org.publicmain.gui.GUI;
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
-	protected static final long			CONNECTION_TIMEOUT		= 1000;									//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
-	protected static final long			ROOT_ANNOUNCE_TIMEOUT	= 2000;									//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
-	private final InetAddress			group					= InetAddress.getByName("230.223.223.223"); //Default MulticastGruppe für Verbindungsaushandlung
-	private final int					multicast_port			= 6789;									//Default Port für MulticastGruppe für Verbindungsaushandlung
-	private final int					MAX_CLIENTS				= 5;										//Maximale Anzahl anzunehmender Verbindungen														
+ protected static final long CONNECTION_TIMEOUT = 4000; //Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ protected static final long ROOT_ANNOUNCE_TIMEOUT = 4000; //Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
+ private final InetAddress group = InetAddress.getByName("230.223.223.223"); //Default MulticastGruppe für Verbindungsaushandlung
+ private final int multicast_port = 6789; //Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int MAX_CLIENTS = 5; //Maximale Anzahl anzunehmender Verbindungen 
 
-	private static volatile NodeEngine	ne;																//Statischer Zeiger auf einzige Instanz der NodeEngine
-	private Node						meinNode;															//die NodeRepräsentation dieser NodeEngine
-	private ChatEngine					ce;																//Zeiger auf parent ChatEngine
+ private static volatile NodeEngine ne; //Statischer Zeiger auf einzige Instanz der NodeEngine
+ private Node meinNode; //die NodeRepräsentation dieser NodeEngine
+ private ChatEngine ce; //Zeiger auf parent ChatEngine
 
-	private ServerSocket				server_socket;														//Server Socket für eingehende Verbindungen (Passiv/Childs)
-	private ConnectionHandler			root_connection;													//TCP Socket zur Verbindung mit anderen Knoten (Aktiv/Parent/Root)
-	private MulticastSocket				multi_socket;														//Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
-	public List<ConnectionHandler>		connections;														//Liste bestehender Childverbindungen in eigener HüllKlasse
-	private Set<String>					groups;															//Liste aller abonierten Gruppen
+ private ServerSocket server_socket; //Server Socket für eingehende Verbindungen (Passiv/Childs)
+ private ConnectionHandler root_connection; //TCP Socket zur Verbindung mit anderen Knoten (Aktiv/Parent/Root)
+ private MulticastSocket multi_socket; //Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
+ public List<ConnectionHandler> connections; //Liste bestehender Childverbindungen in eigener HüllKlasse
+ private Set<String> groups; //Liste aller abonierten Gruppen
 
-	private BlockingQueue<MSG>			root_announce_stash;												//Queue für Bewerberpakete bei Neuaushandlung vom Root-Status 
-	private Set<Node>					allNodes;															//Alle dieser Nodenginge bekannten Knotten (sollten alle sein)
+ private BlockingQueue<MSG> root_claims_stash; //Queue für Bewerberpakete bei Neuaushandlung vom Root-Status 
+ private Set<Node> allNodes; //Alle dieser Nodenginge bekannten Knotten (sollten alle sein)
 
-	private boolean						rootMode;																//Dieser Knoten möchte Wurzel sein (und benimmt sich auch so)
-	private boolean						online;															//Dieser Knoten möchte an sein und verbunden bleiben (signalisiert allen Threads wenn die Anwendung beendet wird)
+ private volatile boolean rootMode; 		//Dieser Knoten möchte Wurzel sein (und benimmt sich auch so)
+ private volatile boolean online; 			//Dieser Knoten möchte an sein und verbunden bleiben (signalisiert allen Threads wenn die Anwendung beendet wird)
+ private volatile boolean rootDiscovering;//Dieser Knoten ist gerade dabei ROOT_ANNOUNCES zu sammeln um einen neuen ROOT zu wählen
 
-	private Thread						multicastRecieverBot;												//Thread zum annehmen und verarbeiten der Multicast-Pakete
-	private Thread						connectionsAcceptBot;												//Thread akzeptiert und schachtelt eingehen Verbindungen auf dem ServerSocket
-	private Thread						discoverGame;														//Thread zur Aushandlung neuer Root Stellung Wenn der Baum segmentiert wurde 
+ private Thread multicastRecieverBot		= new Thread(new MulticastReciever());			//Thread zum annehmen und verarbeiten der Multicast-Pakete
+ private Thread connectionsAcceptBot 	= new Thread(new ConnectionsAccepter()); 	//Thread akzeptiert und schachtelt eingehen Verbindungen auf dem ServerSocket
+ private Thread rootClaimProcessor;// 		= new Thread(new RootClaimProcessor()); 				//Thread zur Aushandlung neuer Root Stellung Wenn der Baum segmentiert wurde 
+ private Thread rootMe	;//					= new Thread(new RootMe());
 
-	private List<Hook>					hooks					= new ArrayList<Hook>();
+ private List<Hook> hooks = new ArrayList<Hook>();
 
 	public NodeEngine(ChatEngine parent) throws IOException {
 		allNodes = new HashSet<Node>();
 		groups = new HashSet<String>();
 		connections = new ArrayList<ConnectionHandler>();
-		root_announce_stash = new LinkedBlockingQueue<MSG>();
+		root_claims_stash = new LinkedBlockingQueue<MSG>();
 		ne = this;
 		ce = parent;
 		online = true;
@@ -79,10 +83,7 @@ public class NodeEngine {
 
 		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
 
-		connectionsAcceptBot = new Thread(new ConnectionsAccepter());
 		connectionsAcceptBot.start();
-
-		multicastRecieverBot = new Thread(new MulticastReciever());
 		multicastRecieverBot.start();
 
 		discover();
@@ -226,13 +227,14 @@ public class NodeEngine {
 
 	}
 
-	private void discover(Node newRoot) {
+	/*private void discover(Node newRoot) {
 		sendunicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY), newRoot);
-	}
+	}*/
 
 	private void discover() {
 		sendmutlicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY));
-		new Thread(new RootMe()).start();
+		rootMe = new Thread(new RootMe());
+		rootMe.start();
 	}
 
 	private void sendDiscoverReply(Node quelle) {
@@ -330,15 +332,13 @@ public class NodeEngine {
 	 */
 	public void remove(ConnectionHandler conn) {
 		LogEngine.log(conn, "removing");
-		System.out.println("Removing" + conn);
 		if (conn == root_connection) {
 			LogEngine.log(this, "Lost Root", LogEngine.INFO);
 			root_connection = null;
-			updateNodes();
 			if (online) {
-				Object[] payload = { allNodes, meinNode };
-				sendmutlicast(new MSG(payload, MSGCode.ROOT_ANNOUNCE));
-				discover_game(null);
+				updateNodes();
+				discover();
+				//discover(null);
 			}
 		}
 		else {
@@ -350,16 +350,22 @@ public class NodeEngine {
 		//updateNodes();
 	}
 
-	private synchronized void discover_game(MSG paket) {
-		if(paket!=null)root_announce_stash.offer(paket);
-		System.out.println(root_announce_stash);
-		if (discoverGame == null) {
-			System.out.println("erzeuge DiscoGamer");
-			discoverGame = new Thread(new DiscoverGame());
-			discoverGame.start();
-			Object[] payload = { allNodes, meinNode };
-			sendmutlicast(new MSG(payload, MSGCode.ROOT_ANNOUNCE));
+	/**
+	 * 
+	 */
+	private void sendRA() {
+		MSG ra= new MSG(meinNode, MSGCode.ROOT_ANNOUNCE);
+		ra.setEmpfänger(allNodes.size());
+		sendmutlicast(ra);
+		root_claims_stash.add(ra);
+	}
+
+	private void handleRootClaim(MSG paket) {
+		if(paket!=null) {
+			paket.reStamp(); //change timestamp to recieved time
+			root_claims_stash.offer(paket);
 		}
+		claimRoot();
 	}
 
 	/**
@@ -381,7 +387,7 @@ public class NodeEngine {
 					if (isRoot()) sendDiscoverReply((Node) paket.getData());
 					break;
 				case ROOT_ANNOUNCE:
-					if (!hasParent()) discover_game(paket);
+					if (!hasParent()) handleRootClaim(paket);
 					break;
 				case NODE_LOOKUP:
 					if((long)paket.getData()==meinNode.getNodeID())sendroot(new MSG(meinNode));
@@ -401,7 +407,7 @@ public class NodeEngine {
 	 */
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		if (hook(paket)) return;
+		//if (hook(paket)) return;
 		switch (paket.getTyp()) {
 			case GROUP:
 				sendtcpexcept(paket, quelle);
@@ -528,61 +534,82 @@ public class NodeEngine {
 	 */
 	private final class RootMe implements Runnable {
 		public void run() {
-			try {
-				Thread.sleep(CONNECTION_TIMEOUT);
-			}
-			catch (InterruptedException e) {
-			}
-			if (!hasParent()&&discoverGame==null) {
-				LogEngine.log("RootMe", "no Nodes detected: turning me to ROOT", LogEngine.INFO);
-				setRootMode(true);
-			}
-		}
-	}
-
-	/**
-	 * Warte eine gewisse Zeit und Werte dann alle gesammelten RoOt_AnOunCEs aus forder anschließend vom Gewinner einen Knoten zum Verbinden an. Wenn der Knoten selber Gewonnen hat
-	 */
-	private final class DiscoverGame implements Runnable {
-		public void run() {
-			long until = System.currentTimeMillis() + ROOT_ANNOUNCE_TIMEOUT;
+			if (!online&&!isRoot()&&!rootDiscovering)	return;
+			long until = System.currentTimeMillis() + CONNECTION_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
-					Thread.sleep(100);
+					Thread.sleep(500);
 				}
 				catch (InterruptedException e) {
 				}
 			}
-			Node toConnectTo = meinNode;
-			int maxPenunte = allNodes.size();
-			
-			for (MSG x : root_announce_stash) {
-				System.out.println(x.toString());
-				@SuppressWarnings("unchecked")
-				// extrahieren aller informationen dieses ROOTANNOUNCE
-				Set<Node> tmp_allnodes = (Set<Node>) ((Object[]) x.getData())[0]; // Cast Payload in ein Object Array und das 1. Object in ein Set aus Nodes
-				Node tmp_node = (Node) ((Object[]) x.getData())[1]; //	Cast Payload in ein Object Array und das 2. Object dieses Arrays in einen Node
-				if (tmp_allnodes.size() > maxPenunte || ((tmp_allnodes.size() == maxPenunte) && (tmp_node.getNodeID() > toConnectTo.getNodeID()))) {
-					toConnectTo = tmp_node;
-					maxPenunte = tmp_allnodes.size();
+			if (online&&!hasParent()) {
+				LogEngine.log("RootMe", "no Nodes detected: claiming Root", LogEngine.INFO);
+				claimRoot();
+			}
+		}
+
+		/**
+		 * 
+		 */
+		
+	}
+	private synchronized void claimRoot() {
+			if(rootDiscovering==false) {
+				rootClaimProcessor=new Thread(new RootClaimProcessor());
+				rootClaimProcessor.start();
+			}
+	}
+	/**
+	 * Warte eine gewisse Zeit und Wertet dann alle gesammelten RoOt_AnOunCEs aus forder anschließend vom Gewinner einen Knoten zum Verbinden an. Wenn der Knoten selber Gewonnen hat
+	 */
+	private final class RootClaimProcessor implements Runnable {
+		public void run() {
+			rootDiscovering=true;
+			LogEngine.log("DiscoverGame","started",LogEngine.INFO);
+			sendRA();
+			long until = System.currentTimeMillis() + ROOT_ANNOUNCE_TIMEOUT;
+			while (System.currentTimeMillis() < until) {
+				try {
+					Thread.sleep(500);
+				}
+				catch (InterruptedException e) {
 				}
 			}
 			
-			System.out.println("DiscoGame is over! I " + ((toConnectTo != meinNode)?"lost":"won")+" against " + root_announce_stash.size() +"roots");
-			if (toConnectTo != meinNode) discover(toConnectTo);
-			else setRootMode(true);
-			try {
-				Thread.sleep(ROOT_ANNOUNCE_TIMEOUT);
+			List <MSG> ra_replies=new ArrayList<MSG>();
+			ra_replies.addAll(root_claims_stash);
+			Collections.sort(ra_replies);
+			for (MSG msg : ra_replies) {
+				System.out.println(((Node)msg.getData()).getHostname());
 			}
-			catch (InterruptedException e) {
+			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_ANNOUNCE_TIMEOUT;
+			
+			Node toConnectTo = meinNode;
+			long maxPenunte = allNodes.size();
+			for (MSG x : root_claims_stash) {
+				if (x.getTimestamp() <= deadline) {
+					long tmp_size = x.getEmpfänger();
+					Node tmp_node = (Node) x.getData(); //	Cast Payload in ein Object Array und das 2. Object dieses Arrays in einen Node
+					if (tmp_size > maxPenunte || ((tmp_size == maxPenunte) && (tmp_node.getNodeID() > toConnectTo.getNodeID()))) {
+						toConnectTo = tmp_node;
+						maxPenunte = tmp_size;
+					}
+				}
 			}
-			root_announce_stash.clear();
-			discoverGame = null;
+			
+			LogEngine.log("DiscoverGame","Finished:" + ((toConnectTo != meinNode)?"lost":"won")+"(" + root_claims_stash.size() +" participants)",LogEngine.INFO);
+			
+			if (toConnectTo == meinNode) setRootMode(true);
+			else discover(); //another root won and should be answeringconnectTo(toConnectTo);
+			root_claims_stash.clear();
+			rootDiscovering=false;
 		}
 	}
 
 	private final class MulticastReciever implements Runnable {
 		public void run() {
+			if(multi_socket==null)return;
 			while (true) {
 				byte[] buff = new byte[65535];
 				DatagramPacket tmp = new DatagramPacket(buff, buff.length);
@@ -601,6 +628,7 @@ public class NodeEngine {
 
 	private final class ConnectionsAccepter implements Runnable {
 		public void run() {
+			if(connections==null||server_socket==null)return;
 			while (online && connections.size() <= MAX_CLIENTS) {
 				System.out.println();
 				LogEngine.log("ConnectionsAccepter", "Listening on Port:" + server_socket.getLocalPort(), LogEngine.INFO);

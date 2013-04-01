@@ -27,15 +27,15 @@ public class ConnectionHandler {
 	private Socket				line;
 	private ObjectOutputStream	line_out;
 	private ObjectInputStream	line_in;
-	private ConnectionHandler	me;
+	private volatile ConnectionHandler	me;
 	private String				endpoint;
-	private long				latency				= Integer.MAX_VALUE;
+	private long					latency				= Integer.MAX_VALUE;
 
 	private Thread				pakets_rein_hol_bot	= new Thread(new Reciever());
 	private Thread				pingpongBot			= new Thread(new Pinger());
 
 	public ConnectionHandler(Socket underlying) throws IOException {
-		me = this;
+
 		ne = NodeEngine.getNE();
 		children = new HashSet<Node>();
 
@@ -48,13 +48,14 @@ public class ConnectionHandler {
 		line_in = new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 
 		endpoint = line.getInetAddress().getHostAddress();
-		pakets_rein_hol_bot.start();
-		ping();
 
-		endpoint = line.getInetAddress().getHostName();
+//		ping();
+//		endpoint = line.getInetAddress().getHostName();
 		//pingpongBot.start();
 
 		LogEngine.log(this, "Verbunden");
+		me = this;
+		pakets_rein_hol_bot.start();
 
 	}
 
@@ -138,6 +139,7 @@ public class ConnectionHandler {
 
 	class Reciever implements Runnable {
 		public void run() {
+			while(me==null)System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ME WAR NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
 				try {

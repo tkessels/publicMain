@@ -10,15 +10,7 @@ import org.publicmain.common.MSG;
 public abstract class Kanal extends Observable {
 	protected Object 	referenz;
 
-
-	protected TreeSet<MSG> messages = new TreeSet<MSG>(new Comparator<MSG>() {
-		public int compare(MSG o1, MSG o2) {
-			if (o1.getTimestamp() != o2.getTimestamp())	return (o1.getTimestamp() > o2.getTimestamp()) ? 1 : -1;
-			else if (o1.getSender() != o2.getSender())	return (o1.getSender() > o2.getSender()) ? 1 : -1;
-			else if (o1.getId() != o2.getId())			return (o1.getId() - o2.getId());
-			return 0;
-		}
-	});
+	protected TreeSet<MSG> messages = new TreeSet<MSG>();
 
 	public abstract boolean add(MSG nachricht);
 

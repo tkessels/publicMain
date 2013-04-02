@@ -1,5 +1,6 @@
 package org.publicmain.gui;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -67,9 +69,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private ButtonGroup btnGrp;
 	private JMenuItem lafNimROD;
 	private DragableJTabbedPane jTabbedPane;
-	private JToggleButton userListBtn;
-	private boolean userListActive;
-	private UserList userListWin;
+	private JToggleButton contactListBtn;
+	private boolean contactListActive;
+	private ContactList contactListWin;
 	private pMTrayIcon trayIcon;
 	private DBConnection db;
 
@@ -107,8 +109,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.btnGrp = new ButtonGroup();
 		this.chatList = new ArrayList<ChatWindow>();
 		this.jTabbedPane = new DragableJTabbedPane();
-		this.userListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
-		this.userListActive = false;
+		this.contactListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
+		this.contactListActive = false;
 		this.lafNimROD = new JRadioButtonMenuItem("NimROD");
 		this.trayIcon = new pMTrayIcon();
 		
@@ -140,17 +142,17 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.helpContents.addActionListener(new menuContoller());
 		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
 		
-		// Konfiguration userListBtn:
-		this.userListBtn.setMargin(new Insets(2, 3, 2, 3));
-		this.userListBtn.setToolTipText("Userlist einblenden");
-		this.userListBtn.addActionListener(new ActionListener() {
+		// Konfiguration contactListBtn:
+		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
+		this.contactListBtn.setToolTipText("show contacts");
+		this.contactListBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton) e.getSource();
 				if (source.isSelected()) {
-					userListAufklappen();
+					contactListAufklappen();
 				} else {
-					userListZuklappen();
+					contactListZuklappen();
 				}
 			}
 		});
@@ -162,7 +164,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.fileMenu.add(menuItemRequestFile);
 		this.helpMenu.add(aboutPMAIN);
 		this.helpMenu.add(helpContents);
-		this.menuBar.add(userListBtn);
+		this.menuBar.add(contactListBtn);
 		this.menuBar.add(fileMenu);
 		this.menuBar.add(configMenu);
 		this.menuBar.add(helpMenu);
@@ -176,50 +178,51 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		this.setMinimumSize(new Dimension(250,250));
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("publicMAIN");
 		this.setVisible(true);
-		chatList.get(0).focusEingabefeld();
+		chatList.get(0).focusEingabefeld(); // das tut's net
 	}
 
 	/**
-	 * Diese Methode klappt die Userliste auf
+	 * Diese Methode klappt die Contactlist auf
 	 * 
 	 * 
 	 */
-	private void userListAufklappen(){
+	private void contactListAufklappen(){
 
-		if(!userListActive){
+		if(!contactListActive){
 			
-			this.userListBtn.setToolTipText("Userlist ausblenden");
-			this.userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListEinklappen.png")));
-			this.userListBtn.setSelected(true);
-			this.userListWin = new UserList(GUI.me);
-			this.userListWin.repaint();
-			this.userListWin.setVisible(true);
-			userListActive = true;
+			this.contactListBtn.setToolTipText("hide contacts");
+			this.contactListBtn.setIcon(new ImageIcon(getClass().getResource("UserListEinklappen.png")));
+			this.contactListBtn.setSelected(true);
+			this.contactListWin = new ContactList(GUI.me);
+			this.contactListWin.repaint();
+			this.contactListWin.setVisible(true);
+			contactListActive = true;
 		}
 
 	}
 	
 	/**
-	 * Diese Methode klappt die Userliste zu
+	 * Diese Methode klappt die Contactlist zu
 	 * 
 	 * 
 	 */
-	private void userListZuklappen(){
+	private void contactListZuklappen(){
 
-		if(userListActive){
+		if(contactListActive){
 			
-			this.userListBtn.setToolTipText("Userlist einblenden");
-			this.userListBtn.setIcon(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
-			this.userListBtn.setSelected(false);
+			this.contactListBtn.setToolTipText("show contacts");
+			this.contactListBtn.setIcon(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
+			this.contactListBtn.setSelected(false);
 			
-			this.userListWin.setVisible(false);
+			this.contactListWin.setVisible(false);
 			
-			this.userListActive = false;
+			this.contactListActive = false;
 		}
 	}
 	
@@ -231,7 +234,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * @param cw
 	 */
-	public void addChat(final ChatWindow cw) {
+	public void addChat(ChatWindow cw) {
 		// TODO: evtl. noch Typunterscheidung hinzufügen (Methode
 		// getCwTyp():String)
 		String title = cw.getChatWindowName();
@@ -276,6 +279,18 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			addChat(new ChatWindow("public"));
 		}
 	}
+	
+	/**
+	 * Diese Methode entfernt ein ChatWindow anhand des Namens
+	 * 
+	 * Diese Methode sorgt dafür das ChatWindows aus der ArrayList "chatList"
+	 * entfernt werden und im GUI nicht mehr angezeigt werden.
+	 * 
+	 * @param chatname
+	 */
+	public void delChat(String chatname){
+		delChat(existCW(chatname));
+	}
 
 	/**
 	 * Fährt das Programm ordnungsgemäß runter
@@ -286,12 +301,29 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	}
 
 	/**
+	 * Diese Methode prüft ob ein ChatWindow bereits vorhanden ist
+	 * 
+	 * Diese Methode prüft ob ein ChatWindow vorhanden ist falls ja wird dieses returned
+	 * falls nein wird null returned
+	 * @param chatWindowname Name Chatwindow
+	 * @return ChatWindow or null 
+	 */
+	private ChatWindow existCW(String chatWindowname){
+		for(ChatWindow x : chatList){
+			if(x.getChatWindowName().equals(chatWindowname)){
+				return x;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Diese Methode wird in einem privaten ChatWindow zum versenden der Nachricht verwendet
 	 * @param empfUID long EmpfängerUID
 	 * @param msg String die Nachricht
 	 * @param cw ChatWindow das aufrufende ChatWindow
 	 */
-	void privSend(long empfUID,String msg, ChatWindow cw){
+	void privSend(long empfUID,String msg){
 		ce.send_private(empfUID, msg);
 	}
 	
@@ -305,22 +337,27 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param msg String die Nachricht
 	 * @param cw ChatWindow das aufrufende ChatWindow
 	 */
-	void privSend(String empfAlias, String msg, ChatWindow cw){
-		boolean cwExist = false;
+	void privSend(String empfAlias, String msg){
+		ChatWindow tmpCW = existCW(empfAlias);
+		int tabNr = 0;
 		long tmpUID;
-		for(ChatWindow x : chatList){
-			if(x.getChatWindowName().equals(cw.getChatWindowName())){
-				cwExist = true;
-			}
-		}
-		for(Node x : nodes){
-			if(x.getAlias().equals(empfAlias)){
-				tmpUID = x.getNodeID();
-				if(!cwExist){
-					addChat(new ChatWindow(tmpUID, empfAlias));
+		try{
+			for(Node x : nodes){
+				if(x.getAlias().equals(empfAlias)){
+					tmpUID = x.getNodeID();
+					if(tmpCW == null){
+						addChat(new ChatWindow(tmpUID, empfAlias));
+						tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
+						jTabbedPane.setSelectedIndex(tabNr);
+					} else {
+						tabNr = jTabbedPane.indexOfComponent(tmpCW);
+						jTabbedPane.setSelectedIndex(tabNr);
+					}
+					ce.send_private(tmpUID, msg);
 				}
-				ce.send_private(tmpUID, msg);
 			}
+		} catch (NullPointerException npex){
+			LogEngine.log("User nicht gefunden!", LogEngine.ERROR);
 		}
 	}
 	
@@ -331,15 +368,16 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param msg String die Nachricht/Msg
 	 * @param cw ChatWindow das aufrufende ChatWindow
 	 */
-	void groupSend(String empfGrp, String msg, ChatWindow cw){
-		boolean cwExist = false;
-		for(ChatWindow x : chatList){
-			if(x.getChatWindowName().equals(empfGrp)){
-				cwExist = true;
-			}
-		}
-		if(!cwExist){
+	void groupSend(String empfGrp, String msg){
+		ChatWindow tmpCW = existCW(empfGrp);
+		int tabNr = 0;
+		if(tmpCW == null){
 			addChat(new ChatWindow(empfGrp));
+			tabNr = jTabbedPane.indexOfComponent(existCW(empfGrp));
+			jTabbedPane.setSelectedIndex(tabNr);
+		} else {
+			tabNr = jTabbedPane.indexOfComponent(tmpCW);
+			jTabbedPane.setSelectedIndex(tabNr);
 		}
 		ce.send_group(empfGrp, msg);
 	}
@@ -378,7 +416,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		
 		return false;
 	}
-	
 	
 	/**
 	 * Diese Methode liefert ein Fileobjekt
@@ -467,8 +504,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		return this.jTabbedPane;
 	}
 
-	
-	
 	/**
 	 * ActionListener für Design wechsel (LookAndFeel)
 	 * 
@@ -491,10 +526,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
-			userListWasActive = userListActive;
+			userListWasActive = contactListActive;
 			JMenuItem source = (JMenuItem)e.getSource();
 			
-			userListZuklappen();
+			contactListZuklappen();
 			
 			if(source.getText().equals("NimROD")){
 				try{
@@ -511,7 +546,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			}
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
-			if(userListWasActive)userListAufklappen();
+			if(userListWasActive)contactListAufklappen();
 			
 		}
 	}
@@ -564,8 +599,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		// Wird das GUI minimiert wird die Userlist zugeklappt und der
 		// userListBtn zurückgesetzt:
 		public void windowIconified(WindowEvent arg0) {
-			if (userListBtn.isSelected()) {
-				userListZuklappen();
+			if (contactListBtn.isSelected()) {
+				contactListZuklappen();
 			}
 		}
 		@Override
@@ -592,8 +627,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		@Override
 		public void windowActivated(WindowEvent arg0) {
-			if (userListBtn.isSelected()) {
-				userListWin.toFront();
+			if (contactListBtn.isSelected()) {
+				contactListWin.toFront();
 			}
 		}
 	}
@@ -614,6 +649,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();

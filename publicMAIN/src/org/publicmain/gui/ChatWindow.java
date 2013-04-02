@@ -43,7 +43,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private JTextPane msgTextPane;
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
-	private JScrollPane jScrollPane;
+	private JScrollPane msgTextScroller;
 	private JTextField eingabeFeld;
 	private String gruppe;
 	private long user;
@@ -51,8 +51,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private GUI gui;
 	private History keyHistory;
 	private ChatWindowTab myTab;
+	private JPanel panel;
 	private String helptext="<br><table color='green'>" +
-			"<tr><td colspan='3'><b>Kurzbefehl</b></td><td><b>Erleuterung</b></td></tr>" +
+			"<tr><td colspan='3'><b>Kurzbefehl</b></td><td><b>Erläuterung</b></td></tr>" +
 			"<tr><td colspan='3'>/clear</td><td>Anzeige löschen</td></tr>" +
 			"<tr><td colspan='3'>/exit</td><td>Programm beenden</td></tr>" +
 			"<tr><td colspan='3'>/help</td><td>zeigt diese Hilfe an</td></tr>" +
@@ -82,7 +83,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * Erstellt Content und macht Layout für das Chatpanel
 	 */
 	private void doWindowbuildingstuff() {
-		this.myTab =  new ChatWindowTab(name,GUI.getGUI().getTabbedPane(), this); 
+		this.myTab =  new ChatWindowTab(name, GUI.getGUI().getTabbedPane(), this); 
 		// Layout für ChatWindow (JPanel) festlegen auf BorderLayout:
 		this.setLayout(new BorderLayout());
 
@@ -93,21 +94,22 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.msgTextPane = new JTextPane();
 		this.htmlKit = new HTMLEditorKit();
 		this.htmlDoc = new HTMLDocument();
-		this.jScrollPane = new JScrollPane(msgTextPane,	JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.msgTextScroller = new JScrollPane(msgTextPane,	JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
+		this.panel = new JPanel(new BorderLayout());
 
-		msgTextPane.setEditable(false);
-		msgTextPane.setPreferredSize(new Dimension(400, 300));
-		msgTextPane.setEditorKit(htmlKit);
-		msgTextPane.setDocument(htmlDoc);
+		this.msgTextPane.setEditable(false);
+		this.msgTextPane.setPreferredSize(new Dimension(400, 300));
+		this.msgTextPane.setEditorKit(htmlKit);
+		this.msgTextPane.setDocument(htmlDoc);
 
-		eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
+		this.eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
 
 		// KeyListener für Nachrichtenhistorie hinzufügen
-		eingabeFeld.addKeyListener(new History(eingabeFeld));
+		this.eingabeFeld.addKeyListener(new History(eingabeFeld));
 
-		sendenBtn.addActionListener(this);
-		sendenBtn.addMouseListener(new MouseListener() {
+		this.sendenBtn.addActionListener(this);
+		this.sendenBtn.addMouseListener(new MouseListener() {
 			public void mouseReleased(MouseEvent e) {
 			}
 
@@ -128,13 +130,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			}
 		});
 
-		eingabeFeld.addActionListener(this);
-		keyHistory=new History(eingabeFeld);
+		this.eingabeFeld.addActionListener(this);
+		this.keyHistory=new History(eingabeFeld);
 
-		this.add(jScrollPane, BorderLayout.CENTER);
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(eingabeFeld, BorderLayout.CENTER);
-		panel.add(sendenBtn, BorderLayout.EAST);
+		this.panel.add(eingabeFeld, BorderLayout.CENTER);
+		this.panel.add(sendenBtn, BorderLayout.EAST);
+		
+		this.add(msgTextScroller, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.SOUTH);
 
 		this.setVisible(true);
@@ -151,13 +153,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @return
 	 */
 	public JPanel getWindowTab(){
-		
-		return myTab;
+		return this.myTab;
 	}
 	
 	void focusEingabefeld(){
 		this.eingabeFeld.requestFocusInWindow();
-		myTab.stopBlink();
+		this.myTab.stopBlink();
 	}
 	
 	/**
@@ -218,35 +219,34 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				
 				// Prüfen ob die Eingabe ein einfacher Befehl ist
 				if (eingabe.equals("/clear")) {
-					msgTextPane.setText("");
+					this.msgTextPane.setText("");
 				} else if (eingabe.equals("/help")) {
 					info(helptext);
 				} else if (eingabe.equals("/exit")) {
-					gui.shutdown();
+					this.gui.shutdown();
 				}
 
 				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
 				else if (eingabe.startsWith("/ignore ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
-					if(gui.ignoreUser(tmp[1])){
+					if(this.gui.ignoreUser(tmp[1])){
 						info(tmp[1] + " wird ignoriert!");
 					} else {
 						warn("Ignorieren nicht möglich! " + tmp[1] + " wurde nicht gefunden!");
 					}
 				}
 				else if (eingabe.startsWith("/unignore ")&& (tmp = eingabe.split(" ", 2)).length == 2){
-					if(gui.unignoreUser(tmp[1])){
+					if(this.gui.unignoreUser(tmp[1])){
 						info(tmp[1] + " wird nicht weiter ignoriert!");
 					} else {
 						warn(tmp[1] + "wurde nicht gefunden!");
 					}
 				}
-				//TODO: evtl. auch die Möglichkeit umsetzen, dass man mit /w und /g nur ein ChatWindow anlegt ohne Nachricht zu schicken
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
-					gui.privSend(tmp[1], tmp[2], this);
+					this.gui.privSend(tmp[1], tmp[2]);
 					warn("Flüsternachrichten noch nicht möglich...");
 				}
 				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
-					gui.groupSend(tmp[1], tmp[2], this);
+					this.gui.groupSend(tmp[1], tmp[2]);
 				}
 				else {
 					error("Befehl nicht gültig oder vollständig...");
@@ -256,20 +256,20 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			// Wenn es kein Befehl ist muss es wohl eine Nachricht sein
 			else if (gruppe == null) {
 				// ggf. eingabe durch Methode filtern
-				gui.privSend(user, eingabe, this);
+				this.gui.privSend(user, eingabe);
 			}
 			else {
 				// ggf. eingabe durch Methode filtern
-				gui.groupSend(gruppe, eingabe, this);
+				this.gui.groupSend(gruppe, eingabe);
 						}
 		// In jedem Fall wird das Eingabefeld gelöscht
-		eingabeFeld.setText("");
+		this.eingabeFeld.setText("");
 		}
 	}
 
 	public void update(Observable sourceChannel, Object msg) {
 		if(GUI.getGUI().getTabbedPane().indexOfComponent(this)!=GUI.getGUI().getTabbedPane().getSelectedIndex()){
-			myTab.startBlink();
+			this.myTab.startBlink();
 		}
 		MSG tmpMSG = (MSG) msg;
 		this.putMSG(tmpMSG);

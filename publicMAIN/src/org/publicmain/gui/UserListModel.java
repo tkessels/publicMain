@@ -17,17 +17,12 @@ public class UserListModel extends AbstractListModel<String>{
 	private static final long serialVersionUID = 3915185276474553682L;
 	private ArrayList<String> users = new ArrayList<String>();
 	private Thread userListWriter;
-	private UserList parent;
 	
-	public UserListModel(final UserList parent) {
-    	this.parent = parent;
+	public UserListModel() {
 		this.userListWriter = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
-					// for(String grpName : ChatEngine.getCE().getGroupList()){
-					// users.add(grpName);
-					// }
 					users.clear();
 					for (Node userAlias : ChatEngine.getCE().getUsers()) {
 						users.add(userAlias.getAlias());
@@ -47,17 +42,12 @@ public class UserListModel extends AbstractListModel<String>{
     	
 	    Collections.sort(users);
     }
-
     @Override
     public int getSize() {
     	return users.size();
     }
-
     @Override
     public String getElementAt(int index) {
     return users.get(index);
     }
-    
-   
-    
 }

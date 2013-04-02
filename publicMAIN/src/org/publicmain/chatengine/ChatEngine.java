@@ -157,8 +157,9 @@ public class ChatEngine extends Observable{
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
 	public	String[] getGroupList(){
-		//TODO: CODE HERE		
-		return null;
+		//TODO: CODE HERE / bisher nur ein test String[]
+		String[] testGroups = {"testGroup1","testGroup2","testGroup3", "testGroup4"};
+		return testGroups;
 	}
 	
 	/** Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei

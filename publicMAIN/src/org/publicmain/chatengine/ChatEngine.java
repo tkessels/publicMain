@@ -53,7 +53,7 @@ public class ChatEngine extends Observable{
 	public ChatEngine() throws IOException{
 		
 		this.ne = new NodeEngine(this);
-		//this.db = db.getDBConnection();
+		this.db = db.getDBConnection();
 		this.ce = this;
 		
 		group_channels=new ArrayList<GruppenKanal>();

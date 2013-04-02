@@ -102,7 +102,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me = this;
 		this.log = new LogEngine();
-		// this.db = DBConnection.getDBConnection(); // bei bedarf einbinden!
+		this.db = DBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.menuBar 		= new JMenuBar();
 		this.fileMenu 		= new JMenu("File");
 		this.configMenu 	= new JMenu("Settings");

@@ -26,17 +26,36 @@ public class DBConnection {
 	private String dbName;
 	private String user;
 	private String passwd;
-	private String msgHistTbl;
-	private boolean isDBConnected;
+	
+	//Tabellen der Loc DB
+	private String chatLogTbl;
+	private String msgTbl;
+	private String usrTbl;
+	private String nodeTbl;
+	private String groupTbl;
+	private String configTbl;
+	private String eventTypeTbl;
+	private String routingOverviewTbl;
+	
+	
+	// verbindungssachen
+	private boolean isDBConnected;		// noch richtig implementieren oder weg lassen weil ehh jedesmal neu prüfen?
 	private static DBConnection me;
 	
 	private DBConnection() {
-		this.url = "jdbc:mysql://localhost:3306/";
-		this.user = "root";
-		this.passwd = "";
-		this.dbName = "db_javatest";
-		this.msgHistTbl= "t_msgHistory";
-		this.isDBConnected = false;
+		this.url 				= "jdbc:mysql://localhost:3306/";
+		this.user 				= "root";
+		this.passwd 			= "";
+		this.dbName 			= "db_publicMain";
+		this.chatLogTbl			= "t_chatLog";
+		this.msgTbl				= "t_msg";
+		this.usrTbl				= "t_usr";
+		this.nodeTbl			= "t_node";
+		this.groupTbl			= "t_group";
+		this.configTbl			= "t_config";
+		this.eventTypeTbl		= "t_eventType";
+		this.routingOverviewTbl	= "t_routingOverView";
+		this.isDBConnected 		= false;
 
 		if(connectToLocDBServer()){
 			isDBConnected = true;
@@ -63,17 +82,60 @@ public class DBConnection {
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		try {
 			this.stmt = con.createStatement();
-			stmt.execute("create database if not exists " + dbName);
-			stmt.execute("use " + dbName);
-			// TODO Datentypen anpassen!
-			stmt.execute("create table if not exists "+ msgHistTbl + "(id int(200) NOT NULL," +
+			stmt.addBatch("create database if not exists " + dbName);
+			stmt.addBatch("use " + dbName);
+			// erstellen der Message Tabelle
+			stmt.addBatch("create table if not exists "+ chatLogTbl + "(id INTEGER NOT NULL AUTO_INCREMENT," +		// hier autoincrement nutzen - kann ja mehrere mit der selben geben
+																	"msgID INTEGER NOT NULL," +
 																	"sender BIGINT NOT NULL," +
-																	"timestamp DOUBLE PRECISION NOT NULL," +
-																	"empfaenger int(200) NOT NULL," +
+																	"timestamp BIGINT NOT NULL," +
+																	"empfaenger BIGINT NOT NULL," +
 																	"grp varchar(20) NOT NULL," +
-																	"data varchar(20) NOT NULL," +
+																	"data varchar(200) NOT NULL," +
 																	"primary key(id))" +
 																	"engine = INNODB");
+			// TODO Datentypen anpassen! 
+			// erstellen der user-Tabelle
+			stmt.addBatch("create table if not exists "+ usrTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
+					"alias VARCHAR(20) NOT NULL," +														// hier auf 20 Zeichen begrenzt
+					"primary key(id))" +
+					"engine = INNODB");
+			// erstellen der message-Tabelle was soll die machen? Verstehe ich nicht!??
+//						stmt.addBatch("create table if not exists "+ msgTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
+//								"alias VARCHAR(20)," +														// hier auf 20 Zeichen begrenzt
+//								"primary key(id))" +
+//								"engine = INNODB");
+			// erstellen der node-Tabelle für ALLE nodes?
+			stmt.addBatch("create table if not exists "+ nodeTbl + "(ip VARCHAR(15) NOT NULL," +// Als sting abspeichern? 192.168.100.200 -> 15  
+					"hostname VARCHAR(20) NOT NULL," +											//TODO: wie lang max? 
+					"nodeID BIGINT NOT NULL," +
+					"primary key(nodeID))" +
+					"engine = INNODB");	
+			// erstellen der Gruppen-Tabelle
+			stmt.addBatch("create table if not exists "+ groupTbl + "(groupID BIGINT NOT NULL," +			
+					"name VARCHAR(20) NOT NULL," +													//TODO: wie lang max? 
+					"password VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
+					"groupOwner BIGINT NOT NULL," +
+					"primary key(groupID))" +
+					"engine = INNODB");	
+			// erstellen der Config-Tabelle
+			stmt.addBatch("create table if not exists "+ configTbl + "(nodeID BIGINT NOT NULL," +			
+					"userID BIGINT NOT NULL," +														//TODO: wie lang max? 
+					"layout VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
+					"remotDBSvrIP VARCHAR(15) NOT NULL," +											//TODO: Als sting abspeichern? 192.168.100.200 -> 15  
+					"Alias VARCHAR(20) NOT NULL," +
+					"primary key(nodeID,userID))" +
+					"engine = INNODB");	
+			// erstellen der EventTyp-Tabelle														//TODO: was macht das wo kommen daten her? Was wird genau gespeichert?!?
+			stmt.addBatch("create table if not exists "+ eventTypeTbl + "(id BIGINT NOT NULL," +			
+					"description VARCHAR(200) NOT NULL," +														//TODO: wie lang max? 
+					"primary key(ID))" +
+					"engine = INNODB");	
+			// erstellen die Routing-Tabelle
+			stmt.addBatch("create table if not exists "+ routingOverviewTbl + "(id BIGINT NOT NULL," +	//TODO: hier nochmal extrem nachdenken ;-)
+					"primary key(id))" +
+					"engine = INNODB");	
+			stmt.executeBatch();
 			LogEngine.log(this, "createDbAndTables erstellt", LogEngine.INFO);
 		} catch (SQLException e) {
 			LogEngine.log(this, "createDbAndTables fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
@@ -87,7 +149,7 @@ public class DBConnection {
 				if (isDBConnected) {
 					if (m.getTyp() == NachrichtenTyp.GROUP
 							|| m.getTyp() == NachrichtenTyp.PRIVATE) {
-						String saveStmt = ("insert into " + msgHistTbl
+						String saveStmt = ("insert into " + chatLogTbl + " (msgID,sender,timestamp,empfaenger,grp,data)"
 								+ " VALUES (" + m.getId() + "," + m.getSender()
 								+ "," + m.getTimestamp() + ","
 								+ m.getEmpfänger() + "," + "'" + m.getGroup()
@@ -96,11 +158,11 @@ public class DBConnection {
 							//System.out.println(saveStmt);
 							stmt.execute(saveStmt);
 							LogEngine.log(DBConnection.this,
-									"Nachicht in DB-Tabelle " + msgHistTbl
+									"Nachicht in DB-Tabelle " + chatLogTbl
 											+ " eingetragen.", LogEngine.INFO);
 						} catch (Exception e) {
 							LogEngine.log(DBConnection.this,
-									"Fehler beim eintragen in : " + msgHistTbl
+									"Fehler beim eintragen in : " + chatLogTbl
 											+ " " + e.getMessage(),
 									LogEngine.ERROR);
 						}

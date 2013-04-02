@@ -16,7 +16,7 @@ import org.publicmain.nodeengine.NodeEngine;
  * @author tkessels
  *
  */
-public class MSG implements Serializable{
+public class MSG implements Serializable,Comparable<MSG>{
 	private static Integer id_counter=0;
 	private static final long serialVersionUID = -2010661171218754968L;
 
@@ -27,7 +27,7 @@ public class MSG implements Serializable{
 	private long sender;
 	private long timestamp;
 	private int id;
-	//Empfänger
+	//Optionale Datenfelder für beispielsweise Empfänger
 	private long empfänger;
 	private String group;
 	//Payload
@@ -82,6 +82,10 @@ public class MSG implements Serializable{
 	public long getTimestamp() {
 		return timestamp;
 	}
+	
+	public void reStamp() {
+		timestamp=System.currentTimeMillis();
+	}
 
 	public NachrichtenTyp getTyp() {
 		return typ;
@@ -101,6 +105,9 @@ public class MSG implements Serializable{
 
 	public int getId() {
 		return id;
+	}
+	public void setEmpfänger(long value) {
+		empfänger=value;
 	}
 
 
@@ -139,4 +146,15 @@ public class MSG implements Serializable{
 		}
 		return null;
 	}
+
+	@Override
+	public int compareTo(MSG o) {
+		if (this.getTimestamp() != o.getTimestamp())	return (this.getTimestamp() > o.getTimestamp()) ? 1 : -1;
+			else if (this.getSender() != o.getSender())	return (this.getSender() > o.getSender()) ? 1 : -1;
+			else if (this.getId() != o.getId())			return (this.getId() - o.getId());
+			return 0;
+		
+	}
+	
+	
 }

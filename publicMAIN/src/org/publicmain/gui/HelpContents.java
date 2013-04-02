@@ -28,7 +28,7 @@ import org.images.Help;
 
 public class HelpContents {
 
-	private JFrame hcframe;
+	private JFrame hcFrame;
 	private JTextField searchField;
 	private JButton searchButton;
 	private JPanel searchPanel;
@@ -36,10 +36,10 @@ public class HelpContents {
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
 
-	// TODO: Suche ermöglichen! Mehrere Intanzen zuassen?
+	// TODO: Suche ermöglichen!
 
 	public HelpContents() {
-		this.hcframe = new JFrame("Help Contents");
+		this.hcFrame = new JFrame("Help Contents");
 		this.searchField = new JTextField("What to hell are you searching for?");
 		this.searchButton = new JButton("Search");
 		this.searchPanel = new JPanel();
@@ -47,9 +47,9 @@ public class HelpContents {
 		this.htmlKit = new HTMLEditorKit();
 		this.htmlDoc = new HTMLDocument();
 
-		hcframe.setLocationRelativeTo(null);
-		hcframe.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
-		hcframe.setMinimumSize(new Dimension(250, 400));
+		hcFrame.setLocationRelativeTo(null);
+		hcFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		hcFrame.setMinimumSize(new Dimension(250, 400));
 		
 		helpContentTxt.setBackground(new Color(229, 195, 0));
 		helpContentTxt.setEditable(false);
@@ -60,15 +60,15 @@ public class HelpContents {
 		
 		
 		// hinzufügen
-		hcframe.add(searchPanel, BorderLayout.NORTH);
+		hcFrame.add(searchPanel, BorderLayout.NORTH);
 		searchPanel.add(searchField, BorderLayout.CENTER);
 		searchPanel.add(searchButton, BorderLayout.EAST);
-		hcframe.add(helpContentTxt, BorderLayout.CENTER);
+		hcFrame.add(helpContentTxt, BorderLayout.CENTER);
 
 		addIndex();
 		addChapter();
-		hcframe.pack();
-		hcframe.setVisible(true);
+		hcFrame.pack();
+		hcFrame.setVisible(true);
 	}
 
 	private void addIndex() {

@@ -1,5 +1,6 @@
 package org.publicmain.common;
 import java.sql.Time;
+import java.util.Arrays;
 
 import org.publicmain.nodeengine.ConnectionHandler;
 
@@ -9,11 +10,15 @@ import org.publicmain.nodeengine.ConnectionHandler;
  *
  */
 public class LogEngine {
-	private static int verbosity=3;
+	private static int verbosity=4;
+	public static final int TRACE=4;
 	public static final int INFO=3;
 	public static final int WARNING=2;
 	public static final int ERROR=1;
 	public static final int NONE=0;
+	public static MSGCode[] filter_code= {MSGCode.ECHO_REQUEST,MSGCode.ECHO_RESPONSE};
+	public static NachrichtenTyp[] filter_typ= {};
+	public static String[] filter_source={};
 	
 	/**Gibt eine Exception auf dem Programm Fehlerstrom aus
 	 * @param e Die zu dokumentierende Exception
@@ -27,9 +32,8 @@ public class LogEngine {
 	
 	public static void log(Exception e, Object source) {
 		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
-		if(verbosity>0){
+		if(verbosity>=ERROR){
 			log(sourceString + ":"+e.getMessage(),ERROR);
-			//e.printStackTrace();
 		}
 	}
 	
@@ -42,14 +46,18 @@ public class LogEngine {
 	}
 	
 	/**Gibt eine Fehlermeldung auf dem Fehlerstrom aus 
-	 * @param meldung Der Text der Fehlermeldung
 	 * @param source Die Quelle des Fehlers
+	 * @param meldung Der Text der Fehlermeldung
 	 * @param errorLevel Das Niveau des Fehlers (INFO, WARNING oder ERROR)
 	 */
-	public static void log(String meldung, Object source,int errorLevel){
-		if(errorLevel<=verbosity){
-			log(source.getClass().getSimpleName()+" : "+meldung,errorLevel);
-		}
+	public static void log(final Object source, final String meldung,final int errorLevel){
+			new Thread(new Runnable() {
+				public void run() {
+					String sourceString = (source instanceof String) ? (String) source : source.getClass().getSimpleName();
+					if(Arrays.asList(filter_source).contains(sourceString)&&((errorLevel==ERROR)&&(verbosity>=ERROR)))
+					log(sourceString + " : " + meldung, errorLevel);
+				}
+			}).start();
 	}
 	
 	private static String msg2String(MSG x){
@@ -58,13 +66,25 @@ public class LogEngine {
 	
 	
 	
-	public static void log(Object source,String action,MSG x){
-		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
-		log(sourceString+ " : " + action+ " : "+msg2String(x),INFO);
+	public static void log(final Object source,final String action,final MSG x){
+		new Thread(new Runnable() {
+			public void run() {
+				if(!filtered(x)) {
+				String sourceString = (source instanceof String) ? (String) source : source.getClass().getSimpleName();
+				log(sourceString + " : " + action + " : " + msg2String(x), TRACE);
+				}
+			}
+		}).start();
 	}
 	
-	public static void log(ConnectionHandler newConnection){
-		
+	protected static boolean filtered(MSG x) {
+		for (NachrichtenTyp tmp : filter_typ) if(x.getTyp()==tmp)return true;
+		if(x.getTyp()==NachrichtenTyp.SYSTEM)	for (MSGCode tmp : filter_code)if(x.getCode()==tmp) return true;
+		return false;
+	}
+
+	public static void log(ConnectionHandler quelle,String meldung){
+		log(quelle.toString()+":"+meldung,INFO);
 	}
 	
 	public static void log(String meldung,int errorLevel){
@@ -73,9 +93,8 @@ public class LogEngine {
 		}
 	}
 
-	public static void log(ConnectionHandler quelle, MSG paket) {
-		log(quelle.toString()+":"+paket,INFO);
-		
+	public static void log(final ConnectionHandler quelle, final String action,final MSG paket) {
+				log(quelle.toString(), action, paket);
 	}
 	
 	

@@ -17,6 +17,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
+import org.publicmain.sql.DBConnection;
 
 /**
  * @author ATRM
@@ -27,6 +28,7 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
+	public DBConnection db;
 	//private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;
@@ -50,8 +52,9 @@ public class ChatEngine extends Observable{
 	
 	public ChatEngine() throws IOException{
 		
-		ne = new NodeEngine(this);
-		ce=this;
+		this.ne = new NodeEngine(this);
+		//this.db = db.getDBConnection();
+		this.ce = this;
 		
 		group_channels=new ArrayList<GruppenKanal>();
 		private_channels=new ArrayList<KnotenKanal>();
@@ -78,8 +81,6 @@ public class ChatEngine extends Observable{
 			}}
 		);
 		msgSorterBot.start();
-		
-		
 	}
 	
 	
@@ -128,7 +129,7 @@ public class ChatEngine extends Observable{
 	/**Fragt ein Array alle User ab 
 	 * @return Array aller verbundener Nodes
 	 */
-	public	List<Node>	getUsers(){
+	public	Set<Node>	getUsers(){
 		return ne.getNodes();
 	}
 	
@@ -253,17 +254,15 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
+		if(db!=null)db.saveMsg(nachricht);
 	}
 	
 	/**Findet zu NodeID zugehörigen Node in der Liste
 	 * @param nid NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
 	 */
-	public Node getNodeforUser(long nid){
-		for (Node x : ne.getNodes()) {
-			if(x.getNodeID()==nid) return x;
-		}
-		return null;
+	public Node getNodeforNID(long nid){
+		return ne.getNodeforNID(nid);
 	}
 }
 

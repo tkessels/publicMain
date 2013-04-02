@@ -19,6 +19,8 @@ import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
 import org.publicmain.sql.DBConnection;
 
+import com.mysql.jdbc.UpdatableResultSet;
+
 /**
  * @author ATRM
  *
@@ -39,6 +41,7 @@ public class ChatEngine extends Observable{
 	
 	
 	private BlockingQueue<MSG> inbox;
+	private String[]	Groups=new String[] {"testGroup1","testGroup2","testGroup3", "testGroup4"};
 	
 	
 	
@@ -158,9 +161,8 @@ public class ChatEngine extends Observable{
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
 	public	String[] getGroupList(){
-		//TODO: CODE HERE / bisher nur ein test String[]
-		String[] testGroups = {"testGroup1","testGroup2","testGroup3", "testGroup4"};
-		return testGroups;
+		//testGroups = new String[] {"testGroup1","testGroup2","testGroup3", "testGroup4"};
+		return Groups;
 	}
 	
 	/** Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
@@ -246,6 +248,13 @@ public class ChatEngine extends Observable{
 		}
 		
 		
+	}
+	
+	private void updateGroups() {
+		//TODO ask Nodeengine for Groupsstrings
+		synchronized (Groups) {
+	
+		}
 	}
 	
 	

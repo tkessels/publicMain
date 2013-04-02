@@ -70,8 +70,8 @@ public class DragableJTabbedPane extends JTabbedPane {
 
 				/*
 				Point tabPt = e.getLocation();
-				SwingUtilities.convertPointFromScreen(tabPt, DnDTabbedPane.this);
-				if (DnDTabbedPane.this.contains(tabPt)) {
+				SwingUtilities.convertPointFromScreen(tabPt, DragableJTabbedPane.this);
+				if (DragableJTabbedPane.this.contains(tabPt)) {
 					int targetIdx = getTargetTabIndex(tabPt);
 					int sourceIndex = data.getTabIndex();
 					if (getTabAreaBound().contains(tabPt)

@@ -293,18 +293,18 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param ChatWindow
 	 */
 	public void delChat(ChatWindow cw) {
-		// ChatWindow (cw) aus jTabbedPane entfernen:
-		this.jTabbedPane.remove(cw);
-		// ChatWindow aus Chatliste entfernen:
-		this.chatList.remove(cw);
-		// ChatWindow aus Gruppe entfernen (MSGListener abschalten):
-		ce.remove_MSGListener(cw);
-		// Falls keine ChatWindows mehr wird public geöffnet:
-		if (chatList.isEmpty()) {
-			// TODO: Hier evtl. noch anderen Programmablauf implementier
-			// z.B. schließen des Programms wenn letztes ChatWindow geschlossen
-			// wird
-			addChat(new ChatWindow("public"));
+		// TODO: Hier evtl. noch anderen Programmablauf implementier
+		// z.B. schließen des Programms wenn letztes ChatWindow geschlossen
+		// wird
+		
+		// Falls nur noch ein ChatWindow übrig kann dieses nicht entfernt werden
+		if(chatList.size() >= 2){
+			// ChatWindow (cw) aus jTabbedPane entfernen:
+			this.jTabbedPane.remove(cw);
+			// ChatWindow aus Chatliste entfernen:
+			this.chatList.remove(cw);
+			// ChatWindow aus Gruppe entfernen (MSGListener abschalten):
+			ce.remove_MSGListener(cw);
 		}
 	}
 	

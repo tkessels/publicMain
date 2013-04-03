@@ -1,17 +1,27 @@
 package org.publicmain.sql;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.gui.GUI;
+
+import com.mysql.jdbc.PreparedStatement;
 
 /**
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
@@ -19,8 +29,9 @@ import org.publicmain.gui.GUI;
  */
 public class DBConnection {
 
-	private Connection con;;
+	private Connection con;
 	private Statement stmt;
+	private PreparedStatement checkoutHistoryPrpStmt;
 	//private ResultSet rs;
 	private String url;
 	private String dbName;
@@ -36,6 +47,8 @@ public class DBConnection {
 	private String configTbl;
 	private String eventTypeTbl;
 	private String routingOverviewTbl;
+	private Calendar cal;
+	private SimpleDateFormat splDateFormt;
 	
 	
 	// verbindungssachen
@@ -56,6 +69,8 @@ public class DBConnection {
 		this.eventTypeTbl		= "t_eventType";
 		this.routingOverviewTbl	= "t_routingOverView";
 		this.isDBConnected 		= false;
+		this.cal				= Calendar.getInstance();
+		this.splDateFormt		= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 		if(connectToLocDBServer()){
 			isDBConnected = true;
@@ -87,9 +102,10 @@ public class DBConnection {
 			// erstellen der Message Tabelle
 			stmt.addBatch("create table if not exists "+ chatLogTbl + "(id INTEGER NOT NULL AUTO_INCREMENT," +		// hier autoincrement nutzen - kann ja mehrere mit der selben geben
 																	"msgID INTEGER NOT NULL," +
-																	"sender BIGINT NOT NULL," +
 																	"timestamp BIGINT NOT NULL," +
+																	"sender BIGINT NOT NULL," +
 																	"empfaenger BIGINT NOT NULL," +
+																	"typ varchar(30) NOT NULL," +
 																	"grp varchar(20) NOT NULL," +
 																	"data varchar(200) NOT NULL," +
 																	"primary key(id))" +
@@ -147,13 +163,16 @@ public class DBConnection {
 		Runnable tmp = new Runnable() {
 			public void run() {
 				if (isDBConnected) {
-					if (m.getTyp() == NachrichtenTyp.GROUP
-							|| m.getTyp() == NachrichtenTyp.PRIVATE) {
-						String saveStmt = ("insert into " + chatLogTbl + " (msgID,sender,timestamp,empfaenger,grp,data)"
-								+ " VALUES (" + m.getId() + "," + m.getSender()
-								+ "," + m.getTimestamp() + ","
-								+ m.getEmpfänger() + "," + "'" + m.getGroup()
-								+ "'" + "," + "'" + m.getData() + "'" + ")");
+					if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
+						String saveStmt = ("insert into " + chatLogTbl + " (msgID,timestamp,sender,empfaenger,typ,grp,data)"
+								+ " VALUES ("
+								+ m.getId() + ","
+								+ m.getTimestamp() 	+ "," 
+								+ m.getSender() 	+ ","
+								+ m.getEmpfänger() 	+ ","
+								+ "'" + m.getTyp() 	+ "'"	+ ","
+								+ "'" + m.getGroup()+ "'"	+ ","
+								+ "'" + m.getData() + "'" + ")");
 						try {
 							//System.out.println(saveStmt);
 							stmt.execute(saveStmt);
@@ -183,6 +202,55 @@ public class DBConnection {
 		(new Thread(tmp)).start();
 		
 		
+	}
+	public void searchInHistory (String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
+		try {
+			String tmpStmtStr = (
+					"SELECT * " +
+					"FROM " + chatLogTbl + " " +
+					"WHERE timestamp BETWEEN '" + fromDateTime.getTime() + "' AND '" + toDateTime.getTime() + "'");
+			if (!chosenNTyp.equals("ALL")){
+				tmpStmtStr = tmpStmtStr + " AND typ = '" + chosenNTyp + "'";
+			}
+			if (!chosenAliasOrGrpName.equals("...type in here.")){
+				//TODO: hier die übersetung von nr in string einbinden
+//				tmpStmtStr = tmpStmtStr + " AND ";
+			}
+			
+			
+			Statement searchStmt = con.createStatement();
+			ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
+			
+			
+			
+			//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
+					+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
+					+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
+					+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
+			while (rs.next()) {
+				cal.setTimeInMillis(rs.getLong("timestamp"));
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
+						"<tr>" + "<td>" + rs.getInt("id") + "<td>"
+								+ rs.getInt("msgID") + "<td>"
+								+ splDateFormt.format(cal.getTime())+ "<td>"
+								+ rs.getLong("sender") + "<td>"
+								+ rs.getLong("empfaenger") + "<td>"
+								+ rs.getString("typ") + "<td>"
+								+ rs.getString("grp") + "<td>"
+								+ rs.getString("data"), 0, 0, null);
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</tr>", 0, 0,
+						null);
+			}
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</table>", 0, 0,
+					null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
 	}
 
 }

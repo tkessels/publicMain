@@ -60,7 +60,8 @@ public class NodeEngine {
  private Thread connectionsAcceptBot 	= new Thread(new ConnectionsAccepter()); 	//Thread akzeptiert und schachtelt eingehen Verbindungen auf dem ServerSocket
  private Thread rootClaimProcessor;// 		= new Thread(new RootClaimProcessor()); 				//Thread zur Aushandlung neuer Root Stellung Wenn der Baum segmentiert wurde 
  private Thread rootMe	;//					= new Thread(new RootMe());
-
+ 
+private Hook angler = new Hook();
  private List<Hook> hooks = new ArrayList<Hook>();
 
 	public NodeEngine(ChatEngine parent) throws IOException {
@@ -520,7 +521,7 @@ public class NodeEngine {
 	
 	
 	
-
+/*
 
 	private boolean hook(MSG paket) {
 		boolean tmp = false;
@@ -528,7 +529,7 @@ public class NodeEngine {
 			tmp |= x.check(paket);
 		return tmp;
 	}
-
+*/
 	/**
 	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.
 	 */
@@ -646,23 +647,16 @@ public class NodeEngine {
 	}
 
 	public Node retrieve(long nid) {
-			Hook x = new Hook(NachrichtenTyp.SYSTEM, MSGCode.NODE_UPDATE, nid, null, null, null, false);
 			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
-			hooks.add(x);
-			synchronized (x) {
-				try {
-					x.wait(1000);
-				}
-				catch (InterruptedException e) {
-				}
-			}
-			hooks.remove(x);
-			if (x.getHookedMSG() != null) return (Node) x.getHookedMSG().getData();
+			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,false,1000);
+			if (x != null) return (Node) x.getData();
 			else {
 				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
 				return null;
 			}
 	}
+
+	
 
 	public void setRootMode(boolean rootmode) {
 		this.rootMode = rootmode;

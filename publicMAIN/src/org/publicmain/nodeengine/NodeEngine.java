@@ -33,36 +33,35 @@ import org.publicmain.gui.GUI;
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
- protected static final long CONNECTION_TIMEOUT = 4000; //Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
- protected static final long ROOT_ANNOUNCE_TIMEOUT = 4000; //Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
- private final InetAddress group = InetAddress.getByName("230.223.223.223"); //Default MulticastGruppe für Verbindungsaushandlung
- private final int multicast_port = 6789; //Default Port für MulticastGruppe für Verbindungsaushandlung
- private final int MAX_CLIENTS = 5; //Maximale Anzahl anzunehmender Verbindungen 
+ protected static final long CONNECTION_TIMEOUT = 4000; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ protected static final long ROOT_ANNOUNCE_TIMEOUT = 4000; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
+ private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
+ private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
 
- private static volatile NodeEngine ne; //Statischer Zeiger auf einzige Instanz der NodeEngine
- private Node meinNode; //die NodeRepräsentation dieser NodeEngine
- private ChatEngine ce; //Zeiger auf parent ChatEngine
+ private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
+ private Node meinNode; 					//die NodeRepräsentation dieser NodeEngine
+ private ChatEngine ce; 					//Zeiger auf parent ChatEngine
+ private Hook angler = new Hook();		//Hookobjekt zum abfangen von Nachrichten		
 
- private ServerSocket server_socket; //Server Socket für eingehende Verbindungen (Passiv/Childs)
- private ConnectionHandler root_connection; //TCP Socket zur Verbindung mit anderen Knoten (Aktiv/Parent/Root)
- private MulticastSocket multi_socket; //Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
- public List<ConnectionHandler> connections; //Liste bestehender Childverbindungen in eigener HüllKlasse
- private Set<String> groups; //Liste aller abonierten Gruppen
+ private ServerSocket server_socket; 				//Server Socket für eingehende Verbindungen (Passiv/Childs)
+ private ConnectionHandler root_connection;	//TCP Socket zur Verbindung mit anderen Knoten (Aktiv/Parent/Root)
+ private MulticastSocket multi_socket;			//Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
+ public List<ConnectionHandler> connections; 	//Liste bestehender Childverbindungen in eigener HüllKlasse
+ private Set<String> groups;						//Liste aller abonierten Gruppen
 
  private BlockingQueue<MSG> root_claims_stash; //Queue für Bewerberpakete bei Neuaushandlung vom Root-Status 
- private Set<Node> allNodes; //Alle dieser Nodenginge bekannten Knotten (sollten alle sein)
+ private Set<Node> allNodes; 						//Alle dieser Nodenginge bekannten Knotten (sollten alle sein)
 
- private volatile boolean rootMode; 		//Dieser Knoten möchte Wurzel sein (und benimmt sich auch so)
- private volatile boolean online; 			//Dieser Knoten möchte an sein und verbunden bleiben (signalisiert allen Threads wenn die Anwendung beendet wird)
- private volatile boolean rootDiscovering;//Dieser Knoten ist gerade dabei ROOT_ANNOUNCES zu sammeln um einen neuen ROOT zu wählen
+ private volatile boolean rootMode; 			//Dieser Knoten möchte Wurzel sein (und benimmt sich auch so)
+ private volatile boolean online; 				//Dieser Knoten möchte an sein und verbunden bleiben (signalisiert allen Threads wenn die Anwendung beendet wird)
+ private volatile boolean rootDiscovering;	//Dieser Knoten ist gerade dabei ROOT_ANNOUNCES zu sammeln um einen neuen ROOT zu wählen
 
  private Thread multicastRecieverBot		= new Thread(new MulticastReciever());			//Thread zum annehmen und verarbeiten der Multicast-Pakete
  private Thread connectionsAcceptBot 	= new Thread(new ConnectionsAccepter()); 	//Thread akzeptiert und schachtelt eingehen Verbindungen auf dem ServerSocket
- private Thread rootClaimProcessor;// 		= new Thread(new RootClaimProcessor()); 				//Thread zur Aushandlung neuer Root Stellung Wenn der Baum segmentiert wurde 
- private Thread rootMe	;//					= new Thread(new RootMe());
+ private Thread rootMe	;																			//Thread der nach einem Delay Antrag auf RootMode stellt wird mit einem Discover gestartet
+ private Thread rootClaimProcessor;												 				//Thread zum Sammeln und Auswerten von Root_Announces (Ansprüche auf Rootmode) wird beim empfang/versand eines RootAnnounce getstatet.
  
-private Hook angler = new Hook();
- private List<Hook> hooks = new ArrayList<Hook>();
 
 	public NodeEngine(ChatEngine parent) throws IOException {
 		allNodes = new HashSet<Node>();
@@ -408,7 +407,7 @@ private Hook angler = new Hook();
 	 */
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		//if (hook(paket)) return;
+		if (angler.check(paket)) return;
 		switch (paket.getTyp()) {
 			case GROUP:
 				sendtcpexcept(paket, quelle);

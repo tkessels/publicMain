@@ -8,11 +8,28 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 
+/**
+ * Dies Klasse erlaubt es eine Reihe von Vergleichskriterien (Haken) abzuspeichern und eine blockende Abfrage zu starten. 
+ * Dies Klasse erlaubt es einer Methode einen Haken zu registrieren und zu blocken bis eine MSG entsprechender Zusammensetzung angekommen ist. 
+ * Dabei wird ein Timeout benötigt um tote Hooks zu verhindern. 
+ * 
+ * 
+ * @author tkessels
+ *
+ */
 public class Hook {
-	
-	private List<Haken> allHooks=new ArrayList<Haken>();
+	private boolean onlyFirstMatch=true;
+	private List<Haken> allHooks=new ArrayList<Haken>();  //Liste aller registrierten Filter
 
-	public MSG fishfor(NachrichtenTyp system, MSGCode nodeUpdate, long nid,boolean filter, long timeout) {
+	/**Richtet einen Hook ein der blockt bis eine MSG mit den Entsprechenden Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND verknüpft und müssen alle erfüllt werden.
+	 * @param typ	Nachrichtentyp der zu erwartenden Nachricht. Also ob <code>SYSTEM, GROUP, PRIVATE</code> oder <code>DATA</code>
+	 * @param code Der MSGCode der Nachricht. Also um welchen Typ von SystemNachricht es sich handelt (z.B.:<code>NODE_UPDATE </code> oder <code>ECHO_REQUEST</code>)
+	 * @param nid NodeID des Absenders
+	 * @param filter gibt an ob die Nachricht von der weiteren Verarbeitung in der NodeEngine ausgeschlossen werden soll. <ul><li><code>true</code>-Nachricht wird von handle nicht weiter betrachtet<li><code>false</code>-Nachricht wird normal weiterverarbeitet.
+	 * @param timeout gibt die Dauer in Millisekunden an für die der Hook aktiv bleiben soll bevor er sich selbst enfernt.
+	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>null</code> wenn das <code>timeout</code> abgelaufen ist ohne eine Nachricht zu matchen.
+	 */
+	public MSG fishfor(NachrichtenTyp typ, MSGCode code, long nid,boolean filter, long timeout) {
 		Haken x = new Haken(NachrichtenTyp.SYSTEM, MSGCode.NODE_UPDATE, nid,filter);
 		allHooks.add(x);
 		synchronized (x) {
@@ -26,15 +43,59 @@ public class Hook {
 		return x.getHookedMSG();
 	}
 	
+	/**Nicht blockende Methode die für eine gewisse Zeit <code>timeout</code> alle Nachrichten verwirft die den angegebennen Krieterien entspricht.
+	 * @param typ Typ der zu verwerfenden Nachricht
+	 * @param typ	Nachrichtentyp der zu filternden Nachricht. (z.b:<code>SYSTEM, GROUP, PRIVATE</code> oder <code>DATA</code>)
+	 * @param code Der MSGCode der Nachricht. Also um welchen Typ von SystemNachricht es sich handelt (z.B.:<code>NODE_UPDATE </code> oder <code>ECHO_REQUEST</code>)
+	 * @param nid NodeID des Absenders
+	 * @param timeout gibt die Dauer in Millisekunden an für die der Hook aktiv bleiben soll bevor er sich selbst enfernt.
+	 * 	 */
+	public void filter(NachrichtenTyp typ, MSGCode code, long nid, final long timeout) {
+	final Haken x = new Haken(NachrichtenTyp.SYSTEM, MSGCode.NODE_UPDATE, nid,true);
+	new Thread(new Runnable() {
+		public void run() {
+			allHooks.add(x);
+			synchronized (x) {
+				try {
+					Thread.sleep(timeout);
+				} catch (InterruptedException e) {
+				}
+			}
+			allHooks.remove(x);
+		}
+	}).start();
+}
+	
+	public boolean check(MSG paket) {
+			boolean tmp=false;
+			for (Haken cur : allHooks) {
+				if (cur.check(paket)) {
+					if(onlyFirstMatch)return cur.filter;
+					else tmp|=cur.filter;
+				}
+			}
+			return tmp;
+	}
+	
+	
+	/**interne Klasse für Parameter Kapsel und Semaphore 
+	 * @author tkessels
+	 *
+	 */
 	private class Haken{
+		//Filterinformationen
 		private NachrichtenTyp typ;
 		private MSGCode code;
 		private Long sender;
-		private Long reciever;
-		private String gruppe;
-		private Object payload;
-		private MSG hookedMSG;
+		//private Long reciever;
+		//private String gruppe;
+		//private Object payload;
+		
 		private boolean filter;
+		
+
+		private MSG hookedMSG;
+
 		public Haken(NachrichtenTyp typ, MSGCode code, Long sender, boolean filter) {
 			super();
 			this.typ = typ;
@@ -56,19 +117,22 @@ public class Hook {
 			
 			
 			if(typ_check&&code_check&&sender_check) {//&&reciever_check&&gruppe_check&&payload_check) {
-//				System.out.println("Hooked packed found !!!! Filter:"+filter+ " MSG:" + x);
 				LogEngine.log(this.toString(),"hooked", x);
-				this.notifyAll();
 				hookedMSG=x;
-				return filter;
+				this.notifyAll();
+				return true;
 			}
 			return false;
 		}
+		
 		public String toString() {
-			return "Hook [" + (typ != null ? "typ=" + typ + ", " : "") + (code != null ? "code=" + code + ", " : "") + (sender != null ? "sender=" + sender + ", " : "") + (reciever != null ? "reciever=" + reciever + ", " : "") + (gruppe != null ? "gruppe=" + gruppe + ", " : "") + (payload != null ? "payload=" + payload + ", " : "") + (hookedMSG != null ? "hookedMSG=" + hookedMSG + ", " : "") + "filter=" + filter + "]";
+			return "Hook [" + (typ != null ? "typ=" + typ + ", " : "") + (code != null ? "code=" + code + ", " : "") + (sender != null ? "sender=" + sender + ", " : "") + "filter=" + filter + ", " + (hookedMSG != null ? "hookedMSG=" + hookedMSG : "") + "]";
 		}
+
 		private MSG getHookedMSG() {
 			return hookedMSG;
 		}
 	}
+
+	
 }

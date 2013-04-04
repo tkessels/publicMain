@@ -20,6 +20,18 @@ import org.publicmain.common.NachrichtenTyp;
 public class Hook {
 	private boolean onlyFirstMatch=true;
 	private List<Haken> allHooks=new ArrayList<Haken>();  //Liste aller registrierten Filter
+	
+	private synchronized void add(Haken toAdd) {
+		synchronized (allHooks) {
+			allHooks.add(toAdd);
+		}
+	}
+	
+	private synchronized void remove(Haken toRemove) {
+		synchronized (allHooks) {
+			allHooks.add(toRemove);
+		}
+	}
 
 	/**Richtet einen Hook ein der blockt bis eine MSG mit den Entsprechenden Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND verknüpft und müssen alle erfüllt werden.
 	 * @param typ	Nachrichtentyp der zu erwartenden Nachricht. Also ob <code>SYSTEM, GROUP, PRIVATE</code> oder <code>DATA</code>
@@ -29,9 +41,9 @@ public class Hook {
 	 * @param timeout gibt die Dauer in Millisekunden an für die der Hook aktiv bleiben soll bevor er sich selbst enfernt.
 	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>null</code> wenn das <code>timeout</code> abgelaufen ist ohne eine Nachricht zu matchen.
 	 */
-	public MSG fishfor(NachrichtenTyp typ, MSGCode code, long nid,boolean filter, long timeout) {
-		Haken x = new Haken(NachrichtenTyp.SYSTEM, MSGCode.NODE_UPDATE, nid,filter);
-		allHooks.add(x);
+	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,boolean filter, long timeout) {
+		Haken x = new Haken(typ,code, nid,filter);
+		add(x);
 		synchronized (x) {
 			try {
 				x.wait(timeout);
@@ -39,7 +51,7 @@ public class Hook {
 			catch (InterruptedException e) {
 			}
 		}
-		allHooks.remove(x);
+		remove(x);
 		return x.getHookedMSG();
 	}
 	
@@ -50,29 +62,31 @@ public class Hook {
 	 * @param nid NodeID des Absenders
 	 * @param timeout gibt die Dauer in Millisekunden an für die der Hook aktiv bleiben soll bevor er sich selbst enfernt.
 	 * 	 */
-	public void filter(NachrichtenTyp typ, MSGCode code, long nid, final long timeout) {
-	final Haken x = new Haken(NachrichtenTyp.SYSTEM, MSGCode.NODE_UPDATE, nid,true);
+	public void filter(NachrichtenTyp typ, MSGCode code, Long nid, final long timeout) {
+	final Haken x = new Haken(typ, code, nid,true);
 	new Thread(new Runnable() {
 		public void run() {
-			allHooks.add(x);
+			add(x);
 			synchronized (x) {
 				try {
 					Thread.sleep(timeout);
 				} catch (InterruptedException e) {
 				}
 			}
-			allHooks.remove(x);
+			remove(x);
 		}
 	}).start();
 }
 	
 	public boolean check(MSG paket) {
 			boolean tmp=false;
+			synchronized (allHooks) {
 			for (Haken cur : allHooks) {
 				if (cur.check(paket)) {
 					if(onlyFirstMatch)return cur.filter;
 					else tmp|=cur.filter;
 				}
+			}
 			}
 			return tmp;
 	}
@@ -126,7 +140,7 @@ public class Hook {
 		}
 		
 		public String toString() {
-			return "Hook [" + (typ != null ? "typ=" + typ + ", " : "") + (code != null ? "code=" + code + ", " : "") + (sender != null ? "sender=" + sender + ", " : "") + "filter=" + filter + ", " + (hookedMSG != null ? "hookedMSG=" + hookedMSG : "") + "]";
+			return "Hook [" + (typ != null ? "typ=" + typ + ", " : "") + (code != null ? "code=" + code + ", " : "") + (sender != null ? "sender=" + sender + ", " : "") + "filter=" + filter +"]";
 		}
 
 		private MSG getHookedMSG() {

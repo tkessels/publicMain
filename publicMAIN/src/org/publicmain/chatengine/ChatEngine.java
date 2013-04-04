@@ -3,6 +3,7 @@ package org.publicmain.chatengine;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
@@ -13,6 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
@@ -27,21 +29,29 @@ import com.mysql.jdbc.UpdatableResultSet;
  */
 
 public class ChatEngine extends Observable{
+	
+
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
 	public DBConnection db;
-	//private Set<Node> nodes;
 	private Set<Node> ignored;
-	private List<GruppenKanal> group_channels;
-	private List<KnotenKanal> private_channels;
 	
-	private Thread msgSorterBot;//verteilt eingehende MSGs
+	private long userID;
+	private String alias;
+	
+	private Set<GruppenKanal> group_channels;
+	private Set<KnotenKanal> private_channels;
+	private KnotenKanal default_channel;
+	
+	private Thread msgSorterBot=new Thread(new MsgSorter());	//verteilt eingehende MSGs auf die Kanäle
 	private Thread neMaintenance;//warted die NE
 	
 	
 	private BlockingQueue<MSG> inbox;
-	private String[]	Groups=new String[] {"testGroup1","testGroup2","testGroup3", "testGroup4"};
+	
+	private Set<String> allGroups=new HashSet<String>();
+	private Set<String> myGroups=new HashSet<String>();
 	
 	
 	
@@ -54,38 +64,58 @@ public class ChatEngine extends Observable{
 
 	
 	public ChatEngine() throws IOException{
-		
-		this.ne = new NodeEngine(this);
+		ce = this;
+		//TODO:Load Settings & UserDATA
 		//this.db = db.getDBConnection();
-		this.ce = this;
 		
-		group_channels=new ArrayList<GruppenKanal>();
-		private_channels=new ArrayList<KnotenKanal>();
-		//nodes=new HashSet<Node>();
+		//temporär
+		 setUserID((long) (Math.random()*Long.MAX_VALUE));
+		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
+		
+		 this.ne = new NodeEngine(this);
+		
+		group_channels=new HashSet<GruppenKanal>();
+		private_channels=new HashSet<KnotenKanal>();
+		default_channel=new KnotenKanal(getUserID());
 		ignored=new HashSet<Node>();
-		//nodes.addAll(ne.getNodes());
 		inbox=new LinkedBlockingQueue<MSG>();
+		
+		//temporäre Initialisierung der GruppenListe mit default Groups 
+		allGroups.addAll(Arrays.asList(new String[]{"public","hs5"}));
+		myGroups.addAll(allGroups);
+		// TODO:GUI müsste für all diese Gruppen je ein Fenster anlgegen beim Starten
+		//TODO: All diese Gruppen müssten gejoint werden.
 		//group_join("public");
-		//hier müssten die default kanäle angelegt werden und die GUI müsste angebunden werden.
 		
-		
-		
-		msgSorterBot=new Thread(new Runnable() { //nimmt Nachrichten aus der inbox und verteilt sie auf die Kanäle
-			public void run() {
-				while (true) {
-					try {
-						MSG tmp = inbox.take(); 
-						LogEngine.log("msgSorterBot","sorting",tmp);
-						if (tmp.getTyp() == NachrichtenTyp.GROUP) for (GruppenKanal x : group_channels)if (x.add(tmp)) break;
-						else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) for (KnotenKanal y : private_channels) if (y.add(tmp))break;
-					} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
-					}
-				}
-			}}
-		);
 		msgSorterBot.start();
 	}
 	
+	/**Findet zu NodeID zugehörigen Node in der Liste
+	 * @param nid NodeID
+	 * @return Node-Objekt zu angegebenem NodeID
+	 */
+	public Node getNode(long nid){
+		return ne.getNode(nid);
+	}
+	
+	public long getUserID() {
+		return userID;
+	}
+
+	public void setUserID(long userID) {
+		this.userID = userID;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	/**Verändert den Anzeigenamen des Nutzers
+	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
+	 */
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
 	
 	/**Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
 	 * @param uid UID des Empfängers
@@ -132,7 +162,7 @@ public class ChatEngine extends Observable{
 	/**Fragt ein Array alle User ab 
 	 * @return Array aller verbundener Nodes
 	 */
-	public	Set<Node>	getUsers(){
+	public	Set<Node> getUsers(){
 		return ne.getNodes();
 	}
 	
@@ -140,29 +170,31 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name){
-		//GruppenKanal tmp =new GruppenKanal(gruppen_name);
-		//group_channels.add(tmp);
-		/*Lege KAnal an 
-		 * informiere NodeEngine über neue gruppe wenn noch nicht vorhanden so das ander nodes diese anzeigen
-		 * vielleicht machen wirdas auch einfach indem wir ein group announce paket forgen
-		*/
-		//TODO: CODE HERE
+		if(!myGroups.contains(gruppen_name)) {
+			myGroups.add(gruppen_name);
+			addGroup(gruppen_name);
+			ne.joinGroup(gruppen_name);
+		}
+		
+		
 	}
 	
 	/**verlässt eine gruppe wieder
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_leave(String gruppen_name){
-		
-		//TODO: CODE HERE		
+		ne.leaveGroup(gruppen_name);
+		myGroups.remove(gruppen_name);
 	}
 	
 	/**Liefert eine Liste der verfügbaren Gruppenstrings
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
-	public	String[] getGroupList(){
-		//testGroups = new String[] {"testGroup1","testGroup2","testGroup3", "testGroup4"};
-		return Groups;
+	public	Set<String> getAllGroups(){
+		synchronized (allGroups) {
+		return allGroups;
+		}
+			
 	}
 	
 	/** Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
@@ -190,20 +222,6 @@ public class ChatEngine extends Observable{
 		//TODO: CODE HERE
 	}
 	
-	/**Verändert den Anzeigenamen des Nutzers
-	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
-	 */
-	public	void	set_alias(String alias){
-		//TODO: CODE HERE
-	}
-	
-	/**Liefert den aktuellen Anzeigenamen
-	 * @return aktueller Anzeigename
-	 */
-	public	String	get_alias(){
-		return ne.getME().getAlias();
-	}
-	
 	
 	/** Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an 
 	 * @param chatPanel Das abonierende Fenster
@@ -211,11 +229,14 @@ public class ChatEngine extends Observable{
 	 */
 	public void add_MSGListener(Observer chatPanel,String gruppen_name){
 		GruppenKanal tmp =new GruppenKanal(gruppen_name);
-		int i = group_channels.indexOf(tmp);
-		if(i>=0)group_channels.get(i).addObserver(chatPanel);
-		else{
+		if(group_channels.contains(tmp)) {
+			for (GruppenKanal cur : group_channels) {
+				if(cur.equals(tmp)) cur.addObserver(chatPanel);
+			}
+		}else {
 			tmp.addObserver(chatPanel);
 			group_channels.add(tmp);
+			group_join(gruppen_name);
 		}
 	}
 	
@@ -224,12 +245,13 @@ public class ChatEngine extends Observable{
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
-	public void	add_MSGListener(Observer chatPanel,long uid){
+	public void add_MSGListener(Observer chatPanel,long uid){
 		KnotenKanal tmp =new KnotenKanal(uid);
-		int i = group_channels.indexOf(tmp);
-		if(i>=0)group_channels.get(i).addObserver(chatPanel);
-		else{
-			
+		if(private_channels.contains(tmp)) {
+			for (KnotenKanal cur : private_channels) {
+				if(cur.equals(tmp)) cur.addObserver(chatPanel);
+			}
+		}else {
 			tmp.addObserver(chatPanel);
 			private_channels.add(tmp);
 		}
@@ -241,22 +263,50 @@ public class ChatEngine extends Observable{
 	public	void	remove_MSGListener(Observer chatPanel){
 		for (Kanal x : group_channels) {
 			x.deleteObserver(chatPanel);
+			if(x.countObservers()==0) { //wenn kanal leer ist
+				group_channels.remove(x); //entferne ihn
+				group_leave((String) x.referenz);
+			}
 		}
-		
 		for (Kanal x : private_channels) {
 			x.deleteObserver(chatPanel);
+			if(x.countObservers()==0) { //wenn kanal leer
+				private_channels.remove(x);
+			}
 		}
-		
-		
 	}
 	
-	private void updateGroups() {
+	public void addGroup(String groupname) {
+		synchronized (allGroups) {
+			int hash=allGroups.hashCode();
+			allGroups.add(groupname);
+			if(hash!=allGroups.hashCode()) allGroups.notifyAll();
+		}
+	}
+	
+	public void removeGroup(String groupname) {
+		synchronized (allGroups) {
+			int hash = allGroups.hashCode();
+			allGroups.add(groupname);
+			if(hash!=allGroups.hashCode())allGroups.notifyAll();
+		}
+	}
+	public void setGroups(Set<String> groupnames) {
+		synchronized (allGroups) {
+			int hash=allGroups.hashCode();
+			allGroups.clear();
+			allGroups.addAll(groupnames);
+			if(hash!=allGroups.hashCode())allGroups.notifyAll();
+		}
+	}
+	
+/*	private void updateGroups() {
 		//TODO ask Nodeengine for Groupsstrings
-		synchronized (Groups) {
+		synchronized (allGroups) {
 	
 		}
 	}
-	
+*/	
 	
 	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
 	 * @param nachricht Die neue Nachricht.
@@ -266,12 +316,24 @@ public class ChatEngine extends Observable{
 		if(db!=null)db.saveMsg(nachricht);
 	}
 	
-	/**Findet zu NodeID zugehörigen Node in der Liste
-	 * @param nid NodeID
-	 * @return Node-Objekt zu angegebenem NodeID
-	 */
-	public Node getNodeforNID(long nid){
-		return ne.getNodeforNID(nid);
+
+
+	private final class MsgSorter implements Runnable {
+		public void run() {
+			while (true) {
+				try {
+					MSG tmp = inbox.take(); 
+					LogEngine.log("msgSorterBot","sorting",tmp);
+					if (tmp.getTyp() == NachrichtenTyp.GROUP) for (GruppenKanal x : group_channels)if (x.add(tmp)) break;
+					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
+						for (KnotenKanal y : private_channels) if (y.add(tmp))break;
+						//Kein CW angemeldet um die Nachricht aufzunehmen  sende es an GUI via DEFAULT CHANNEL
+						
+					}
+				} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
+				}
+			}
+		}
 	}
 }
 

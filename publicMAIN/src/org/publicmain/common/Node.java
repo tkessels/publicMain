@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.nodeengine.NodeEngine;
 
 public class Node implements Serializable {
@@ -18,13 +19,12 @@ public class Node implements Serializable {
 	private List<InetAddress> sockets;
 	private String hostname;
 	private int server_port;
-	//private boolean isRoot;
 	
-	private Node() {
-		Random myrnd = new Random();
-		nodeID = myrnd.nextLong();
-		userID = myrnd.nextLong(); //noch zufällig später aus config
-		alias = System.getProperties().getProperty("user.name");
+	public Node() {
+		nodeID = NodeEngine.getNE().getNodeID();
+		userID = ChatEngine.getCE().getUserID();
+		this.alias = ChatEngine.getCE().getAlias();
+		
 		sockets=getMyIPs();
 		server_port = NodeEngine.getNE().getServer_port();
 		try {
@@ -34,11 +34,6 @@ public class Node implements Serializable {
 		}
 	}
 	
-	public static Node getMe(){
-		if(me==null)me=new Node();
-		return me;
-	}
-
 	public long getNodeID() {
 		return nodeID;
 	}

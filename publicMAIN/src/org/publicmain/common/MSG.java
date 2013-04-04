@@ -39,7 +39,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 			MSG.id_counter++;
 		}
 		this.timestamp=System.currentTimeMillis();
-		this.sender= NodeEngine.getNE().getME().getNodeID();
+		this.sender= NodeEngine.getNE().getMe().getNodeID();
 	}
 
 	public MSG(Object payload, MSGCode code){

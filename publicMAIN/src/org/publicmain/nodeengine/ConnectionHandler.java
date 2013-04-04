@@ -22,6 +22,7 @@ import org.publicmain.common.Node;
  */
 public class ConnectionHandler {
 	public Set<Node>			children;
+	public Set<String>			groups;
 	public Node					otherEnd;
 	private NodeEngine			ne;
 	private Socket				line;
@@ -91,7 +92,7 @@ public class ConnectionHandler {
 	}
 
 	public void disconnect() {
-		send(new MSG(ne.getME(), MSGCode.NODE_SHUTDOWN));
+		send(new MSG(ne.getMe(), MSGCode.NODE_SHUTDOWN));
 		close();
 	}
 

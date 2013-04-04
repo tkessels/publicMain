@@ -33,13 +33,14 @@ import org.publicmain.gui.GUI;
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
- protected static final long CONNECTION_TIMEOUT = 4000; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
- protected static final long ROOT_ANNOUNCE_TIMEOUT = 4000; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
+ protected static final long CONNECTION_TIMEOUT = 1000; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ protected static final long ROOT_ANNOUNCE_TIMEOUT = 1000; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
  private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
  private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
+ private long nodeID;
  private Node meinNode; 					//die NodeRepräsentation dieser NodeEngine
  private ChatEngine ce; 					//Zeiger auf parent ChatEngine
  private Hook angler = new Hook();		//Hookobjekt zum abfangen von Nachrichten		
@@ -48,7 +49,11 @@ public class NodeEngine {
  private ConnectionHandler root_connection;	//TCP Socket zur Verbindung mit anderen Knoten (Aktiv/Parent/Root)
  private MulticastSocket multi_socket;			//Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
  public List<ConnectionHandler> connections; 	//Liste bestehender Childverbindungen in eigener HüllKlasse
- private Set<String> groups;						//Liste aller abonierten Gruppen
+ 
+ private Set<String> mygroups;						//Liste aller abonierten Gruppen
+ private Set<String> allgroups;						//Liste aller Gruppen
+ 
+ 
 
  private BlockingQueue<MSG> root_claims_stash; //Queue für Bewerberpakete bei Neuaushandlung vom Root-Status 
  private Set<Node> allNodes; 						//Alle dieser Nodenginge bekannten Knotten (sollten alle sein)
@@ -64,10 +69,13 @@ public class NodeEngine {
  
 
 	public NodeEngine(ChatEngine parent) throws IOException {
+		
 		allNodes = new HashSet<Node>();
-		groups = new HashSet<String>();
+		mygroups = new HashSet<String>();
 		connections = new ArrayList<ConnectionHandler>();
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
+		
+		setNodeID((long) (Math.random()*Long.MAX_VALUE));
 		ne = this;
 		ce = parent;
 		online = true;
@@ -78,7 +86,7 @@ public class NodeEngine {
 		multi_socket.setLoopbackMode(true);
 		multi_socket.setTimeToLive(10);
 
-		meinNode = Node.getMe();
+		meinNode = new Node();
 		allNodes.add(meinNode);
 
 		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
@@ -87,6 +95,8 @@ public class NodeEngine {
 		multicastRecieverBot.start();
 
 		discover();
+		
+		
 
 	}
 
@@ -97,10 +107,13 @@ public class NodeEngine {
 	/**
 	 * getMe() gibt das eigene NodeObjekt zurück
 	 */
-	public Node getME() {
+	public Node getMe() {
 		return meinNode; 
 	}
 
+	
+	
+	
 	private Node getBestNode() {
 		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sich der Neue Verbinden darf.
 		/*Random x = new Random(meinNode.getNodeID());
@@ -148,7 +161,7 @@ public class NodeEngine {
 	 * @param nid NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
 	 */
-	public Node getNodeforNID(long nid){
+	public Node getNode(long nid){
 		for (Node x : getNodes()) {
 			if(x.getNodeID()==nid) return x;
 		}
@@ -232,9 +245,13 @@ public class NodeEngine {
 	}*/
 
 	private void discover() {
-		sendmutlicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY));
-		rootMe = new Thread(new RootMe());
-		rootMe.start();
+		new Thread(new Runnable() {
+			public void run() {
+				sendmutlicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY));
+				rootMe = new Thread(new RootMe());
+				rootMe.start();
+			}
+		}).start();
 	}
 
 	private void sendDiscoverReply(Node quelle) {
@@ -248,7 +265,7 @@ public class NodeEngine {
 		 */
 		synchronized (allNodes) {
 			allNodes.clear();
-			allNodes.add(getME());
+			allNodes.add(getMe());
 			allNodes.addAll(getChilds());
 			allNodes.notify();
 		}
@@ -295,7 +312,7 @@ public class NodeEngine {
 			try {
 				root_connection = new ConnectionHandler(tmp_socket);
 				setRootMode(false);
-				sendroot(new MSG(getME()));
+				sendroot(new MSG(getMe()));
 				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 			}
 			catch (IOException e) {
@@ -376,6 +393,7 @@ public class NodeEngine {
 	 */
 	public void handleMulticast(MSG paket) {
 		LogEngine.log(this, "handling [MC]", paket);
+		if (angler.check(paket)) return;
 		if (online && (paket.getTyp() == NachrichtenTyp.SYSTEM)) {
 			switch (paket.getCode()) {
 				case ROOT_REPLY:
@@ -459,7 +477,7 @@ public class NodeEngine {
 						
 					case NODE_LOOKUP:
 						Node tmp=null;
-						if((tmp=getNodeforNID((long) paket.getData()))!=null)quelle.send(new MSG(tmp));
+						if((tmp=getNode((long) paket.getData()))!=null)quelle.send(new MSG(tmp));
 						else sendroot(paket);
 						
 						break;
@@ -520,15 +538,9 @@ public class NodeEngine {
 	
 	
 	
-/*
+	
+	
 
-	private boolean hook(MSG paket) {
-		boolean tmp = false;
-		for (Hook x : hooks)
-			tmp |= x.check(paket);
-		return tmp;
-	}
-*/
 	/**
 	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.
 	 */
@@ -629,7 +641,7 @@ public class NodeEngine {
 	private final class ConnectionsAccepter implements Runnable {
 		public void run() {
 			if(connections==null||server_socket==null)return;
-			while (online && connections.size() <= MAX_CLIENTS) {
+			while (online) {
 				System.out.println();
 				LogEngine.log("ConnectionsAccepter", "Listening on Port:" + server_socket.getLocalPort(), LogEngine.INFO);
 				try {
@@ -657,9 +669,35 @@ public class NodeEngine {
 
 	
 
-	public void setRootMode(boolean rootmode) {
+	private void setRootMode(boolean rootmode) {
 		this.rootMode = rootmode;
 		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
+	}
+
+	public long getNodeID() {
+		return nodeID;
+	}
+
+	public void setNodeID(long nodeID) {
+		this.nodeID = nodeID;
+	}
+
+/*	public void announceGroup(String groupname) {
+//		for (ConnectionHandler iterable_element : iterable) {
+			
+//		}
+		// TODO Auto-generated method stub
+		
+	}
+*/
+	public void joinGroup(String gruppen_name) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void leaveGroup(String gruppen_name) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

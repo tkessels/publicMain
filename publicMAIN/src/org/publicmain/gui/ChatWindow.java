@@ -291,7 +291,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 */
 	private void printMSG(MSG msg) {
 		String color = "black";
-		Node sender = ChatEngine.getCE().getNodeforNID(msg.getSender());
+		Node sender = ChatEngine.getCE().getNode(msg.getSender());
 		String senderalias = (sender!=null)? sender.getAlias():"unknown";
 		
 		switch(msg.getTyp()){

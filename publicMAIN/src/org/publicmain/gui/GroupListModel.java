@@ -24,13 +24,13 @@ public class GroupListModel extends AbstractListModel<String>{
 			public void run() {
 				while (true) {
 					groups.clear();
-					for(String grpName : ChatEngine.getCE().getGroupList()){
+					for(String grpName : ChatEngine.getCE().getAllGroups()){
 						groups.add(grpName);
 					}
 					fireContentsChanged(this, 0, groups.size());
-					synchronized (ChatEngine.getCE().getGroupList()) {
+					synchronized (ChatEngine.getCE().getAllGroups()) {
 						try {
-							ChatEngine.getCE().getGroupList().wait();
+							ChatEngine.getCE().getAllGroups().wait();
 						} catch (InterruptedException e) {
 							LogEngine.log(e);
 						}

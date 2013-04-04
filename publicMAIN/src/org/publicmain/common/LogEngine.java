@@ -54,8 +54,8 @@ public class LogEngine {
 			new Thread(new Runnable() {
 				public void run() {
 					String sourceString = (source instanceof String) ? (String) source : source.getClass().getSimpleName();
-					if(Arrays.asList(filter_source).contains(sourceString)&&((errorLevel==ERROR)&&(verbosity>=ERROR)))
-					log(sourceString + " : " + meldung, errorLevel);
+					if(!Arrays.asList(filter_source).contains(sourceString)&&errorLevel<=verbosity)log(sourceString + " : " + meldung, errorLevel);
+					else if ((errorLevel==ERROR)&&(verbosity>=ERROR))log(sourceString + " : " + meldung, errorLevel);
 				}
 			}).start();
 	}

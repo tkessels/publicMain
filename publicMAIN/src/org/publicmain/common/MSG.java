@@ -46,7 +46,16 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this();
 		this.typ=NachrichtenTyp.SYSTEM;
 		this.code = code;
-		this.data = payload;
+
+		switch(code) {
+		case GROUP_JOIN:
+		case GROUP_LEAVE:
+		case GROUP_ANNOUNCE:
+		case GROUP_EMPTY:
+			this.group=(String) payload;
+		default:
+			this.data = payload;
+		}
 	}
 
 	public MSG(Node daNode){

@@ -15,6 +15,11 @@ public class GruppenKanal extends Kanal {
 		this.referenz=gruppe.toLowerCase();
 	}
 	
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
 	public boolean add(MSG nachricht){
 		LogEngine.log(this, "Nachricht auf Kanal " + referenz + " empfangen benachrichtige : " + this.countObservers(), LogEngine.INFO);
 		if(nachricht.getTyp()==NachrichtenTyp.GROUP&&nachricht.getGroup().equals(referenz)){
@@ -26,14 +31,10 @@ public class GruppenKanal extends Kanal {
 		return false;
 	}
 
-	public boolean is(Object vergleich) {
-		return (this.referenz.equals(vergleich));
-	}
-	
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return super.toString()+messages.toString();
+		return (String) referenz;
 	}
 }
 /*

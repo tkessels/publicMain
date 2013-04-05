@@ -22,7 +22,7 @@ import org.publicmain.common.Node;
  */
 public class ConnectionHandler {
 	public Set<Node>			children;
-	public Set<String>			groups;
+	private Set<String>			groups;
 	public Node					otherEnd;
 	private NodeEngine			ne;
 	private Socket				line;
@@ -39,6 +39,7 @@ public class ConnectionHandler {
 
 		ne = NodeEngine.getNE();
 		children = new HashSet<Node>();
+		groups = new HashSet<String>();
 
 		line = underlying;
 		line.setTcpNoDelay(true);
@@ -68,18 +69,17 @@ public class ConnectionHandler {
 	 * @throws IOException
 	 *             Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt
 	 */
-	public void send(MSG paket) {
-		if (isConnected()) {
-			try {
-				LogEngine.log(this, "sending", paket);
-				line_out.writeObject(paket);
-				line_out.flush();
-			}
-			catch (IOException e) {
-				LogEngine.log(this, "failure", paket);
-			}
-		}
-		else LogEngine.log(this, "dropped", paket);
+	public void send(final MSG paket) {
+				if (isConnected()) {
+					try {
+						LogEngine.log(ConnectionHandler.this, "sending", paket);
+						line_out.writeObject(paket);
+						line_out.flush();
+					} catch (IOException e) {
+						LogEngine.log(ConnectionHandler.this, "failure", paket);
+					}
+				} else
+					LogEngine.log(ConnectionHandler.this, "dropped", paket);
 	}
 
 	/**
@@ -129,6 +129,23 @@ public class ConnectionHandler {
 		send(new MSG(null, MSGCode.ECHO_REQUEST));
 	}
 	
+	public boolean add(String gruppe) {
+		synchronized (groups) {
+			return groups.add(gruppe);
+		}
+	}
+	
+	public boolean remove(String gruppe) {
+		synchronized (groups) {
+			return groups.remove(gruppe);
+		}
+	}
+	
+	public Set<String> getGroups(){
+		synchronized (groups) {
+			return groups;
+		}
+	}
 
 	private void pong(final MSG ping) {
 		new Thread(new Runnable() {

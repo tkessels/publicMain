@@ -1,5 +1,4 @@
 package org.publicmain.chatengine;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Set;
@@ -14,7 +13,6 @@ public abstract class Kanal extends Observable {
 
 	public abstract boolean add(MSG nachricht);
 
-	public abstract boolean is(Object vergleich);
 
 	/**Gibt die letzten x Nachrichten aus einem Kanal als Set zurück
 	 * @param count Die gewünschte Anzahl von Nachrichten
@@ -49,18 +47,16 @@ public abstract class Kanal extends Observable {
 	
 
 	public boolean equals(Object obj) {
-		if (this == obj)return true;
-		if (obj == null)return false;
-		if((referenz!=null)&&referenz.equals(obj)) return true;
-		if (getClass() != obj.getClass())	return false;
-		Kanal other = (Kanal) obj;
-		if (referenz == null)if(other.referenz != null)return false;
-		else if (referenz.equals(other.referenz))return true;
-		return false;
+		return referenz.equals(obj);
+		
 	}
 
 	public Object getReferenz() {
 		return referenz;
+	}
+
+	public boolean is(Object vergleich) {
+		return (this.referenz.equals(vergleich));
 	}
 	
 	

@@ -31,6 +31,7 @@ public enum MSGCode {
 	GROUP_JOIN,
 	GROUP_LEAVE,
 	GROUP_EMPTY,
+	GROUP_ANNOUNCE,
 	/*
 	FILE_REQUEST,
 	

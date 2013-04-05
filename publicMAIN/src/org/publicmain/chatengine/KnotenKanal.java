@@ -19,9 +19,4 @@ public class KnotenKanal extends Kanal{
 		return false;
 	}
 
-	@Override
-	public boolean is(Object vergleich) {
-		return (referenz==vergleich);
-	}
-
 }

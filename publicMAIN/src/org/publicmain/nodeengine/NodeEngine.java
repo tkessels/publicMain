@@ -33,8 +33,8 @@ import org.publicmain.gui.GUI;
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
- protected static final long CONNECTION_TIMEOUT = 1000; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
- protected static final long ROOT_ANNOUNCE_TIMEOUT = 1000; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
+ protected static final long CONNECTION_TIMEOUT = 100; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ protected static final long ROOT_ANNOUNCE_TIMEOUT = 100; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
  private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
  private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
@@ -50,9 +50,8 @@ public class NodeEngine {
  private MulticastSocket multi_socket;			//Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
  public List<ConnectionHandler> connections; 	//Liste bestehender Childverbindungen in eigener HüllKlasse
  
- private Set<String> mygroups;						//Liste aller abonierten Gruppen
- private Set<String> allgroups;						//Liste aller Gruppen
- 
+ private Set<String> allGroups=new HashSet<String>();  //Liste aller Gruppen 
+private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gruppen dieses und aller untergeordneter Knoten
  
 
  private BlockingQueue<MSG> root_claims_stash; //Queue für Bewerberpakete bei Neuaushandlung vom Root-Status 
@@ -71,7 +70,6 @@ public class NodeEngine {
 	public NodeEngine(ChatEngine parent) throws IOException {
 		
 		allNodes = new HashSet<Node>();
-		mygroups = new HashSet<String>();
 		connections = new ArrayList<ConnectionHandler>();
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
 		
@@ -176,13 +174,12 @@ public class NodeEngine {
 	 * Gibt ein StringArray aller vorhandenen Groups zurück
 	 * 
 	 */
-	public String[] getGroups() {
-		String[] grouparray = { "public", "GruppeA", "GruppeB" };
-		return grouparray; //TODO:to implement
+	public Set<String> getGroups() {
+		return allGroups;
 	}
 
 	private void sendroot(MSG msg) {
-		if (root_connection != null && root_connection.isConnected()) root_connection.send(msg);
+		if (hasParent()) root_connection.send(msg);
 	}
 
 	/**
@@ -220,15 +217,18 @@ public class NodeEngine {
 	}
 
 	public void sendtcp(MSG nachricht) {
-		if (hasParent()) sendroot(nachricht); //vielleicht sendroot verwenden?
-		for (ConnectionHandler x : connections)
-			x.send(nachricht);
+		if (hasParent()) 		sendroot(nachricht); 
+		if (hasChildren()) 	for (ConnectionHandler x : connections) x.send(nachricht);
 	}
 
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
-		if (!isRoot() && root_connection != ch) root_connection.send(msg);
-		for (ConnectionHandler x : connections)
-			if (x != ch) x.send(msg);
+//		if (!isRoot() && root_connection != ch) root_connection.send(msg);
+		if (hasParent()&&root_connection != ch) root_connection.send(msg);
+		if (hasChildren())sendchild(msg, ch);
+	}
+	
+	private void sendchild(MSG msg, ConnectionHandler ch) {
+		for (ConnectionHandler x : connections)if (x != ch||ch==null) x.send(msg);
 	}
 
 	/**
@@ -432,7 +432,7 @@ public class NodeEngine {
 				ce.put(paket);
 				break;
 			case SYSTEM:
-				switch (paket.getCode()) {
+			switch (paket.getCode()) {
 					case NODE_UPDATE:
 						allnodes_add((Node) paket.getData());
 						sendtcpexcept(paket, quelle);
@@ -474,12 +474,30 @@ public class NodeEngine {
 						allnodes_remove((Collection<Node>) paket.getData());
 						sendtcpexcept(paket, quelle);
 						break;
-						
+					case GROUP_JOIN:
+						if(!computeGroups().contains(paket.getGroup())) {
+							sendroot(paket);
+						}
+						quelle.add(paket.getGroup());
+						if(!addGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_ANNOUNCE), quelle);
+						break;
+					case GROUP_LEAVE:
+						quelle.remove(paket.getGroup());
+						if(!computeGroups().contains(paket.getGroup())) {
+							sendroot(paket);
+							if (isRoot()&&removeGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_EMPTY), null);
+						}
+						break;
+					case GROUP_ANNOUNCE:
+						if(addGroup(paket.getGroup()))sendchild(paket, null);
+						break;
+					case GROUP_EMPTY:
+						if (removeGroup(paket.getGroup())) sendchild(paket, null);
+						break;
 					case NODE_LOOKUP:
 						Node tmp=null;
 						if((tmp=getNode((long) paket.getData()))!=null)quelle.send(new MSG(tmp));
 						else sendroot(paket);
-						
 						break;
 					default:
 						LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
@@ -493,6 +511,18 @@ public class NodeEngine {
 	}
 
 	
+	private boolean myGroupsChanged() {
+		Set<String> tmp = computeGroups();
+		synchronized (myGroups) {
+			if (tmp.hashCode() != myGroups.hashCode()) {
+				myGroups.clear();
+				myGroups.addAll(tmp);
+				return true;
+			}
+			return false;
+		}
+	}
+
 	private void allnodes_remove(Collection<Node> data) {
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
@@ -648,7 +678,6 @@ public class NodeEngine {
 					ConnectionHandler tmp = new ConnectionHandler(server_socket.accept());
 					connections.add(tmp);
 					tmp.isConnected();
-
 				}
 				catch (IOException e) {
 					LogEngine.log(e);
@@ -682,24 +711,56 @@ public class NodeEngine {
 		this.nodeID = nodeID;
 	}
 
-/*	public void announceGroup(String groupname) {
-//		for (ConnectionHandler iterable_element : iterable) {
-			
-//		}
-		// TODO Auto-generated method stub
-		
-	}
-*/
 	public void joinGroup(String gruppen_name) {
-		// TODO Auto-generated method stub
+		if(addMyGroup(gruppen_name)&&myGroupsChanged()) {
+			sendroot(new MSG(gruppen_name,MSGCode.GROUP_JOIN));
+		}
 		
+		if(addGroup(gruppen_name)) {
+			sendchild(new MSG(gruppen_name,MSGCode.GROUP_ANNOUNCE), null);
+		}
 	}
 
 	public void leaveGroup(String gruppen_name) {
-		// TODO Auto-generated method stub
-		
+		if(myGroupsChanged()) sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
+	}
+	
+	public boolean removeGroup(String gruppen_name) {
+		synchronized (allGroups) {
+			boolean x = allGroups.remove(gruppen_name);
+			allGroups.notifyAll();
+			return x;
+		}
+	}
+	
+	public boolean addGroup(String gruppen_name) {
+		synchronized (allGroups) {
+			boolean x = allGroups.add(gruppen_name);
+			allGroups.notifyAll();
+			return x;
+		}
+	}
+	
+	public boolean removeMyGroup(String gruppen_name) {
+		synchronized (myGroups) {
+			return myGroups.remove(gruppen_name);
+		}
+	}
+	
+	public boolean addMyGroup(String gruppen_name) {
+		synchronized (myGroups) {
+			return myGroups.add(gruppen_name);
+		}
+	}
+	
+	public Set<String>computeGroups(){
+		Set<String> tmpGroups = new HashSet<String>();
+		for (ConnectionHandler cur : connections) {
+			tmpGroups.addAll(cur.getGroups());
+		}
+		tmpGroups.addAll(ce.getMyGroups());
+		return tmpGroups;
 	}
 
-	
 
 }

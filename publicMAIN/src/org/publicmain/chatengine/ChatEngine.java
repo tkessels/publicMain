@@ -78,7 +78,7 @@ public class ChatEngine extends Observable{
 		
 		//temporäre Initialisierung der GruppenListe mit default Groups 
 		ne.getGroups().addAll(Arrays.asList(new String[]{"public","hs5"}));
-		myGroups.addAll(ne.getGroups());
+		//myGroups.addAll(ne.getGroups());
 		// TODO:GUI müsste für all diese Gruppen je ein Fenster anlgegen beim Starten
 		//TODO: All diese Gruppen müssten gejoint werden.
 		
@@ -101,6 +101,9 @@ public class ChatEngine extends Observable{
 		this.userID = userID;
 	}
 
+	/**Gibt den aktuellen Anzeigenamen zurück 
+	 * @return den Anzeigenamen
+	 */
 	public String getAlias() {
 		return alias;
 	}
@@ -165,9 +168,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void group_join(String gruppen_name){
 			synchronized (myGroups) {
-				if(myGroups.add(gruppen_name)) {
-					ne.joinGroup(gruppen_name);
-				}
+				if(myGroups.add(gruppen_name)) 	ne.joinGroup(gruppen_name);
 			}
 	}
 	
@@ -176,8 +177,10 @@ public class ChatEngine extends Observable{
 	 */
 	public void group_leave(String gruppen_name){
 		synchronized (myGroups) {
-			if(myGroups.remove(gruppen_name)) {
+			System.out.println(myGroups);
+			if(myGroups.remove(gruppen_name)){
 				ne.leaveGroup(gruppen_name);
+				System.out.println("DID IT");
 			}
 		}
 	}
@@ -256,6 +259,7 @@ public class ChatEngine extends Observable{
 	 */
 	public	void	remove_MSGListener(Observer chatPanel){
 		Set<Kanal> empty=new HashSet<Kanal>();
+		
 		for (Kanal x : group_channels) {
 			x.deleteObserver(chatPanel);
 			if(x.countObservers()==0) { //wenn kanal leer ist
@@ -264,51 +268,15 @@ public class ChatEngine extends Observable{
 			}
 		}
 		group_channels.removeAll(empty);
+		
 		empty.clear();
 		for (Kanal x : private_channels) {
 			x.deleteObserver(chatPanel);
-			if(x.countObservers()==0) { //wenn kanal leer
-				empty.add(x);
-			}
+			if(x.countObservers()==0)empty.add(x); //wenn kanal leer
 		}
 		private_channels.removeAll(empty);
-		System.out.println(group_channels);
 
 	}
-	
-/*	public void addGroup(String groupname) {
-		synchronized (ne.getGroups()) {
-			int hash=allGroups.hashCode();
-			allGroups.add(groupname);
-			if(hash!=allGroups.hashCode()) allGroups.notifyAll();
-		}
-		ne.addGroup(groupname);
-	}
-	
-	public void removeGroup(String groupname) {
-		synchronized (allGroups) {
-			int hash = allGroups.hashCode();
-			allGroups.add(groupname);
-			if(hash!=allGroups.hashCode())allGroups.notifyAll();
-		}
-		ne.removeGroup(groupname);
-	}*/
-	/*public void setGroups(Set<String> groupnames) {
-		synchronized (allGroups) {
-			int hash=allGroups.hashCode();
-			allGroups.clear();
-			allGroups.addAll(groupnames);
-			if(hash!=allGroups.hashCode())allGroups.notifyAll();
-		}
-	}*/
-	
-/*	private void updateGroups() {
-		//TODO ask Nodeengine for Groupsstrings
-		synchronized (allGroups) {
-	
-		}
-	}
-*/	
 	
 	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
 	 * @param nachricht Die neue Nachricht.
@@ -318,8 +286,6 @@ public class ChatEngine extends Observable{
 		if(db!=null)db.saveMsg(nachricht);
 	}
 	
-
-
 	private final class MsgSorter implements Runnable {
 		public void run() {
 			while (true) {
@@ -338,13 +304,9 @@ public class ChatEngine extends Observable{
 		}
 	}
 
-
-
 	public Set<String> getMyGroups() {
 /*		Set<String> tmp = new HashSet<String>();
-		for (Kanal chan : group_channels) {
-			tmp.add((String) chan.referenz);
-		}
+		for (Kanal chan : group_channels) tmp.add((String) chan.referenz);}
 		return tmp;*/
 		synchronized (myGroups) {
 			return  myGroups;

@@ -475,11 +475,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 						sendtcpexcept(paket, quelle);
 						break;
 					case GROUP_JOIN:
-						if(!computeGroups().contains(paket.getGroup())) {
-							sendroot(paket);
-						}
+						if(!computeGroups().contains(paket.getGroup())) sendroot(paket);
 						quelle.add(paket.getGroup());
-						if(!addGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_ANNOUNCE), quelle);
+						if(addGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_ANNOUNCE), quelle);
 						break;
 					case GROUP_LEAVE:
 						quelle.remove(paket.getGroup());
@@ -712,17 +710,41 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 
 	public void joinGroup(String gruppen_name) {
-		if(addMyGroup(gruppen_name)&&myGroupsChanged()) {
+		
+		//FIXME:: BEI REJOIN EINER GRUPPE WIRD DAS NICHT NACH OBEN KOMMUNIZIERT
+		if(myGroupsChanged()){
+			sendroot(new MSG(gruppen_name,MSGCode.GROUP_JOIN));
+			if(isRoot())sendchild(new MSG(gruppen_name,MSGCode.GROUP_ANNOUNCE), null);
+		}
+		
+		if(!addGroup(gruppen_name)) sendchild(new MSG(gruppen_name,MSGCode.GROUP_ANNOUNCE), null);
+
+/*		if(addMyGroup(gruppen_name)&&myGroupsChanged()) {
 			sendroot(new MSG(gruppen_name,MSGCode.GROUP_JOIN));
 		}
 		
 		if(addGroup(gruppen_name)) {
 			sendchild(new MSG(gruppen_name,MSGCode.GROUP_ANNOUNCE), null);
-		}
+		}*/
 	}
 
 	public void leaveGroup(String gruppen_name) {
-		if(myGroupsChanged()) sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
+		
+		if(!computeGroups().contains(gruppen_name)){
+			sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
+			if (isRoot()&&removeGroup(gruppen_name)) sendchild(new MSG(gruppen_name,MSGCode.GROUP_EMPTY), null);
+		}
+		
+		
+		/*if(myGroupsChanged()){
+			sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
+		}
+		
+		if() {
+			sendroot(paket);
+			if (isRoot()&&removeGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_EMPTY), null);
+		}*/
+		
 	}
 	
 	public boolean removeGroup(String gruppen_name) {
@@ -759,6 +781,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			tmpGroups.addAll(cur.getGroups());
 		}
 		tmpGroups.addAll(ce.getMyGroups());
+		System.out.println(tmpGroups);
 		return tmpGroups;
 	}
 

@@ -168,7 +168,9 @@ public class ChatEngine extends Observable{
 	 */
 	public void group_join(String gruppen_name){
 			synchronized (myGroups) {
-				if(myGroups.add(gruppen_name)) 	ne.joinGroup(gruppen_name, null);
+				if(myGroups.add(gruppen_name)) {
+					ne.joinGroup(Arrays.asList(gruppen_name), null);
+				}
 			}
 	}
 	
@@ -179,7 +181,7 @@ public class ChatEngine extends Observable{
 		synchronized (myGroups) {
 			System.out.println(myGroups);
 			if(myGroups.remove(gruppen_name)){
-				ne.leaveGroup(gruppen_name, null);
+				ne.leaveGroup(Arrays.asList(gruppen_name), null);
 				System.out.println("DID IT");
 			}
 		}

@@ -8,16 +8,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -312,8 +307,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			try {
 				root_connection = new ConnectionHandler(tmp_socket);
 				setRootMode(false);
+				setGroup(myGroups);//FIXME:Bleibt das hier
 				sendroot(new MSG(getMe()));
+				sendroot(new MSG(myGroups, MSGCode.GROUP_REPLY));
 				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
+				sendroot(new MSG(null, MSGCode.GROUP_POLL));
 			}
 			catch (IOException e) {
 				LogEngine.log(e);
@@ -354,14 +352,15 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			root_connection = null;
 			if (online) {
 				updateNodes();
+				//setGroup(myGroups); //FIXME: weiss noch nicht ob diese ZEILE so passt
 				discover();
-				//discover(null);
 			}
 		}
 		else {
 			LogEngine.log(this, "Lost Child", LogEngine.INFO);
 			connections.remove(conn);
 			sendtcp(new MSG(conn.children, MSGCode.CHILD_SHUTDOWN));
+			updateMyGroups();
 			allnodes_remove(conn.children);
 		}
 		//updateNodes();
@@ -475,28 +474,27 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 						sendtcpexcept(paket, quelle);
 						break;
 					case GROUP_JOIN:
-						/*
-						if(!computeGroups().contains(paket.getGroup())) sendroot(paket);
-						quelle.add(paket.getGroup());
-						if(addGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_ANNOUNCE), quelle);*/
-						quelle.add((String) paket.getData());
-						joinGroup((String) paket.getData(), quelle);
+						quelle.add((Collection<String>) paket.getData());
+						joinGroup((Collection<String>) paket.getData(), quelle);
 						break;
 					case GROUP_LEAVE:
-						/*quelle.remove(paket.getGroup());
-						if(!computeGroups().contains(paket.getGroup())) {
-							sendroot(paket);
-							if (isRoot()&&removeGroup(paket.getGroup())) sendchild(new MSG(paket.getGroup(),MSGCode.GROUP_EMPTY), null);
-						}*/
-						quelle.remove((String) paket.getData());
-						leaveGroup((String) paket.getData(), quelle);
-						
+						quelle.remove((Collection<String>) paket.getData());
+						leaveGroup( (Collection<String>) paket.getData(), quelle);
 						break;
 					case GROUP_ANNOUNCE:
-						if(addGroup((String) paket.getData()))sendchild(paket, null);
+						if(addGroup( (Collection<String>) paket.getData()))sendchild(paket, null);
 						break;
 					case GROUP_EMPTY:
-						if (removeGroup((String) paket.getData())) sendchild(paket, null);
+						if (removeGroup((Collection<String>) paket.getData())) sendchild(paket, null);
+						break;
+					case GROUP_POLL:
+						quelle.send(new MSG(allGroups,MSGCode.GROUP_REPLY));
+						break;
+					case GROUP_REPLY:
+						Set<String> groups =(Set<String>) paket.getData();
+						quelle.add(groups);
+						updateMyGroups();
+						addGroup(groups);
 						break;
 					case NODE_LOOKUP:
 						Node tmp=null;
@@ -516,11 +514,28 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 	
 	private boolean updateMyGroups() {
-		Set<String> tmp = computeGroups();
+		Set<String> aktuell = computeGroups();
 		synchronized (myGroups) {
-			if (tmp.hashCode() != myGroups.hashCode()) {
+
+			if (aktuell.hashCode() != myGroups.hashCode()) {
+				Set<String> dazu = new HashSet<String>(aktuell);
+				dazu.removeAll(myGroups);
+				if(dazu.size()>0) {
+					sendroot(new MSG(dazu, MSGCode.GROUP_JOIN));
+					if(addGroup(dazu))sendchild(new MSG(dazu, MSGCode.GROUP_ANNOUNCE),null);
+				}
+
+				Set<String> weg = new HashSet<String>(myGroups);
+				weg.removeAll(aktuell);
+				if(weg.size()>0) {
+					sendroot(new MSG(weg, MSGCode.GROUP_LEAVE));
+					if(isRoot()) {
+						if(removeGroup(weg))sendchild(new MSG(weg, MSGCode.GROUP_EMPTY),null);
+					}
+				}
+
 				myGroups.clear();
-				myGroups.addAll(tmp);
+				myGroups.addAll(aktuell);
 				return true;
 			}
 			return false;
@@ -705,6 +720,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	private void setRootMode(boolean rootmode) {
 		this.rootMode = rootmode;
 		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
+		if(rootmode) setGroup(myGroups) ;
 	}
 
 	public long getNodeID() {
@@ -715,25 +731,34 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		this.nodeID = nodeID;
 	}
 
-	public void joinGroup(String gruppen_name, ConnectionHandler con) {
+	public void joinGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
 		//FIXME: vielleicht wäre es besser bei update my Groups einen Differenzsatz zu berechnen und für alle  wegfallenden ein leave group zu erstellen und für alle neuen ein Join Group
-		if(updateMyGroups()){//Wenn sich was geänderhat melden vielleciht noch eingrenzen 
-			sendroot(new MSG(gruppen_name,MSGCode.GROUP_JOIN));
-		}
-		if(addGroup(gruppen_name))sendchild(new MSG(gruppen_name,MSGCode.GROUP_ANNOUNCE), con);
+		/*if(updateMyGroups()){//Wenn sich was geänderhat melden vielleciht noch eingrenzen 
+			sendroot(new MSG(gruppen_namen,MSGCode.GROUP_JOIN));
+		}*/
+		updateMyGroups();
+		//if(addGroup(gruppen_namen))sendchild(new MSG(gruppen_namen,MSGCode.GROUP_ANNOUNCE), con);
 	}
 
-	public void leaveGroup(String gruppen_name, ConnectionHandler con) {
-		
+	public void leaveGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
 		if(updateMyGroups()){
-			sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
-			if (isRoot()) {
-				removeGroup(gruppen_name);
-				sendchild(new MSG(gruppen_name,MSGCode.GROUP_EMPTY), null);
+			//sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
+/*			if (isRoot()) {
+				removeGroup(gruppen_namen);
+				sendchild(new MSG(gruppen_namen,MSGCode.GROUP_EMPTY), null);
 			}
-		}
+*/		}
 	}
 	
+	
+	public boolean removeGroup(Collection<String> gruppen_name) {
+		synchronized (allGroups) {
+			boolean x = allGroups.removeAll(gruppen_name);
+			allGroups.notifyAll();
+			return x;
+		}
+	}
+	/*
 	public boolean removeGroup(String gruppen_name) {
 		synchronized (allGroups) {
 			boolean x = allGroups.remove(gruppen_name);
@@ -741,7 +766,25 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			return x;
 		}
 	}
+	*/
 	
+	public void setGroup(Collection<String> groups) {
+		synchronized (allGroups) {
+			allGroups.clear();
+			allGroups.addAll(groups);
+			allGroups.notifyAll();
+		}
+	}
+	
+	
+	public boolean addGroup(Collection<String> groups) {
+		synchronized (allGroups) {
+		boolean x = allGroups.addAll(groups);
+		allGroups.notifyAll();
+		return x;
+		}
+	}
+	/*
 	public boolean addGroup(String gruppen_name) {
 		synchronized (allGroups) {
 			boolean x = allGroups.add(gruppen_name);
@@ -749,7 +792,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			return x;
 		}
 	}
-	
+	*/
 	public boolean removeMyGroup(String gruppen_name) {
 		synchronized (myGroups) {
 			return myGroups.remove(gruppen_name);

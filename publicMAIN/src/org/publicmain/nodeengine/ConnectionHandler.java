@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -129,6 +130,18 @@ public class ConnectionHandler {
 		send(new MSG(null, MSGCode.ECHO_REQUEST));
 	}
 	
+	public boolean add(Collection<String> gruppe) {
+		synchronized (groups) {
+			return groups.addAll(gruppe);
+		}
+	}
+	public boolean remove(Collection<String> gruppe) {
+		synchronized (groups) {
+			return groups.removeAll(gruppe);
+		}
+	}
+	
+	/*
 	public boolean add(String gruppe) {
 		synchronized (groups) {
 			return groups.add(gruppe);
@@ -140,7 +153,7 @@ public class ConnectionHandler {
 			return groups.remove(gruppe);
 		}
 	}
-	
+	*/
 	public Set<String> getGroups(){
 		synchronized (groups) {
 			return groups;

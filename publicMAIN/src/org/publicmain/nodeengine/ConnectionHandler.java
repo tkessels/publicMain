@@ -170,7 +170,13 @@ public class ConnectionHandler {
 
 	class Reciever implements Runnable {
 		public void run() {
-			while(me==null)System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ME WAR NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			while(me==null) {
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}}
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
 				try {
@@ -203,11 +209,14 @@ public class ConnectionHandler {
 					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist -> Thread beenden
 				}
 				catch (Exception e) {
+					//Zum aufspüren komischer NULL-MSGs
+					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
 					System.out.println(me);
 					System.out.println(readObject);
 					System.out.println(e.getMessage());
 					e.printStackTrace();
 					if (readObject != null) System.out.println((readObject instanceof MSG) ? ((MSG) readObject).toString() : readObject.toString());
+					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
 				}
 			}
 			close();

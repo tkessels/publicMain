@@ -112,7 +112,6 @@ public class ChatEngine extends Observable{
 	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
 	 */
 	public void setAlias(String alias) {
-		System.out.println("Setting Allias");
 		this.alias = alias;
 		if(ne!=null&&ne.isOnline())ne.updateAlias();
 	}
@@ -181,10 +180,8 @@ public class ChatEngine extends Observable{
 	 */
 	public void group_leave(String gruppen_name){
 		synchronized (myGroups) {
-			System.out.println(myGroups);
 			if(myGroups.remove(gruppen_name)){
 				ne.leaveGroup(Arrays.asList(gruppen_name), null);
-				System.out.println("DID IT");
 			}
 		}
 	}
@@ -309,10 +306,6 @@ public class ChatEngine extends Observable{
 	}
 
 	public Set<String> getMyGroups() {
-/*		Set<String> tmp = new HashSet<String>();
-		for (Kanal chan : group_channels) tmp.add((String) chan.referenz);}
-		return tmp;*/
-		System.out.println("myGroups : " + myGroups );
 		synchronized (myGroups) {
 			return  myGroups;
 		}

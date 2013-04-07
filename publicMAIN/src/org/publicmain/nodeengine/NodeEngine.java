@@ -657,9 +657,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			List <MSG> ra_replies=new ArrayList<MSG>();
 			ra_replies.addAll(root_claims_stash);
 			Collections.sort(ra_replies);
-			for (MSG msg : ra_replies) {
+			/*for (MSG msg : ra_replies) {
 				System.out.println(((Node)msg.getData()).getHostname());
-			}
+			}*/
 			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_ANNOUNCE_TIMEOUT;
 			
 			Node toConnectTo = meinNode;
@@ -707,7 +707,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		public void run() {
 			if(connections==null||server_socket==null)return;
 			while (online) {
-				System.out.println();
 				LogEngine.log("ConnectionsAccepter", "Listening on Port:" + server_socket.getLocalPort(), LogEngine.INFO);
 				try {
 					ConnectionHandler tmp = new ConnectionHandler(server_socket.accept());
@@ -832,7 +831,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			tmpGroups.addAll(cur.getGroups());
 		}
 		tmpGroups.addAll(ce.getMyGroups());
-		System.out.println("Union of myGroups: " + tmpGroups);
 		return tmpGroups;
 	}
 
@@ -842,18 +840,19 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			meinNode.setAlias(alias);
 			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
 			updateAlias(alias,nodeID);
+			LogEngine.log(this,"User has changed ALIAS to " + alias,LogEngine.INFO);
 		}
 	}
 	
 	private boolean updateAlias(String newAlias, long nid) {
 		Node tmp;
-		System.out.println(getNode(nid)+" changed his name "+ newAlias);
 		
 		synchronized (allNodes) {
 			if ((tmp = getNode(nid)) != null) {
 				if (tmp.getAlias() != newAlias) {
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
+					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}
 			}
@@ -862,7 +861,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 
 	public void debug(String command, String parameter) {
-		// TODO Auto-generated method stub
 		LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 	}
 }

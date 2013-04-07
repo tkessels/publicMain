@@ -21,51 +21,48 @@ public class MSG implements Serializable,Comparable<MSG>{
 	private static final long serialVersionUID = -2010661171218754968L;
 
 	//Typisierung
-	private NachrichtenTyp typ;
+	private final NachrichtenTyp typ;
 	private MSGCode code;
 	//Quelle und Eindeutigkeit
-	private long sender;
+	private final long sender;
 	private long timestamp;
-	private int id;
+	private final int id;
 	//Optionale Datenfelder für beispielsweise Empfänger
 	private long empfänger;
 	private String group;
 	//Payload
 	private Object data;
 
-	private MSG() {
+	private MSG(NachrichtenTyp typ) {
 		synchronized (id_counter) {
 			this.id=id_counter;
 			MSG.id_counter++;
 		}
+		this.typ=typ;
 		this.timestamp=System.currentTimeMillis();
 		this.sender= NodeEngine.getNE().getMe().getNodeID();
 	}
 
 	public MSG(Object payload, MSGCode code){
-		this();
-		this.typ=NachrichtenTyp.SYSTEM;
+		this(NachrichtenTyp.SYSTEM);
 		this.code = code;
 		this.data = payload;
 	}
 
 	public MSG(Node daNode){
-		this();
-		this.typ=NachrichtenTyp.SYSTEM;
+		this(NachrichtenTyp.SYSTEM);
 		this.code=MSGCode.NODE_UPDATE;
 		this.data=daNode;
 	}
 
 	public MSG(String group,String text){
-		this();
-		this.typ=NachrichtenTyp.GROUP;
+		this(NachrichtenTyp.GROUP);
 		this.group=group.toLowerCase();
 		this.data=text;
 	}
 
 	public MSG(long user, String text){
-		this();
-		this.typ=NachrichtenTyp.PRIVATE;
+		this(NachrichtenTyp.PRIVATE);
 		this.empfänger=user;
 		this.data=text;
 	}

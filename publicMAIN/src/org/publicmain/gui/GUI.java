@@ -56,7 +56,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	LogEngine log;
 
 	private static GUI me;
-	private List<Node> nodes;
+	private List<Node> nodes; //FIXME: REMOVE this LIST! and fix all references 
 	private List<ChatWindow> chatList;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;

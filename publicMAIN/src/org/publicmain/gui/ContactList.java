@@ -44,12 +44,12 @@ public class ContactList extends JWindow {
 		this.internalFrame = new JInternalFrame("contacts");
 		this.breite = 150;
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
+		this.users = new JList<String>(new UserListModel());
+		this.groups = new JList<String>(new GroupListModel());
 		this.usersScroller = new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.groupsScroller = new JScrollPane(groups, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.groupPanel = new JPanel(new BorderLayout());
 		this.userPanel = new JPanel(new BorderLayout());
-		this.users = new JList<String>(new UserListModel());
-		this.groups = new JList<String>(new GroupListModel());
 		this.trenner = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
          
 		this.internalFrame.setLayout(new BorderLayout());
@@ -242,6 +242,7 @@ public class ContactList extends JWindow {
 				GUI.getGUI().unignoreUser(chatname);
 			}
 			else if(source.getText().startsWith("info")){
+				//TODO: CODE HERE
 				
 			}
 		}

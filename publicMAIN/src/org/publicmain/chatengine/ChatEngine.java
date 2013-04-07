@@ -2,11 +2,8 @@ package org.publicmain.chatengine;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -15,14 +12,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
-import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
 import org.publicmain.sql.DBConnection;
-
-import com.mysql.jdbc.UpdatableResultSet;
 
 /**
  * @author ATRM

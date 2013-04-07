@@ -22,7 +22,7 @@ import org.publicmain.common.Node;
  * 
  */
 public class ConnectionHandler {
-	public Set<Node>			children;
+	private Set<Node>			children;
 	private Set<String>			groups;
 	public Node					otherEnd;
 	private NodeEngine			ne;
@@ -39,7 +39,7 @@ public class ConnectionHandler {
 	public ConnectionHandler(Socket underlying) throws IOException {
 
 		ne = NodeEngine.getNE();
-		children = new HashSet<Node>();
+		children=new HashSet<Node>();
 		groups = new HashSet<String>();
 
 		line = underlying;
@@ -140,6 +140,15 @@ public class ConnectionHandler {
 			return groups.removeAll(gruppe);
 		}
 	}
+	public boolean hasChild(final long nid) {
+		synchronized (children) {
+			for (Node x : children)if (x.getNodeID() == nid) return true;
+			return false;
+		}
+
+	}			
+		
+	
 	
 	/*
 	public boolean add(String gruppe) {
@@ -168,6 +177,37 @@ public class ConnectionHandler {
 		}).start();
 	}
 
+	public Set<Node> getChildren() {
+		synchronized (children) {
+			return children;
+		}
+	}
+	
+	public boolean addChildren(Collection<Node> toAdd) {
+		synchronized (children) {
+			return children.addAll(toAdd);
+		}
+	}
+
+	public boolean removeChildren(Collection<Node> toRemove) {
+		synchronized (children) {
+			return children.removeAll(toRemove);
+		}
+	}
+	
+	public boolean setChildren(Collection<Node> toSet) {
+		synchronized (children) {
+			int oldHash= children.hashCode();
+			children.clear();
+			children.addAll(toSet);
+			return (oldHash!=children.hashCode());
+			
+		}
+	}
+
+	
+
+
 	class Reciever implements Runnable {
 		public void run() {
 			while(me==null) {
@@ -192,7 +232,7 @@ public class ConnectionHandler {
 									latency = System.currentTimeMillis() - (Long) tmp.getData();
 									break;
 								case NODE_UPDATE:
-									me.children.add((Node) tmp.getData());
+									me.getChildren().add((Node) tmp.getData());
 								default:
 									ne.handle(tmp, me);
 							}

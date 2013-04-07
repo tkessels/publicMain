@@ -293,7 +293,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	private Set<Node> getChilds() {
 		Set<Node> rück = new HashSet<Node>();
 		for (ConnectionHandler x : connections)
-			rück.addAll(x.children);
+			rück.addAll(x.getChildren());
 		return rück;
 	}
 
@@ -375,9 +375,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		else {
 			LogEngine.log(this, "Lost Child", LogEngine.INFO);
 			connections.remove(conn);
-			sendtcp(new MSG(conn.children, MSGCode.CHILD_SHUTDOWN));
+			sendtcp(new MSG(conn.getChildren(), MSGCode.CHILD_SHUTDOWN));
 			updateMyGroups();
-			allnodes_remove(conn.children);
+			allnodes_remove(conn.getChildren());
 		}
 		//updateNodes();
 	}
@@ -438,97 +438,125 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 * @param quelle
 	 *            Quelle des Pakets
 	 */
+	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
 		if (angler.check(paket)) return;
 		switch (paket.getTyp()) {
-			case GROUP:
-				sendtcpexcept(paket, quelle);
-				ce.put(paket);
-				break;
-			case SYSTEM:
+		case PRIVATE:
+			if(paket.getEmpfänger()==nodeID)ce.put(paket);
+			else routesend(paket);
+			break;
+
+		case GROUP:
+			//sendtcpexcept(paket, quelle);
+			groupRouteSend(paket,quelle);
+			ce.put(paket);
+			break;
+		case SYSTEM:
 			switch (paket.getCode()) {
-					case NODE_UPDATE:
-						allnodes_add((Node) paket.getData());
-						sendtcpexcept(paket, quelle);
-						break;
+			case NODE_UPDATE:
+				allnodes_add((Node) paket.getData());
+				sendtcpexcept(paket, quelle);
+				break;
 
-					case POLL_ALLNODES:
-						//updateNodes();
-						if (quelle!=root_connection) quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
-						//				else LogEngine.log("POLL_ALLNODES von root bekommen", this, LogEngine.WARNING);
-						break;
-					case REPORT_ALLNODES:
-						allnodes_set((Set<Node>) paket.getData());
-						//				else LogEngine.log("REPORT_ALLNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
-						break;
-					case POLL_CHILDNODES:
-						if (quelle == root_connection) {
-							Set<Node> tmp = new HashSet<Node>();
-							for (ConnectionHandler x : connections)
-								tmp.addAll(x.children);
-							sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
-						}
-						//				else LogEngine.log("POLL_CHILDNODES von komischer Quelle bekommen:", this, LogEngine.WARNING);
-						break;
-					case REPORT_CHILDNODES:
-						if (quelle != root_connection) {
-							quelle.children.clear();
-							quelle.children.addAll((Set<Node>) paket.getData());
-						}
-						//				else LogEngine.log(this,"handling ",paket);
-						break;
-					case NODE_SHUTDOWN:
-						//sendtcpexcept(new MSG(quelle.children,MSGCode.CHILD_SHUTDOWN), quelle);
-						allnodes_remove(quelle.children);
-						quelle.close();
-						break;
-
-					case CHILD_SHUTDOWN:
-						if (quelle != root_connection) quelle.children.removeAll((Collection<Node>) paket.getData());
-						allnodes_remove((Collection<Node>) paket.getData());
-						sendtcpexcept(paket, quelle);
-						break;
-					case GROUP_JOIN:
-						quelle.add((Collection<String>) paket.getData());
-						joinGroup((Collection<String>) paket.getData(), quelle);
-						break;
-					case GROUP_LEAVE:
-						quelle.remove((Collection<String>) paket.getData());
-						leaveGroup( (Collection<String>) paket.getData(), quelle);
-						break;
-					case GROUP_ANNOUNCE:
-						if(addGroup( (Collection<String>) paket.getData()))sendchild(paket, null);
-						break;
-					case GROUP_EMPTY:
-						if (removeGroup((Collection<String>) paket.getData())) sendchild(paket, null);
-						break;
-					case GROUP_POLL:
-						quelle.send(new MSG(allGroups,MSGCode.GROUP_REPLY));
-						break;
-					case GROUP_REPLY:
-						Set<String> groups =(Set<String>) paket.getData();
-						quelle.add(groups);
-						updateMyGroups();
-						addGroup(groups);
-						break;
-					case NODE_LOOKUP:
-						Node tmp=null;
-						if((tmp=getNode((long) paket.getData()))!=null)quelle.send(new MSG(tmp));
-						else sendroot(paket);
-						break;
-					default:
-						LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
-						break;
+			case POLL_ALLNODES:
+				if (quelle != root_connection)
+					quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
+				break;
+			case REPORT_ALLNODES:
+				allnodes_set((Set<Node>) paket.getData());
+				break;
+			case POLL_CHILDNODES:
+				if (quelle == root_connection) {
+					Set<Node> tmp = new HashSet<Node>();
+					for (ConnectionHandler x : connections)
+						tmp.addAll(x.getChildren());
+					sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
 				}
 				break;
-			case DATA:
+			case REPORT_CHILDNODES:
+				if (quelle != root_connection) {
+					quelle.setChildren((Collection<Node>) paket.getData());
+				}
+				break;
+			case NODE_SHUTDOWN:
+				allnodes_remove(quelle.getChildren());
+				quelle.close();
+				break;
+			case CHILD_SHUTDOWN:
+				if (quelle != root_connection) quelle.removeChildren((Collection<Node>) paket.getData());
+				allnodes_remove((Collection<Node>) paket.getData());
+				sendtcpexcept(paket, quelle);
+				break;
+			case GROUP_JOIN:
+				quelle.add((Collection<String>) paket.getData());
+				joinGroup((Collection<String>) paket.getData(), quelle);
+				break;
+			case GROUP_LEAVE:
+				quelle.remove((Collection<String>) paket.getData());
+				leaveGroup((Collection<String>) paket.getData(), quelle);
+				break;
+			case GROUP_ANNOUNCE:
+				if (addGroup((Collection<String>) paket.getData()))
+					sendchild(paket, null);
+				break;
+			case GROUP_EMPTY:
+				if (removeGroup((Collection<String>) paket.getData()))
+					sendchild(paket, null);
+				break;
+			case GROUP_POLL:
+				quelle.send(new MSG(allGroups, MSGCode.GROUP_REPLY));
+				break;
+			case GROUP_REPLY:
+				Set<String> groups = (Set<String>) paket.getData();
+				quelle.add(groups);
+				updateMyGroups();
+				addGroup(groups);
+				break;
+			case NODE_LOOKUP:
+				Node tmp = null;
+				if ((tmp = getNode((long) paket.getData())) != null)quelle.send(new MSG(tmp));
+				else
+					sendroot(paket);
 				break;
 			default:
+				LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
+				break;
+			}
+			break;
+		case DATA:
+			break;
+		default:
+		}
+	}
+	
+	private void routesend(MSG paket) {
+		long empfänger = paket.getEmpfänger();
+		for (ConnectionHandler con : connections) {
+			if(con.hasChild(empfänger)) {
+				con.send(paket);
+				return;
+			}
+		}
+		if(hasParent())sendroot(paket);
+		else if(isRoot()) {//Node ist Wurzel des Baums und weiss nicht wo der Empfänger ist
+			Node tmp = retrieve(empfänger); //versuche Empfänger aufszuspüren
+			if(tmp!=null) routesend(paket); //und Paket zuzustellen
+			else sendchild(new MSG(empfänger,MSGCode.NODE_SHUTDOWN),null); //weiss alle Clients an diesen Empfänger zu entfernen und alle offnen Fenster zu deaktivieren
+		}
+	}
+	
+	private void groupRouteSend(MSG paket,ConnectionHandler quelle) {
+		String gruppe = paket.getGroup();
+		for (ConnectionHandler con : connections) {
+			if((quelle!=con)&&con.getGroups().contains(gruppe)) {
+				con.send(paket);
+			}
+			if(hasParent())sendroot(paket);
 		}
 	}
 
-	
 	private boolean updateMyGroups() {
 		Set<String> aktuell = computeGroups();
 		synchronized (myGroups) {
@@ -730,7 +758,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			if (x != null) return (Node) x.getData();
 			else {
 				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
-				//TODO:send reconnect_befehl an den betroffenen Knoten
+				sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
 				return null;
 			}
 	}

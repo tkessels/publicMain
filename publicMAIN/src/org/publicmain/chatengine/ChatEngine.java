@@ -112,7 +112,9 @@ public class ChatEngine extends Observable{
 	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
 	 */
 	public void setAlias(String alias) {
+		System.out.println("Setting Allias");
 		this.alias = alias;
+		if(ne!=null&&ne.isOnline())ne.updateAlias();
 	}
 	
 	/**Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
@@ -314,6 +316,24 @@ public class ChatEngine extends Observable{
 		synchronized (myGroups) {
 			return  myGroups;
 		}
+	}
+	
+	public void updateAlias(String newAlias) {
+		setAlias(newAlias);
+		ne.updateAlias();
+	}
+
+	public void debug(String command,String parameter) {
+		switch (command) {
+		case "alias":
+			setAlias(parameter);
+			break;
+		default:
+			ne.debug(command,parameter);
+			break;
+		}
+		// TODO Auto-generated method stub
+		
 	}
 }
 

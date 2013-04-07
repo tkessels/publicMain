@@ -133,6 +133,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	public boolean isRoot() {
 		return rootMode && !hasParent();
 	}
+	
+	public boolean isOnline() {
+		return online;
+	}
 
 	public boolean hasParent() {
 		return (root_connection != null && root_connection.isConnected());
@@ -146,20 +150,32 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen Nodes beinhaltet.
 	 */
 	public Set<Node> getNodes() {
-		return allNodes;
+		synchronized (allNodes) {
+			return allNodes;
+		}
 	}
 
 
 	/**Findet zu NodeID zugehörigen Node in der Liste
+	 * 
+	 * Liefert das NodeObjekt zu einer NodeID solte der Knoten nicht bekannt sein wird <code>null</code> zurück geliefert.
+	 * Befindet sich der Knoten der die Abfrage ausführ im RootMode dann wird er versuchen den Knoten über ein Lookup aufzuspüren und ihn nachzutragen.
+	 * Schlägt dieser Versuch auch Fehl wird er einen Befehl an den Knoten schicken sich neu zu verbinden. (not yet implemented)
+	 * 
 	 * @param nid NodeID
-	 * @return Node-Objekt zu angegebenem NodeID
+	 * @return Node-Objekt zu angegebenem NodeID oder null wenn
 	 */
 	public Node getNode(long nid){
-		for (Node x : getNodes()) {
-			if(x.getNodeID()==nid) return x;
+		synchronized (allNodes) {
+			for (Node x : getNodes()) {
+				if (x.getNodeID() == nid)
+					return x;
+			}
+			if (isRoot())
+				return retrieve(nid);
+			else
+				return null;
 		}
-		if(isRoot()) return retrieve(nid);
-		else return null;
 	}
 	
 	
@@ -352,7 +368,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			root_connection = null;
 			if (online) {
 				updateNodes();
-				//setGroup(myGroups); //FIXME: weiss noch nicht ob diese ZEILE so passt
+				//setGroup(myGroups); //FIXME: prüfen wo myGroups=allGroups den meisten macht.
 				discover();
 			}
 		}
@@ -366,12 +382,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		//updateNodes();
 	}
 
-	/**
-	 * 
-	 */
+
 	private void sendRA() {
 		MSG ra= new MSG(meinNode, MSGCode.ROOT_ANNOUNCE);
-		ra.setEmpfänger(allNodes.size());
+		ra.setEmpfänger(getNodes().size());
 		sendmutlicast(ra);
 		root_claims_stash.add(ra);
 	}
@@ -396,9 +410,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		if (online && (paket.getTyp() == NachrichtenTyp.SYSTEM)) {
 			switch (paket.getCode()) {
 				case ROOT_REPLY:
-					if (!hasParent()) {
-						connectTo((Node) paket.getData());
-					}
+					if (!hasParent())connectTo((Node) paket.getData());
 					break;
 				case ROOT_DISCOVERY:
 					if (isRoot()) sendDiscoverReply((Node) paket.getData());
@@ -408,6 +420,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					break;
 				case NODE_LOOKUP:
 					if((long)paket.getData()==meinNode.getNodeID())sendroot(new MSG(meinNode));
+					break;
+				case ALIAS_UPDATE:
+					updateAlias((String) paket.getData(), paket.getSender());
+					break;
 				default:
 					LogEngine.log(this, "handling [MC]:undefined", paket);
 			}
@@ -439,7 +455,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 					case POLL_ALLNODES:
 						//updateNodes();
-						if (quelle!=root_connection) quelle.send(new MSG(allNodes, MSGCode.REPORT_ALLNODES));
+						if (quelle!=root_connection) quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
 						//				else LogEngine.log("POLL_ALLNODES von root bekommen", this, LogEngine.WARNING);
 						break;
 					case REPORT_ALLNODES:
@@ -647,7 +663,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_ANNOUNCE_TIMEOUT;
 			
 			Node toConnectTo = meinNode;
-			long maxPenunte = allNodes.size();
+			long maxPenunte = getNodes().size();
 			for (MSG x : root_claims_stash) {
 				if (x.getTimestamp() <= deadline) {
 					long tmp_size = x.getEmpfänger();
@@ -705,12 +721,17 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 
-	public Node retrieve(long nid) {
+	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
+	 * @param nid ID des Nodes
+	 * @return das {@link Node}-Objekt oder <code>null</code> wenn der Knoten nicht gefunden wurde.
+	 */
+	private Node retrieve(long nid) {
 			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
 			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,false,1000);
 			if (x != null) return (Node) x.getData();
 			else {
 				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
+				//TODO:send reconnect_befehl an den betroffenen Knoten
 				return null;
 			}
 	}
@@ -815,5 +836,33 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		return tmpGroups;
 	}
 
+	public void updateAlias() {
+		String alias = ce.getAlias();
+		if(online&&(!alias.equals(meinNode.getAlias()))) {
+			meinNode.setAlias(alias);
+			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
+			updateAlias(alias,nodeID);
+		}
+	}
+	
+	private boolean updateAlias(String newAlias, long nid) {
+		Node tmp;
+		System.out.println(getNode(nid)+" changed his name "+ newAlias);
+		
+		synchronized (allNodes) {
+			if ((tmp = getNode(nid)) != null) {
+				if (tmp.getAlias() != newAlias) {
+					tmp.setAlias(newAlias);
+					allNodes.notifyAll();
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
+	public void debug(String command, String parameter) {
+		// TODO Auto-generated method stub
+		LogEngine.log(this, "debug command not found", LogEngine.ERROR);
+	}
 }

@@ -233,6 +233,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					} else {
 						warn("Ignorieren nicht möglich! " + tmp[1] + " wurde nicht gefunden!");
 					}
+				}else if (eingabe.startsWith("/debug ")&& (tmp = eingabe.split(" ", 3)).length == 3) {
+					ChatEngine.getCE().debug(tmp[1],tmp[2]);
+
 				}
 				else if (eingabe.startsWith("/unignore ")&& (tmp = eingabe.split(" ", 2)).length == 2){
 					if(this.gui.unignoreUser(tmp[1])){

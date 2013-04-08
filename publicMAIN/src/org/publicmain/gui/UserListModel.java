@@ -2,6 +2,7 @@ package org.publicmain.gui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import javax.swing.AbstractListModel;
 
@@ -15,7 +16,7 @@ public class UserListModel extends AbstractListModel<String>{
 	 * 
 	 */
 	private static final long serialVersionUID = 3915185276474553682L;
-	private ArrayList<String> users = new ArrayList<String>();
+	private List<String> users = (new ArrayList<String>());
 	private Thread userListWriter;
 	
 	public UserListModel() {
@@ -45,6 +46,13 @@ public class UserListModel extends AbstractListModel<String>{
     @Override
     public int getSize() {
     	return users.size();
+    }
+    
+    public boolean contains(String user){
+    	synchronized (users) {
+    		return users.contains(user);
+		}
+    	
     }
     @Override
     public String getElementAt(int index) {

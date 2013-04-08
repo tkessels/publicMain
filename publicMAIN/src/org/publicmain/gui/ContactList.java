@@ -83,7 +83,6 @@ public class ContactList extends JWindow {
 		parent.addComponentListener(new ComponentListener() {
 			@Override
 			public void componentHidden(ComponentEvent e) {
-				// TODO Auto-generated method stub
 			}
 			@Override
 			public void componentMoved(ComponentEvent e) {
@@ -96,10 +95,14 @@ public class ContactList extends JWindow {
 			}
 			@Override
 			public void componentShown(ComponentEvent e) {
-				// TODO Auto-generated method stub
 			}
 		});
 	}
+	
+	public boolean nameExists(String name){
+		return ((UserListModel)users.getModel()).contains(name);
+	}
+
 
 	@Override
 	public void repaint() {
@@ -118,7 +121,6 @@ public class ContactList extends JWindow {
 				if(index >= 0){
 					Object o = source.getModel().getElementAt(index);
 					if(source.getModel().getClass().getSimpleName().startsWith("Group")){
-						//TODO: aktion für doppelklick auf Gruppe
 						GUI.getGUI().addChat(new ChatWindow(o.toString()));
 					}
 					if(source.getModel().getClass().getSimpleName().startsWith("User")){
@@ -148,19 +150,15 @@ public class ContactList extends JWindow {
 		}
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		public void mousePressed(MouseEvent e) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
 		}
 	}
 
@@ -224,7 +222,7 @@ public class ContactList extends JWindow {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JMenuItem source = (JMenuItem)e.getSource();
-			System.out.println(source.getText());
+//			System.out.println(source.getText());
 			
 			if(source.getText().startsWith("join")){
 				GUI.getGUI().addChat(new ChatWindow(chatname));

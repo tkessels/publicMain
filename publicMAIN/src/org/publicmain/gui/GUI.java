@@ -209,12 +209,13 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setMinimumSize(new Dimension(250,250));
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		this.setTitle("publicMAIN");
+		this.contactListWin = new ContactList(GUI.me);
 		this.setVisible(true);
 		chatList.get(0).focusEingabefeld(); // das tut's net
 	}
-
+	
 	/**
 	 * Diese Methode klappt die Contactlist auf
 	 * 
@@ -227,7 +228,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			this.contactListBtn.setToolTipText("hide contacts");
 			this.contactListBtn.setIcon(new ImageIcon(getClass().getResource("UserListEinklappen.png")));
 			this.contactListBtn.setSelected(true);
-			this.contactListWin = new ContactList(GUI.me);
+//			this.contactListWin = new ContactList(GUI.me);
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible(true);
 			contactListActive = true;

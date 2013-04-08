@@ -263,7 +263,6 @@ public class ChatEngine extends Observable{
 		return false;
 	}
 	
-	
 	/** Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an 
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal

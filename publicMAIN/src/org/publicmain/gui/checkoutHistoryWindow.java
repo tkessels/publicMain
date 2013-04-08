@@ -19,6 +19,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -56,6 +58,7 @@ public class checkoutHistoryWindow {
 	private JLabel timeHyphen;
 	private JComboBox<SimpleDateFormat> timeToSearchField;
 	private JButton searchButton;
+	private JButton delAllMsgsButton;
 	private JTextPane historyContentTxt;
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
@@ -85,6 +88,7 @@ public class checkoutHistoryWindow {
 		this.timeToSearchField				= new JComboBox(timeArray.toArray());
 		
 		this.searchButton 					= new JButton("Search");
+		this.delAllMsgsButton				= new JButton("Delete all messages");
 		this.c 								= new GridBagConstraints();
 		this.set 							= new Insets(5, 5, 5, 5);
 		
@@ -99,6 +103,7 @@ public class checkoutHistoryWindow {
 		msgTypCombo.addItem(NachrichtenTyp.SYSTEM.toString());
 		
 		searchButton.addActionListener(new searchContoller());
+		delAllMsgsButton.addActionListener(new searchContoller());
 		
 		historyFrame.setLocationRelativeTo(null);
 		historyFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
@@ -161,8 +166,11 @@ public class checkoutHistoryWindow {
 		
 		c.gridy 	= 4;
 		c.gridx 	= 0;
-		c.gridwidth = 4;
+		c.gridwidth = 2;
 		searchPanel.add(searchButton, c);
+		
+		c.gridx 	= 2;
+		searchPanel.add(delAllMsgsButton, c);
 		
 		// hinzufügen der Komponenten zum historyFrame
 		historyFrame.add(searchPanel, BorderLayout.NORTH);
@@ -195,20 +203,39 @@ public class checkoutHistoryWindow {
 		private Date ChosenToDateTime;
 		private SimpleDateFormat splDateForm;
 		
-		public void actionPerformed(ActionEvent arg0) {
-			this.splDateForm = new SimpleDateFormat("dd.MM.yyy HH:mm:ss");
+		public void actionPerformed(ActionEvent evt) {
 			
-			try {
-				chosenNTyp = msgTypCombo.getItemAt(msgTypCombo.getSelectedIndex());
-				chosenAliasOrGrpName = aliasOrGroupNameSearchField.getText();
-				chosenFromDateTime = splDateForm.parse(dateFromSearchField.getText() + " " + (timeFromSearchField.getItemAt(timeFromSearchField.getSelectedIndex())) + ":00");
-				ChosenToDateTime = splDateForm.parse(dateToSearchField.getText() + " " + (timeToSearchField.getItemAt(timeToSearchField.getSelectedIndex())) + ":00");
+			JButton source = (JButton)evt.getSource();
+			
+			switch(source.getText()){
+			
+			case "Search":
+				this.splDateForm = new SimpleDateFormat("dd.MM.yyy HH:mm:ss");
+				try {
+					chosenNTyp = msgTypCombo.getItemAt(msgTypCombo.getSelectedIndex());
+					chosenAliasOrGrpName = aliasOrGroupNameSearchField.getText();
+					chosenFromDateTime = splDateForm.parse(dateFromSearchField.getText() + " " + (timeFromSearchField.getItemAt(timeFromSearchField.getSelectedIndex())) + ":00");
+					ChosenToDateTime = splDateForm.parse(dateToSearchField.getText() + " " + (timeToSearchField.getItemAt(timeToSearchField.getSelectedIndex())) + ":00");
+					
+					db.searchInHistory(chosenNTyp, chosenAliasOrGrpName, chosenFromDateTime, ChosenToDateTime , htmlKit, htmlDoc);
+					
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				break;
 				
-				db.searchInHistory(chosenNTyp, chosenAliasOrGrpName, chosenFromDateTime, ChosenToDateTime , htmlKit, htmlDoc);
-				
-			} catch (ParseException e) {
-				e.printStackTrace();
+			case "Delete all messages":
+				db.deleteAllMsgs();
+				break;
+			
 			}
+			
+			
+			
+			
+			
+			
+			
 			
 			
 			

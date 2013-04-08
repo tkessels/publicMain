@@ -228,9 +228,42 @@ public class LocalDBConnection {
 		};
 		(new Thread(tmp)).start();
 	}
+	
 	public void deleteAllMsgs () {
-		
+		if (isDBConnected) {
+			int eingabe = JOptionPane.showConfirmDialog(null,
+					"Yout´re about to delete your ChatLog!\n"
+							+ "Are you really shore that you want to do it?",
+					"Delete confirmation", JOptionPane.YES_NO_OPTION);
+			if (eingabe == 1) {
+				// no, he´s not shore!
+
+			} else if (eingabe == 0) {
+				askForConnectionRetry = true;
+				connectToLocDBServer();
+
+				try {
+					this.stmt = con.createStatement();
+					stmt.addBatch("DROP TABLE IF EXISTS " + chatLogTbl);
+					stmt.executeBatch();
+					createDbAndTables();
+
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}else {
+			askForConnectionRetry = true;
+			if (connectToLocDBServer()) {
+				isDBConnected = true;
+				deleteAllMsgs();
+			} else {
+				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
+			}
+		}
 	}
+	
 	public void searchInHistory (String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
 		if (isDBConnected){
 			try {
@@ -245,8 +278,6 @@ public class LocalDBConnection {
 					//TODO: hier die übersetung von nr in string einbinden
 //					tmpStmtStr = tmpStmtStr + " AND ";
 				}
-				
-				
 				Statement searchStmt = con.createStatement();
 				ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
 				

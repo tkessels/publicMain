@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -264,7 +265,7 @@ public class LocalDBConnection {
 		}
 	}
 	
-	public void searchInHistory (String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
+	public void searchInHistory (JTextPane historyContentTxt, String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
 		if (isDBConnected){
 			try {
 				String tmpStmtStr = (
@@ -284,11 +285,13 @@ public class LocalDBConnection {
 				
 				
 				//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
+				historyContentTxt.setText("");
 				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
 						+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
 						+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
 						+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
 				while (rs.next()) {
+					
 					cal.setTimeInMillis(rs.getLong("timestamp"));
 					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
 							"<tr>" + "<td>" + rs.getInt("id") + "<td>"
@@ -319,7 +322,7 @@ public class LocalDBConnection {
 			askForConnectionRetry = true;
 			if (connectToLocDBServer()) {
 				isDBConnected = true;
-				searchInHistory(chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);
+				searchInHistory(historyContentTxt, chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);
 				
 			} else {
 				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");

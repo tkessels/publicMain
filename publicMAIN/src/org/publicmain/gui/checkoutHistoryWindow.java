@@ -217,7 +217,7 @@ public class checkoutHistoryWindow {
 					chosenFromDateTime = splDateForm.parse(dateFromSearchField.getText() + " " + (timeFromSearchField.getItemAt(timeFromSearchField.getSelectedIndex())) + ":00");
 					ChosenToDateTime = splDateForm.parse(dateToSearchField.getText() + " " + (timeToSearchField.getItemAt(timeToSearchField.getSelectedIndex())) + ":00");
 					
-					db.searchInHistory(chosenNTyp, chosenAliasOrGrpName, chosenFromDateTime, ChosenToDateTime , htmlKit, htmlDoc);
+					db.searchInHistory(historyContentTxt, chosenNTyp, chosenAliasOrGrpName, chosenFromDateTime, ChosenToDateTime , htmlKit, htmlDoc);
 					
 				} catch (ParseException e) {
 					e.printStackTrace();

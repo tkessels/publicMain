@@ -341,7 +341,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	void shutdown(){
 		//TODO: ordentlicher shutdown
 		ce.shutdown();
-		System.out.println("EXITED");
 		System.exit(0);
 	}
 

@@ -18,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -33,9 +34,10 @@ public class ContactList extends JWindow {
 	private int breite;
 	private JFrame parent;
 	private JInternalFrame internalFrame;
-	//private JScrollPane usersScroller;
-	//private JScrollPane groupsScroller;
+	private JScrollPane usersScroller;
+	private JScrollPane groupsScroller;
 	private JPanel groupPanel;
+	private JButton createGrp;
 	private JPanel userPanel;
 	private JList<String> users;
 	private JList<String> groups;
@@ -48,9 +50,10 @@ public class ContactList extends JWindow {
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
 		this.users = new JList<String>(new UserListModel());
 		this.groups = new JList<String>(new GroupListModel());
-		//this.usersScroller = new JScrollPane(users);//, JScrollPane.SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		//this.groupsScroller = new JScrollPane(groupPanel);//, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.usersScroller = new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.groupsScroller = new JScrollPane(groups, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.groupPanel = new JPanel(new BorderLayout());
+		this.createGrp = new JButton("create Group");
 		this.userPanel = new JPanel(new BorderLayout());
 		this.trenner = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
          
@@ -59,31 +62,42 @@ public class ContactList extends JWindow {
 		this.groupPanel.setBorder(BorderFactory.createTitledBorder("GROUPS"));
 		this.userPanel.setBorder(BorderFactory.createTitledBorder("USERS"));
 		
+		this.groupPanel.setPreferredSize(new Dimension(breite, parent.getHeight()/4));
+		
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.VERTICAL);
 		this.users.setVisibleRowCount(-1);
-		this.users.setMinimumSize(new Dimension(breite,50));
 		
 		this.groups.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.groups.setLayoutOrientation(JList.VERTICAL);
 		this.groups.setVisibleRowCount(-1);
-		this.groups.setMinimumSize(new Dimension(breite,50));
-		this.groups.setPreferredSize(new Dimension(breite, parent.getHeight()/4));
 		
+		// Listener adden
 		this.users.addMouseListener(new myMouseAdapter());
 		this.groups.addMouseListener(new myMouseAdapter());
+		this.createGrp.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String tmpGrpName = null;
+				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("gruppe.png")), null, null);
+				if(tmpGrpName!=null){
+					
+					GUI.getGUI().addChat(new ChatWindow(tmpGrpName));
+				}
+			}
+		});
 		
-//		groupPanel.add(groups);
-		JScrollPane group_scroll_Pane = new JScrollPane(groups,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		this.groupPanel.add(group_scroll_Pane, BorderLayout.CENTER);
-		this.groupPanel.add(new JButton("CREATE"), BorderLayout.SOUTH);
-		this.userPanel.add(users, BorderLayout.CENTER);
-		//this.trenner.add(groupPanel);
+		// adden der Komponenten
+		this.groupPanel.add(groupsScroller, BorderLayout.CENTER);
+		this.groupPanel.add(createGrp, BorderLayout.SOUTH);
+		
+		this.userPanel.add(usersScroller, BorderLayout.CENTER);
+		
 		this.trenner.add(groupPanel);
 		this.trenner.add(userPanel);
-		//this.add(trenner, BorderLayout.CENTER);
 
 		this.internalFrame.add(trenner, BorderLayout.CENTER);
+		
 		this.add(internalFrame);
 		
 		this.internalFrame.setVisible(true);

@@ -5,7 +5,8 @@ import org.publicmain.common.MSG;
 public class KnotenKanal extends Kanal{
 	
 	public KnotenKanal(long node) {
-		this.referenz=node;
+		super(node);
+		//this.referenz=node;
 	}
 
 	@Override

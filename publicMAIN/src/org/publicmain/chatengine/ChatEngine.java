@@ -29,7 +29,7 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	public LocalDBConnection locDBCon;
+	//public LocalDBConnection locDBCon;
 	private Set<Node> ignored;
 	
 	private long userID;
@@ -64,7 +64,7 @@ public class ChatEngine extends Observable{
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
 		 this.ne = new NodeEngine(this);
-		this.locDBCon = LocalDBConnection.getDBConnection();
+//		this.locDBCon = LocalDBConnection.getDBConnection();
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();
@@ -124,7 +124,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void send_private(long uid, String text){
 		MSG tmp = new MSG(uid,text);
-		put(tmp);
+		//put(tmp);
 		ne.sendtcp(tmp);
 	}
 	
@@ -286,7 +286,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
-		locDBCon.saveMsg(nachricht);
+//		locDBCon.saveMsg(nachricht);
 	}
 	
 	private final class MsgSorter implements Runnable {

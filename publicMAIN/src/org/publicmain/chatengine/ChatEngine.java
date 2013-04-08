@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Observable;
 import java.util.Observer;
@@ -29,8 +30,7 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	private ArrayList<Long> ignored;
-//	private Set<Node> ignored;
+	private Set<Long> ignored;
 	private long userID;
 	private String alias;
 	
@@ -68,13 +68,12 @@ public class ChatEngine extends Observable{
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
 		this.ne = new NodeEngine(this);
-		 this.ne = new NodeEngine(this);
+		this.ne = new NodeEngine(this);
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();
 		default_channel=new KnotenKanal(getUserID());
-		ignored = new ArrayList<Long>();
-//		ignored=new HashSet<Node>();
+		ignored = Collections.synchronizedSet(new HashSet<Long>());
 		inbox=new LinkedBlockingQueue<MSG>();
 		
 		//temporäre Initialisierung der GruppenListe mit default Groups 
@@ -239,30 +238,22 @@ public class ChatEngine extends Observable{
 	 * 
 	 * @param uid
 	 */
-	public	void	ignore_user(long uid){
-		ignored.add(uid);
+	public	void	ignore_user(long nodeID){
+			ignored.add(nodeID);
 	}
 	
 	/**
 	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code>
 	 * wieder angezeigt werden. Hier wird geprüft ob der Benutzer überhaupt
 	 * in der <code>ignored</code> ist. Wenn ja wird das Long aus der
-	 * ArrayList gelöscht und "true" zurückgeliefert anderenfalls wird mit
+	 * HashSet gelöscht und "true" zurückgeliefert anderenfalls wird mit
 	 * "false" das Fehlen des Eintrages signalisiert 
-	 * 
 	 * 
 	 * @param uid
 	 */
-	public boolean 	unignore_user(long uid){
-		for(int i = 0; i < ignored.size(); i++){
-			if(ignored.get(i) == uid){
-				ignored.remove(i);
-				return true;
-			}
-		}
-		return false;
-	}
-	
+	public boolean unignore_user(long nodeID) {
+			return ignored.remove(nodeID);
+	}	
 	
 	/** Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an 
 	 * @param chatPanel Das abonierende Fenster

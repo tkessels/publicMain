@@ -7,12 +7,14 @@ import java.util.TreeSet;
 import org.publicmain.common.MSG;
 
 public abstract class Kanal extends Observable {
-	protected Object 	referenz;
+	protected final Object 	referenz;
 
 	protected TreeSet<MSG> messages = new TreeSet<MSG>();
 
 	public abstract boolean add(MSG nachricht);
-
+	public Kanal(Object reference) {
+		this.referenz=reference;
+	}
 
 	/**Gibt die letzten x Nachrichten aus einem Kanal als Set zurück
 	 * @param count Die gewünschte Anzahl von Nachrichten

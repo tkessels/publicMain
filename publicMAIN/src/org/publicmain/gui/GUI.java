@@ -35,7 +35,6 @@ import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
-import org.publicmain.sql.DBConnection;
 import org.publicmain.gui.ContactList;
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -48,7 +47,7 @@ import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 public class GUI extends JFrame implements Observer , ChangeListener{
 
 	// Deklarationen:
-	ChatEngine ce;
+	private ChatEngine ce;
 	LogEngine log;
 
 	private static GUI me;
@@ -76,7 +75,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private boolean contactListActive;
 	private ContactList contactListWin;
 	private pMTrayIcon trayIcon;
-	private DBConnection db;
 
 	/**
 	 * Konstruktor für GUI
@@ -90,11 +88,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 
 		// Initialisierungen:
 		try {
-			if(ChatEngine.getCE()==null){
-				this.ce = new ChatEngine();
-			} else {
-				ce=ChatEngine.getCE();
-			}
+			this.ce=new ChatEngine();
 		} catch (Exception e) {
 			log.log(e);
 		}

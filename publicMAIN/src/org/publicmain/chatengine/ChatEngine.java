@@ -16,7 +16,6 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
-import org.publicmain.sql.DBConnection;
 
 /**
  * @author ATRM
@@ -28,7 +27,6 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	public DBConnection db;
 	private Set<Node> ignored;
 	
 	private long userID;
@@ -284,7 +282,6 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
-		if(db!=null)db.saveMsg(nachricht);
 	}
 	
 	private final class MsgSorter implements Runnable {

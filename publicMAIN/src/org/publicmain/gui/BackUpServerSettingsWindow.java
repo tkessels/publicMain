@@ -56,6 +56,7 @@ public class BackUpServerSettingsWindow {
 		this.connectToButton				= new JButton("Apply and connect to Backup Server");
 		this.createThisUserButton			= new JButton("create this User");
 		
+		this.createThisUserButton.addActionListener(new backUpServerSettingsWindowButtonController());
 		this.connectToButton.addActionListener(new backUpServerSettingsWindowButtonController());
 		
 		this.c 								= new GridBagConstraints();
@@ -118,10 +119,10 @@ public class BackUpServerSettingsWindow {
 		public void actionPerformed(ActionEvent e) {
 			bdb = BackupDBConnection.getBackupDBConnection();
 			JButton source = (JButton)e.getSource();
-			
 			switch(source.getText()){
 			
 			case "Apply and connect to Backup Server":
+				//TODO:
 				break;
 			case "create this User":
 				bdb.createNewUser(statusTextField, serverIPTextField, userNameTextField, passWordTextField);

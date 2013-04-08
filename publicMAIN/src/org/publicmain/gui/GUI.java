@@ -36,6 +36,8 @@ import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 import org.publicmain.gui.ContactList;
+import org.publicmain.sql.LocalDBConnection;
+
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 
@@ -74,6 +76,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private boolean contactListActive;
 	private ContactList contactListWin;
 	private pMTrayIcon trayIcon;
+	private LocalDBConnection db;
 
 	/**
 	 * Konstruktor für GUI
@@ -93,7 +96,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me = this;
 		this.log = new LogEngine();
-		// this.db = DBConnection.getDBConnection(); // bei bedarf einbinden!
+		this.db = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
@@ -144,6 +147,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.helpContents.addActionListener(new menuContoller());
 		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
 		this.checkoutHistory.addActionListener(new menuContoller());
+		this.backUpServerSettings.addActionListener(new menuContoller());
 		
 		// Konfiguration contactListBtn:
 		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
@@ -634,6 +638,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 				break;
 			case "checkout History":
 				new checkoutHistoryWindow();
+				break;
+			case "Backup-Server Settings":
+				new BackUpServerSettingsWindow();
 				break;
 			}
 			

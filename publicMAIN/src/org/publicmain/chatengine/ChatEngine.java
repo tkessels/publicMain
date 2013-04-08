@@ -63,7 +63,6 @@ public class ChatEngine extends Observable{
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
 		this.ne = new NodeEngine(this);
-		 this.ne = new NodeEngine(this);
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();
@@ -239,6 +238,7 @@ public class ChatEngine extends Observable{
 	 * @param uid
 	 */
 	public boolean 	unignore_user(long uid){
+		
 		for(int i = 0; i < ignored.size(); i++){
 			if(ignored.get(i) == uid){
 				ignored.remove(i);

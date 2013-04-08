@@ -41,7 +41,7 @@ public class LogEngine {
 	/** Setzt die Meldeschwelle ab welchem schweregrad eine Ausgabe erfolgen soll.
 	 * @param x Das Verbositätslevel ?!?!
 	 */
-	public static void serVerbosity(int x){
+	public static void setVerbosity(int x){
 		verbosity=x;
 	}
 	

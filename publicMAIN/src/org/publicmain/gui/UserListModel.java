@@ -10,6 +10,11 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 
+/**
+ * @author ATRM
+ *
+ */
+
 public class UserListModel extends AbstractListModel<String>{
 
 	/**

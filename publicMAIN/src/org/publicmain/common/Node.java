@@ -9,10 +9,14 @@ import java.util.Random;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.nodeengine.NodeEngine;
 
+/**
+ * @author ATRM
+ * 
+ */
+
 public class Node implements Serializable {
 
 	private static Node me;
-
 	private long nodeID;
 	private long userID;
 	private String alias;

@@ -11,12 +11,12 @@ import org.publicmain.common.NachrichtenTyp;
 /**
  * Dies Klasse erlaubt es eine Reihe von Vergleichskriterien (Haken) abzuspeichern und eine blockende Abfrage zu starten. 
  * Dies Klasse erlaubt es einer Methode einen Haken zu registrieren und zu blocken bis eine MSG entsprechender Zusammensetzung angekommen ist. 
- * Dabei wird ein Timeout benötigt um tote Hooks zu verhindern. 
+ * Dabei wird ein Timeout benötigt um tote Hooks zu verhindern.
+ *  
+ * @author ATRM
  * 
- * 
- * @author tkessels
- *
  */
+
 public class Hook {
 	private boolean onlyFirstMatch=true;
 	private List<Haken> allHooks=new ArrayList<Haken>();  //Liste aller registrierten Filter
@@ -33,7 +33,9 @@ public class Hook {
 		}
 	}
 
-	/**Richtet einen Hook ein der blockt bis eine MSG mit den Entsprechenden Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND verknüpft und müssen alle erfüllt werden.
+	/**
+	 * Richtet einen Hook ein der blockt bis eine MSG mit den Entsprechenden Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND verknüpft und müssen alle erfüllt werden.
+	 * 
 	 * @param typ	Nachrichtentyp der zu erwartenden Nachricht. Also ob <code>SYSTEM, GROUP, PRIVATE</code> oder <code>DATA</code>
 	 * @param code Der MSGCode der Nachricht. Also um welchen Typ von SystemNachricht es sich handelt (z.B.:<code>NODE_UPDATE </code> oder <code>ECHO_REQUEST</code>)
 	 * @param nid NodeID des Absenders

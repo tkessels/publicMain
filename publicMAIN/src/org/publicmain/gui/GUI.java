@@ -282,7 +282,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	public void addGrpCW(String grpName){
 		String grp_name = grpName;
-		grp_name = grp_name.substring(0, GRP_NAME_LENGTH);
+		if(grp_name.length() > GRP_NAME_LENGTH){
+			grp_name = grp_name.substring(0, GRP_NAME_LENGTH); 
+		}
 		grp_name = grp_name.trim();
 		grp_name = grp_name.replaceAll("[*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
 		grp_name = grp_name.toLowerCase();

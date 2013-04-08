@@ -17,6 +17,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
+import org.publicmain.sql.LocalDBConnection;
 
 /**
  * @author ATRM
@@ -56,12 +57,12 @@ public class ChatEngine extends Observable{
 	public ChatEngine() throws IOException{
 		ce = this;
 		//TODO:Load Settings & UserDATA
-		//this.db = db.getDBConnection();
 		
 		//temporär
 		 setUserID((long) (Math.random()*Long.MAX_VALUE));
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
+		this.ne = new NodeEngine(this);
 		 this.ne = new NodeEngine(this);
 		
 		group_channels=new HashSet<GruppenKanal>();
@@ -311,6 +312,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
+		LocalDBConnection.getDBConnection().saveMsg(nachricht);
 	}
 	
 	private final class MsgSorter implements Runnable {

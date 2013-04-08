@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -109,11 +110,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	
 	private Node getBestNode() {
 		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sich der Neue Verbinden darf.
-		/*Random x = new Random(meinNode.getNodeID());
-		Node[] tmp = null;
-		allNodes.toArray(tmp);
-		return tmp[x.nextInt(allNodes.size())];*/
-		return meinNode;
+		Random x = new Random(nodeID);
+		return (Node) allNodes.toArray()[x.nextInt(allNodes.size())];
+//		return meinNode;
 	}
 
 	/**
@@ -275,13 +274,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 	private void updateNodes() {
 		/*
-		 * if (isRoot()) { synchronized (allNodes) { allNodes.clear(); allNodes.add(getME()); allNodes.addAll(getChilds()); allNodes.notify(); } } else sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
+		 * if (isRoot()) { synchronized (allNodes) { allNodes.clear(); allNodes.add(getME()); allNodes.addAll(getChilds()); allNodes.notifyAll(); } } else sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 		 */
 		synchronized (allNodes) {
 			allNodes.clear();
 			allNodes.add(getMe());
 			allNodes.addAll(getChilds());
-			allNodes.notify();
+			allNodes.notifyAll();
 		}
 		if (hasParent()) sendroot(new MSG(allNodes, MSGCode.REPORT_ALLNODES));
 
@@ -598,7 +597,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.removeAll(data);
 			allNodes.add(meinNode);
-			if(allNodes.hashCode()!=hash)allNodes.notify();
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
 	
@@ -606,7 +605,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.remove(data);
-			if(allNodes.hashCode()!=hash)allNodes.notify();
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
 	
@@ -614,7 +613,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.addAll(data);
-			if(allNodes.hashCode()!=hash)allNodes.notify();
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
 	
@@ -622,7 +621,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
-			if(allNodes.hashCode()!=hash)allNodes.notify();
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
 	
@@ -632,7 +631,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.clear();
 			allNodes.addAll(data);
 			allNodes.add(meinNode);
-			if(allNodes.hashCode()!=hash)allNodes.notify();
+			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
 	}
 	
@@ -883,11 +882,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		
 		synchronized (allNodes) {
 			if ((tmp = getNode(nid)) != null) {
-				System.out.println(tmp);
 				if (!tmp.getAlias().equals(newAlias)) {
-					System.out.println("Blah");
 					tmp.setAlias(newAlias);
-					allNodes.notify();
+					allNodes.notifyAll();
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}

@@ -331,6 +331,15 @@ public class ChatEngine extends Observable{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public Node getNodeforAlias(String alias){
+		Set<Node> tmp=new HashSet<Node>();
+		for(Node x: getUsers()){
+			if(x.getAlias().startsWith(alias))tmp.add(x);
+		}
+		if(tmp.size()==1)return ((Node)tmp.toArray()[0]);
+		return null;
+	}
 
 	public void shutdown() {
 		ne.disconnect();

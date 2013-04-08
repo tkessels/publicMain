@@ -43,8 +43,8 @@ public class BackupDBConnection {
 	
 	private BackupDBConnection() {
 		
-		this.backupRootUser 	= "backuproot";
-		this.rootPasswd			= "0123456789";
+		this.backupRootUser 	= "root";
+		this.rootPasswd			= "";
 		this.dbName 			= "db_backUpServer_publicMain";
 	}
 	public static BackupDBConnection getBackupDBConnection() {
@@ -54,20 +54,32 @@ public class BackupDBConnection {
 		return me;
 	}
 	
-	public void createNewUser(JTextField statusTextField, JTextField serverIPTextField, JTextField userNameTextField, JTextField passWordTextField){
-		
-		this.backupServerUrl	= "jdbc:mysql://" + serverIPTextField + ":3306/";
-		try {
-			this.rootCon 	= DriverManager.getConnection(backupServerUrl, backupRootUser, rootPasswd);
-			this.stmt 		= rootCon.createStatement();
-			stmt.addBatch("create database if not exists " + dbName);
-			stmt.addBatch("use " + dbName);
-			stmt.addBatch("CREATE USER" + userNameTextField.getText() + " IDENTIFIED BY PASSWORD " + passWordTextField.getText());
+	public void createNewUser(final JTextField statusTextField, final JTextField serverIPTextField, final JTextField userNameTextField, final JTextField passWordTextField){
+		Runnable tmp = new Runnable() {
+			private Connection rootCon;
+			private Statement stmt;
+
+			public void run() {
+				backupServerUrl	= "jdbc:mysql://" + serverIPTextField.getText() + ":3306/";
+				try {
+					statusTextField.setText("Versuche verbindung herzustellen!");
+					this.rootCon 	=  DriverManager.getConnection(backupServerUrl, backupRootUser, rootPasswd);
+					this.stmt 		= rootCon.createStatement();
+					
+					stmt.addBatch("create database if not exists " + dbName);
+					stmt.addBatch("use " + dbName);
+					statusTextField.setText("Lege User an!");
+					stmt.addBatch("CREATE USER" + userNameTextField.getText() + " IDENTIFIED BY PASSWORD " + passWordTextField.getText());
+					statusTextField.setText("Fertig!");
+				} catch (SQLException e) {
+					//TODO:
+					statusTextField.setText(e.getMessage());
+					LogEngine.log(this, "DB-Verbindung zu Backupserver fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
+				}
+			}
 			
-		} catch (SQLException e) {
-			//TODO:
-			statusTextField.setText(e.getMessage());
-			LogEngine.log(this, "DB-Verbindung zu Backupserver fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
-		}
+		};
+		(new Thread(tmp)).start();
+		
 	}
 }

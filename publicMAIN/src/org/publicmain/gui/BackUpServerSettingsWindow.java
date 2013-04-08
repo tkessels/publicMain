@@ -5,15 +5,24 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JTextField;
 
+import org.publicmain.sql.BackupDBConnection;
+
 public class BackUpServerSettingsWindow {
+	
+	private BackupDBConnection bdb;
 	private JFrame backUpServerSettingsFrame;
 	private JLabel serverIPLabel;
 	private JTextField serverIPTextField;
@@ -46,6 +55,8 @@ public class BackUpServerSettingsWindow {
 		
 		this.connectToButton				= new JButton("Apply and connect to Backup Server");
 		this.createThisUserButton			= new JButton("create this User");
+		
+		this.connectToButton.addActionListener(new backUpServerSettingsWindowButtonController());
 		
 		this.c 								= new GridBagConstraints();
 		this.set 							= new Insets(5, 5, 5, 5);
@@ -101,4 +112,23 @@ public class BackUpServerSettingsWindow {
 		backUpServerSettingsFrame.pack();
 		backUpServerSettingsFrame.setVisible(true);
 	}
+	
+	class backUpServerSettingsWindowButtonController implements ActionListener{
+		
+		public void actionPerformed(ActionEvent e) {
+			bdb = BackupDBConnection.getBackupDBConnection();
+			JButton source = (JButton)e.getSource();
+			
+			switch(source.getText()){
+			
+			case "Apply and connect to Backup Server":
+				break;
+			case "create this User":
+				bdb.createNewUser(statusTextField, serverIPTextField, userNameTextField, passWordTextField);
+				break;
+			}
+		}
+		
+	}
+	
 }

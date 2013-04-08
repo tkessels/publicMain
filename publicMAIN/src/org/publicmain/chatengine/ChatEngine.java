@@ -95,14 +95,18 @@ public class ChatEngine extends Observable{
 		this.userID = userID;
 	}
 
-	/**Gibt den aktuellen Anzeigenamen zurück 
+	/**
+	 * Gibt den aktuellen Anzeigenamen zurück 
+	 * 
 	 * @return den Anzeigenamen
 	 */
 	public String getAlias() {
 		return alias;
 	}
 
-	/**Verändert den Anzeigenamen des Nutzers
+	/**
+	 * Verändert den Anzeigenamen des Nutzers
+	 * 
 	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
 	 */
 	public void setAlias(String alias) {
@@ -110,7 +114,9 @@ public class ChatEngine extends Observable{
 		if(ne!=null&&ne.isOnline())ne.updateAlias();
 	}
 	
-	/**Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
+	/**
+	 * Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
+	 * 
 	 * @param uid UID des Empfängers
 	 * @param text Nachricht
 	 */

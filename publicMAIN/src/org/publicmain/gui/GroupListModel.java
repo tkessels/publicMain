@@ -46,6 +46,13 @@ public class GroupListModel extends AbstractListModel<String>{
     public int getSize() {
     	return groups.size();
     }
+
+    public boolean contains(String group){
+    	synchronized (groups) {
+    		return groups.contains(group);
+		}
+    }
+    
     @Override
     public String getElementAt(int index) {
     return groups.get(index);

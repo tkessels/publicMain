@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -15,8 +14,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
-import java.util.logging.Logger;
-
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -33,14 +30,13 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
 import org.publicmain.sql.DBConnection;
-
+import org.publicmain.gui.ContactList;
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 
@@ -209,7 +205,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setMinimumSize(new Dimension(250,250));
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setTitle("publicMAIN");
 		this.contactListWin = new ContactList(GUI.me);
 		this.setVisible(true);
@@ -320,7 +316,25 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	public void delChat(String chatname){
 		delChat(existCW(chatname));
 	}
-
+	
+	/**
+	 * Diese Methode nimmt die Änderungsanforderung entgegen und prüft ob der Name bereits an einen anderen
+	 * Benutzer oder an eine Gruppe vergeben wurde. Existiert der Alias wird false zurückgeliefert in jedem
+	 * anderen Fall wird der Name über die ChatEngine geändert.
+	 *   
+	 * @param alias
+	 * @return boolean
+	 */
+	public boolean changeAlias(String alias){
+		if(contactListWin.nameExists(alias)){
+			System.out.println("GUI: Name existiert bereits! Wird nicht geändert!");
+			return false;
+		} else {
+			ce.setAlias(alias);
+			return true;
+		}
+	}
+	
 	/**
 	 * Fährt das Programm ordnungsgemäß runter
 	 */

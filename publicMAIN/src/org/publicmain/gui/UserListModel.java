@@ -52,8 +52,8 @@ public class UserListModel extends AbstractListModel<String>{
     	synchronized (users) {
     		return users.contains(user);
 		}
-    	
     }
+    
     @Override
     public String getElementAt(int index) {
     return users.get(index);

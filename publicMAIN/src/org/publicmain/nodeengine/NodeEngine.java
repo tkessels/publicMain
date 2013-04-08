@@ -347,7 +347,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		multicastRecieverBot.stop();
 		sendtcp(new MSG(meinNode, MSGCode.NODE_SHUTDOWN));
 		sendroot(new MSG(myGroups,MSGCode.GROUP_LEAVE));
-		root_connection.disconnect();
+		if(root_connection!=null)root_connection.disconnect();
 		for (final ConnectionHandler con : connections)
 			(new Thread(new Runnable() {
 				public void run() {
@@ -598,7 +598,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.removeAll(data);
 			allNodes.add(meinNode);
-			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+			if(allNodes.hashCode()!=hash)allNodes.notify();
 		}
 	}
 	
@@ -606,7 +606,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.remove(data);
-			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+			if(allNodes.hashCode()!=hash)allNodes.notify();
 		}
 	}
 	
@@ -614,7 +614,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.addAll(data);
-			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+			if(allNodes.hashCode()!=hash)allNodes.notify();
 		}
 	}
 	
@@ -622,7 +622,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
-			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+			if(allNodes.hashCode()!=hash)allNodes.notify();
 		}
 	}
 	
@@ -632,7 +632,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.clear();
 			allNodes.addAll(data);
 			allNodes.add(meinNode);
-			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+			if(allNodes.hashCode()!=hash)allNodes.notify();
 		}
 	}
 	
@@ -872,7 +872,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	public void updateAlias() {
 		String alias = ce.getAlias();
 		if(online&&(!alias.equals(meinNode.getAlias()))) {
-			meinNode.setAlias(alias);
 			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
 			updateAlias(alias,nodeID);
 			LogEngine.log(this,"User has changed ALIAS to " + alias,LogEngine.INFO);
@@ -884,9 +883,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		
 		synchronized (allNodes) {
 			if ((tmp = getNode(nid)) != null) {
-				if (tmp.getAlias() != newAlias) {
+				System.out.println(tmp);
+				if (!tmp.getAlias().equals(newAlias)) {
+					System.out.println("Blah");
 					tmp.setAlias(newAlias);
-					allNodes.notifyAll();
+					allNodes.notify();
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}

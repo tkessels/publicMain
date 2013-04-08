@@ -62,22 +62,22 @@ public class LocalDBConnection {
 	private static LocalDBConnection me;
 	
 	private LocalDBConnection() {
-		this.url 				= "jdbc:mysql://localhost:3306/";
-		this.user 				= "root";
-		this.passwd 			= "";
-		this.dbName 			= "db_publicMain";
-		this.chatLogTbl			= "t_chatLog";
-		this.msgTbl				= "t_msg";
-		this.usrTbl				= "t_usr";
-		this.nodeTbl			= "t_node";
-		this.groupTbl			= "t_group";
-		this.configTbl			= "t_config";
-		this.eventTypeTbl		= "t_eventType";
-		this.routingOverviewTbl	= "t_routingOverView";
-		this.isDBConnected 		= false;
-		this.askForConnectionRetry = true;
-		this.cal				= Calendar.getInstance();
-		this.splDateFormt		= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+		this.url 					= "jdbc:mysql://localhost:3306/";
+		this.user 					= "root";
+		this.passwd 				= "";
+		this.dbName 				= "db_publicMain";
+		this.chatLogTbl				= "t_chatLog";
+		this.msgTbl					= "t_msg";
+		this.usrTbl					= "t_usr";
+		this.nodeTbl				= "t_node";
+		this.groupTbl				= "t_group";
+		this.configTbl				= "t_config";
+		this.eventTypeTbl			= "t_eventType";
+		this.routingOverviewTbl		= "t_routingOverView";
+		this.isDBConnected 			= false;
+		this.askForConnectionRetry	= true;
+		this.cal					= Calendar.getInstance();
+		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 		if(connectToLocDBServer()){
 			isDBConnected = true;
@@ -100,6 +100,7 @@ public class LocalDBConnection {
 			LogEngine.log(this, "DB-Verbindung fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
 			isDBConnected = false;
 			if(askForConnectionRetry){
+				askForConnectionRetry = false;
 				int eingabe = JOptionPane.showConfirmDialog(null,
 		                "Es besteht keine Verbindung zum lokalen DB-Server!\n"
 						+ "Fehlerbeschreibung: " + e.getCause() + "\n"
@@ -109,7 +110,8 @@ public class LocalDBConnection {
 				if (eingabe == 1){
 					askForConnectionRetry = false;	// nein ist 1
 						
-				} else {
+				} else if (eingabe == 0){
+					askForConnectionRetry = true;
 					connectToLocDBServer();	
 				}
 			}
@@ -213,19 +215,20 @@ public class LocalDBConnection {
 				} else {
 					//System.out.println("es besteht keine DB-Verbindung!");
 					if (askForConnectionRetry) {
-						connectToLocDBServer();
+						if (connectToLocDBServer()){
 						isDBConnected = true;
 						createDbAndTables();
 						saveMsg(m);
-
+						}
 					} else {
-						//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
+						// Erneuter Verbindungsversuch nicht gewollt
 					}
 				}
 			}
 		};
 		(new Thread(tmp)).start();
-		
+	}
+	public void deleteAllMsgs () {
 		
 	}
 	public void searchInHistory (String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
@@ -282,7 +285,7 @@ public class LocalDBConnection {
 	                "Für diese Operation ist eine Verbindung zum lokalen DB-Server zwingend notwendig",
 	                "Hinweis",
 	                JOptionPane.INFORMATION_MESSAGE);
-			askForConnectionRetry = true;//System.out.println("es besteht keine DB-Verbindung!");
+			askForConnectionRetry = true;
 			if (connectToLocDBServer()) {
 				isDBConnected = true;
 				searchInHistory(chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);

@@ -17,6 +17,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
+import org.publicmain.sql.LocalDBConnection;
 
 /**
  * @author ATRM
@@ -58,6 +59,7 @@ public class ChatEngine extends Observable{
 		ce = this;
 //		TODO:Load Settings & UserDATA
 //		this.db = db.getDBConnection();
+		//TODO:Load Settings & UserDATA
 		
 		/**
 		 * <<<<<<<< Temporär >>>>>>>>
@@ -65,6 +67,7 @@ public class ChatEngine extends Observable{
 		 setUserID((long) (Math.random()*Long.MAX_VALUE));
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
+		this.ne = new NodeEngine(this);
 		 this.ne = new NodeEngine(this);
 		
 		group_channels=new HashSet<GruppenKanal>();
@@ -324,6 +327,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
+		LocalDBConnection.getDBConnection().saveMsg(nachricht);
 	}
 	
 	private final class MsgSorter implements Runnable {
@@ -336,6 +340,7 @@ public class ChatEngine extends Observable{
 					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
 						for (KnotenKanal y : private_channels) if (y.add(tmp))break;
 						//Kein CW angemeldet um die Nachricht aufzunehmen  sende es an GUI via DEFAULT CHANNEL
+						default_channel.add(tmp);
 						
 					}
 				} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
@@ -367,7 +372,6 @@ public class ChatEngine extends Observable{
 			ne.debug(command,parameter);
 			break;
 		}
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -382,7 +386,6 @@ public class ChatEngine extends Observable{
 
 	public void shutdown() {
 		ne.disconnect();
-		// TODO Auto-generated method stub
 		
 	}
 }

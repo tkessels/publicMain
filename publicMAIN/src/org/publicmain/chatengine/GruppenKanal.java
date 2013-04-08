@@ -11,8 +11,8 @@ import org.publicmain.common.NachrichtenTyp;
 public class GruppenKanal extends Kanal {
 
 	public GruppenKanal(String gruppe) {
-		//super();
-		this.referenz=gruppe.toLowerCase();
+		super(gruppe.toLowerCase());
+//		this.referenz=gruppe.toLowerCase();
 	}
 	
 	@Override

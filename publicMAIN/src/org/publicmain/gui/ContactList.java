@@ -78,6 +78,7 @@ public class ContactList extends JWindow {
 		this.createGrp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//TODO: hier nochmal überprüfen!!! und evtl trim und upper oder lowercase...
 				String tmpGrpName = null;
 				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("gruppe.png")), null, null);
 				if(tmpGrpName!=null && !tmpGrpName.equals("")){

@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
@@ -66,7 +67,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private JMenuItem checkoutHistory;
 	private JMenuItem aboutPMAIN;
 	private JMenuItem helpContents;
-	private JMenuItem menuItemRequestFile;
+	private JMenuItem menuItemSendFile;
 	private JMenuItem lafNimROD;
 	private ButtonGroup btnGrp;
 	
@@ -75,7 +76,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private boolean contactListActive;
 	private ContactList contactListWin;
 	private pMTrayIcon trayIcon;
-	private LocalDBConnection db;
+	private LocalDBConnection locDBCon;
 
 	/**
 	 * Konstruktor für GUI
@@ -95,10 +96,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me = this;
 		this.log = new LogEngine();
-//		this.db = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
+		this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
-		this.menuItemRequestFile = new JMenuItem("Test(request_File)");
+		this.menuItemSendFile = new JMenuItem("send File to");
 		this.lafMenu		= new JMenu("Switch Design");
 		this.btnGrp 		= new ButtonGroup();
 		this.chatList 		= new ArrayList<ChatWindow>();
@@ -141,7 +142,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.jTabbedPane.addChangeListener(this);
 
 		// ActionListener für Menu's:
-		this.menuItemRequestFile.addActionListener(new menuContoller());
+		this.menuItemSendFile.addActionListener(new menuContoller());
 		this.aboutPMAIN.addActionListener(new menuContoller());
 		this.helpContents.addActionListener(new menuContoller());
 		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
@@ -163,7 +164,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			}
 		});
 		
-		//lafNimROD muss auch noch in die btnGrp
+		//lafNimROD zur ButtonGroup btnGrp hinzufügen:
 		this.btnGrp.add(lafNimROD);
 		
 		// Menüs hinzufügen:
@@ -171,7 +172,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		
 		this.configMenu.add(lafMenu);
 		
-		this.fileMenu.add(menuItemRequestFile);
+		this.fileMenu.add(menuItemSendFile);
 		
 		this.helpMenu.add(aboutPMAIN);
 		this.helpMenu.add(helpContents);
@@ -451,13 +452,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @returns true Wenn User gefunden
 	 */
 	boolean ignoreUser(String alias){
-		long tmpUID; 
-		for(Node x : ce.getUsers()){
-			if(x.getAlias().equals(alias)){
-				tmpUID = x.getUserID();
-				ce.ignore_user(tmpUID);
-				return true;
-			}
+		long tmpUID = -1;
+		tmpUID = ce.getNodeforAlias(alias).getUserID();
+		if(tmpUID != -1){
+			ce.ignore_user(tmpUID);
+			return true;
 		}
 		return false;
 	}
@@ -468,20 +467,17 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @return true Wenn User gefunden
 	 */
 	boolean unignoreUser(String alias){
-		long tmpUID;
-		for(Node x : ce.getUsers()){
-			if(x.getAlias().equals(alias)){
-				tmpUID = x.getUserID();
-				ce.unignore_user(tmpUID);
-				return true;
-			}
+		long tmpUID = -1;
+		tmpUID = ce.getNodeforAlias(alias).getUserID();
+		if(tmpUID != -1){
+			ce.unignore_user(tmpUID);
+			return true;
 		}
-		
 		return false;
 	}
 	
 	public void sendFile(String aliasName) {
-		// TODO: hier stimmt noch paar sachen nicht später überarbeiten!
+		// TODO: hier stimmen noch paar sachen nicht später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showOpenDialog(me);
 		if(returnVal == JFileChooser.APPROVE_OPTION){
@@ -549,6 +545,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param sender
 	 * @return Node
 	 */
+	//TODO: evtl. löschen ???
 	public Node getNode(long sender) {
 		return ce.getNode(sender);
 	}
@@ -637,8 +634,17 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			
 			switch(source.getText()){
 			
-			case "Test(request_File)":
-				request_File();
+			case "send File to":
+				//TODO: nochmal überprüfen!!!
+				String aliasName = null;
+				aliasName = (String)JOptionPane.showInputDialog(me, "Enter Name", "Reciver Name", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("private.png")), null, null);
+				if(aliasName != null && ce.getNodeforAlias(aliasName) != null && !aliasName.equals("")){
+					sendFile(aliasName);
+				} else if(aliasName == null){
+					
+				} else {
+					JOptionPane.showMessageDialog(GUI.getGUI(), "User not found!", "unknown Username", JOptionPane.ERROR_MESSAGE);
+				}
 				break;
 			case "About pMAIN":
 				new AboutPublicMAIN(me, "About publicMAIN", true);

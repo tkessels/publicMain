@@ -30,7 +30,6 @@ public class ChatEngine extends Observable{
 	public LogEngine log;
 	private ArrayList<Long> ignored;
 //	private Set<Node> ignored;
-	
 	private long userID;
 	private String alias;
 	
@@ -43,10 +42,12 @@ public class ChatEngine extends Observable{
 	
 	private BlockingQueue<MSG> inbox;
 	
-	//private Set<String> allGroups=new HashSet<String>();
+//	private Set<String> allGroups=new HashSet<String>();
 	private Set<String> myGroups=new HashSet<String>();
 	
-	/**Liefert die Instanz der CE
+	/**
+	 * Liefert die Instanz der CE
+	 * 
 	 * @return
 	 */
 	public static ChatEngine getCE() {
@@ -55,10 +56,12 @@ public class ChatEngine extends Observable{
 	
 	public ChatEngine() throws IOException{
 		ce = this;
-		//TODO:Load Settings & UserDATA
-		//this.db = db.getDBConnection();
+//		TODO:Load Settings & UserDATA
+//		this.db = db.getDBConnection();
 		
-		//temporär
+		/**
+		 * <<<<<<<< Temporär >>>>>>>>
+		 */
 		 setUserID((long) (Math.random()*Long.MAX_VALUE));
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
@@ -80,7 +83,9 @@ public class ChatEngine extends Observable{
 		msgSorterBot.start();
 	}
 	
-	/**Findet zu NodeID zugehörigen Node in der Liste
+	/**
+	 * Findet zu NodeID zugehörigen Node in der Liste
+	 * 
 	 * @param nid NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
 	 */
@@ -127,7 +132,9 @@ public class ChatEngine extends Observable{
 		ne.sendtcp(tmp);
 	}
 	
-	/**Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu schicken.
+	/**
+	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu schicken.
+	 * 
 	 * @param group Gruppenbezeichnung
 	 * @param text Nachricht
 	 */
@@ -137,7 +144,9 @@ public class ChatEngine extends Observable{
 		ne.sendtcp(tmp);
 	}
 	
-	/**Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden <code>uid</code> zu schicken.
+	/**
+	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden <code>uid</code> zu schicken.
+	 * 
 	 * @param uid UID des Empfängers
 	 * @param datei Datei
 	 * @return id des Dateitransfers für spätere Rückfragen
@@ -147,7 +156,9 @@ public class ChatEngine extends Observable{
 		return 0;
 	}
 	
-	/** Gibt den Zustand der Übertragung einer Datei an
+	/** 
+	 * Gibt den Zustand der Übertragung einer Datei an
+	 * 
 	 * @param file_transfer_ID
 	 * @return <ul>	<li><code>-1</code> Dateitransfer nicht möglich</li>
 	 * 				<li><code>-2</code> Benutzer lehnt transfer ab</li>
@@ -173,12 +184,12 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name Gruppennamen sind CaseInSensitiv
 	 * und bestehen aus alphanumerischen Zeichen
 	 */
-	public void group_join(String gruppen_name){
-			synchronized (myGroups) {
-				if(myGroups.add(gruppen_name)) {
-					ne.joinGroup(Arrays.asList(gruppen_name), null);
-				}
+	public void group_join(String gruppen_name) {
+		synchronized (myGroups) {
+			if (myGroups.add(gruppen_name)) {
+				ne.joinGroup(Arrays.asList(gruppen_name), null);
 			}
+		}
 	}
 	
 	/**
@@ -195,7 +206,9 @@ public class ChatEngine extends Observable{
 		}
 	}
 	
-	/**Liefert eine Liste der verfügbaren Gruppenstrings
+	/**
+	 * Liefert eine Liste der verfügbaren Gruppenstrings
+	 * 
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
 	public	Set<String> getAllGroups(){

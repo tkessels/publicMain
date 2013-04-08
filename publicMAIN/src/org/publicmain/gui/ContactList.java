@@ -80,10 +80,14 @@ public class ContactList extends JWindow {
 			public void actionPerformed(ActionEvent e) {
 				String tmpGrpName = null;
 				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("gruppe.png")), null, null);
-				if(tmpGrpName!=null){
-					
+				if(tmpGrpName!=null && !tmpGrpName.equals("")){
+//					tmpGrpName = tmpGrpName.trim();
+//					tmpGrpName = tmpGrpName.toUpperCase();
 					GUI.getGUI().addChat(new ChatWindow(tmpGrpName));
+				} else if(tmpGrpName.equals("")){
+					JOptionPane.showMessageDialog(GUI.getGUI(), "empty String not allowed!", "illegal Groupname", JOptionPane.ERROR_MESSAGE);
 				}
+				
 			}
 		});
 		

@@ -3,6 +3,7 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -12,6 +13,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JList;
@@ -31,8 +33,8 @@ public class ContactList extends JWindow {
 	private int breite;
 	private JFrame parent;
 	private JInternalFrame internalFrame;
-	private JScrollPane usersScroller;
-	private JScrollPane groupsScroller;
+	//private JScrollPane usersScroller;
+	//private JScrollPane groupsScroller;
 	private JPanel groupPanel;
 	private JPanel userPanel;
 	private JList<String> users;
@@ -46,8 +48,8 @@ public class ContactList extends JWindow {
 		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
 		this.users = new JList<String>(new UserListModel());
 		this.groups = new JList<String>(new GroupListModel());
-		this.usersScroller = new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		this.groupsScroller = new JScrollPane(groups, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		//this.usersScroller = new JScrollPane(users);//, JScrollPane.SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		//this.groupsScroller = new JScrollPane(groupPanel);//, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.groupPanel = new JPanel(new BorderLayout());
 		this.userPanel = new JPanel(new BorderLayout());
 		this.trenner = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -71,10 +73,16 @@ public class ContactList extends JWindow {
 		this.users.addMouseListener(new myMouseAdapter());
 		this.groups.addMouseListener(new myMouseAdapter());
 		
-		this.groupPanel.add(groups, BorderLayout.CENTER);
+//		groupPanel.add(groups);
+		JScrollPane group_scroll_Pane = new JScrollPane(groups,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.groupPanel.add(group_scroll_Pane, BorderLayout.CENTER);
+		this.groupPanel.add(new JButton("CREATE"), BorderLayout.SOUTH);
 		this.userPanel.add(users, BorderLayout.CENTER);
+		//this.trenner.add(groupPanel);
 		this.trenner.add(groupPanel);
 		this.trenner.add(userPanel);
+		//this.add(trenner, BorderLayout.CENTER);
+
 		this.internalFrame.add(trenner, BorderLayout.CENTER);
 		this.add(internalFrame);
 		

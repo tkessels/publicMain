@@ -347,7 +347,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		multicastRecieverBot.stop();
 		sendtcp(new MSG(meinNode, MSGCode.NODE_SHUTDOWN));
 		sendroot(new MSG(myGroups,MSGCode.GROUP_LEAVE));
-		root_connection.disconnect();
+		if(root_connection!=null)root_connection.disconnect();
 		for (final ConnectionHandler con : connections)
 			(new Thread(new Runnable() {
 				public void run() {

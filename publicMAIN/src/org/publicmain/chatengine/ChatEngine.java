@@ -2,6 +2,7 @@ package org.publicmain.chatengine;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Observable;
@@ -16,8 +17,6 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
-import org.publicmain.sql.BackupDBConnection;
-import org.publicmain.sql.LocalDBConnection;
 
 /**
  * @author ATRM
@@ -29,8 +28,8 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	//public LocalDBConnection locDBCon;
-	private Set<Node> ignored;
+	private ArrayList<Long> ignored;
+//	private Set<Node> ignored;
 	
 	private long userID;
 	private String alias;
@@ -64,12 +63,12 @@ public class ChatEngine extends Observable{
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
 		 this.ne = new NodeEngine(this);
-//		this.locDBCon = LocalDBConnection.getDBConnection();
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();
 		default_channel=new KnotenKanal(getUserID());
-		ignored=new HashSet<Node>();
+		ignored = new ArrayList<Long>();
+//		ignored=new HashSet<Node>();
 		inbox=new LinkedBlockingQueue<MSG>();
 		
 		//temporäre Initialisierung der GruppenListe mit default Groups 
@@ -124,7 +123,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void send_private(long uid, String text){
 		MSG tmp = new MSG(uid,text);
-		//put(tmp);
+		put(tmp);
 		ne.sendtcp(tmp);
 	}
 	
@@ -159,15 +158,20 @@ public class ChatEngine extends Observable{
 		return 0;
 	}
 	
-	/**Fragt ein Array alle User ab 
+	/**
+	 * Fragt ein Array alle User ab 
+	 * 
 	 * @return Array aller verbundener Nodes
 	 */
 	public	Set<Node> getUsers(){
 		return ne.getNodes();
 	}
 	
-	/** tritt einer Gruppe bei
-	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
+	/**
+	 * Beitritt zu einer Gruppe
+	 * 
+	 * @param gruppen_name Gruppennamen sind CaseInSensitiv
+	 * und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name){
 			synchronized (myGroups) {
@@ -177,8 +181,11 @@ public class ChatEngine extends Observable{
 			}
 	}
 	
-	/**verlässt eine gruppe wieder
-	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und bestehen aus alphanumerischen Zeichen
+	/**
+	 * Verlässt eine Gruppe wieder
+	 * 
+	 * @param gruppen_name Gruppennamen sind CaseInSensitiv
+	 * und bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_leave(String gruppen_name){
 		synchronized (myGroups) {
@@ -197,29 +204,47 @@ public class ChatEngine extends Observable{
 		}
 	}
 	
-	/** Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
+	/** 
+	 * Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
 	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten
-	 * @return abstraktes Fileobjekt zu speicherung einer Datei. 
-	 * 	Null Wenn der Nutzer den Empfang ablehnt 
+	 * 
+	 * @return abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
+	 * der Nutzer den Empfang ablehnt 
 	 */
 	public	File	request_File(){
 		//TODO: CODE HERE
 		return GUI.getGUI().request_File();
 	}
 	
-	/**Veranlasst das Nachrichten vom user mit der <code>uid</code> nicht mehr angezeigt werden.
+	/**
+	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code>
+	 * nicht mehr angezeigt werden. Die Prüfung ob der Nutzer vorhanden
+	 * ist muss durch die GUI realisiert werden.
+	 * 
 	 * @param uid
 	 */
 	public	void	ignore_user(long uid){
-		//TODO: CODE HERE
+		ignored.add(uid);
 	}
 	
 	/**
-	 * Veranlasst das Nachrichten vom user mit der <code>uid</code> wieder angezeigt werden.
+	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code>
+	 * wieder angezeigt werden. Hier wird geprüft ob der Benutzer überhaupt
+	 * in der <code>ignored</code> ist. Wenn ja wird das Long aus der
+	 * ArrayList gelöscht und "true" zurückgeliefert anderenfalls wird mit
+	 * "false" das Fehlen des Eintrages signalisiert 
+	 * 
+	 * 
 	 * @param uid
 	 */
-	public void 	unignore_user(long uid){
-		//TODO: CODE HERE
+	public boolean 	unignore_user(long uid){
+		for(int i = 0; i < ignored.size(); i++){
+			if(ignored.get(i) == uid){
+				ignored.remove(i);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	
@@ -286,7 +311,6 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
-//		locDBCon.saveMsg(nachricht);
 	}
 	
 	private final class MsgSorter implements Runnable {

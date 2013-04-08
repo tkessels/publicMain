@@ -28,8 +28,8 @@ import org.publicmain.gui.GUI;
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
- protected static final long CONNECTION_TIMEOUT = 100; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
- protected static final long ROOT_ANNOUNCE_TIMEOUT = 100; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
+ protected static final long CONNECTION_TIMEOUT = 200; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ protected static final long ROOT_ANNOUNCE_TIMEOUT = 200; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
  private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
  private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
@@ -215,13 +215,16 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		byte[] data = MSG.getBytes(msg);
 		if (data.length < 65000) {
 			for (InetAddress x : newRoot.getSockets()) {
-				DatagramPacket unicast = new DatagramPacket(data, data.length, x, multicast_port);//über Unicast
-				try {
-					multi_socket.send(unicast);
-					LogEngine.log(this, "sende ["+x.toString()+"]", msg);
-				}
-				catch (IOException e) {
-					LogEngine.log(e);
+				if (!meinNode.getSockets().contains(x)) {
+					DatagramPacket unicast = new DatagramPacket(data,
+							data.length, x, multicast_port);//über Unicast
+					try {
+						multi_socket.send(unicast);
+						LogEngine
+								.log(this, "sende [" + x.toString() + "]", msg);
+					} catch (IOException e) {
+						LogEngine.log(e);
+					}
 				}
 			}
 		}
@@ -308,32 +311,35 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	private void connectTo(Node knoten) {
 		Socket tmp_socket = null;
 		for (InetAddress x : knoten.getSockets()) {
-			try {
-				tmp_socket = new Socket(x.getHostAddress(), knoten.getServer_port());
+			if (!meinNode.getSockets().contains(x)) {
+				try {
+					tmp_socket = new Socket(x.getHostAddress(),
+							knoten.getServer_port());
+				} catch (UnknownHostException e) {
+					LogEngine.log(e);
+				} catch (IOException e) {
+					LogEngine.log(e);
+				}
+				if (tmp_socket != null && tmp_socket.isConnected())
+					break; // wenn eine Verbindung mit einer der IPs des
+							// Knotenaufgebaut wurden konnte. Hör auf
 			}
-			catch (UnknownHostException e) {
-				LogEngine.log(e);
-			}
-			catch (IOException e) {
-				LogEngine.log(e);
-			}
-			if (tmp_socket != null && tmp_socket.isConnected()) break; //wenn eine Verbindung mit einer der IPs des Knotenaufgebaut wurden konnte. Hör auf
 		}
 		if (tmp_socket != null) {
 			try {
 				root_connection = new ConnectionHandler(tmp_socket);
 				setRootMode(false);
-				setGroup(myGroups);//FIXME:Bleibt das hier
+				setGroup(myGroups);// FIXME:Bleibt das hier
 				sendroot(new MSG(getMe()));
 				sendroot(new MSG(myGroups, MSGCode.GROUP_REPLY));
 				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 				sendroot(new MSG(null, MSGCode.GROUP_POLL));
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				LogEngine.log(e);
 			}
 		}
 	}
+	
 
 	public void disconnect() {
 		online = false;

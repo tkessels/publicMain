@@ -52,7 +52,7 @@ public class ConnectionHandler {
 
 		endpoint = line.getInetAddress().getHostAddress();
 
-//		ping();
+		ping();
 //		endpoint = line.getInetAddress().getHostName();
 		//pingpongBot.start();
 

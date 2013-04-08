@@ -294,6 +294,7 @@ public class ChatEngine extends Observable{
 					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
 						for (KnotenKanal y : private_channels) if (y.add(tmp))break;
 						//Kein CW angemeldet um die Nachricht aufzunehmen  sende es an GUI via DEFAULT CHANNEL
+						default_channel.add(tmp);
 						
 					}
 				} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
@@ -325,7 +326,6 @@ public class ChatEngine extends Observable{
 			ne.debug(command,parameter);
 			break;
 		}
-		// TODO Auto-generated method stub
 		
 	}
 	
@@ -340,7 +340,6 @@ public class ChatEngine extends Observable{
 
 	public void shutdown() {
 		ne.disconnect();
-		// TODO Auto-generated method stub
 		
 	}
 }

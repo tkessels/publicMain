@@ -32,7 +32,7 @@ public class NodeEngine {
  protected static final long CONNECTION_TIMEOUT = 200; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
  protected static final long ROOT_ANNOUNCE_TIMEOUT = 200; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
  private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int multicast_port = 6799; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
@@ -635,11 +635,129 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 	
-	
-	
-	
+	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
+	 * @param nid ID des Nodes
+	 * @return das {@link Node}-Objekt oder <code>null</code> wenn der Knoten nicht gefunden wurde.
+	 */
+	private Node retrieve(long nid) {
+			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
+			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,false,1000);
+			if (x != null) return (Node) x.getData();
+			else {
+				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
+				sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
+				return null;
+			}
+	}
+
 	
 
+	private void setRootMode(boolean rootmode) {
+		this.rootMode = rootmode;
+		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
+		if(rootmode) setGroup(myGroups) ;
+	}
+
+	public long getNodeID() {
+		return nodeID;
+	}
+
+	public void setNodeID(long nodeID) {
+		this.nodeID = nodeID;
+	}
+
+	public void joinGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
+		updateMyGroups();
+	}
+
+	public void leaveGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
+		updateMyGroups();
+	}
+	
+	
+	public boolean removeGroup(Collection<String> gruppen_name) {
+		synchronized (allGroups) {
+			boolean x = allGroups.removeAll(gruppen_name);
+			allGroups.notifyAll();
+			return x;
+		}
+	}
+	
+	public void setGroup(Collection<String> groups) {
+		synchronized (allGroups) {
+			allGroups.clear();
+			allGroups.addAll(groups);
+			allGroups.notifyAll();
+		}
+	}
+	
+	
+	public boolean addGroup(Collection<String> groups) {
+		synchronized (allGroups) {
+		boolean x = allGroups.addAll(groups);
+		allGroups.notifyAll();
+		return x;
+		}
+	}
+
+	public boolean removeMyGroup(String gruppen_name) {
+		synchronized (myGroups) {
+			return myGroups.remove(gruppen_name);
+		}
+	}
+	
+	public boolean addMyGroup(String gruppen_name) {
+		synchronized (myGroups) {
+			return myGroups.add(gruppen_name);
+		}
+	}
+	
+	public Set<String>computeGroups(){
+		Set<String> tmpGroups = new HashSet<String>();
+		for (ConnectionHandler cur : connections) {
+			tmpGroups.addAll(cur.getGroups());
+		}
+		tmpGroups.addAll(ce.getMyGroups());
+		return tmpGroups;
+	}
+
+	public void updateAlias() {
+		String alias = ce.getAlias();
+		if(online&&(!alias.equals(meinNode.getAlias()))) {
+			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
+			updateAlias(alias,nodeID);
+//			LogEngine.log(this,"User has changed ALIAS to " + alias,LogEngine.INFO);
+		}
+	}
+	
+	private boolean updateAlias(String newAlias, long nid) {
+		Node tmp;
+		
+		synchronized (allNodes) {
+			if ((tmp = getNode(nid)) != null) {
+				if (!tmp.getAlias().equals(newAlias)) {
+					tmp.setAlias(newAlias);
+					allNodes.notifyAll();
+					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public void debug(String command, String parameter) {
+		switch (command) {
+		
+
+		default:
+			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
+			break;
+		}
+		
+	}
+	
+	
 	/**
 	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.
 	 */
@@ -753,154 +871,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			}
 		}
 	}
-
-	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
-	 * @param nid ID des Nodes
-	 * @return das {@link Node}-Objekt oder <code>null</code> wenn der Knoten nicht gefunden wurde.
-	 */
-	private Node retrieve(long nid) {
-			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
-			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,false,1000);
-			if (x != null) return (Node) x.getData();
-			else {
-				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
-				sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
-				return null;
-			}
-	}
-
-	
-
-	private void setRootMode(boolean rootmode) {
-		this.rootMode = rootmode;
-		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
-		if(rootmode) setGroup(myGroups) ;
-	}
-
-	public long getNodeID() {
-		return nodeID;
-	}
-
-	public void setNodeID(long nodeID) {
-		this.nodeID = nodeID;
-	}
-
-	public void joinGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
-		//FIXME: vielleicht wäre es besser bei update my Groups einen Differenzsatz zu berechnen und für alle  wegfallenden ein leave group zu erstellen und für alle neuen ein Join Group
-		/*if(updateMyGroups()){//Wenn sich was geänderhat melden vielleciht noch eingrenzen 
-			sendroot(new MSG(gruppen_namen,MSGCode.GROUP_JOIN));
-		}*/
-		updateMyGroups();
-		//if(addGroup(gruppen_namen))sendchild(new MSG(gruppen_namen,MSGCode.GROUP_ANNOUNCE), con);
-	}
-
-	public void leaveGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
-		if(updateMyGroups()){
-			//sendroot(new MSG(gruppen_name,MSGCode.GROUP_LEAVE));
-/*			if (isRoot()) {
-				removeGroup(gruppen_namen);
-				sendchild(new MSG(gruppen_namen,MSGCode.GROUP_EMPTY), null);
-			}
-*/		}
-	}
 	
 	
-	public boolean removeGroup(Collection<String> gruppen_name) {
-		synchronized (allGroups) {
-			boolean x = allGroups.removeAll(gruppen_name);
-			allGroups.notifyAll();
-			return x;
-		}
-	}
-	/*
-	public boolean removeGroup(String gruppen_name) {
-		synchronized (allGroups) {
-			boolean x = allGroups.remove(gruppen_name);
-			allGroups.notifyAll();
-			return x;
-		}
-	}
-	*/
 	
-	public void setGroup(Collection<String> groups) {
-		synchronized (allGroups) {
-			allGroups.clear();
-			allGroups.addAll(groups);
-			allGroups.notifyAll();
-		}
-	}
-	
-	
-	public boolean addGroup(Collection<String> groups) {
-		synchronized (allGroups) {
-		boolean x = allGroups.addAll(groups);
-		allGroups.notifyAll();
-		return x;
-		}
-	}
-	/*
-	public boolean addGroup(String gruppen_name) {
-		synchronized (allGroups) {
-			boolean x = allGroups.add(gruppen_name);
-			allGroups.notifyAll();
-			return x;
-		}
-	}
-	*/
-	public boolean removeMyGroup(String gruppen_name) {
-		synchronized (myGroups) {
-			return myGroups.remove(gruppen_name);
-		}
-	}
-	
-	public boolean addMyGroup(String gruppen_name) {
-		synchronized (myGroups) {
-			return myGroups.add(gruppen_name);
-		}
-	}
-	
-	public Set<String>computeGroups(){
-		Set<String> tmpGroups = new HashSet<String>();
-		for (ConnectionHandler cur : connections) {
-			tmpGroups.addAll(cur.getGroups());
-		}
-		tmpGroups.addAll(ce.getMyGroups());
-		return tmpGroups;
-	}
-
-	public void updateAlias() {
-		String alias = ce.getAlias();
-		if(online&&(!alias.equals(meinNode.getAlias()))) {
-			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
-			updateAlias(alias,nodeID);
-			LogEngine.log(this,"User has changed ALIAS to " + alias,LogEngine.INFO);
-		}
-	}
-	
-	private boolean updateAlias(String newAlias, long nid) {
-		Node tmp;
-		
-		synchronized (allNodes) {
-			if ((tmp = getNode(nid)) != null) {
-				if (!tmp.getAlias().equals(newAlias)) {
-					tmp.setAlias(newAlias);
-					allNodes.notifyAll();
-					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	public void debug(String command, String parameter) {
-		switch (command) {
-		
-
-		default:
-			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
-			break;
-		}
-		
-	}
 }

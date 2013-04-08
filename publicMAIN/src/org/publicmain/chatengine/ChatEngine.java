@@ -67,7 +67,6 @@ public class ChatEngine extends Observable{
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
 		this.ne = new NodeEngine(this);
-		this.ne = new NodeEngine(this);
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();

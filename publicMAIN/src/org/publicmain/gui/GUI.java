@@ -48,6 +48,8 @@ import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 public class GUI extends JFrame implements Observer , ChangeListener{
 
+	private final int GRP_NAME_LENGTH = 10; 
+	
 	// Deklarationen:
 	private ChatEngine ce;
 	LogEngine log;
@@ -252,7 +254,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	/**
 	 * Diese Methode fügt ein ChatWindow hinzu
 	 * 
-	 * Diese Methode fügt ein ChatWindow zu GUI hinzu und setzt dessen
+	 * Diese Methode fügt ein ChatWindow zum GUI hinzu und setzt dessen
 	 * Komponenten
 	 * 
 	 * @param cw
@@ -275,21 +277,28 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	}
 
 	/**
+	 * Diese Methode erstellt ein ChatWindow für Gruppen, falls ChatWindow bereits vorhanden, wird dieses fokusiert.
 	 * @param grpName
 	 */
 	public void addGrpCW(String grpName){
-		if(existCW(grpName) == null){
-			createChat(new ChatWindow(grpName));
+		String grp_name = grpName;
+		grp_name = grp_name.substring(0, GRP_NAME_LENGTH);
+		grp_name = grp_name.trim();
+		grp_name = grp_name.replaceAll("[*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
+		grp_name = grp_name.toLowerCase();
+		if(existCW(grp_name) == null){
+			createChat(new ChatWindow(grp_name));
 			// ChatWindow am Gruppen NachrichtenListener (MSGListener) anmelden und Gruppe joinen:
-			ce.group_join(grpName);
-			ce.add_MSGListener(existCW(grpName), grpName);
+			ce.group_join(grp_name);
+			ce.add_MSGListener(existCW(grp_name), grp_name);
 		} else {
-			existCW(grpName).focusEingabefeld();
-			System.out.println(existCW(grpName).toString());
+			existCW(grp_name).focusEingabefeld();
+			System.out.println(existCW(grp_name).toString());
 		}
 	}
 	
 	/**
+	 * Diese Methode erstellt ein ChatWindow für Privatechat's, falls ChatWindow bereits vorhanden, wird dieses fokusiert.
 	 * @param aliasName
 	 */
 	public void addPrivCW(String aliasName){

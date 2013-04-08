@@ -32,7 +32,7 @@ public class NodeEngine {
  protected static final long CONNECTION_TIMEOUT = 200; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
  protected static final long ROOT_ANNOUNCE_TIMEOUT = 200; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
  private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int multicast_port = 6799; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine

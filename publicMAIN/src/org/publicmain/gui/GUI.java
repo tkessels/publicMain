@@ -51,7 +51,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	LogEngine log;
 
 	private static GUI me;
-	private List<Node> nodes; //FIXME: REMOVE this LIST! and fix all references 
 	private List<ChatWindow> chatList;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
@@ -190,9 +189,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
-		this.addChat(new ChatWindow("public"));
-		this.addChat(new ChatWindow("grupp1"));
-		this.addChat(new ChatWindow(123 ,"private1"));
+		this.createChat(new ChatWindow("public"));
+		this.createChat(new ChatWindow("grupp1"));
+		this.createChat(new ChatWindow(123 ,"private1"));
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
@@ -218,7 +217,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			this.contactListBtn.setToolTipText("hide contacts");
 			this.contactListBtn.setIcon(new ImageIcon(getClass().getResource("UserListEinklappen.png")));
 			this.contactListBtn.setSelected(true);
-//			this.contactListWin = new ContactList(GUI.me);
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible(true);
 			contactListActive = true;
@@ -253,7 +251,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * @param cw
 	 */
-	public void addChat(ChatWindow cw) {
+	public void createChat(ChatWindow cw) {
 		// TODO: evtl. noch Typunterscheidung hinzufügen (Methode
 		// getCwTyp():String)
 		String title = cw.getChatWindowName();
@@ -275,6 +273,29 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
 	}
 
+	/**
+	 * @param grpName
+	 */
+	public void addGrpCW(String grpName){
+		if(existCW(grpName) == null){
+			createChat(new ChatWindow(grpName));
+		} else {
+			existCW(grpName).focusEingabefeld();
+			System.out.println(existCW(grpName).toString());
+		}
+	}
+	
+	/**
+	 * @param aliasName
+	 */
+	public void addPrivCW(String aliasName){
+		if(existCW(aliasName) == null){
+			createChat(new ChatWindow(ce.getNodeforAlias(aliasName).getUserID(), aliasName));
+		} else {
+			// focus auf CW setzen
+		}
+	}
+	
 	/**
 	 * Diese Methode entfernt ein ChatWindow
 	 * 
@@ -380,11 +401,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		int tabNr = 0;
 		long tmpUID;
 		try{
-			for(Node x : nodes){
+			for(Node x : ce.getUsers()){
 				if(x.getAlias().equals(empfAlias)){
 					tmpUID = x.getNodeID();
 					if(tmpCW == null){
-						addChat(new ChatWindow(tmpUID, empfAlias));
+						createChat(new ChatWindow(tmpUID, empfAlias));
 						tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
 						jTabbedPane.setSelectedIndex(tabNr);
 					} else {
@@ -410,7 +431,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		ChatWindow tmpCW = existCW(empfGrp);
 		int tabNr = 0;
 		if(tmpCW == null){
-			addChat(new ChatWindow(empfGrp));
+			createChat(new ChatWindow(empfGrp));
 			tabNr = jTabbedPane.indexOfComponent(existCW(empfGrp));
 			jTabbedPane.setSelectedIndex(tabNr);
 		} else {
@@ -427,7 +448,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	boolean ignoreUser(String alias){
 		long tmpUID; 
-		for(Node x : nodes){
+		for(Node x : ce.getUsers()){
 			if(x.getAlias().equals(alias)){
 				tmpUID = x.getUserID();
 				ce.ignore_user(tmpUID);
@@ -444,7 +465,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	boolean unignoreUser(String alias){
 		long tmpUID;
-		for(Node x : nodes){
+		for(Node x : ce.getUsers()){
 			if(x.getAlias().equals(alias)){
 				tmpUID = x.getUserID();
 				ce.unignore_user(tmpUID);
@@ -514,10 +535,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @return Node
 	 */
 	public Node getNode(long sender) {
-		for (Node x : nodes)
-			if (x.getNodeID() == sender)
-				return x;
-		return null;
+		return ce.getNode(sender);
 	}
 	
 	/**

@@ -83,7 +83,7 @@ public class ContactList extends JWindow {
 				if(tmpGrpName!=null && !tmpGrpName.equals("")){
 //					tmpGrpName = tmpGrpName.trim();
 //					tmpGrpName = tmpGrpName.toUpperCase();
-					GUI.getGUI().addChat(new ChatWindow(tmpGrpName));
+					GUI.getGUI().addGrpCW(tmpGrpName);
 				} else if(tmpGrpName.equals("")){
 					JOptionPane.showMessageDialog(GUI.getGUI(), "empty String not allowed!", "illegal Groupname", JOptionPane.ERROR_MESSAGE);
 				}
@@ -152,11 +152,10 @@ public class ContactList extends JWindow {
 				if(index >= 0){
 					Object o = source.getModel().getElementAt(index);
 					if(source.getModel().getClass().getSimpleName().startsWith("Group")){
-						GUI.getGUI().addChat(new ChatWindow(o.toString()));
+						GUI.getGUI().addGrpCW(o.toString());
 					}
 					if(source.getModel().getClass().getSimpleName().startsWith("User")){
-						//TODO: aktion für doppelklick auf User
-						System.out.println("Doppelklick auf User, da muss noch was passieren");
+						GUI.getGUI().addPrivCW(o.toString());
 					}
 				}
 			}
@@ -256,7 +255,7 @@ public class ContactList extends JWindow {
 //			System.out.println(source.getText());
 			
 			if(source.getText().startsWith("join")){
-				GUI.getGUI().addChat(new ChatWindow(chatname));
+				GUI.getGUI().createChat(new ChatWindow(chatname));
 			}
 			else if(source.getText().startsWith("leave")){
 				GUI.getGUI().delChat(chatname);

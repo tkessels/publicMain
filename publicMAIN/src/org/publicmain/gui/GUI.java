@@ -76,7 +76,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private boolean contactListActive;
 	private ContactList contactListWin;
 	private pMTrayIcon trayIcon;
-	private LocalDBConnection db;
+	private LocalDBConnection locDBCon;
 
 	/**
 	 * Konstruktor für GUI
@@ -96,7 +96,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me = this;
 		this.log = new LogEngine();
-//		this.db = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
+		this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.menuItemRequestFile = new JMenuItem("Test(request_File)");

@@ -16,7 +16,6 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
-import org.publicmain.sql.BackupDBConnection;
 import org.publicmain.sql.LocalDBConnection;
 
 /**
@@ -29,7 +28,6 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	//public LocalDBConnection locDBCon;
 	private Set<Node> ignored;
 	
 	private long userID;
@@ -57,14 +55,12 @@ public class ChatEngine extends Observable{
 	public ChatEngine() throws IOException{
 		ce = this;
 		//TODO:Load Settings & UserDATA
-		//this.db = db.getDBConnection();
 		
 		//temporär
 		 setUserID((long) (Math.random()*Long.MAX_VALUE));
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
-		 this.ne = new NodeEngine(this);
-//		this.locDBCon = LocalDBConnection.getDBConnection();
+		this.ne = new NodeEngine(this);
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();
@@ -286,7 +282,7 @@ public class ChatEngine extends Observable{
 	 */
 	public void put(MSG nachricht){
 		inbox.add(nachricht);
-//		locDBCon.saveMsg(nachricht);
+		LocalDBConnection.getDBConnection().saveMsg(nachricht);
 	}
 	
 	private final class MsgSorter implements Runnable {

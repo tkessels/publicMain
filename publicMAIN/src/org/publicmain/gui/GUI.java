@@ -41,7 +41,6 @@ import org.publicmain.sql.LocalDBConnection;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
-
 /**
  * @author ATRM
  * 

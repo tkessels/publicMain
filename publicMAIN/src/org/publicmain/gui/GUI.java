@@ -193,9 +193,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
-		this.createChat(new ChatWindow("public"));
-		this.createChat(new ChatWindow("grupp1"));
-		this.createChat(new ChatWindow(123 ,"private1"));
+		
+		// StandardGruppe erstellen:
+		this.addGrpCW("public");
+		
+		
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
@@ -256,8 +258,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param cw
 	 */
 	public void createChat(ChatWindow cw) {
-		// TODO: evtl. noch Typunterscheidung hinzufügen (Methode
-		// getCwTyp():String)
+		// Title festlegen:
 		String title = cw.getChatWindowName();
 
 		// neues ChatWindow (cw) zur Chatliste (ArrayList<ChatWindow>)
@@ -265,10 +266,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.chatList.add(cw);
 		// erzeugen von neuem Tab für neues ChatWindow:
 		this.jTabbedPane.addTab(title, cw);
-
-		// ChatWindow am NachrichtenListener (MSGListener) anmelden:
-		// ce.group_join(title);
-		ce.add_MSGListener(cw, title);
 
 		// Index vom ChatWindow im JTabbedPane holen um am richtigen Ort
 		// einzufügen:
@@ -283,6 +280,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	public void addGrpCW(String grpName){
 		if(existCW(grpName) == null){
 			createChat(new ChatWindow(grpName));
+			// ChatWindow am Gruppen NachrichtenListener (MSGListener) anmelden und Gruppe joinen:
+			ce.group_join(grpName);
+			ce.add_MSGListener(existCW(grpName), grpName);
 		} else {
 			existCW(grpName).focusEingabefeld();
 			System.out.println(existCW(grpName).toString());
@@ -294,7 +294,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	public void addPrivCW(String aliasName){
 		if(existCW(aliasName) == null){
-			createChat(new ChatWindow(ce.getNodeforAlias(aliasName).getUserID(), aliasName));
+			long tmpUID = ce.getNodeforAlias(aliasName).getUserID();
+			createChat(new ChatWindow(tmpUID, aliasName));
+			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
+			ce.add_MSGListener(existCW(aliasName), tmpUID);
 		} else {
 			// focus auf CW setzen
 		}
@@ -384,7 +387,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * Diese Methode wird in einem privaten ChatWindow zum versenden der Nachricht verwendet
 	 * @param empfUID long EmpfängerUID
 	 * @param msg String die Nachricht
-	 * @param cw ChatWindow das aufrufende ChatWindow
 	 */
 	void privSend(long empfUID,String msg){
 		ce.send_private(empfUID, msg);
@@ -398,7 +400,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * falls nicht wird eines angelegt und die private nachricht an die UID versendet
 	 * @param empfAlias String Empfänger Alias
 	 * @param msg String die Nachricht
-	 * @param cw ChatWindow das aufrufende ChatWindow
 	 */
 	void privSend(String empfAlias, String msg){
 		ChatWindow tmpCW = existCW(empfAlias);
@@ -478,6 +479,17 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		
 		return false;
+	}
+	
+	public void sendFile(String aliasName) {
+		// TODO: hier stimmt noch paar sachen nicht später überarbeiten!
+		JFileChooser fileChooser = new JFileChooser();
+		int returnVal = fileChooser.showOpenDialog(me);
+		if(returnVal == JFileChooser.APPROVE_OPTION){
+			System.out.println("You chose to send this file: " + fileChooser.getSelectedFile().getName());
+		}
+		File datei = new File(fileChooser.getSelectedFile().getAbsolutePath());
+		ce.send_file(ce.getNodeforAlias(aliasName).getUserID(), datei);
 	}
 	
 	/**

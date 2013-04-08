@@ -46,7 +46,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private JScrollPane msgTextScroller;
 	private JTextField eingabeFeld;
 	private String gruppe;
-	private long user;
+	private long userID;
 	private boolean isPrivCW;
 	private GUI gui;
 	private History keyHistory;
@@ -66,7 +66,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"</table><br>";
 
 	public ChatWindow(long uid, String username) {
-		this.user = uid;
+		this.userID = uid;
 		this.name = username;
 		this.isPrivCW = true;
 		doWindowbuildingstuff();
@@ -259,9 +259,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			}
 
 			// Wenn es kein Befehl ist muss es wohl eine Nachricht sein
-			else if (gruppe == null) {
+			else if (isPrivate()) {
 				// ggf. eingabe durch Methode filtern
-				this.gui.privSend(user, eingabe);
+				this.gui.privSend(userID, eingabe);
 			}
 			else {
 				// ggf. eingabe durch Methode filtern

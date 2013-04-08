@@ -198,6 +198,7 @@ public class ContactList extends JWindow {
 		private JMenuItem ignore;
 		private JMenuItem unignore;
 		private JMenuItem info;
+		private JMenuItem sendFile;
 		private String user;
 		
 		public PopupUser(String user, ActionListener popupListener){
@@ -206,11 +207,13 @@ public class ContactList extends JWindow {
 			this.ignore = new JMenuItem("ignore " + user);
 			this.unignore = new JMenuItem("unignore " + user);
 			this.info = new JMenuItem("info's about " + user);
+			this.sendFile = new JMenuItem("send File to " + user);
 			
 			this.whisper.addActionListener(popupListener);
 			this.ignore.addActionListener(popupListener);
 			this.unignore.addActionListener(popupListener);
 			this.info.addActionListener(popupListener);
+			this.sendFile.addActionListener(popupListener);
 			
 			this.add(whisper);
 			this.add(new Separator());
@@ -218,6 +221,8 @@ public class ContactList extends JWindow {
 			this.add(unignore);
 			this.add(new Separator());
 			this.add(info);
+			this.add(new Separator());
+			this.add(sendFile);
 		}
 	
 	}
@@ -255,13 +260,13 @@ public class ContactList extends JWindow {
 //			System.out.println(source.getText());
 			
 			if(source.getText().startsWith("join")){
-				GUI.getGUI().createChat(new ChatWindow(chatname));
+				GUI.getGUI().addGrpCW(chatname);
 			}
 			else if(source.getText().startsWith("leave")){
 				GUI.getGUI().delChat(chatname);
 			}
 			else if(source.getText().startsWith("whisper")){
-				GUI.getGUI().privSend(chatname, "");
+				GUI.getGUI().addPrivCW(chatname);
 			}
 			else if(source.getText().startsWith("ignore")){
 				GUI.getGUI().ignoreUser(chatname);
@@ -271,7 +276,9 @@ public class ContactList extends JWindow {
 			}
 			else if(source.getText().startsWith("info")){
 				//TODO: CODE HERE
-				
+			}
+			else if(source.getText().startsWith("send")){
+				GUI.getGUI().sendFile(chatname);
 			}
 		}
 	}

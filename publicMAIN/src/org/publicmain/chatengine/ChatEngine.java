@@ -17,7 +17,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
-import org.publicmain.sql.DBConnection;
+import org.publicmain.sql.LocalDBConnection;
 
 /**
  * @author ATRM
@@ -28,7 +28,7 @@ public class ChatEngine extends Observable{
 	private static ChatEngine ce;
 	public NodeEngine ne;
 	public LogEngine log;
-	public DBConnection db;
+	public LocalDBConnection db;
 	//private Set<Node> nodes;
 	private Set<Node> ignored;
 	private List<GruppenKanal> group_channels;

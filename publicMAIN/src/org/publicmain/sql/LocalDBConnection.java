@@ -1,5 +1,7 @@
 package org.publicmain.sql;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,8 +12,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.print.attribute.standard.MediaSize.Other;
+import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -27,7 +32,7 @@ import com.mysql.jdbc.PreparedStatement;
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
  * Sie legt weiterhin alle zwingend notwendigen Datenbanken(1) und Tabellen an.
  */
-public class DBConnection {
+public class LocalDBConnection {
 
 	private Connection con;
 	private Statement stmt;
@@ -53,9 +58,10 @@ public class DBConnection {
 	
 	// verbindungssachen
 	private boolean isDBConnected;		// noch richtig implementieren oder weg lassen weil ehh jedesmal neu prüfen?
-	private static DBConnection me;
+	private boolean askForConnectionRetry;
+	private static LocalDBConnection me;
 	
-	private DBConnection() {
+	private LocalDBConnection() {
 		this.url 				= "jdbc:mysql://localhost:3306/";
 		this.user 				= "root";
 		this.passwd 			= "";
@@ -69,17 +75,17 @@ public class DBConnection {
 		this.eventTypeTbl		= "t_eventType";
 		this.routingOverviewTbl	= "t_routingOverView";
 		this.isDBConnected 		= false;
+		this.askForConnectionRetry = true;
 		this.cal				= Calendar.getInstance();
 		this.splDateFormt		= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 		if(connectToLocDBServer()){
 			isDBConnected = true;
-			createDbAndTables();
 		}
 	}
-	public static DBConnection getDBConnection() {
+	public static LocalDBConnection getDBConnection() {
 		if (me == null) {
-			me = new DBConnection();
+			me = new LocalDBConnection();
 		}
 		return me;
 	}
@@ -87,10 +93,27 @@ public class DBConnection {
 		try {
 			this.con = DriverManager.getConnection(url, user, passwd);
 			this.stmt = con.createStatement();
+			createDbAndTables();
 			LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
 			return true;
 		} catch (SQLException e) {
 			LogEngine.log(this, "DB-Verbindung fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
+			isDBConnected = false;
+			if(askForConnectionRetry){
+				int eingabe = JOptionPane.showConfirmDialog(null,
+		                "Es besteht keine Verbindung zum lokalen DB-Server!\n"
+						+ "Fehlerbeschreibung: " + e.getCause() + "\n"
+						+ "möchten sie einen erneuten versuch unternehmen?",
+		                "Fehler bei der DB-Verbindung.",
+		                JOptionPane.YES_NO_OPTION);
+				if (eingabe == 1){
+					askForConnectionRetry = false;	// nein ist 1
+						
+				} else {
+					connectToLocDBServer();	
+				}
+			}
+			
 			return false;
 		}
 	}
@@ -176,19 +199,21 @@ public class DBConnection {
 						try {
 							//System.out.println(saveStmt);
 							stmt.execute(saveStmt);
-							LogEngine.log(DBConnection.this,
+							LogEngine.log(LocalDBConnection.this,
 									"Nachicht in DB-Tabelle " + chatLogTbl
 											+ " eingetragen.", LogEngine.INFO);
 						} catch (Exception e) {
-							LogEngine.log(DBConnection.this,
+							LogEngine.log(LocalDBConnection.this,
 									"Fehler beim eintragen in : " + chatLogTbl
 											+ " " + e.getMessage(),
 									LogEngine.ERROR);
+							isDBConnected = false;
 						}
 					}
 				} else {
 					//System.out.println("es besteht keine DB-Verbindung!");
-					if (connectToLocDBServer()) {
+					if (askForConnectionRetry) {
+						connectToLocDBServer();
 						isDBConnected = true;
 						createDbAndTables();
 						saveMsg(m);
@@ -204,53 +229,68 @@ public class DBConnection {
 		
 	}
 	public void searchInHistory (String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
-		try {
-			String tmpStmtStr = (
-					"SELECT * " +
-					"FROM " + chatLogTbl + " " +
-					"WHERE timestamp BETWEEN '" + fromDateTime.getTime() + "' AND '" + toDateTime.getTime() + "'");
-			if (!chosenNTyp.equals("ALL")){
-				tmpStmtStr = tmpStmtStr + " AND typ = '" + chosenNTyp + "'";
-			}
-			if (!chosenAliasOrGrpName.equals("...type in here.")){
-				//TODO: hier die übersetung von nr in string einbinden
-//				tmpStmtStr = tmpStmtStr + " AND ";
-			}
-			
-			
-			Statement searchStmt = con.createStatement();
-			ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
-			
-			
-			
-			//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
-					+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
-					+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
-					+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
-			while (rs.next()) {
-				cal.setTimeInMillis(rs.getLong("timestamp"));
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
-						"<tr>" + "<td>" + rs.getInt("id") + "<td>"
-								+ rs.getInt("msgID") + "<td>"
-								+ splDateFormt.format(cal.getTime())+ "<td>"
-								+ rs.getLong("sender") + "<td>"
-								+ rs.getLong("empfaenger") + "<td>"
-								+ rs.getString("typ") + "<td>"
-								+ rs.getString("grp") + "<td>"
-								+ rs.getString("data"), 0, 0, null);
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</tr>", 0, 0,
+		if (isDBConnected){
+			try {
+				String tmpStmtStr = (
+						"SELECT * " +
+						"FROM " + chatLogTbl + " " +
+						"WHERE timestamp BETWEEN '" + fromDateTime.getTime() + "' AND '" + toDateTime.getTime() + "'");
+				if (!chosenNTyp.equals("ALL")){
+					tmpStmtStr = tmpStmtStr + " AND typ = '" + chosenNTyp + "'";
+				}
+				if (!chosenAliasOrGrpName.equals("...type in here.")){
+					//TODO: hier die übersetung von nr in string einbinden
+//					tmpStmtStr = tmpStmtStr + " AND ";
+				}
+				
+				
+				Statement searchStmt = con.createStatement();
+				ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
+				
+				
+				
+				//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
+						+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
+						+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
+						+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
+				while (rs.next()) {
+					cal.setTimeInMillis(rs.getLong("timestamp"));
+					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
+							"<tr>" + "<td>" + rs.getInt("id") + "<td>"
+									+ rs.getInt("msgID") + "<td>"
+									+ splDateFormt.format(cal.getTime())+ "<td>"
+									+ rs.getLong("sender") + "<td>"
+									+ rs.getLong("empfaenger") + "<td>"
+									+ rs.getString("typ") + "<td>"
+									+ rs.getString("grp") + "<td>"
+									+ rs.getString("data"), 0, 0, null);
+					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</tr>", 0, 0,
+							null);
+				}
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</table>", 0, 0,
 						null);
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} 
+		}else {
+			JOptionPane.showMessageDialog(null,
+	                "Für diese Operation ist eine Verbindung zum lokalen DB-Server zwingend notwendig",
+	                "Hinweis",
+	                JOptionPane.INFORMATION_MESSAGE);
+			askForConnectionRetry = true;//System.out.println("es besteht keine DB-Verbindung!");
+			if (connectToLocDBServer()) {
+				isDBConnected = true;
+				searchInHistory(chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);
+				
+			} else {
+				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
 			}
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</table>", 0, 0,
-					null);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} 
+		}
 	}
 
 }

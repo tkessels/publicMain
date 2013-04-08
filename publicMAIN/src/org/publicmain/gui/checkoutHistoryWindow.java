@@ -26,7 +26,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.common.NachrichtenTyp;
-import org.publicmain.sql.DBConnection;
+import org.publicmain.sql.LocalDBConnection;
 
 
 /**
@@ -40,7 +40,7 @@ import org.publicmain.sql.DBConnection;
 // TODO nicht ausgewählte Felder werden nicht beachtet!
 // TODO Anzeigebereich bestenfalls HTML-Formatiert
 public class checkoutHistoryWindow {
-	private DBConnection db;
+	private LocalDBConnection db;
 	private JFrame historyFrame;
 	private JPanel searchPanel;
 	private JLabel msgTyp;
@@ -79,7 +79,7 @@ public class checkoutHistoryWindow {
 		this.dateToSearchField 				= new JTextField("01.01.2014");
 		this.time							= new JLabel("Time");
 		this.timeDateFormat					= new SimpleDateFormat("HH:mm");
-		fillTimeArray();
+		this.fillTimeArray();
 		this.timeFromSearchField 			= new JComboBox(timeArray.toArray());
 		this.timeHyphen						= new JLabel("-");
 		this.timeToSearchField				= new JComboBox(timeArray.toArray());
@@ -102,7 +102,7 @@ public class checkoutHistoryWindow {
 		
 		historyFrame.setLocationRelativeTo(null);
 		historyFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
-		historyFrame.setMinimumSize(new Dimension(500, 400));
+		historyFrame.setMinimumSize(new Dimension(200, 400));
 		
 		historyContentTxt.setBackground(new Color(229, 195, 0));
 		historyContentTxt.setEditable(false);
@@ -111,8 +111,9 @@ public class checkoutHistoryWindow {
 
 		searchPanel.setLayout(new GridBagLayout());
 		c.insets 	= set;
-		c.anchor	= GridBagConstraints.LINE_START;
-		c.fill 		= GridBagConstraints.BOTH;
+		c.fill 		= GridBagConstraints.HORIZONTAL;
+//		c.anchor	= GridBagConstraints.LINE_START;
+		
 		// hinzufügen der Komponenten zum searchpanel
 		c.gridx 	= 0;
 		c.gridy 	= 0;

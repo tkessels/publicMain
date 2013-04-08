@@ -340,6 +340,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		connectionsAcceptBot.stop();
 		multicastRecieverBot.stop();
 		sendtcp(new MSG(meinNode, MSGCode.NODE_SHUTDOWN));
+		sendroot(new MSG(myGroups,MSGCode.GROUP_LEAVE));
 		root_connection.disconnect();
 		for (final ConnectionHandler con : connections)
 			(new Thread(new Runnable() {
@@ -889,6 +890,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 
 	public void debug(String command, String parameter) {
-		LogEngine.log(this, "debug command not found", LogEngine.ERROR);
+		switch (command) {
+		
+
+		default:
+			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
+			break;
+		}
+		
 	}
 }

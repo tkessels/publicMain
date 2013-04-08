@@ -209,7 +209,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setMinimumSize(new Dimension(250,250));
 		this.pack();
 		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setTitle("publicMAIN");
 		this.setVisible(true);
 		chatList.get(0).focusEingabefeld(); // das tut's net
@@ -325,6 +325,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	void shutdown(){
 		//TODO: ordentlicher shutdown
+		ce.shutdown();
+		System.out.println("EXITED");
 		System.exit(0);
 	}
 
@@ -647,6 +649,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		@Override
 		public void windowClosed(WindowEvent arg0) {
+			shutdown();
 			// Object[] eventCache =
 			// {"super, so ne scheisse","deine Mama liegt im Systemtray"};
 			// Object anchor = true;

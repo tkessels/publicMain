@@ -315,10 +315,19 @@ public class ChatEngine extends Observable{
 		case "alias":
 			setAlias(parameter);
 			break;
+		case "disconnect":
+			shutdown();
+			break;
 		default:
 			ne.debug(command,parameter);
 			break;
 		}
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void shutdown() {
+		ne.disconnect();
 		// TODO Auto-generated method stub
 		
 	}

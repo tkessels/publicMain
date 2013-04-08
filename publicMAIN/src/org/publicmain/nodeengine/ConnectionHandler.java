@@ -114,7 +114,7 @@ public class ConnectionHandler {
 		}
 		catch (IOException e) {
 		}
-		LogEngine.log(me, "closed");
+		LogEngine.log(this.toString(), "closed",LogEngine.INFO);
 		me = null;
 		//pakets_rein_hol_bot.stop();
 		pakets_rein_hol_bot = null;

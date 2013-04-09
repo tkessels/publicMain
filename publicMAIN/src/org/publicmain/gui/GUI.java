@@ -498,6 +498,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		return false;
 	}
 	
+	/**
+	 * @param aliasName
+	 */
 	public void sendFile(String aliasName) {
 		// TODO: hier stimmen noch paar sachen nicht später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
@@ -594,6 +597,14 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		return this.jTabbedPane;
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
+	}
+	
 	/**
 	 * ActionListener für Design wechsel (LookAndFeel)
 	 * 
@@ -752,13 +763,5 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		for (Object obj : vec) {
 			System.out.println(obj + "\n\t" + def.get(obj));
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
-	 */
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
 	}
 }

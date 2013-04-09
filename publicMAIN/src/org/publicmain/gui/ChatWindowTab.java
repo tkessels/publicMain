@@ -36,27 +36,33 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		this.setOpaque(false);
 
 		// TitelLabel für Tabbeschriftung erzeugen:
-		lblTitle = new JLabel(title);
+		this.lblTitle = new JLabel(title);
 		// MouseListener zu JLabel (lblTitle) hinzufügen:
-		lblTitle.addMouseListener(this);
+		this.lblTitle.addMouseListener(this);
 
 		// ImageIcon für SchließenLabel erstellen:
-		tabCloseImgIcon = new ImageIcon(getClass().getResource("TabCloseBlack.png"));
-		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
-		lblClose = new JLabel(tabCloseImgIcon);
-		// Observer für das Image auf das lblClose setzen:
-		tabCloseImgIcon.setImageObserver(lblClose);
-		// MouseListener für Schließenlabel (lblClose) hinzufügen:
-		lblClose.addMouseListener(this);
-
-		lblIcon = new JLabel();
-		if(owner.isPrivate()){
-			lblIcon.setIcon(new ImageIcon(getClass().getResource("private.png")));
+		if(owner.getOnlineState()){
+			this.tabCloseImgIcon = new ImageIcon(getClass().getResource("TabCloseBlack.png"));
 		} else {
-			lblIcon.setIcon(new ImageIcon(getClass().getResource("gruppe.png")));
+			this.tabCloseImgIcon = new ImageIcon(getClass().getResource("TabCloseGray.png"));
 		}
-		
-		
+		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
+		this.lblClose = new JLabel(tabCloseImgIcon);
+		// Observer für das Image auf das lblClose setzen:
+		this.tabCloseImgIcon.setImageObserver(lblClose);
+		// MouseListener für Schließenlabel (lblClose) hinzufügen:
+		this.lblClose.addMouseListener(this);
+
+		this.lblIcon = new JLabel();
+		if(owner.isPrivate()){
+			if(owner.getOnlineState()){
+				this.lblIcon.setIcon(new ImageIcon(getClass().getResource("private.png")));
+			} else {
+				this.lblIcon.setIcon(new ImageIcon(getClass().getResource("privateOffline.png")));
+			}
+		} else {
+			this.lblIcon.setIcon(new ImageIcon(getClass().getResource("gruppe.png")));
+		}
 		
 		// TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
 		this.add(lblIcon);
@@ -83,20 +89,36 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		if (e.getSource() == lblClose){
-			tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseOrange.png")).getImage());
+			if(owner.getOnlineState()){
+				this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseOrange.png")).getImage());
+			} else {
+				this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
+			}
 		} else {
 			JLabel source = (JLabel) e.getSource();
-			source.setForeground(new Color(255, 130, 13));
+			if(owner.getOnlineState()){
+				source.setForeground(new Color(255, 130, 13));
+			} else {
+				source.setForeground(Color.BLACK);
+			}
 		}
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		if (e.getSource() == lblClose){
-			tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
+			if(owner.getOnlineState()){
+				this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
+			} else {
+				this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseGray.png")).getImage());
+			}
 		} else {
 			JLabel source = (JLabel) e.getSource();
-			source.setForeground(Color.BLACK);
+			if(owner.getOnlineState()){
+				source.setForeground(Color.BLACK);
+			} else {
+				source.setForeground(Color.GRAY);
+			}
 		}
 	}
 
@@ -109,9 +131,9 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 
 	private void blink() {
 		if (lblTitle.getForeground() == Color.BLACK){
-			lblTitle.setForeground(new Color(255, 130, 13));
+			this.lblTitle.setForeground(new Color(255, 130, 13));
 		} else {
-			lblTitle.setForeground(Color.BLACK);
+			this.lblTitle.setForeground(Color.BLACK);
 		}
 		if (parent.indexOfComponent(owner) == parent.getSelectedIndex()){
 			this.stopBlink();
@@ -157,10 +179,19 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		public void stopit() {
 			active = false;
 		}
-		
 	}
-
-
+	
+	void setOffline(){
+		this.lblTitle.setForeground(Color.GRAY);
+		this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseGray.png")).getImage());
+		this.lblIcon.setIcon(new ImageIcon(getClass().getResource("privateOffline.png")));
+	}
+	
+	void setOnline(){
+		this.lblTitle.setForeground(Color.BLACK);
+		this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
+		this.lblIcon.setIcon(new ImageIcon(getClass().getResource("private.png")));
+	}
 }
 	
 	

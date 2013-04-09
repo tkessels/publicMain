@@ -64,8 +64,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>Flüsternachricht</tr>" +
 			"<tr><td>/s</td><td  colspan='2'>&lt;message&gt;</td>schreien</tr>" +
 			"</table><br>";
+	private boolean onlineState;
+	private Thread onlineStateSetter;
 
-	public ChatWindow(long uid, String username) {
+	public ChatWindow( long uid, String username) {
 		this.userID = uid;
 		this.name = username;
 		this.isPrivCW = true;
@@ -76,6 +78,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		gruppe = gruppenname;
 		this.name = gruppenname;
 		this.isPrivCW = false;
+		onlineState = true;
 		doWindowbuildingstuff();
 	}
 
@@ -112,20 +115,20 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.sendenBtn.addMouseListener(new MouseListener() {
 			public void mouseReleased(MouseEvent e) {
 			}
-
 			public void mousePressed(MouseEvent e) {
 			}
-
 			public void mouseExited(MouseEvent e) {
 				JButton source = (JButton) e.getSource();
-				source.setForeground(Color.BLACK);
+				if(onlineState){
+					source.setForeground(Color.BLACK);
+				}
 			}
-
 			public void mouseEntered(MouseEvent e) {
 				JButton source = (JButton) e.getSource();
-				source.setForeground(new Color(255, 130, 13));
+				if(onlineState){
+					source.setForeground(new Color(255, 130, 13));
+				}
 			}
-
 			public void mouseClicked(MouseEvent e) {
 			}
 		});
@@ -139,6 +142,40 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.add(msgTextScroller, BorderLayout.CENTER);
 		this.add(panel, BorderLayout.SOUTH);
 
+		
+		this.onlineStateSetter = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true){
+					if (isPrivCW) {
+						if (gui.getNode(userID) == null) {
+							onlineState = false;
+							myTab.setOffline();
+							eingabeFeld.setEnabled(false);
+							sendenBtn.setForeground(Color.GRAY);
+							sendenBtn.setEnabled(false);
+						} else {
+							onlineState = true;
+							myTab.setOnline();
+							eingabeFeld.setEnabled(true);
+							sendenBtn.setForeground(Color.BLACK);
+							sendenBtn.setEnabled(true);
+						}
+						synchronized (ChatEngine.getCE().getUsers()) {
+							try {
+								ChatEngine.getCE().getUsers().wait();
+							} catch (InterruptedException e) {
+								LogEngine.log(e);
+							}
+						}
+					}
+				}
+			}
+		});
+		if(isPrivCW){
+			this.onlineStateSetter.start();
+		}
+		
 		this.setVisible(true);
 	}
 	
@@ -154,6 +191,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 */
 	public JPanel getWindowTab(){
 		return this.myTab;
+	}
+	
+	/**
+	 * @return
+	 */
+	boolean getOnlineState(){
+		return this.onlineState;
 	}
 	
 	void focusEingabefeld(){

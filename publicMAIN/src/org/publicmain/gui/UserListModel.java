@@ -61,6 +61,6 @@ public class UserListModel extends AbstractListModel<String>{
     
     @Override
     public String getElementAt(int index) {
-    return users.get(index);
+    	return users.get(index);
     }
 }

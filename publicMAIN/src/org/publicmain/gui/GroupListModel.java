@@ -38,7 +38,7 @@ public class GroupListModel extends AbstractListModel<String>{
 				}
 			}
 		});
-    	groupListWriter.start();
+    	this.groupListWriter.start();
     	
 	    Collections.sort(groups);
     }
@@ -55,6 +55,6 @@ public class GroupListModel extends AbstractListModel<String>{
     
     @Override
     public String getElementAt(int index) {
-    return groups.get(index);
+    	return groups.get(index);
     }
 }

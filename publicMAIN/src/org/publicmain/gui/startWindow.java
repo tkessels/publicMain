@@ -60,7 +60,6 @@ public class startWindow {
 		this.set 							= new Insets(5, 5, 5, 5);
 		
 		
-		startWindowFrame.setLocationRelativeTo(null);
 		startWindowFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		startWindowFrame.setMinimumSize(new Dimension(200, 180));
 		
@@ -105,6 +104,8 @@ public class startWindow {
 		startWindowFrame.add(registerButton, c);
 		
 		startWindowFrame.pack();
+		startWindowFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		startWindowFrame.setLocationRelativeTo(null);
 		startWindowFrame.setVisible(true);
 	}
 

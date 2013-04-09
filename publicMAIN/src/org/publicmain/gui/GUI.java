@@ -1,6 +1,9 @@
 package org.publicmain.gui;
 
+import java.awt.BorderLayout;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,14 +17,19 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
@@ -36,7 +44,6 @@ import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.Node;
-import org.publicmain.gui.ContactList;
 import org.publicmain.sql.LocalDBConnection;
 
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
@@ -186,11 +193,14 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.backupServer.add(pullHistoryFromBackUpServer);
 		this.backupServer.add(backUpServerSettings);
 		
+		this.menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.LINE_AXIS));
 		this.menuBar.add(contactListBtn);
 		this.menuBar.add(fileMenu);
 		this.menuBar.add(configMenu);
 		this.menuBar.add(helpMenu);
 		this.menuBar.add(historyMenu);
+		this.menuBar.add(Box.createHorizontalGlue());
+		this.menuBar.add(new JLabel(new ImageIcon(getClass().getResource("miniSpin.gif"))));
 
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
@@ -208,7 +218,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setTitle("publicMAIN");
-		this.contactListWin = new ContactList(GUI.me);
+		this.contactListWin = new ContactList(me);
 		this.setVisible(true);
 		chatList.get(0).focusEingabefeld(); // das tut's net
 	}

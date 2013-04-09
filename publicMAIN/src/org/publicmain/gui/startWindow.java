@@ -31,34 +31,31 @@ public class startWindow {
 	
 	private JButton loginButton;
 	private JButton registerButton;
+	private boolean registerButtonPushed;
 	
 	private GridBagConstraints c;
 	private Insets set;
 	
 	private startWindow() {
 		
-		this.startWindowFrame	=	new JFrame();
-		this.wellcomeLabel		=	new JLabel("Wellcome to pMain");
-		this.userNameLabel		=	new JLabel("Username");
-		this.userNameTextField 	=	new JTextField();
-		this.passWordLabel		=	new JLabel("Password");
-		this.passWordTextField	=	new JTextField();
+		this.startWindowFrame		=	new JFrame();
+		this.wellcomeLabel			=	new JLabel("Wellcome to pMain");
+		this.userNameLabel			=	new JLabel("Username");
+		this.userNameTextField 		=	new JTextField();
+		this.passWordLabel			=	new JLabel("Password");
+		this.passWordTextField		=	new JTextField();
 		
-		this.statusTextField	=	new JTextField();
+		this.statusTextField		=	new JTextField();
 		
-		this.loginButton		=	new JButton("Login");
-		this.registerButton		=	new JButton("Register");
+		this.loginButton			=	new JButton("Login");
+		this.registerButton			=	new JButton("Register");
+		this.registerButtonPushed 	= 	false;
 		
 		this.loginButton.addActionListener(new startWindowButtonController(startWindowFrame));
-		this.registerButton.addActionListener(new startWindowButtonController());
-		
-		
-		
-		
-		
-		this.c 								= new GridBagConstraints();
-		this.set 							= new Insets(5, 5, 5, 5);
-		
+		this.registerButton.addActionListener(new startWindowButtonController(registerButtonPushed));
+
+		this.c 						= new GridBagConstraints();
+		this.set 					= new Insets(5, 5, 5, 5);
 		
 		startWindowFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		startWindowFrame.setMinimumSize(new Dimension(200, 180));
@@ -104,6 +101,7 @@ public class startWindow {
 		startWindowFrame.add(registerButton, c);
 		
 		startWindowFrame.pack();
+		startWindowFrame.setResizable(false);
 		startWindowFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		startWindowFrame.setLocationRelativeTo(null);
 		startWindowFrame.setVisible(true);
@@ -119,11 +117,15 @@ public class startWindow {
 
 class startWindowButtonController implements ActionListener{
 	JFrame startWindowFrame;
+	boolean registerButtonPushed;
 	public startWindowButtonController() {
 
 	}
 	public startWindowButtonController(JFrame startWindowFrame) {
 		this.startWindowFrame = startWindowFrame;
+	}
+	public startWindowButtonController(boolean registerButtonPushed) {
+		this.registerButtonPushed = registerButtonPushed;
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -138,6 +140,12 @@ class startWindowButtonController implements ActionListener{
 			//TODO:
 			break;
 		case "Register":
+			if (registerButtonPushed){
+				registerButtonPushed = false;
+			} else if (!registerButtonPushed){
+				registrationWindow.getRegistrationWindow();
+				registerButtonPushed = true;
+			}
 			break;
 		}
 	}

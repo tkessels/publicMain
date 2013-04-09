@@ -198,8 +198,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		
 		// StandardGruppe erstellen:
 		this.addGrpCW("public");
-		
-		
+		// StandardGruppe joinen:
+		this.ce.group_join("public");
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
@@ -293,9 +293,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			// ChatWindow am Gruppen NachrichtenListener (MSGListener) anmelden und Gruppe joinen:
 			ce.group_join(grp_name);
 			ce.add_MSGListener(existCW(grp_name), grp_name);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(grp_name)));
 		} else {
-			existCW(grp_name).focusEingabefeld();
-			System.out.println(existCW(grp_name).toString());
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(grp_name)));
 		}
 	}
 	
@@ -309,8 +309,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			createChat(new ChatWindow(tmpUID, aliasName));
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
 			ce.add_MSGListener(existCW(aliasName), tmpUID);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(aliasName)));
 		} else {
-			// focus auf CW setzen
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(aliasName)));
 		}
 	}
 	
@@ -421,7 +422,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 				if(x.getAlias().equals(empfAlias)){
 					tmpUID = x.getNodeID();
 					if(tmpCW == null){
-						createChat(new ChatWindow(tmpUID, empfAlias));
+						addPrivCW(empfAlias);
 						tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
 						jTabbedPane.setSelectedIndex(tabNr);
 					} else {
@@ -447,7 +448,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		ChatWindow tmpCW = existCW(empfGrp);
 		int tabNr = 0;
 		if(tmpCW == null){
-			createChat(new ChatWindow(empfGrp));
+			addGrpCW(empfGrp);
 			tabNr = jTabbedPane.indexOfComponent(existCW(empfGrp));
 			jTabbedPane.setSelectedIndex(tabNr);
 		} else {

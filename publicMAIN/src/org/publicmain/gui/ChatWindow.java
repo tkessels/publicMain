@@ -248,7 +248,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					this.gui.privSend(tmp[1], tmp[2]);
-					warn("Flüsternachrichten noch nicht möglich...");
 				}
 				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
 					this.gui.groupSend(tmp[1], tmp[2]);

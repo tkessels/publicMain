@@ -24,14 +24,14 @@ import org.publicmain.common.Node;
 public class ConnectionHandler {
 	private Set<Node>			children;
 	private Set<String>			groups;
-	public Node					otherEnd;
+	public Node					host_node;
 	private NodeEngine			ne;
 	private Socket				line;
 	private ObjectOutputStream	line_out;
 	private ObjectInputStream	line_in;
 	private volatile ConnectionHandler	me;
-	private String				endpoint;
-	private long					latency				= Integer.MAX_VALUE;
+	private String				hostname;
+	private long				latency				= Integer.MAX_VALUE;
 
 	private Thread				pakets_rein_hol_bot	= new Thread(new Reciever());
 	private Thread				pingpongBot			= new Thread(new Pinger());
@@ -50,7 +50,7 @@ public class ConnectionHandler {
 		line_out.flush();
 		line_in = new ObjectInputStream(new BufferedInputStream(line.getInputStream()));
 
-		endpoint = line.getInetAddress().getHostAddress();
+		hostname = line.getInetAddress().getHostAddress();
 
 		ping();
 //		endpoint = line.getInetAddress().getHostName();
@@ -123,7 +123,7 @@ public class ConnectionHandler {
 	}
 
 	public String toString() {
-		return "ConnectionHandler [" + endpoint + "]" + ((latency < 10000) ? "[" + latency + "]" : "");
+		return "ConnectionHandler [" + hostname + "]" + ((latency < 10000) ? "[" + latency + "]" : "");
 	}
 
 	private void ping() {
@@ -149,20 +149,6 @@ public class ConnectionHandler {
 	}			
 		
 	
-	
-	/*
-	public boolean add(String gruppe) {
-		synchronized (groups) {
-			return groups.add(gruppe);
-		}
-	}
-	
-	public boolean remove(String gruppe) {
-		synchronized (groups) {
-			return groups.remove(gruppe);
-		}
-	}
-	*/
 	public Set<String> getGroups(){
 		synchronized (groups) {
 			return groups;
@@ -214,8 +200,7 @@ public class ConnectionHandler {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					LogEngine.log(this,e1);
 				}}
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
@@ -242,7 +227,7 @@ public class ConnectionHandler {
 					else LogEngine.log(me, "Empfangenes Objekt ist keine MSG");
 				}
 				catch (ClassNotFoundException e) {
-					LogEngine.log(e, "ConnectionHandler");
+					LogEngine.log("ConnectionHandler", e);
 				}
 				catch (IOException e) {
 					LogEngine.log(e);

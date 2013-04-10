@@ -41,6 +41,7 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.sql.LocalDBConnection;
 
@@ -210,6 +211,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.addGrpCW("public");
 		// StandardGruppe joinen:
 		this.ce.group_join("public");
+		
+		//registriert Hauptfenster als Empfänger für noch nicht gefangene Privatnachrichten
+		this.ce.register_defaultMSGListener(this);
 
 		// GUI JFrame Einstellungen:
 		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
@@ -385,6 +389,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	void shutdown(){
 		//TODO: ordentlicher shutdown
 		ce.shutdown();
+		locDBCon.shutdownLocDB();
 		System.exit(0);
 	}
 
@@ -547,19 +552,13 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o instanceof GruppenKanal){
-			if (o.countObservers()==1){
-			//erzeuge gruppenfenster füge nachricht ein sei happy
-			}
-			else{
-				//
-			}
-			
+		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
+		if(o instanceof KnotenKanal){
+			MSG tmp = (MSG) arg;
+			Node tmp_node = ce.getNode(tmp.getSender());
+			me.addPrivCW(tmp_node.getAlias());
+			ce.put(tmp);
 		}
-		if(o instanceof KnotenKanal&&o.countObservers()==1){
-			//erzeuge gruppen
-		}
-		// TODO Auto-generated method stub
 	}
 
 	/**

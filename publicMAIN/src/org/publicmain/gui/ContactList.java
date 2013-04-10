@@ -127,12 +127,7 @@ public class ContactList extends JWindow {
 	}
 	
 	public boolean nameExists(String name){
-		if (((UserListModel)users.getModel()).contains(name) || ((GroupListModel)groups.getModel()).contains(name)) {
-			System.out.println("ContactList: Name existiert bereits!");
-			return true;
-		} else {
-			return false;
-		}
+		return (((UserListModel)users.getModel()).contains(name) || ((GroupListModel)groups.getModel()).contains(name));
 	}
 
 

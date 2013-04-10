@@ -60,9 +60,7 @@ public class ChatEngine extends Observable{
 //		this.db = db.getDBConnection();
 		//TODO:Load Settings & UserDATA
 		
-		/**
-		 * <<<<<<<< Temporär >>>>>>>>
-		 */
+//		  <<<<<<<< Temporärbär >>>>>>>>
 		 setUserID((long) (Math.random()*Long.MAX_VALUE));
 		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
 		
@@ -70,7 +68,7 @@ public class ChatEngine extends Observable{
 		
 		group_channels=new HashSet<GruppenKanal>();
 		private_channels=new HashSet<KnotenKanal>();
-		default_channel=new KnotenKanal(getUserID());
+		default_channel=new KnotenKanal(ne.getNodeID());
 		ignored = Collections.synchronizedSet(new HashSet<Long>());
 		inbox=new LinkedBlockingQueue<MSG>();
 		
@@ -237,7 +235,7 @@ public class ChatEngine extends Observable{
 	 * @param uid
 	 */
 	public	void	ignore_user(long nodeID){
-			ignored.add(nodeID);
+			if(nodeID!=ne.getNodeID())ignored.add(nodeID);
 	}
 	
 	/**
@@ -287,6 +285,11 @@ public class ChatEngine extends Observable{
 		private_channels.add(tmp);
 	}
 	
+	public void register_defaultMSGListener(Observer gui){
+		default_channel.addObserver(gui);
+	}
+
+	
 	/** Entefert ein Chatpannel aus allen Kanälen
 	 * @param chatPanel
 	 */
@@ -315,7 +318,7 @@ public class ChatEngine extends Observable{
 	 * @param nachricht Die neue Nachricht.
 	 */
 	public void put(MSG nachricht){
-		inbox.add(nachricht);
+		if(!ignored.contains(nachricht.getSender()))inbox.add(nachricht);
 		LocalDBConnection.getDBConnection().saveMsg(nachricht);
 	}
 	

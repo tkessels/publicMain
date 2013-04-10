@@ -30,7 +30,7 @@ public class LogEngine {
 		}
 	}
 	
-	public static void log(Exception e, Object source) {
+	public static void log(Object source, Exception e) {
 		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
 		if(verbosity>=ERROR){
 			log(sourceString + ":"+e.getMessage(),ERROR);
@@ -67,14 +67,16 @@ public class LogEngine {
 	
 	
 	public static void log(final Object source,final String action,final MSG x){
-		new Thread(new Runnable() {
-			public void run() {
-				if(!filtered(x)) {
-				String sourceString = (source instanceof String) ? (String) source : source.getClass().getSimpleName();
-				log(sourceString + " : " + action + " : " + msg2String(x), TRACE);
+		if (verbosity == 4) {
+			new Thread(new Runnable() {
+				public void run() {
+					if (!filtered(x)) {
+						String sourceString = (source instanceof String) ? (String) source: source.getClass().getSimpleName();
+						log(sourceString + " : " + action + " : " + msg2String(x), TRACE);
+					}
 				}
-			}
-		}).start();
+			}).start();
+		}
 	}
 	
 	protected static boolean filtered(MSG x) {

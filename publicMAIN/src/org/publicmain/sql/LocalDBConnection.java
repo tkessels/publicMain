@@ -332,11 +332,18 @@ public class LocalDBConnection {
 	public void shutdownLocDB() {
 		// TODO alle verbindungen trennen
 		try {
-			con.close();
-			stmt.close();
+			if(con!=null)con.close();
+			
 			// TODO What else?
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LogEngine.log(this, e);
+		}
+		
+		try {
+			if(stmt!=null)stmt.close();
+		} catch (SQLException e) {
+			LogEngine.log(this, e);
+			// TODO Auto-generated catch block
 		}
 	}
 

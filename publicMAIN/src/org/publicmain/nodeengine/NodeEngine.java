@@ -170,10 +170,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				if (x.getNodeID() == nid)
 					return x;
 			}
-			if (isRoot())
-				return retrieve(nid);
-			else
-				return null;
+			if (isRoot()) return retrieve(nid);
+			else return null;
 		}
 	}
 	

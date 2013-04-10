@@ -177,8 +177,7 @@ public class registrationWindow {
 		
 		registrationWindowFrame.pack();
 		registrationWindowFrame.setResizable(false);
-		registrationWindowFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		registrationWindowFrame.setLocationRelativeTo(null);
+		registrationWindowFrame.setLocationRelativeTo(GUI.getGUI());
 		registrationWindowFrame.setVisible(true);
 	}
 	

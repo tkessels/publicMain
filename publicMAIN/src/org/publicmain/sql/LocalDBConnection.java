@@ -329,6 +329,16 @@ public class LocalDBConnection {
 			}
 		}
 	}
+	public void shutdownLocDB() {
+		// TODO alle verbindungen trennen
+		try {
+			con.close();
+			stmt.close();
+			// TODO What else?
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
 

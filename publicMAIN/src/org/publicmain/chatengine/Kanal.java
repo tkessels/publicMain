@@ -60,6 +60,10 @@ public abstract class Kanal extends Observable {
 	public boolean is(Object vergleich) {
 		return (this.referenz.equals(vergleich));
 	}
+
+	public String toString() {
+		return referenz.toString();
+	}
 	
 	
 	

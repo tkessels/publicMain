@@ -18,6 +18,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -29,11 +30,11 @@ import org.publicmain.gui.GUI;
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
- protected static final long CONNECTION_TIMEOUT = 200; 							//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
- protected static final long ROOT_ANNOUNCE_TIMEOUT = 200; 					//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
- private final InetAddress group = InetAddress.getByName("230.223.223.223"); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int multicast_port = 6789; 													//Default Port für MulticastGruppe für Verbindungsaushandlung
- private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
+ private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout(); 					//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ private final long ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout(); 			//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
+ private final InetAddress group = InetAddress.getByName(Config.getConfig().getMCGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
+ private final int multicast_port = Config.getConfig().getMCPort(); 										//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int MAX_CLIENTS = Config.getConfig().getMaxConnections(); 																			//Maximale Anzahl anzunehmender Verbindungen 
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
  private final long nodeID;
@@ -773,10 +774,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		public void run() {
 //			if (!online&&!isRoot()&&!rootDiscovering)	return;
 			if (!online||isRoot()||rootDiscovering) return;
-			long until = System.currentTimeMillis() + CONNECTION_TIMEOUT;
+			long until = System.currentTimeMillis() + DISCOVER_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
-					Thread.sleep(CONNECTION_TIMEOUT);
+					Thread.sleep(DISCOVER_TIMEOUT);
 				}
 				catch (InterruptedException e) {
 				}
@@ -806,10 +807,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			rootDiscovering=true;
 			LogEngine.log("DiscoverGame","started",LogEngine.INFO);
 			sendRA();
-			long until = System.currentTimeMillis() + ROOT_ANNOUNCE_TIMEOUT;
+			long until = System.currentTimeMillis() + ROOT_CLAIM_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
-					Thread.sleep(ROOT_ANNOUNCE_TIMEOUT);
+					Thread.sleep(ROOT_CLAIM_TIMEOUT);
 				}
 				catch (InterruptedException e) {
 				}
@@ -821,7 +822,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			/*for (MSG msg : ra_replies) {
 				System.out.println(((Node)msg.getData()).getHostname());
 			}*/
-			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_ANNOUNCE_TIMEOUT;
+			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_CLAIM_TIMEOUT;
 			
 			Node toConnectTo = meinNode;
 			long maxPenunte = getNodes().size();

@@ -40,6 +40,7 @@ import javax.swing.plaf.FontUIResource;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
@@ -54,7 +55,7 @@ import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 public class GUI extends JFrame implements Observer , ChangeListener{
 
-	private final int GRP_NAME_LENGTH = 10; 
+	private final int GRP_NAME_LENGTH = Config.getConfig().getMaxGroupLength(); 
 	
 	// Deklarationen:
 	private ChatEngine ce;

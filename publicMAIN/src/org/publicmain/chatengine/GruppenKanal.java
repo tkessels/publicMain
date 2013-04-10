@@ -12,7 +12,6 @@ public class GruppenKanal extends Kanal {
 
 	public GruppenKanal(String gruppe) {
 		super(gruppe.toLowerCase());
-//		this.referenz=gruppe.toLowerCase();
 	}
 	
 	@Override
@@ -31,11 +30,6 @@ public class GruppenKanal extends Kanal {
 		return false;
 	}
 
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return (String) referenz;
-	}
 }
 /*
 

@@ -93,8 +93,7 @@ public class Node implements Serializable {
 			if (inetAddress.getAddress().length==4)addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
 			}
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LogEngine.log(e);
 		}
 		return addrList;
 	}

@@ -22,21 +22,13 @@ public class startWindow {
 
 	private static startWindow me;
 	private JFrame startWindowFrame;
-	private JLabel wellcomeLogo;
-	private JLabel wellcomeLabel1;
-	private JLabel wellcomeLabel2;
-	private JLabel wellcomeLabel3;
+	private JLabel welcomeLogo;
+	private JLabel welcomeLabel1;
+
 	private JLabel nickNameLabel;
 	private JTextField nickNameTextField;
-	private JLabel userNameLabel;
-	private JTextField userNameTextField;
-	private JLabel passWordLabel;
-	private JPasswordField passWordTextField;
-	
-	private JTextField statusTextField;
-	
-	private JButton loginButton;
-	private JButton registerButton;
+	private JButton goButton;
+	private JButton pullButton;
 	
 	private GridBagConstraints c;
 	private Insets set;
@@ -44,35 +36,28 @@ public class startWindow {
 	private startWindow() {
 		
 		this.startWindowFrame		=	new JFrame();
-		this.wellcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
-		this.wellcomeLabel1			=	new JLabel("Enter your Nick if you just want to chat.");
+		this.welcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
+		this.welcomeLabel1			=	new JLabel("Enter your Nick an push \"GO\" if you just want to chat.");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
-		this.wellcomeLabel2			=	new JLabel("For using Backup-DB also enter Username and Password");
-		this.wellcomeLabel3			=	new JLabel("If you are new, press \"Register\"-Button");
-		this.userNameLabel			=	new JLabel("Username");
-		this.userNameTextField 		=	new JTextField();
-		this.passWordLabel			=	new JLabel("Password");
-		this.passWordTextField		=	new JPasswordField();
+
 		
-		this.statusTextField		=	new JTextField();
+		this.goButton			=	new JButton("GO");
+		this.pullButton			=	new JButton("PULL from Backup");
 		
-		this.loginButton			=	new JButton("Login");
-		this.registerButton			=	new JButton("Register");
-		
-		this.loginButton.addActionListener(new startWindowButtonController(startWindowFrame));
-		this.registerButton.addActionListener(new startWindowButtonController(startWindowFrame));
 
 		this.c 						= new GridBagConstraints();
 		this.set 					= new Insets(5, 5, 5, 5);
 		
-		startWindowFrame.setTitle("Wellcome!");
+		this.goButton.addActionListener(new startWindowButtonController(startWindowFrame, c, goButton));
+		this.pullButton.addActionListener(new startWindowButtonController(startWindowFrame, c, goButton));
+		
+		startWindowFrame.setTitle("Welcome!");
 		startWindowFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		startWindowFrame.getContentPane().setBackground(Color.WHITE);
 		startWindowFrame.setMinimumSize(new Dimension(200, 180));
 		
-		statusTextField.setBackground(new Color(229, 195, 0));
-		statusTextField.setEditable(false);
+
 
 		startWindowFrame.setLayout(new GridBagLayout());
 		c.insets 	= set;
@@ -83,10 +68,10 @@ public class startWindow {
 		c.gridx 	= 0;
 		c.gridy 	= 0;
 		c.gridwidth = 2;
-		startWindowFrame.add(wellcomeLogo ,c);
+		startWindowFrame.add(welcomeLogo ,c);
 		
 		c.gridy 	= 1;
-		startWindowFrame.add(wellcomeLabel1, c);
+		startWindowFrame.add(welcomeLabel1, c);
 		
 		c.gridy 	= 2;
 		c.gridwidth = 1;
@@ -95,40 +80,13 @@ public class startWindow {
 		c.gridx 	= 1;
 		startWindowFrame.add(nickNameTextField, c);
 		
+		c.gridx 	= 0;
 		c.gridy 	= 3;
-		c.gridx 	= 0;
-		c.gridwidth = 2;
-		startWindowFrame.add(wellcomeLabel2, c);
+		startWindowFrame.add(goButton, c);
 		
-		c.gridy 	= 4;
-		startWindowFrame.add(wellcomeLabel3, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 5;
-		c.gridwidth = 1;
-		startWindowFrame.add(userNameLabel, c);
-		
+
 		c.gridx 	= 1;
-		startWindowFrame.add(userNameTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 6;
-		startWindowFrame.add(passWordLabel, c);
-		
-		c.gridx 	= 1;
-		startWindowFrame.add(passWordTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 7;
-		c.gridwidth = 2;
-		startWindowFrame.add(statusTextField, c);
-		
-		c.gridy 	= 8;
-		c.gridwidth = 1;
-		startWindowFrame.add(loginButton, c);
-		
-		c.gridx 	= 1;
-		startWindowFrame.add(registerButton, c);
+		startWindowFrame.add(pullButton, c);
 		
 		startWindowFrame.pack();
 		startWindowFrame.setResizable(false);
@@ -147,8 +105,24 @@ public class startWindow {
 
 class startWindowButtonController implements ActionListener{
 	JFrame startWindowFrame;
-	public startWindowButtonController(JFrame startWindowFrame) {
+	private JLabel wellcomeLabel2;
+	private JLabel wellcomeLabel3;
+	private JLabel userNameLabel;
+	private JTextField userNameTextField;
+	private JLabel passWordLabel;
+	private JPasswordField passWordTextField;
+	private JTextField statusTextField;
+	private JLabel backupserverIPLabel;
+	private JTextField backupserverIPTextField;
+//	private JButton pull;
+	private GridBagConstraints c;
+	
+	private JButton goButton;
+	
+	public startWindowButtonController(JFrame startWindowFrame, GridBagConstraints c, JButton goButton) {
 		this.startWindowFrame = startWindowFrame;
+		this.goButton = goButton;
+		this.c = c;
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -156,16 +130,87 @@ class startWindowButtonController implements ActionListener{
 		JButton source = (JButton)evt.getSource();
 		switch(source.getText()){
 		
-		case "Login":
+		case "GO":
 			startWindowFrame.setVisible(false);
 			GUI.getGUI();
 			
 			//TODO:
 			break;
-		case "Register":
-			startWindowFrame.setVisible(false);
-			registrationWindow.getRegistrationWindow(startWindowFrame);
+		case "PULL from Backup":
+			this.wellcomeLabel2			=	new JLabel("For using backupserver enter Username, Password");
+			this.wellcomeLabel3			=	new JLabel("and the IP of your backupserver");
+			this.userNameLabel			=	new JLabel("Username");
+			this.userNameTextField 		=	new JTextField();
+			this.passWordLabel			=	new JLabel("Password");
+			this.passWordTextField		=	new JPasswordField();
+			this.statusTextField		=	new JTextField();
+//			this.pull					=	new JButton("PULL from Backup & GO");
+			this.backupserverIPLabel	=	new JLabel("Backupserver IP");
+			this.backupserverIPTextField=	new JTextField();
+			
+			statusTextField.setBackground(new Color(229, 195, 0));
+			statusTextField.setEditable(false);
+			source.setVisible(false);
+			source.setText("PULL from Backup & GO");
+			
+			c.gridx 	= 0;
+			c.gridy 	= 3;
+			c.gridwidth = 2;
+			startWindowFrame.add(goButton, c);
+			
+			c.gridy 	= 4;
+			c.gridx 	= 0;
+			c.gridwidth = 2;
+			startWindowFrame.add(wellcomeLabel2, c);
+			
+			c.gridy 	= 5;
+			startWindowFrame.add(wellcomeLabel3, c);
+			
+			c.gridx 	= 0;
+			c.gridy 	= 6;
+			c.gridwidth = 1;
+			startWindowFrame.add(userNameLabel, c);
+			
+			c.gridx 	= 1;
+			startWindowFrame.add(userNameTextField, c);
+			
+			c.gridx 	= 0;
+			c.gridy 	= 7;
+			startWindowFrame.add(passWordLabel, c);
+			
+			c.gridx 	= 1;
+			startWindowFrame.add(passWordTextField, c);
+			
+			c.gridx 	= 0;
+			c.gridy 	= 8;
+			startWindowFrame.add(backupserverIPLabel, c);
+			
+			c.gridx 	= 1;
+			startWindowFrame.add(backupserverIPTextField, c);
+			
+			
+			
+			c.gridx 	= 0;
+			c.gridy 	= 9;
+			c.gridwidth = 2;
+			startWindowFrame.add(statusTextField, c);
+			
+
+			
+			c.gridx 	= 0;
+			c.gridy 	= 10;
+			c.gridwidth = 2;
+			startWindowFrame.add(source, c);
+			source.setVisible(true);
+			
+			startWindowFrame.pack();
 		break;
+		case "PULL from Backup & GO":
+			System.out.println("wenn das klappt geht´s");
+			
+			//TODO:
+			break;
+		
 		}
 	}
 }

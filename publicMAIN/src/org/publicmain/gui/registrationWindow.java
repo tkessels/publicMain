@@ -26,15 +26,22 @@ public class registrationWindow {
 	private JFrame registrationWindowFrame;
 	private JLabel wellcomeLogo;
 	private JLabel wellcomeLabel1;
-	private JLabel wellcomeLabel2;
 	private JLabel nickNameLabel;
 	private JTextField nickNameTextField;
 	private JLabel userNameLabel;
 	private JTextField userNameTextField;
 	private JLabel passWordLabel;
 	private JPasswordField passWordTextField;
-	private JLabel BackupserverIPLabel;
-	private JTextField BackupserverIPTextField;
+	private JLabel firstNameLabel;
+	private JTextField firstNameTextField;
+	private JLabel lastNameLabel;
+	private JTextField lastNameTextField;
+	private JLabel eMailLabel;
+	private JTextField eMailTextField;
+	private JLabel birthDayLabel;
+	private JTextField birthDayTextField;
+	private JLabel backupserverIPLabel;
+	private JTextField backupserverIPTextField;
 	
 	private JTextField statusTextField;
 	
@@ -44,19 +51,26 @@ public class registrationWindow {
 	private GridBagConstraints c;
 	private Insets set;
 	
-	public registrationWindow(JFrame startWindowFrame) {
+	private registrationWindow(JFrame startWindowFrame) {
 		this.registrationWindowFrame=	new JFrame();
 		this.wellcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
-		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data and");
-		this.wellcomeLabel2			=	new JLabel("push \"Submit & Login\"-Button");
+		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
 		this.userNameLabel			=	new JLabel("Username");
 		this.userNameTextField 		=	new JTextField();
 		this.passWordLabel			=	new JLabel("Password");
 		this.passWordTextField		=	new JPasswordField();
-		this.BackupserverIPLabel	=	new JLabel("IP of your Backupserver");
-		this.BackupserverIPTextField=	new JTextField();
+		this.firstNameLabel			=	new JLabel("First name");
+		this.firstNameTextField 	=	new JTextField();
+		this.lastNameLabel			=	new JLabel("Last name");
+		this.lastNameTextField 		=	new JTextField();
+		this.eMailLabel				=	new JLabel("eMail");
+		this.eMailTextField 		=	new JTextField();
+		this.birthDayLabel			=	new JLabel("Birthday");
+		this.birthDayTextField 		=	new JTextField();
+		this.backupserverIPLabel	=	new JLabel("IP of your Backupserver");
+		this.backupserverIPTextField=	new JTextField();
 		
 		this.statusTextField		=	new JTextField();
 		
@@ -115,17 +129,48 @@ public class registrationWindow {
 		
 		c.gridx 	= 0;
 		c.gridy 	= 6;
-		registrationWindowFrame.add(BackupserverIPLabel, c);
+		registrationWindowFrame.add(firstNameLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(BackupserverIPTextField, c);
+		registrationWindowFrame.add(firstNameTextField, c);
+		
 		
 		c.gridx 	= 0;
 		c.gridy 	= 7;
+		registrationWindowFrame.add(lastNameLabel, c);
+		
+		c.gridx 	= 1;
+		registrationWindowFrame.add(lastNameTextField, c);
+		
+		c.gridx 	= 0;
+		c.gridy 	= 8;
+		registrationWindowFrame.add(eMailLabel, c);
+		
+		c.gridx 	= 1;
+		registrationWindowFrame.add(eMailTextField, c);
+		
+		c.gridx 	= 0;
+		c.gridy 	= 9;
+		registrationWindowFrame.add(birthDayLabel, c);
+		
+		c.gridx 	= 1;
+		registrationWindowFrame.add(birthDayTextField, c);
+		
+		
+		
+		c.gridx 	= 0;
+		c.gridy 	= 10;
+		registrationWindowFrame.add(backupserverIPLabel, c);
+		
+		c.gridx 	= 1;
+		registrationWindowFrame.add(backupserverIPTextField, c);
+		
+		c.gridx 	= 0;
+		c.gridy 	= 11;
 		c.gridwidth = 2;
 		registrationWindowFrame.add(statusTextField, c);
 		
-		c.gridy 	= 8;
+		c.gridy 	= 12;
 		c.gridwidth = 1;
 		registrationWindowFrame.add(backButton, c);	
 		

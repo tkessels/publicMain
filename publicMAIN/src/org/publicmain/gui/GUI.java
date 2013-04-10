@@ -689,7 +689,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 				new checkoutHistoryWindow();
 				break;
 			case "Backup-Server Settings":
-				new BackUpServerSettingsWindow();
+				//TODO: hier noch eine vernünfige variante der Implementierung
+				registrationWindow.getRegistrationWindow();
 				break;
 			}
 			

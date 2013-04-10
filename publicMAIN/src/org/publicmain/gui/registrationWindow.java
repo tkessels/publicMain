@@ -1,28 +1,26 @@
 package org.publicmain.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.JWindow;
+
+import org.publicmain.sql.BackupDBConnection;
 
 public class registrationWindow {
 	
 	private static registrationWindow me;
+	private BackupDBConnection bdb;
 	private JFrame registrationWindowFrame;
 	private JLabel wellcomeLogo;
 	private JLabel wellcomeLabel1;
@@ -51,7 +49,7 @@ public class registrationWindow {
 	private GridBagConstraints c;
 	private Insets set;
 	
-	private registrationWindow(JFrame startWindowFrame) {
+	private registrationWindow() {
 		this.registrationWindowFrame=	new JFrame();
 		this.wellcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
 		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
@@ -74,11 +72,11 @@ public class registrationWindow {
 		
 		this.statusTextField		=	new JTextField();
 		
-		this.backButton				=	new JButton("< Back");
-		this.submitButton			=	new JButton("Submit & Login");
+		this.backButton				=	new JButton("Apply Changes");
+		this.submitButton			=	new JButton("Register");
 		
-		this.submitButton.addActionListener(new registrationWindowButtonController(registrationWindowFrame, startWindowFrame));
-		this.backButton.addActionListener(new registrationWindowButtonController(registrationWindowFrame, startWindowFrame));
+		this.submitButton.addActionListener(new registrationWindowButtonController());
+		this.backButton.addActionListener(new registrationWindowButtonController());
 		
 		this.c 						= new GridBagConstraints();
 		this.set 					= new Insets(5, 5, 5, 5);
@@ -184,37 +182,32 @@ public class registrationWindow {
 		registrationWindowFrame.setVisible(true);
 	}
 	
-	
-	public static registrationWindow getRegistrationWindow(JFrame startWindowFrame){
+	public static registrationWindow getRegistrationWindow(){
 		if (me == null) {
-			me = new registrationWindow(startWindowFrame);
+			me = new registrationWindow();
 			return me;
 		} else {
-			me.registrationWindowFrame.setVisible(true);
 			return me;
 		}
 	}
-}
-class registrationWindowButtonController implements ActionListener{
-	private JFrame registrationWindowFrame;
-	private JFrame startWindowFrame;
-	public registrationWindowButtonController(JFrame registrationWindowFrame, JFrame startWindowFrame) {
-		this.registrationWindowFrame =	registrationWindowFrame;
-		this.startWindowFrame =	startWindowFrame;
-	}
 
-	public void actionPerformed(ActionEvent evt) {
-		JButton source = (JButton)evt.getSource();
-		switch(source.getText()){
-		
-		case "< Back":
-			registrationWindowFrame.setVisible(false);
-			startWindowFrame.setVisible(true);
-			break;
-		case "Submit & Login":
-			registrationWindowFrame.setVisible(false);
-			GUI.getGUI();
-		break;
+	class registrationWindowButtonController implements ActionListener {
+
+		public registrationWindowButtonController() {
+		}
+
+		public void actionPerformed(ActionEvent evt) {
+			bdb = BackupDBConnection.getBackupDBConnection();
+			JButton source = (JButton) evt.getSource();
+			switch (source.getText()) {
+
+			case "Apply Changes":
+				//TODO Hier wie gewünscht das Übernehmen die Änderungen initiieren 
+				break;
+			case "Register":
+				bdb.createNewUser(statusTextField, backupserverIPTextField, userNameTextField, passWordTextField);
+				break;
+			}
 		}
 	}
 }

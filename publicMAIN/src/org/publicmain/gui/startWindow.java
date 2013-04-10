@@ -15,9 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.publicmain.gui.BackUpServerSettingsWindow.backUpServerSettingsWindowButtonController;
-import org.publicmain.sql.BackupDBConnection;
-
 public class startWindow {
 
 	private static startWindow me;
@@ -41,13 +38,11 @@ public class startWindow {
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
 
-		
-		this.goButton			=	new JButton("GO");
-		this.pullButton			=	new JButton("PULL from Backup");
-		
+		this.goButton				=	new JButton("GO");
+		this.pullButton				=	new JButton("PULL from Backup");
 
-		this.c 						= new GridBagConstraints();
-		this.set 					= new Insets(5, 5, 5, 5);
+		this.c 						= 	new GridBagConstraints();
+		this.set 					=	new Insets(5, 5, 5, 5);
 		
 		this.goButton.addActionListener(new startWindowButtonController(startWindowFrame, c, goButton));
 		this.pullButton.addActionListener(new startWindowButtonController(startWindowFrame, c, goButton));
@@ -57,8 +52,6 @@ public class startWindow {
 		startWindowFrame.getContentPane().setBackground(Color.WHITE);
 		startWindowFrame.setMinimumSize(new Dimension(200, 180));
 		
-
-
 		startWindowFrame.setLayout(new GridBagLayout());
 		c.insets 	= set;
 		c.fill 		= GridBagConstraints.HORIZONTAL;
@@ -84,7 +77,6 @@ public class startWindow {
 		c.gridy 	= 3;
 		startWindowFrame.add(goButton, c);
 		
-
 		c.gridx 	= 1;
 		startWindowFrame.add(pullButton, c);
 		
@@ -104,7 +96,7 @@ public class startWindow {
 }
 
 class startWindowButtonController implements ActionListener{
-	JFrame startWindowFrame;
+	private JFrame startWindowFrame;
 	private JLabel wellcomeLabel2;
 	private JLabel wellcomeLabel3;
 	private JLabel userNameLabel;
@@ -114,7 +106,6 @@ class startWindowButtonController implements ActionListener{
 	private JTextField statusTextField;
 	private JLabel backupserverIPLabel;
 	private JTextField backupserverIPTextField;
-//	private JButton pull;
 	private GridBagConstraints c;
 	
 	private JButton goButton;
@@ -127,8 +118,8 @@ class startWindowButtonController implements ActionListener{
 
 	public void actionPerformed(ActionEvent evt) {
 		
-		JButton source = (JButton)evt.getSource();
-		switch(source.getText()){
+		JButton sourceButton = (JButton)evt.getSource();
+		switch(sourceButton.getText()){
 		
 		case "GO":
 			startWindowFrame.setVisible(false);
@@ -144,14 +135,12 @@ class startWindowButtonController implements ActionListener{
 			this.passWordLabel			=	new JLabel("Password");
 			this.passWordTextField		=	new JPasswordField();
 			this.statusTextField		=	new JTextField();
-//			this.pull					=	new JButton("PULL from Backup & GO");
 			this.backupserverIPLabel	=	new JLabel("Backupserver IP");
 			this.backupserverIPTextField=	new JTextField();
 			
 			statusTextField.setBackground(new Color(229, 195, 0));
 			statusTextField.setEditable(false);
-			source.setVisible(false);
-			source.setText("PULL from Backup & GO");
+			sourceButton.setText("PULL from Backup & GO");
 			
 			c.gridx 	= 0;
 			c.gridy 	= 3;
@@ -188,29 +177,24 @@ class startWindowButtonController implements ActionListener{
 			c.gridx 	= 1;
 			startWindowFrame.add(backupserverIPTextField, c);
 			
-			
-			
 			c.gridx 	= 0;
 			c.gridy 	= 9;
 			c.gridwidth = 2;
 			startWindowFrame.add(statusTextField, c);
 			
-
-			
 			c.gridx 	= 0;
 			c.gridy 	= 10;
 			c.gridwidth = 2;
-			startWindowFrame.add(source, c);
-			source.setVisible(true);
+			startWindowFrame.add(sourceButton, c);
+			sourceButton.setVisible(true);
 			
 			startWindowFrame.pack();
 		break;
-		case "PULL from Backup & GO":
-			System.out.println("wenn das klappt geht´s");
-			
-			//TODO:
-			break;
 		
+		case "PULL from Backup & GO":						//Vorsicht...ist ein bissl undurchsichtig! Ist der selbe Button wie "oben" nur wurde der Text
+			System.out.println("wenn das klappt geht´s");	//umbenannt und neu positioniert. Daher trifft ein anderer case im (selben) Buttoncontroller zu.
+			// Hier noch viel sinnvolles implementieren!!!
+			break;
 		}
 	}
 }

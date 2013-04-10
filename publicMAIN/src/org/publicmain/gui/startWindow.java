@@ -12,6 +12,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import org.publicmain.gui.BackUpServerSettingsWindow.backUpServerSettingsWindowButtonController;
@@ -21,11 +22,14 @@ public class startWindow {
 
 	private static startWindow me;
 	private JFrame startWindowFrame;
+	private JLabel wellcomeLogo;
 	private JLabel wellcomeLabel;
+	private JLabel wellcomeLabel2;
+	private JLabel wellcomeLabel3;
 	private JLabel userNameLabel;
 	private JTextField userNameTextField;
 	private JLabel passWordLabel;
-	private JTextField passWordTextField;
+	private JPasswordField passWordTextField;
 	
 	private JTextField statusTextField;
 	
@@ -39,11 +43,14 @@ public class startWindow {
 	private startWindow() {
 		
 		this.startWindowFrame		=	new JFrame();
-		this.wellcomeLabel			=	new JLabel("Wellcome to pMain");
+		this.wellcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
+		this.wellcomeLabel			=	new JLabel("Wellcome!");
+		this.wellcomeLabel2			=	new JLabel("Please Enter your Username and Password");
+		this.wellcomeLabel3			=	new JLabel("If you are new, press \"Register\"-Button");
 		this.userNameLabel			=	new JLabel("Username");
 		this.userNameTextField 		=	new JTextField();
 		this.passWordLabel			=	new JLabel("Password");
-		this.passWordTextField		=	new JTextField();
+		this.passWordTextField		=	new JPasswordField();
 		
 		this.statusTextField		=	new JTextField();
 		
@@ -58,6 +65,7 @@ public class startWindow {
 		this.set 					= new Insets(5, 5, 5, 5);
 		
 		startWindowFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		startWindowFrame.getContentPane().setBackground(Color.WHITE);
 		startWindowFrame.setMinimumSize(new Dimension(200, 180));
 		
 		statusTextField.setBackground(new Color(229, 195, 0));
@@ -72,9 +80,21 @@ public class startWindow {
 		c.gridx 	= 0;
 		c.gridy 	= 0;
 		c.gridwidth = 2;
-		startWindowFrame.add(wellcomeLabel ,c);
+		startWindowFrame.add(wellcomeLogo ,c);
 		
 		c.gridy 	= 1;
+		c.gridwidth = 2;
+		startWindowFrame.add(wellcomeLabel, c);
+		
+		c.gridy 	= 2;
+		c.gridwidth = 2;
+		startWindowFrame.add(wellcomeLabel2, c);
+		
+		c.gridy 	= 3;
+		c.gridwidth = 2;
+		startWindowFrame.add(wellcomeLabel3, c);
+		
+		c.gridy 	= 4;
 		c.gridwidth = 1;
 		startWindowFrame.add(userNameLabel, c);
 		
@@ -82,18 +102,18 @@ public class startWindow {
 		startWindowFrame.add(userNameTextField, c);
 		
 		c.gridx 	= 0;
-		c.gridy 	= 2;
+		c.gridy 	= 5;
 		startWindowFrame.add(passWordLabel, c);
 		
 		c.gridx 	= 1;
 		startWindowFrame.add(passWordTextField, c);
 		
 		c.gridx 	= 0;
-		c.gridy 	= 3;
+		c.gridy 	= 6;
 		c.gridwidth = 2;
 		startWindowFrame.add(statusTextField, c);
 		
-		c.gridy 	= 4;
+		c.gridy 	= 7;
 		c.gridwidth = 1;
 		startWindowFrame.add(loginButton, c);
 		

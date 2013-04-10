@@ -1,9 +1,7 @@
 package org.publicmain.gui;
 
-import java.awt.BorderLayout;
-import java.awt.ComponentOrientation;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,7 +27,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
@@ -38,6 +35,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.FontUIResource;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.chatengine.GruppenKanal;
@@ -93,7 +91,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private GUI() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			UIManager.getLookAndFeelDefaults().put("defaultFont", new Font("SourceSansPro-Regular.otf", Font.BOLD, 50));
 		} catch (Exception ex) {
+			System.out.println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 			log.log(ex);
 		}
 
@@ -220,7 +220,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setTitle("publicMAIN");
 		this.contactListWin = new ContactList(me);
 		this.setVisible(true);
-		chatList.get(0).focusEingabefeld(); // das tut's net
+		this.chatList.get(0).focusEingabefeld();
 	}
 	
 	/**

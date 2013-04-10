@@ -317,15 +317,15 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * Diese Methode erstellt ein ChatWindow für Privatechat's, falls ChatWindow bereits vorhanden, wird dieses fokusiert.
 	 * @param aliasName
 	 */
-	public void addPrivCW(String aliasName){
-		if(existCW(aliasName) == null){
-			long tmpUID = ce.getNodeforAlias(aliasName).getUserID();
-			createChat(new ChatWindow(tmpUID, aliasName));
+	public void addPrivCW(long uid){
+		String tmpAlias = ce.getNodeForUID(uid).getAlias();
+		if(existCW(tmpAlias) == null){
+			createChat(new ChatWindow(uid, tmpAlias));
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-			ce.add_MSGListener(existCW(aliasName), tmpUID);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(aliasName)));
+			ce.add_MSGListener(existCW(tmpAlias), uid);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(aliasName)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
 		}
 	}
 	
@@ -439,25 +439,17 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	void privSend(String empfAlias, String msg){
 		ChatWindow tmpCW = existCW(empfAlias);
-		int tabNr = 0;
-		long tmpUID;
-		try{
-			for(Node x : ce.getUsers()){
-				if(x.getAlias().equals(empfAlias)){
-					tmpUID = x.getNodeID();
-					if(tmpCW == null){
-						addPrivCW(empfAlias);
-						tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
-						jTabbedPane.setSelectedIndex(tabNr);
-					} else {
-						tabNr = jTabbedPane.indexOfComponent(tmpCW);
-						jTabbedPane.setSelectedIndex(tabNr);
-					}
-					ce.send_private(tmpUID, msg);
-				}
+		long tmpUID = -1;
+		tmpUID = ce.getNodeforAlias(empfAlias).getUserID();
+		if(tmpUID != -1){
+			if(tmpCW == null){
+				addPrivCW(tmpUID);
+//					tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
+//					jTabbedPane.setSelectedIndex(tabNr);
+			} else {
+				jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
 			}
-		} catch (NullPointerException npex){
-			LogEngine.log("User nicht gefunden!", LogEngine.ERROR);
+			ce.send_private(tmpUID, msg);
 		}
 	}
 	
@@ -470,14 +462,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	void groupSend(String empfGrp, String msg){
 		ChatWindow tmpCW = existCW(empfGrp);
-		int tabNr = 0;
 		if(tmpCW == null){
 			addGrpCW(empfGrp);
-			tabNr = jTabbedPane.indexOfComponent(existCW(empfGrp));
-			jTabbedPane.setSelectedIndex(tabNr);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(empfGrp)));
 		} else {
-			tabNr = jTabbedPane.indexOfComponent(tmpCW);
-			jTabbedPane.setSelectedIndex(tabNr);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
 		}
 		ce.send_group(empfGrp, msg);
 	}
@@ -565,7 +554,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
 			Node tmp_node = ce.getNodeForNID(tmp.getSender());
-			me.addPrivCW(tmp_node.getAlias());
+			me.addPrivCW(tmp_node.getUserID());
 			//ce.put(tmp);
 		}
 	}

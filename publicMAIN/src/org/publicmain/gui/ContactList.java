@@ -26,6 +26,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JWindow;
 import javax.swing.ListSelectionModel;
 
+import org.publicmain.chatengine.ChatEngine;
+
 /**
  * @author ATRM
  * 
@@ -151,7 +153,7 @@ public class ContactList extends JWindow {
 						GUI.getGUI().addGrpCW(o.toString());
 					}
 					if(source.getModel().getClass().getSimpleName().startsWith("User")){
-						GUI.getGUI().addPrivCW(o.toString());
+						GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(o.toString()).getUserID());
 					}
 				}
 			}
@@ -253,7 +255,6 @@ public class ContactList extends JWindow {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JMenuItem source = (JMenuItem)e.getSource();
-//			System.out.println(source.getText());
 			
 			if(source.getText().startsWith("join")){
 				GUI.getGUI().addGrpCW(chatname);
@@ -262,7 +263,7 @@ public class ContactList extends JWindow {
 				GUI.getGUI().delChat(chatname);
 			}
 			else if(source.getText().startsWith("whisper")){
-				GUI.getGUI().addPrivCW(chatname);
+				GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(chatname).getUserID());
 			}
 			else if(source.getText().startsWith("ignore")){
 				GUI.getGUI().ignoreUser(chatname);

@@ -36,7 +36,7 @@ public class NodeEngine {
  private final int MAX_CLIENTS = 5; 														//Maximale Anzahl anzunehmender Verbindungen 
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
- private long nodeID;
+ private final long nodeID;
  private Node meinNode; 					//die NodeRepräsentation dieser NodeEngine
  private ChatEngine ce; 					//Zeiger auf parent ChatEngine
  private Hook angler = new Hook();		//Hookobjekt zum abfangen von Nachrichten		
@@ -69,7 +69,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		connections = new ArrayList<ConnectionHandler>();
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
 		
-		setNodeID((long) (Math.random()*Long.MAX_VALUE));
+		nodeID=((long) (Math.random()*Long.MAX_VALUE));
 		ne = this;
 		ce = parent;
 		online = true;
@@ -175,6 +175,16 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 	
+	
+	public Node getNodeForUID(long uid){
+		synchronized (allNodes) {
+			for (Node x : getNodes()) {
+				if (x.getUserID() == uid)
+					return x;
+			}
+			return null;
+		}
+	}
 	
 
 
@@ -660,9 +670,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		return nodeID;
 	}
 
-	public void setNodeID(long nodeID) {
+	/*public void setNodeID(long nodeID) {
 		this.nodeID = nodeID;
-	}
+	}*/
 
 	public void joinGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
 		updateMyGroups();

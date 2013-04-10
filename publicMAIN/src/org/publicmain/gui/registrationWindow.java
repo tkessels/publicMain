@@ -132,7 +132,6 @@ public class registrationWindow {
 		c.gridx 	= 1;
 		registrationWindowFrame.add(firstNameTextField, c);
 		
-		
 		c.gridx 	= 0;
 		c.gridy 	= 7;
 		registrationWindowFrame.add(lastNameLabel, c);

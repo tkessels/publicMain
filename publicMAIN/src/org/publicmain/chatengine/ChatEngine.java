@@ -87,9 +87,16 @@ public class ChatEngine extends Observable{
 	 * @param nid NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
 	 */
-	public Node getNode(long nid){
+	public Node getNodeForNID(long nid){
 		return ne.getNode(nid);
 	}
+	
+	public Node getNodeForUID(long uid){
+		return ne.getNodeForUID(uid);
+	}
+
+	
+	
 	
 	public long getUserID() {
 		return userID;
@@ -125,7 +132,7 @@ public class ChatEngine extends Observable{
 	 * @param text Nachricht
 	 */
 	public void send_private(long uid, String text){
-		MSG tmp = new MSG(uid,text);
+		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(),text);
 		put(tmp);
 		ne.sendtcp(tmp);
 	}
@@ -328,12 +335,17 @@ public class ChatEngine extends Observable{
 				try {
 					MSG tmp = inbox.take(); 
 					LogEngine.log("msgSorterBot","sorting",tmp);
-					if (tmp.getTyp() == NachrichtenTyp.GROUP) for (Kanal x : group_channels)if (x.add(tmp)) break;
-					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
+					System.out.println(tmp);
+					if (tmp.getTyp() == NachrichtenTyp.GROUP)
+					{
+						for (Kanal x : group_channels)if (x.add(tmp)) break;
+					}
+					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) 
+					{
+						System.out.println("PRIVATE MSG");
 						for (KnotenKanal y : private_channels) if (y.add(tmp))break;
 						//Kein CW angemeldet um die Nachricht aufzunehmen  sende es an GUI via DEFAULT CHANNEL
 						default_channel.add(tmp);
-						
 					}
 				} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
 				}

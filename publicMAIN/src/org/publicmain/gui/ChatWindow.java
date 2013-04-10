@@ -148,7 +148,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			public void run() {
 				while(true){
 					if (isPrivCW) {
-						if (gui.getNode(userID) == null) {
+						if (gui.getNodeForUID(userID) == null) {
 							onlineState = false;
 							myTab.setOffline();
 							eingabeFeld.setEnabled(false);
@@ -339,7 +339,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 */
 	private void printMSG(MSG msg) {
 		String color = "black";
-		Node sender = ChatEngine.getCE().getNode(msg.getSender());
+		Node sender = ChatEngine.getCE().getNodeForNID(msg.getSender());
 		String senderalias = (sender!=null)? sender.getAlias():"unknown";
 		
 		switch(msg.getTyp()){

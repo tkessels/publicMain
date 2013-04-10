@@ -387,10 +387,19 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * Fährt das Programm ordnungsgemäß runter
 	 */
 	void shutdown(){
-		//TODO: ordentlicher shutdown
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.exit(0);
+			}
+		}).start();
 		ce.shutdown();
 		locDBCon.shutdownLocDB();
-		System.exit(0);
 	}
 
 	/**
@@ -555,7 +564,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
-			Node tmp_node = ce.getNode(tmp.getSender());
+			Node tmp_node = ce.getNodeForNID(tmp.getSender());
 			me.addPrivCW(tmp_node.getAlias());
 			ce.put(tmp);
 		}
@@ -564,14 +573,13 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	/**
 	 * Diese Methode stellt das Node bereit
 	 * 
-	 * Diese Methode ist ein Getter für das Node
+	 * Diese Methode holt das {@link NODE}-Objekt für eine UserID
 	 * 
-	 * @param sender
+	 * @param uid
 	 * @return Node
 	 */
-	//TODO: evtl. löschen ???
-	public Node getNode(long sender) {
-		return ce.getNode(sender);
+	public Node getNodeForUID(long uid) {
+		return ce.getNodeForUID(uid);
 	}
 	
 	/**

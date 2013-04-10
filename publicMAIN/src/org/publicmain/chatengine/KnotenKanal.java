@@ -11,6 +11,8 @@ public class KnotenKanal extends Kanal{
 
 	@Override
 	public boolean add(MSG nachricht) {
+		System.out.println(nachricht);
+		System.out.println(referenz);
 		if((nachricht.getSender()==(long)referenz)||nachricht.getEmpfänger()==(long)referenz){
 			setChanged();
 			notifyObservers(nachricht);

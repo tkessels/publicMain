@@ -238,6 +238,7 @@ public class ConnectionHandler {
 					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
 					System.out.println(me);
 					System.out.println(readObject);
+					System.out.println(readObject.getClass());
 					System.out.println(e.getMessage());
 					e.printStackTrace();
 					if (readObject != null) System.out.println((readObject instanceof MSG) ? ((MSG) readObject).toString() : readObject.toString());

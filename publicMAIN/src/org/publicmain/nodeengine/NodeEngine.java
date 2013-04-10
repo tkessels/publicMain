@@ -771,11 +771,12 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 */
 	private final class RootMe implements Runnable {
 		public void run() {
-			if (!online&&!isRoot()&&!rootDiscovering)	return;
+//			if (!online&&!isRoot()&&!rootDiscovering)	return;
+			if (!online||isRoot()||rootDiscovering) return;
 			long until = System.currentTimeMillis() + CONNECTION_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
-					Thread.sleep(500);
+					Thread.sleep(CONNECTION_TIMEOUT);
 				}
 				catch (InterruptedException e) {
 				}
@@ -808,7 +809,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			long until = System.currentTimeMillis() + ROOT_ANNOUNCE_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
-					Thread.sleep(500);
+					Thread.sleep(ROOT_ANNOUNCE_TIMEOUT);
 				}
 				catch (InterruptedException e) {
 				}

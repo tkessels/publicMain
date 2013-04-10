@@ -281,13 +281,16 @@ public class ChatEngine extends Observable{
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel,long uid){
+		System.out.println("Privater Chat hinzugefügt");
+		long nid = ce.getNodeForUID(uid).getNodeID();
 		for (KnotenKanal cur : private_channels) {
-				if(cur.is(uid)) {
+				if(cur.is(nid)) {
+					System.out.println("und auch gefunden");
 					cur.addObserver(chatPanel);
 					return;
 				}
 		}
-		KnotenKanal tmp = new KnotenKanal(uid);
+		KnotenKanal tmp = new KnotenKanal(nid);
 		tmp.addObserver(chatPanel);
 		private_channels.add(tmp);
 	}

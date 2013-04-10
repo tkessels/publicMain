@@ -566,7 +566,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			MSG tmp = (MSG) arg;
 			Node tmp_node = ce.getNodeForNID(tmp.getSender());
 			me.addPrivCW(tmp_node.getAlias());
-			ce.put(tmp);
+			//ce.put(tmp);
 		}
 	}
 

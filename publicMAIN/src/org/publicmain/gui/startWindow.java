@@ -23,9 +23,11 @@ public class startWindow {
 	private static startWindow me;
 	private JFrame startWindowFrame;
 	private JLabel wellcomeLogo;
-	private JLabel wellcomeLabel;
+	private JLabel wellcomeLabel1;
 	private JLabel wellcomeLabel2;
 	private JLabel wellcomeLabel3;
+	private JLabel nickNameLabel;
+	private JTextField nickNameTextField;
 	private JLabel userNameLabel;
 	private JTextField userNameTextField;
 	private JLabel passWordLabel;
@@ -35,7 +37,6 @@ public class startWindow {
 	
 	private JButton loginButton;
 	private JButton registerButton;
-	private boolean registerButtonPushed;
 	
 	private GridBagConstraints c;
 	private Insets set;
@@ -44,8 +45,10 @@ public class startWindow {
 		
 		this.startWindowFrame		=	new JFrame();
 		this.wellcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
-		this.wellcomeLabel			=	new JLabel("Wellcome!");
-		this.wellcomeLabel2			=	new JLabel("Please Enter your Username and Password");
+		this.wellcomeLabel1			=	new JLabel("Enter your Nick if you just want to chat.");
+		this.nickNameLabel			=	new JLabel("Nickname");
+		this.nickNameTextField		=	new JTextField();
+		this.wellcomeLabel2			=	new JLabel("For using Backup-DB also enter Username and Password");
 		this.wellcomeLabel3			=	new JLabel("If you are new, press \"Register\"-Button");
 		this.userNameLabel			=	new JLabel("Username");
 		this.userNameTextField 		=	new JTextField();
@@ -56,14 +59,14 @@ public class startWindow {
 		
 		this.loginButton			=	new JButton("Login");
 		this.registerButton			=	new JButton("Register");
-		this.registerButtonPushed 	= 	false;
 		
 		this.loginButton.addActionListener(new startWindowButtonController(startWindowFrame));
-		this.registerButton.addActionListener(new startWindowButtonController(registerButtonPushed));
+		this.registerButton.addActionListener(new startWindowButtonController(startWindowFrame));
 
 		this.c 						= new GridBagConstraints();
 		this.set 					= new Insets(5, 5, 5, 5);
 		
+		startWindowFrame.setTitle("Wellcome!");
 		startWindowFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
 		startWindowFrame.getContentPane().setBackground(Color.WHITE);
 		startWindowFrame.setMinimumSize(new Dimension(200, 180));
@@ -83,18 +86,25 @@ public class startWindow {
 		startWindowFrame.add(wellcomeLogo ,c);
 		
 		c.gridy 	= 1;
-		c.gridwidth = 2;
-		startWindowFrame.add(wellcomeLabel, c);
+		startWindowFrame.add(wellcomeLabel1, c);
 		
 		c.gridy 	= 2;
+		c.gridwidth = 1;
+		startWindowFrame.add(nickNameLabel, c);
+		
+		c.gridx 	= 1;
+		startWindowFrame.add(nickNameTextField, c);
+		
+		c.gridy 	= 3;
+		c.gridx 	= 0;
 		c.gridwidth = 2;
 		startWindowFrame.add(wellcomeLabel2, c);
 		
-		c.gridy 	= 3;
-		c.gridwidth = 2;
+		c.gridy 	= 4;
 		startWindowFrame.add(wellcomeLabel3, c);
 		
-		c.gridy 	= 4;
+		c.gridx 	= 0;
+		c.gridy 	= 5;
 		c.gridwidth = 1;
 		startWindowFrame.add(userNameLabel, c);
 		
@@ -102,18 +112,18 @@ public class startWindow {
 		startWindowFrame.add(userNameTextField, c);
 		
 		c.gridx 	= 0;
-		c.gridy 	= 5;
+		c.gridy 	= 6;
 		startWindowFrame.add(passWordLabel, c);
 		
 		c.gridx 	= 1;
 		startWindowFrame.add(passWordTextField, c);
 		
 		c.gridx 	= 0;
-		c.gridy 	= 6;
+		c.gridy 	= 7;
 		c.gridwidth = 2;
 		startWindowFrame.add(statusTextField, c);
 		
-		c.gridy 	= 7;
+		c.gridy 	= 8;
 		c.gridwidth = 1;
 		startWindowFrame.add(loginButton, c);
 		
@@ -137,15 +147,8 @@ public class startWindow {
 
 class startWindowButtonController implements ActionListener{
 	JFrame startWindowFrame;
-	boolean registerButtonPushed;
-	public startWindowButtonController() {
-
-	}
 	public startWindowButtonController(JFrame startWindowFrame) {
 		this.startWindowFrame = startWindowFrame;
-	}
-	public startWindowButtonController(boolean registerButtonPushed) {
-		this.registerButtonPushed = registerButtonPushed;
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -160,14 +163,9 @@ class startWindowButtonController implements ActionListener{
 			//TODO:
 			break;
 		case "Register":
-			if (registerButtonPushed){
-				registerButtonPushed = false;
-			} else if (!registerButtonPushed){
-				registrationWindow.getRegistrationWindow();
-				registerButtonPushed = true;
-			}
-			break;
+			startWindowFrame.setVisible(false);
+			registrationWindow.getRegistrationWindow(startWindowFrame);
+		break;
 		}
 	}
-	
 }

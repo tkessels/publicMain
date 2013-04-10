@@ -386,6 +386,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		//TODO: ordentlicher shutdown
 		ce.shutdown();
 		System.exit(0);
+		locDBCon.shutdownLocDB();
 	}
 
 	/**

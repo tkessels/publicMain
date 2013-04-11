@@ -37,7 +37,8 @@ public class Config {
 		sourceSettings.put("ce.ping_enabled", "false");
 		sourceSettings.put("log.verbosity", "4");
 		
-		sourceSettings.put("gui.max_group_length","12");
+		sourceSettings.put("gui.max_group_length","19");
+		sourceSettings.put("gui.max_alias_length","19");
 		sourceSettings.put("gui.group_pattern","[a-z0-9\\-_]{2,}");
 		
 		sourceSettings.put("sql.local_db_port","3306");
@@ -114,9 +115,11 @@ public class Config {
 	}
 
 	public int getMaxGroupLength() {
-		String property = settings.getProperty("gui.max_group_length");
-		System.out.println(property);
-		return Integer.parseInt(property);
+		return Integer.parseInt(settings.getProperty("gui.max_group_length"));
+	}
+	
+	public int getMaxAliasLength() {
+		return Integer.parseInt(settings.getProperty("gui.max_alias_length"));
 	}
 	
 

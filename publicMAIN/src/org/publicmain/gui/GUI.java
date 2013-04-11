@@ -73,7 +73,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private JMenuItem checkoutHistory;
 	private JMenuItem aboutPMAIN;
 	private JMenuItem helpContents;
-	private JMenuItem menuItemSendFile;
+	private JMenuItem exit;
 	private JMenuItem lafNimROD;
 	private ButtonGroup btnGrp;
 	
@@ -107,7 +107,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
-		this.menuItemSendFile = new JMenuItem("send File to");
+		this.exit = new JMenuItem("Exit");
 		this.lafMenu		= new JMenu("Switch Design");
 		this.btnGrp 		= new ButtonGroup();
 		this.chatList 		= new ArrayList<ChatWindow>();
@@ -150,7 +150,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.jTabbedPane.addChangeListener(this);
 
 		// ActionListener für Menu's:
-		this.menuItemSendFile.addActionListener(new menuContoller());
+		this.exit.addActionListener(new menuContoller());
 		this.aboutPMAIN.addActionListener(new menuContoller());
 		this.helpContents.addActionListener(new menuContoller());
 		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
@@ -180,7 +180,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		
 		this.configMenu.add(lafMenu);
 		
-		this.fileMenu.add(menuItemSendFile);
+		this.fileMenu.add(exit);
 		
 		this.helpMenu.add(aboutPMAIN);
 		this.helpMenu.add(helpContents);
@@ -398,6 +398,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}).start();
 		ce.shutdown();
 		locDBCon.shutdownLocDB();
+		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
 	}
 
 	/**

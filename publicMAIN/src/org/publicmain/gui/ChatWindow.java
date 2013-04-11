@@ -272,12 +272,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
 				else if (eingabe.startsWith("/ignore ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
-					if(this.gui.ignoreUser(tmp[1])){
-						info(tmp[1] + " wird ignoriert!");
-						LogEngine.log(tmp[1] + " wird ignoriert!", LogEngine.INFO);
+					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if((tmp_node!=null) && this.gui.ignoreUser(tmp_node.getUserID())){
+						info(tmp_node + " wird ignoriert!");
+						LogEngine.log(tmp_node + " wird ignoriert!", LogEngine.INFO);
 					} else {
-						warn("Ignorieren von " + tmp[1] + " nicht möglich!");
-						LogEngine.log("Ignorieren von " + tmp[1] + " nicht möglich!", LogEngine.INFO);
+						warn("Ignorieren von " + tmp_node + " nicht möglich!");
+						LogEngine.log("Ignorieren von " + tmp_node + " nicht möglich!", LogEngine.INFO);
 					}
 				}else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
 					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
@@ -286,10 +287,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					GUI.getGUI().changeAlias(tmp[1]);
 				}
 				else if (eingabe.startsWith("/unignore ") && (tmp = eingabe.split(" ", 2)).length == 2){
-					if(this.gui.unignoreUser(tmp[1])){
-						info(tmp[1] + " wird nicht weiter ignoriert!");
+					
+					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if((tmp_node!=null) && this.gui.unignoreUser(tmp_node.getUserID())){
+						info(tmp_node + " wird nicht weiter ignoriert!");
 					} else {
-						warn(tmp[1] + "wurde nicht gefunden!");
+						warn(tmp_node + "wurde nicht gefunden!");
 					}
 				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {

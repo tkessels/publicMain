@@ -263,19 +263,21 @@ public class ContactList extends JWindow {
 				GUI.getGUI().delChat(chatname);
 			}
 			else if(source.getText().startsWith("whisper")){
-				GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(chatname).getUserID());
+				
+//				GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(chatname).getUserID());
+				GUI.getGUI().addPrivCW(users.getSelectedValue().getUserID());
 			}
 			else if(source.getText().startsWith("ignore")){
-				GUI.getGUI().ignoreUser(chatname);
+				GUI.getGUI().ignoreUser(users.getSelectedValue().getUserID());
 			}
 			else if(source.getText().startsWith("unignore")){
-				GUI.getGUI().unignoreUser(chatname);
+				GUI.getGUI().unignoreUser(users.getSelectedValue().getUserID());
 			}
 			else if(source.getText().startsWith("info")){
 				//TODO: CODE HERE
 			}
 			else if(source.getText().startsWith("send")){
-				GUI.getGUI().sendFile(chatname);
+				GUI.getGUI().sendFile(users.getSelectedValue().getUserID());
 			}
 		}
 	}

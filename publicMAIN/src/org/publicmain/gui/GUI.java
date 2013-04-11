@@ -477,11 +477,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param alias String Alias des Users
 	 * @returns true Wenn User gefunden
 	 */
-	boolean ignoreUser(String alias){
-		if(ce.getNodeforAlias(alias)!=null){
-			return ce.ignore_user(ce.getNodeforAlias(alias).getNodeID());
-		}
-		return false;
+	boolean ignoreUser(long uid){
+		return ce.ignore_user(uid);
 	}
 
 	/**
@@ -489,25 +486,22 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param alias String Alias des Users
 	 * @return true Wenn User gefunden
 	 */
-	boolean unignoreUser(String alias){
-		if(ce.getNodeforAlias(alias)!=null){
-			return ce.unignore_user(ce.getNodeforAlias(alias).getNodeID());
-		}
-		return false;
+	boolean unignoreUser(long uid){
+			return ce.unignore_user(uid);
 	}
 	
 	/**
 	 * @param aliasName
 	 */
-	public void sendFile(String aliasName) {
+	public void sendFile(long uid) {
 		// TODO: hier stimmen noch paar sachen nicht später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showOpenDialog(me);
+		File selectedFile = fileChooser.getSelectedFile();
 		if(returnVal == JFileChooser.APPROVE_OPTION){
-			System.out.println("You chose to send this file: " + fileChooser.getSelectedFile().getName());
+			System.out.println("You chose to send this file: " + selectedFile.getName());
 		}
-		File datei = new File(fileChooser.getSelectedFile().getAbsolutePath());
-		ce.send_file(ce.getNodeforAlias(aliasName).getUserID(), datei);
+		if(selectedFile!=null)ce.send_file(selectedFile, uid);
 	}
 	
 	/**
@@ -658,17 +652,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			
 			switch(source.getText()){
 			
-			case "send File to":
-				//TODO: nochmal überprüfen!!!
-				String aliasName = null;
-				aliasName = (String)JOptionPane.showInputDialog(me, "Enter Name", "Reciver Name", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("private.png")), null, null);
-				if(aliasName != null && ce.getNodeforAlias(aliasName) != null && !aliasName.equals("")){
-					sendFile(aliasName);
-				} else if(aliasName == null){
-					
-				} else {
-					JOptionPane.showMessageDialog(GUI.getGUI(), "User not found!", "unknown Username", JOptionPane.ERROR_MESSAGE);
-				}
+			case "Exit":
+				shutdown();
 				break;
 			case "About pMAIN":
 				new AboutPublicMAIN(me, "About publicMAIN", true);

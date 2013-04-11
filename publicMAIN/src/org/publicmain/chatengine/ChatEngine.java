@@ -168,12 +168,12 @@ public class ChatEngine extends Observable{
 	
 	/**
 	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden <code>uid</code> zu schicken.
-	 * 
-	 * @param uid UID des Empfängers
 	 * @param datei Datei
+	 * @param uid UID des Empfängers
+	 * 
 	 * @return id des Dateitransfers für spätere Rückfragen
 	 */
-	public int send_file(long uid, File datei){
+	public int send_file(File datei, long uid){
 		//TODO: CODE HERE
 		return 0;
 	}
@@ -258,9 +258,9 @@ public class ChatEngine extends Observable{
 	 * 
 	 * @param uid
 	 */
-	public	boolean	ignore_user(long nodeID){
-			if(nodeID!=ne.getNodeID())return ignored.add(nodeID);
-			else return false;
+	public	boolean	ignore_user(long uid){
+			if(uid!=userID)return ignored.add(getNodeForUID(uid).getNodeID());
+			return false;
 	}
 	
 	/**
@@ -272,9 +272,8 @@ public class ChatEngine extends Observable{
 	 * 
 	 * @param uid
 	 */
-	public boolean unignore_user(long nodeID) {
-		System.out.println(ignored);
-		return ignored.remove(nodeID);
+	public boolean unignore_user(long uid) {
+		return ignored.remove(getNodeForUID(uid).getNodeID());
 	}	
 	
 	/** Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an 

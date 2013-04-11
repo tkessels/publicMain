@@ -75,8 +75,10 @@ public class ConnectionHandler {
 				if (isConnected()) {
 					try {
 						LogEngine.log(ConnectionHandler.this, "sending", paket);
-						line_out.writeObject(paket);
+						//line_out.writeObject(paket);
+						line_out.writeUnshared(paket);
 						line_out.flush();
+						line_out.reset();
 					} catch (IOException e) {
 						LogEngine.log(ConnectionHandler.this, "failure", paket);
 					}
@@ -206,7 +208,10 @@ public class ConnectionHandler {
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
 				try {
-					readObject = line_in.readObject();
+//					readObject = line_in.readObject();
+					readObject = line_in.readUnshared();
+					
+					
 					if (readObject != null && readObject instanceof MSG) {
 						MSG tmp = (MSG) readObject;
 						if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {

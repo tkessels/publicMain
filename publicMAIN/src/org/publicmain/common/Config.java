@@ -33,6 +33,7 @@ public class Config {
 		sourceSettings.put("ne.discover_timeout", "200");
 		sourceSettings.put("ne.root_claim_timeout", "200");
 		sourceSettings.put("ne.max_clients","5");
+		sourceSettings.put("ne.max_file_size","5000000");
 		
 		sourceSettings.put("ch.ping_intervall","30000");
 		sourceSettings.put("ch.ping_enabled", "false");
@@ -152,5 +153,9 @@ public class Config {
         }
         return false;
     }
+
+	public int getMaxFileSize() {
+		return 0;
+	}
 }
 

@@ -80,8 +80,11 @@ public class LogEngine {
 	}
 	
 	protected static boolean filtered(MSG x) {
-		for (NachrichtenTyp tmp : filter_typ) if(x.getTyp()==tmp)return true;
-		if(x.getTyp()==NachrichtenTyp.SYSTEM)	for (MSGCode tmp : filter_code)if(x.getCode()==tmp) return true;
+		if(x!=null)
+		{
+		for (NachrichtenTyp tmp : filter_typ) 	if(x.getTyp()==tmp)return true;
+		if(x.getTyp()==NachrichtenTyp.SYSTEM) 	for (MSGCode tmp : filter_code)	if(x.getCode()==tmp) return true;
+		}
 		return false;
 	}
 

@@ -1,10 +1,18 @@
 package org.publicmain.common;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.publicmain.nodeengine.NodeEngine;
 
@@ -67,6 +75,46 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this.data=text;
 	}
 
+
+	public MSG(File datei, long nid) throws IOException {
+		this(NachrichtenTyp.DATA);
+		if(!datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		GZIPOutputStream zip = new GZIPOutputStream(bout);
+		BufferedOutputStream bos = new BufferedOutputStream(zip);
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
+		byte[] cup=new byte[64000];
+		int leng=-1;
+		while((leng=bis.read(cup))!=-1){
+				bos.write(cup,0,leng);
+		}
+		bos.flush();
+		zip.finish();
+		bos.close();
+		data=bout.toByteArray();
+		System.out.println(((byte[])data).length);
+		setEmpfänger(nid);
+		group=datei.getName();
+	}
+	
+	public void save(File datei) throws IOException{
+		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof byte[]&&((byte[])data).length>0){
+			System.out.println(((byte[])data).length);
+
+			ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) data);
+			GZIPInputStream zip = new GZIPInputStream(bais);
+			BufferedInputStream bis = new BufferedInputStream(zip);
+			
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(datei));
+			byte[] cup=new byte[64000];
+			int leng=-1;
+			while((leng=bis.read(cup))!=-1){
+				bos.write(cup,0,leng);
+			}
+			bos.flush();
+			bos.close();
+		}
+	}
 
 	public long getEmpfänger() {
 		return empfänger;

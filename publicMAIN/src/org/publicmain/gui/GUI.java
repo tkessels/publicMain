@@ -505,12 +505,14 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * Diese Methode bittet die GUI(den Nutzer) um ein Fileobjekt zur Ablage der
 	 * empfangenen Datei
+	 * @param filename TODO
 	 * 
 	 * @return File
 	 */
-	public File request_File() {
+	public File request_File(String filename) {
 		// TODO: hier stimmt noch nix! später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
+		if(filename!=null)fileChooser.setSelectedFile(new File(filename));
 		int returnVal = fileChooser.showSaveDialog(me);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
@@ -738,4 +740,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			System.out.println(obj + "\n\t" + def.get(obj));
 		}
 	}
+
+
 }

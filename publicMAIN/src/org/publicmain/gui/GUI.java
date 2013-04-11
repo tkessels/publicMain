@@ -52,7 +52,8 @@ import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 public class GUI extends JFrame implements Observer , ChangeListener{
 
-	private final int GRP_NAME_LENGTH = Config.getConfig().getMaxGroupLength(); 
+	private final int GRP_NAME_LENGTH = Config.getConfig().getMaxGroupLength();
+	private final int PRIV_NAME_LENGTH = Config.getConfig().getMaxAliasLength();
 	
 	// Deklarationen:
 	private ChatEngine ce;
@@ -90,9 +91,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private GUI() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			//TODO: Schriftart Einbindung noch nicht Funktionsfähig!
 			UIManager.getLookAndFeelDefaults().put("defaultFont", new Font("SourceSansPro-Regular.otf", Font.BOLD, 50));
 		} catch (Exception ex) {
-			System.out.println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 			log.log(ex);
 		}
 
@@ -107,7 +108,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
-		this.exit = new JMenuItem("Exit");
+		this.exit			= new JMenuItem("Exit");
 		this.lafMenu		= new JMenu("Switch Design");
 		this.btnGrp 		= new ButtonGroup();
 		this.chatList 		= new ArrayList<ChatWindow>();
@@ -312,7 +313,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	}
 	
 	/**
-	 * Diese Methode erstellt ein ChatWindow für Privatechat's, falls ChatWindow bereits vorhanden, wird dieses fokusiert.
+	 * Diese Methode erstellt ein ChatWindow für Privatechats, welches fokussiert wird.
 	 * @param aliasName
 	 */
 	public void addPrivCW(long uid){
@@ -322,6 +323,22 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
 			ce.add_MSGListener(existCW(tmpAlias), uid);
 			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
+		} else {
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
+		}
+	}
+	
+	
+	/**
+	 * Diese Methode erstellt ein ChatWindow für einkommende Privatechats, falls ChatWindow bereits vorhanden, wird dieses fokussiert.
+	 * @param uid
+	 */
+	public void addPrivIncomingCW(long uid){
+		String tmpAlias = ce.getNodeForUID(uid).getAlias();
+		if(existCW(tmpAlias) == null){
+			createChat(new ChatWindow(uid, tmpAlias));
+			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
+			ce.add_MSGListener(existCW(tmpAlias), uid);
 		} else {
 			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
 		}
@@ -372,10 +389,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @return boolean
 	 */
 	public boolean changeAlias(String alias){
-		if(contactListWin.nameExists(alias)){
+		if(ce.getNodeforAlias(alias)!=null){
 			System.out.println("GUI: Name existiert bereits! Wird nicht geändert!");
 			return false;
 		} else {
+			//TODO: ChatWindowTab Name ändern;
 			ce.setAlias(alias);
 			return true;
 		}
@@ -541,7 +559,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
 			Node tmp_node = ce.getNodeForNID(tmp.getSender());
-			me.addPrivCW(tmp_node.getUserID());
+			me.addPrivIncomingCW(tmp_node.getUserID());
 			ce.put(tmp);
 		}
 	}

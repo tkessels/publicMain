@@ -384,21 +384,19 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	/**
 	 * F‰hrt das Programm ordnungsgem‰ﬂ runter
 	 */
-	void shutdown(){
+	void shutdown() {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 				System.exit(0);
 			}
 		}).start();
+		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
 		ce.shutdown();
 		locDBCon.shutdownLocDB();
-		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
 	}
 
 	/**
@@ -707,6 +705,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		@Override
 		public void windowClosed(WindowEvent arg0) {
+			contactListZuklappen();
 			shutdown();
 			// Object[] eventCache =
 			// {"super, so ne scheisse","deine Mama liegt im Systemtray"};

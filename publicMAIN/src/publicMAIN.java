@@ -2,10 +2,8 @@ import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
-import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
-import org.publicmain.gui.GUI;
 import org.publicmain.gui.startWindow;
 
 /**

@@ -21,7 +21,7 @@ import org.publicmain.sql.LocalDBConnection;
 
 /**
  * @author ATRM
- *
+ * 
  */
 
 public class ChatEngine extends Observable{
@@ -32,57 +32,64 @@ public class ChatEngine extends Observable{
 	private Set<Long> ignored;
 	private long userID;
 	private String alias;
-	
+
 	private Set<GruppenKanal> group_channels;
 	private Set<KnotenKanal> private_channels;
 	private KnotenKanal default_channel;
-	
-	private Thread msgSorterBot=new Thread(new MsgSorter());	//verteilt eingehende MSGs auf die Kanäle
-//	private Thread neMaintenance;//warted die NE
-	
+
+	// Verteilt eingehende Messages auf die Kanäle
+	private Thread msgSorterBot = new Thread(new MsgSorter());
+	// Wartungsthread für die NodeEngine
+	// private Thread neMaintenance;
 	private BlockingQueue<MSG> inbox;
-	
-//	private Set<String> allGroups=new HashSet<String>();
-	private Set<String> myGroups=new HashSet<String>();
+	// private Set<String> allGroups=new HashSet<String>();
+	private Set<String> myGroups = new HashSet<String>();
 	
 	/**
-	 * Liefert die Instanz der CE
+	 * Liefert die Instanz der ChatEngine
 	 * 
-	 * @return
+	 * @return: ChatEngine
 	 */
 	public static ChatEngine getCE() {
 		return ce;
 	}
 	
-	public ChatEngine() throws IOException{
+	/**
+	 * TODO: Kommentieren!
+	 * 
+	 * @throws IOException
+	 */
+	public ChatEngine() throws IOException {
 		ce = this;
-//		TODO:Load Settings & UserDATA
-//		this.db = db.getDBConnection();
-		//TODO:Load Settings & UserDATA
-		
-//		  <<<<<<<< Temporärbär >>>>>>>>
-		 setUserID((long) (Math.random()*Long.MAX_VALUE));
-		 setAlias(System.getProperties().getProperty("user.name")+(int)(Math.random()*100));
-		
+		// TODO:Load Settings & UserDATA
+		// this.db = db.getDBConnection();
+		// TODO:Load Settings & UserDATA
+
+		// <<<<<<<< Temporär >>>>>>>>
+		setUserID((long) (Math.random() * Long.MAX_VALUE));
+		setAlias(System.getProperties().getProperty("user.name")
+				+ (int) (Math.random() * 100));
+
 		this.ne = new NodeEngine(this);
-		
-		group_channels=new HashSet<GruppenKanal>();
-		private_channels=new HashSet<KnotenKanal>();
-		default_channel=new KnotenKanal(ne.getNodeID());
+
+		group_channels = new HashSet<GruppenKanal>();
+		private_channels = new HashSet<KnotenKanal>();
+		default_channel = new KnotenKanal(ne.getNodeID());
 		ignored = Collections.synchronizedSet(new HashSet<Long>());
-		inbox=new LinkedBlockingQueue<MSG>();
-		
-		//temporäre Initialisierung der GruppenListe mit default Groups 
-		ne.getGroups().addAll(Arrays.asList(new String[]{"public","hs5"}));
-		//myGroups.addAll(ne.getGroups());
-		// TODO:GUI müsste für all diese Gruppen je ein Fenster anlgegen beim Starten
-		//TODO: All diese Gruppen müssten gejoint werden.
-		
+		inbox = new LinkedBlockingQueue<MSG>();
+
+		// temporäre Initialisierung der GruppenListe mit default Groups
+		ne.getGroups().addAll(Arrays.asList(new String[] { "public", "hs5" }));
+		// myGroups.addAll(ne.getGroups());
+		// TODO:GUI müsste für all diese Gruppen je ein Fenster anlgegen beim
+		// Starten
+		// TODO: All diese Gruppen müssten gejoint werden.
+
 		msgSorterBot.start();
 	}
 	
 	/**
-	 * Findet zu NodeID zugehörigen Node in der Liste
+	 * Findet zu einer definierten NodeID zugehörigen Node in der Liste
 	 * 
 	 * @param nid NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
@@ -96,27 +103,37 @@ public class ChatEngine extends Observable{
 	}
 	
 	/**
-	 * @param alias
-	 * @return
+	 * Findet zu einem bestimmten <code>alias</code>, falls eindeutig, den {@link Node} und
+	 * liefert diesen zurück. <br><b>Diese Methode ist nur für Befehlseingaben vorgesehen!</b>
+	 * 
+	 * @param
+	 * @return {@link Node}
 	 */
-	public Node getNodeforAlias(String alias){
-		Set<Node> tmp=new HashSet<Node>();
-		for(Node x: getUsers()){
-			if(x.getAlias().startsWith(alias))tmp.add(x);
+	public Node getNodeforAlias(String alias) {
+		Set<Node> tmp = new HashSet<Node>();
+		for (Node x : getUsers()) {
+			if (x.getAlias().startsWith(alias)) {
+				tmp.add(x);
+			}
 		}
-		if(tmp.size()==1)return ((Node)tmp.toArray()[0]);
+		if (tmp.size() == 1) {
+			return ((Node) tmp.toArray()[0]);
+		}
 		return null;
 	}
 
-	
 	/**
-	 * @return
+	 * Getter für die <code>UserID</code>.
+	 * 
+	 * @return userID
 	 */
 	public long getUserID() {
 		return userID;
 	}
 
 	/**
+	 * Setter für die <code>UserID</code>.
+	 * 
 	 * @param userID
 	 */
 	public void setUserID(long userID) {
@@ -124,26 +141,30 @@ public class ChatEngine extends Observable{
 	}
 
 	/**
-	 * Gibt den aktuellen Anzeigenamen zurück 
+	 * Getter für den Anzeigenamen (Alias) zurück.
 	 * 
-	 * @return den Anzeigenamen
+	 * @return userID
 	 */
 	public String getAlias() {
 		return alias;
 	}
 
 	/**
-	 * Verändert den Anzeigenamen des Nutzers
+	 * Setter für den Anzeigenamen (Alias) des eigenen Benutzers.
 	 * 
-	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12} 
+	 * @param alias
+	 *            neuer Anzeigename [a-zA-Z0-9]{12}
 	 */
 	public void setAlias(String alias) {
 		this.alias = alias;
-		if(ne!=null&&ne.isOnline())ne.updateAlias();
+		if (ne != null && ne.isOnline()) {
+			ne.updateAlias();
+		}
 	}
 	
 	/**
-	 * Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen <code>uid</code> zu schicken. 
+	 * Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen
+	 * <code>uid</code> zu schicken. 
 	 * 
 	 * @param uid UID des Empfängers
 	 * @param text Nachricht

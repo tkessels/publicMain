@@ -344,8 +344,10 @@ public class ChatEngine extends Observable{
 	 * @param nachricht Die neue Nachricht.
 	 */
 	public void put(MSG nachricht){
-		if(!ignored.contains(nachricht.getSender()))inbox.add(nachricht);
-		LocalDBConnection.getDBConnection().saveMsg(nachricht);
+		if(!ignored.contains(nachricht.getSender())){
+			inbox.add(nachricht);
+			LocalDBConnection.getDBConnection().saveMsg(nachricht);
+		}
 	}
 	
 	private final class MsgSorter implements Runnable {
@@ -354,7 +356,6 @@ public class ChatEngine extends Observable{
 				try {
 					MSG tmp = inbox.take(); 
 					LogEngine.log("msgSorterBot","sorting",tmp);
-					System.out.println(tmp);
 					if (tmp.getTyp() == NachrichtenTyp.GROUP)
 					{
 						for (Kanal x : group_channels)if (x.add(tmp)) break;
@@ -362,9 +363,15 @@ public class ChatEngine extends Observable{
 					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) 
 					{
 						System.out.println("PRIVATE MSG");
-						for (KnotenKanal y : private_channels) if (y.add(tmp))break;
+						boolean msgAssigned=false;
+						for (KnotenKanal y : private_channels){
+							if (y.add(tmp)){
+								msgAssigned=true;
+								break;
+							}
+						}
 						//Kein CW angemeldet um die Nachricht aufzunehmen  sende es an GUI via DEFAULT CHANNEL
-						default_channel.add(tmp);
+						if(!msgAssigned)default_channel.add(tmp);
 					}
 				} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
 				}

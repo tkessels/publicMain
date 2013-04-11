@@ -26,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
@@ -35,10 +34,8 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.FontUIResource;
 
 import org.publicmain.chatengine.ChatEngine;
-import org.publicmain.chatengine.GruppenKanal;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
@@ -544,7 +541,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			MSG tmp = (MSG) arg;
 			Node tmp_node = ce.getNodeForNID(tmp.getSender());
 			me.addPrivCW(tmp_node.getUserID());
-			//ce.put(tmp);
+			ce.put(tmp);
 		}
 	}
 

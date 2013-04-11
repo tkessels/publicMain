@@ -264,9 +264,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				// Prüfen ob die Eingabe ein einfacher Befehl ist
 				if (eingabe.equals("/clear")) {
 					this.msgTextPane.setText("");
-				} else if (eingabe.equals("/help")) {
+				}
+				else if (eingabe.equals("/help")) {
 					info(helptext);
-				} else if (eingabe.equals("/exit")) {
+				}
+				else if (eingabe.equals("/exit")) {
 					this.gui.shutdown();
 				}
 
@@ -277,10 +279,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						info(tmp_node + " wird ignoriert!");
 						LogEngine.log(tmp_node + " wird ignoriert!", LogEngine.INFO);
 					} else {
-						warn("Ignorieren von " + tmp_node + " nicht möglich!");
-						LogEngine.log("Ignorieren von " + tmp_node + " nicht möglich!", LogEngine.INFO);
+						warn("Ignorieren von " + tmp[1] + " nicht möglich!");
+						LogEngine.log("Ignorieren von " + tmp[1] + " nicht möglich!", LogEngine.INFO);
 					}
-				}else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
+				}
+				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
 					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
 				}
 				else if (eingabe.startsWith("/alias ") && (tmp = eingabe.split(" ", 2)).length == 2) {
@@ -292,11 +295,15 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					if((tmp_node!=null) && this.gui.unignoreUser(tmp_node.getUserID())){
 						info(tmp_node + " wird nicht weiter ignoriert!");
 					} else {
-						warn(tmp_node + "wurde nicht gefunden!");
+						warn(tmp[1] + "wurde nicht gefunden!");
 					}
 				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
-					this.gui.privSend(tmp[1], tmp[2]);
+					Node tmp_node=ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if(tmp_node!=null)this.gui.privSend(tmp_node.getUserID(), tmp[2]);
+					else{
+						warn(tmp[1] + " wurde nicht gefunden!");
+					}
 				}
 				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
 					this.gui.groupSend(tmp[1], tmp[2]);

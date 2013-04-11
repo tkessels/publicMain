@@ -237,11 +237,12 @@ public class ConnectionHandler {
 				catch (Exception e) {
 					//Zum aufspüren komischer NULL-MSGs
 					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
-					System.out.println(me);
-					System.out.println(readObject);
-					System.out.println(readObject.getClass());
 					System.out.println(e.getMessage());
 					e.printStackTrace();
+					System.out.println("--------------------------------------------------------------------------------------------------------------------------------");
+					System.out.println(me);
+					System.out.println(readObject);
+					if(readObject!=null)System.out.println(readObject.getClass());
 					if (readObject != null) System.out.println((readObject instanceof MSG) ? ((MSG) readObject).toString() : readObject.toString());
 					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
 				}

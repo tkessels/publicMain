@@ -1,9 +1,12 @@
 package org.publicmain.common;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
 import java.util.Properties;
 
 
@@ -121,7 +124,33 @@ public class Config {
 	public int getMaxAliasLength() {
 		return Integer.parseInt(settings.getProperty("gui.max_alias_length"));
 	}
-	
 
+
+	
+	public static boolean getLock() {
+		final String lockFile = System.getenv("APPDATA")+"\\pmlockfile.";
+        try {
+            final File file = new File(lockFile);
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            final FileLock fileLock = randomAccessFile.getChannel().tryLock();
+            if (fileLock != null) {
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        try {
+                            fileLock.release();
+                            randomAccessFile.close();
+                            file.delete();
+                        } catch (Exception e) {
+                            LogEngine.log("ShutdownHook","Unable to remove lock file: " + lockFile, LogEngine.ERROR);
+                        }
+                    }
+                });
+                return true;
+            }
+        } catch (Exception e) {
+        	LogEngine.log("Config","Unable to create and/or lock file: " + lockFile, LogEngine.ERROR);
+        }
+        return false;
+    }
 }
 

@@ -241,8 +241,14 @@ public class ChatEngine extends Observable{
 	 * 
 	 * @param uid
 	 */
-	public	void	ignore_user(long nodeID){
-			if(nodeID!=ne.getNodeID())ignored.add(nodeID);
+	public	boolean	ignore_user(long nodeID){
+			if(nodeID!=ne.getNodeID()){
+				ignored.add(nodeID);
+				System.out.println(ignored);
+				return true;
+			} else {
+				return false;
+			}
 	}
 	
 	/**
@@ -255,7 +261,8 @@ public class ChatEngine extends Observable{
 	 * @param uid
 	 */
 	public boolean unignore_user(long nodeID) {
-			return ignored.remove(nodeID);
+		System.out.println(ignored);
+		return ignored.remove(nodeID);
 	}	
 	
 	/** Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an 

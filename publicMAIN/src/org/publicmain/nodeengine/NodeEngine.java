@@ -1,5 +1,6 @@
 package org.publicmain.nodeengine;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -25,16 +26,18 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
+import org.publicmain.nodeengine.ConnectionHandler.Reciever;
 
 /**
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
  */
 public class NodeEngine {
- private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout(); 					//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
+ private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout(); 			//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
  private final long ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout(); 			//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
  private final InetAddress group = InetAddress.getByName(Config.getConfig().getMCGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int multicast_port = Config.getConfig().getMCPort(); 										//Default Port für MulticastGruppe für Verbindungsaushandlung
- private final int MAX_CLIENTS = Config.getConfig().getMaxConnections(); 																			//Maximale Anzahl anzunehmender Verbindungen 
+ private final int multicast_port = Config.getConfig().getMCPort(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int MAX_CLIENTS = Config.getConfig().getMaxConnections();					//Maximale Anzahl anzunehmender Verbindungen
+ private final int MAX_FILE_SIZE = Config.getConfig().getMaxFileSize();
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
  private final long nodeID;
@@ -257,8 +260,14 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 * versendet Datein über eine TCP-Direktverbindung wird nur von send() aufgerufen nachdem festgestellt wurde, dass nachicht > 5MB
 	 */
 
-	public void send_file(String destination) {
-		// bekommt ziel und FILE übergeben
+	public void send_file(File datei, long nid) {
+		try {
+			routesend(new MSG(datei, nid));
+		} catch (IOException e) {
+			System.out.println("WILLST DU MICH EIGENTLICH VERARSCHEN.......???");
+			System.out.println(e.getMessage());
+			
+		}
 
 	}
 
@@ -541,11 +550,31 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			}
 			break;
 		case DATA:
+			if(paket.getEmpfänger()==nodeID){
+				recieve_file(paket);
+			}
+			else routesend(paket);
 			break;
 		default:
 		}
 	}
 	
+	private void recieve_file(final MSG paket) {
+		
+		new Thread(new Runnable() {
+			public void run() {
+				File tmp =ce.request_File(paket.getGroup());
+				try {
+					paket.save(tmp);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		
+	}
+
 	private void routesend(MSG paket) {
 		long empfänger = paket.getEmpfänger();
 		for (ConnectionHandler con : connections) {
@@ -757,7 +786,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 	public void debug(String command, String parameter) {
 		switch (command) {
-		
+		case "gc":
+			Runtime r = Runtime.getRuntime();
+			r.gc();
+			break;
+		case "gc2":
+			System.gc();
+			break;
 
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);

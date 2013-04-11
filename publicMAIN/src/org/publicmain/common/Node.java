@@ -20,6 +20,7 @@ public class Node implements Serializable {
 	private long nodeID;
 	private long userID;
 	private String alias;
+	private final String username;
 	private List<InetAddress> sockets;
 	private String hostname;
 	private int server_port;
@@ -27,7 +28,8 @@ public class Node implements Serializable {
 	public Node() {
 		nodeID = NodeEngine.getNE().getNodeID();
 		userID = ChatEngine.getCE().getUserID();
-		this.alias = ChatEngine.getCE().getAlias();
+		this.username = ChatEngine.getCE().getAlias();
+		this.alias=this.username;
 		
 		sockets=getMyIPs();
 		server_port = NodeEngine.getNE().getServer_port();

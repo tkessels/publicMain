@@ -173,9 +173,8 @@ public class ChatEngine extends Observable{
 	 * 
 	 * @return id des Dateitransfers für spätere Rückfragen
 	 */
-	public int send_file(File datei, long uid){
-		//TODO: CODE HERE
-		return 0;
+	public void send_file(File datei, long uid){
+		ne.send_file(datei, getNodeForUID(uid).getNodeID());
 	}
 	
 	/** 
@@ -242,13 +241,14 @@ public class ChatEngine extends Observable{
 	/** 
 	 * Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
 	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten
+	 * @param filename TODO
 	 * 
 	 * @return abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
 	 * der Nutzer den Empfang ablehnt 
 	 */
-	public	File	request_File(){
+	public	File	request_File(String filename){
 		//TODO: CODE HERE
-		return GUI.getGUI().request_File();
+		return GUI.getGUI().request_File(filename);
 	}
 	
 	/**

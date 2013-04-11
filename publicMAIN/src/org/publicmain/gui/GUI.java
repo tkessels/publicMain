@@ -478,11 +478,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @returns true Wenn User gefunden
 	 */
 	boolean ignoreUser(String alias){
-		long tmpUID = -1;
-		tmpUID = ce.getNodeforAlias(alias).getUserID();
-		if(tmpUID != -1){
-			ce.ignore_user(tmpUID);
-			return true;
+		if(ce.getNodeforAlias(alias)!=null){
+			return ce.ignore_user(ce.getNodeforAlias(alias).getNodeID());
 		}
 		return false;
 	}
@@ -493,11 +490,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @return true Wenn User gefunden
 	 */
 	boolean unignoreUser(String alias){
-		long tmpUID = -1;
-		tmpUID = ce.getNodeforAlias(alias).getUserID();
-		if(tmpUID != -1){
-			ce.unignore_user(tmpUID);
-			return true;
+		if(ce.getNodeforAlias(alias)!=null){
+			return ce.unignore_user(ce.getNodeforAlias(alias).getNodeID());
 		}
 		return false;
 	}

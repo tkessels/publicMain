@@ -34,6 +34,7 @@ public class Config {
 		sourceSettings.put("ne.root_claim_timeout", "200");
 		sourceSettings.put("ne.max_clients","5");
 		sourceSettings.put("ne.max_file_size","5000000");
+		sourceSettings.put("ne.file_transfer_timeout","30000");
 		
 		sourceSettings.put("ch.ping_intervall","30000");
 		sourceSettings.put("ch.ping_enabled", "false");
@@ -155,7 +156,20 @@ public class Config {
     }
 
 	public int getMaxFileSize() {
-		return 0;
+		return Integer.parseInt(settings.getProperty("ne.max_file_size")) ;
+	}
+
+	public Long getUserID() {
+		String uid=settings.getProperty("System.UserID");
+		return (uid!=null)?Long.parseLong(uid):null;
+	}
+	
+	public String getAlias() {
+		return settings.getProperty("System.alias");
+	}
+
+	public long getFileTransferTimeout() {
+		return Long.parseLong(settings.getProperty("ne.file_transfer_timeout"));
 	}
 }
 

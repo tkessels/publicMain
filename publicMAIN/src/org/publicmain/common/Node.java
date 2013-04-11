@@ -110,7 +110,6 @@ public class Node implements Serializable {
 		return alias+"@"+hostname;
 	}
 
-
 	/* Liefert  Hashcode des Knoten über die beiden eindeutigen IDs 
 	 * 
 	 * Wird für die Haltung der Nodes in einem Hashset benötigt.
@@ -124,7 +123,7 @@ public class Node implements Serializable {
 	}
 
 	/* 
-	 * Liefert true wenn zwei Knoten die sowohl die Gleiche UserID als auch NodeID haben.
+	 * Liefert true wenn zwei Knoten sowohl die Gleiche UserID als auch NodeID haben.
 	 * Allerdings nur wenn beide Nodes auch Nodes sind. 
 	 * Ist das Vergleichsobjekt kein Node gehen wir davon aus, dass es eine andere NodeID hätte und der User gerade in Vermont zum shoppen ist. (=Ungleicheit) 
 	 */

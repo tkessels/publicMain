@@ -19,6 +19,7 @@ public class publicMAIN {
 	 */
 	public static void main(String[] args) throws IOException {
 		if(Config.getConfig().getLock()){
+			
 			//Mir gefälltnicht das hier die Controlle weggegeben wird. Es sollte ein strukturierte und Kontrollierter Start formuliert werden der die Module in der richtigen Reihenfolge startet
 			startWindow.getStartWindow();
 		}

@@ -260,17 +260,58 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 * versendet Datein über eine TCP-Direktverbindung wird nur von send() aufgerufen nachdem festgestellt wurde, dass nachicht > 5MB
 	 */
 
-	public void send_file(File datei, long nid) {
-		try {
-			routesend(new MSG(datei, nid));
-		} catch (IOException e) {
-			System.out.println("WILLST DU MICH EIGENTLICH VERARSCHEN.......???");
-			System.out.println(e.getMessage());
-			
+	public void send_file(final File datei, final long nid) {
+		if (datei.isFile() && datei.exists() && datei.canRead() && datei.length() > 0) {
+			new Thread(new Runnable() 
+			{
+				public void run() 
+				{
+					if (datei.length() < Config.getConfig().getMaxFileSize()) 
+					{
+						MSG paket;
+						try {
+							paket = new MSG(datei, nid);
+							int requestHash = paket.hashCode();
+							routesend(paket);
+							MSG antwort = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_REPLY, nid, null, true, Config.getConfig().getFileTransferTimeout());
+							if (antwort == null)LogEngine.log(this, "Host  answer timed out", LogEngine.WARNING);
+							else LogEngine.log(this, "File transfer "+((requestHash==(int)antwort.getData())?"finished!":"failed!"), LogEngine.WARNING);
+						}
+						catch (IOException e1) 
+						{
+							LogEngine.log(e1);
+						}
+					}
+				}
+			}).start();
+			}
 		}
 
+	private void recieve_file(final MSG paket) {
+		/*
+		 * System.out.println("RECIEVED FILE REQUEST");
+				File tmp_file = ce.request_File(((File)paket.getData()), getNode(paket.getSender()));
+				if(tmp_file!=null) recieve_file(paket, tmp_file);
+		 */
+		Object[] tmp = (Object[]) paket.getData();
+		File tmp_file = (File) tmp[0];
+		final File destination = ce.request_File((tmp_file), getNode(paket.getSender()));
+		if(destination!=null) {
+		MSG reply = new MSG(paket.hashCode(),MSGCode.FILE_REPLY);
+		reply.setEmpfänger(paket.getSender());
+		routesend(reply);
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					paket.save(destination);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		
 	}
-
+	}
 	/*private void discover(Node newRoot) {
 		sendunicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY), newRoot);
 	}*/
@@ -538,9 +579,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				updateMyGroups();
 				addGroup(groups);
 				break;
+			case FILE_REQUEST:
+				break;
 			case NODE_LOOKUP:
-				Node tmp = null;
-				if ((tmp = getNode((long) paket.getData())) != null)quelle.send(new MSG(tmp));
+				Node tmp_node = null;
+				if ((tmp_node = getNode((long) paket.getData())) != null)quelle.send(new MSG(tmp_node));
 				else
 					sendroot(paket);
 				break;
@@ -550,30 +593,14 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			}
 			break;
 		case DATA:
-			if(paket.getEmpfänger()==nodeID){
-				recieve_file(paket);
-			}
-			else routesend(paket);
+			if(paket.getEmpfänger()!=nodeID)routesend(paket);
+			else recieve_file(paket);
 			break;
 		default:
 		}
 	}
 	
-	private void recieve_file(final MSG paket) {
-		
-		new Thread(new Runnable() {
-			public void run() {
-				File tmp =ce.request_File(paket.getGroup());
-				try {
-					paket.save(tmp);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}).start();
-		
-	}
+
 
 	private void routesend(MSG paket) {
 		long empfänger = paket.getEmpfänger();
@@ -679,7 +706,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 */
 	private Node retrieve(long nid) {
 			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
-			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,false,1000);
+			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,null,false,1000);
 			if (x != null) return (Node) x.getData();
 			else {
 				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
@@ -792,6 +819,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			break;
 		case "gc2":
 			System.gc();
+			break;
+			
+		case "file":
+			System.out.println(ce.request_File(new File("test.txt"), meinNode));
 			break;
 
 		default:

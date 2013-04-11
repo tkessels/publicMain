@@ -91,17 +91,20 @@ public class MSG implements Serializable,Comparable<MSG>{
 		bos.flush();
 		zip.finish();
 		bos.close();
-		data=bout.toByteArray();
-		System.out.println(((byte[])data).length);
+		Object tmp_data[]=new Object[2];
+		tmp_data[0]=datei;
+		tmp_data[1]=bout.toByteArray();
+		data=tmp_data;
 		setEmpfänger(nid);
 		group=datei.getName();
 	}
 	
 	public void save(File datei) throws IOException{
-		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof byte[]&&((byte[])data).length>0){
-			System.out.println(((byte[])data).length);
+		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof Object[]&&((Object[])data).length==2&&((Object[])data)[0]instanceof File&&((Object[])data)[1]instanceof byte[]){
+			byte[] tmp_data=(byte[]) ((Object[])data)[1];
+			System.out.println(tmp_data.length);
 
-			ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) data);
+			ByteArrayInputStream bais = new ByteArrayInputStream(tmp_data);
 			GZIPInputStream zip = new GZIPInputStream(bais);
 			BufferedInputStream bis = new BufferedInputStream(zip);
 			
@@ -114,6 +117,41 @@ public class MSG implements Serializable,Comparable<MSG>{
 			bos.flush();
 			bos.close();
 		}
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		result = prime * result + (int) (sender ^ (sender >>> 32));
+		result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MSG other = (MSG) obj;
+		if (id != other.id)
+			return false;
+		if (sender != other.sender)
+			return false;
+		if (timestamp != other.timestamp)
+			return false;
+		return true;
 	}
 
 	public long getEmpfänger() {
@@ -199,6 +237,10 @@ public class MSG implements Serializable,Comparable<MSG>{
 			else if (this.getId() != o.getId())			return (this.getId() - o.getId());
 			return 0;
 		
+	}
+
+	public void setGroup(String string) {
+		group=string;
 	}
 	
 	

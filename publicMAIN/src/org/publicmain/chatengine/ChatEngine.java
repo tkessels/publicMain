@@ -67,8 +67,8 @@ public class ChatEngine extends Observable{
 
 		// <<<<<<<< Temporär >>>>>>>>
 		setUserID((long) (Math.random() * Long.MAX_VALUE));
-		setAlias(System.getProperties().getProperty("user.name")
-				+ (int) (Math.random() * 100));
+		
+		setAlias(System.getProperties().getProperty("user.name"));
 
 		this.ne = new NodeEngine(this);
 
@@ -123,6 +123,14 @@ public class ChatEngine extends Observable{
 	}
 
 	/**
+	 * Diese Methode liefert die eigene NodeID
+	 * @return
+	 */
+	public long getMyNodeID(){
+		return ne.getNodeID();
+	}
+	
+	/**
 	 * Getter für die <code>UserID</code>.
 	 * 
 	 * @return userID
@@ -156,6 +164,7 @@ public class ChatEngine extends Observable{
 	 *            neuer Anzeigename [a-zA-Z0-9]{12}
 	 */
 	public void setAlias(String alias) {
+		int tmpCounter = 0;
 		this.alias = alias;
 		if (ne != null && ne.isOnline()) {
 			ne.updateAlias();
@@ -267,9 +276,8 @@ public class ChatEngine extends Observable{
 	 * @return abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
 	 * der Nutzer den Empfang ablehnt 
 	 */
-	public	File	request_File(String filename){
-		//TODO: CODE HERE
-		return GUI.getGUI().request_File(filename);
+	public	File	request_File(File datei , Node user){
+		return GUI.getGUI().request_File(datei,user);
 	}
 	
 	/**

@@ -72,6 +72,32 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		// den neuen Tab an die Stelle von index setzen:
 	}
 	
+
+	/**
+	 * 
+	 */
+	void setOffline(){
+		this.lblTitle.setForeground(Color.GRAY);
+		this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseGray.png")).getImage());
+		this.lblIcon.setIcon(new ImageIcon(getClass().getResource("privateOffline.png")));
+	}
+	
+	/**
+	 * 
+	 */
+	void setOnline(){
+		this.lblTitle.setForeground(Color.BLACK);
+		this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
+		this.lblIcon.setIcon(new ImageIcon(getClass().getResource("private.png")));
+	}
+	
+	/**
+	 * @param name
+	 */
+	void setTabTitle(String name){
+		this.lblTitle.setText(name);
+	}
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (e.getSource() == lblTitle) {
@@ -179,18 +205,6 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		public void stopit() {
 			active = false;
 		}
-	}
-	
-	void setOffline(){
-		this.lblTitle.setForeground(Color.GRAY);
-		this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseGray.png")).getImage());
-		this.lblIcon.setIcon(new ImageIcon(getClass().getResource("privateOffline.png")));
-	}
-	
-	void setOnline(){
-		this.lblTitle.setForeground(Color.BLACK);
-		this.tabCloseImgIcon.setImage(new ImageIcon(getClass().getResource("TabCloseBlack.png")).getImage());
-		this.lblIcon.setIcon(new ImageIcon(getClass().getResource("private.png")));
 	}
 }
 	

@@ -43,8 +43,8 @@ public class Hook {
 	 * @param timeout gibt die Dauer in Millisekunden an für die der Hook aktiv bleiben soll bevor er sich selbst enfernt.
 	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>null</code> wenn das <code>timeout</code> abgelaufen ist ohne eine Nachricht zu matchen.
 	 */
-	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,boolean filter, long timeout) {
-		Haken x = new Haken(typ,code, nid,filter);
+	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,Object payload,boolean filter, long timeout) {
+		Haken x = new Haken(typ,code, nid,payload,filter);
 		add(x);
 		synchronized (x) {
 			try {
@@ -64,8 +64,8 @@ public class Hook {
 	 * @param nid NodeID des Absenders
 	 * @param timeout gibt die Dauer in Millisekunden an für die der Hook aktiv bleiben soll bevor er sich selbst enfernt.
 	 * 	 */
-	public void filter(NachrichtenTyp typ, MSGCode code, Long nid, final long timeout) {
-	final Haken x = new Haken(typ, code, nid,true);
+	public void filter(NachrichtenTyp typ, MSGCode code, Long nid,Object payload, final long timeout) {
+	final Haken x = new Haken(typ, code, nid,payload,true);
 	new Thread(new Runnable() {
 		public void run() {
 			add(x);
@@ -103,23 +103,23 @@ public class Hook {
 		private NachrichtenTyp typ;
 		private MSGCode code;
 		private Long sender;
+		private Object payload;
 		//private Long reciever;
 		//private String gruppe;
-		//private Object payload;
 		
 		private boolean filter;
 		
 
 		private MSG hookedMSG;
 
-		public Haken(NachrichtenTyp typ, MSGCode code, Long sender, boolean filter) {
+		public Haken(NachrichtenTyp typ, MSGCode code, Long sender, Object payload, boolean filter) {
 			super();
 			this.typ = typ;
 			this.code = code;
 			this.sender = sender;
+			this.payload = payload;
 //			this.reciever = reciever;
 //			this.gruppe = gruppe;
-//			this.payload = payload;
 			this.filter=filter;
 		}
 		
@@ -127,12 +127,12 @@ public class Hook {
 			boolean typ_check=(typ==null)||typ==x.getTyp();
 			boolean code_check=(code==null)||code==x.getCode();
 			boolean sender_check=(sender==null)||sender==x.getSender();
+			boolean payload_check=(payload==null)||payload==x.getData();
 //			boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
 //			boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
-//			boolean payload_check=(payload==null)||payload==x.getData();
 			
 			
-			if(typ_check&&code_check&&sender_check) {//&&reciever_check&&gruppe_check&&payload_check) {
+			if(typ_check&&code_check&&sender_check&&payload_check) {//&&reciever_check&&gruppe_check) {
 				LogEngine.log(this.toString(),"hooked", x);
 				hookedMSG=x;
 				this.notifyAll();

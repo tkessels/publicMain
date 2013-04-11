@@ -153,7 +153,7 @@ public class ContactList extends JWindow {
 						GUI.getGUI().addGrpCW(o.toString());
 					}
 					if(source.getModel().getClass().getSimpleName().startsWith("User")){
-						GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(o.toString()).getUserID());
+						GUI.getGUI().addPrivCW(((Node) o).getUserID());
 					}
 				}
 			}

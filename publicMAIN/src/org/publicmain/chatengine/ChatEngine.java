@@ -94,14 +94,31 @@ public class ChatEngine extends Observable{
 	public Node getNodeForUID(long uid){
 		return ne.getNodeForUID(uid);
 	}
+	
+	/**
+	 * @param alias
+	 * @return
+	 */
+	public Node getNodeforAlias(String alias){
+		Set<Node> tmp=new HashSet<Node>();
+		for(Node x: getUsers()){
+			if(x.getAlias().startsWith(alias))tmp.add(x);
+		}
+		if(tmp.size()==1)return ((Node)tmp.toArray()[0]);
+		return null;
+	}
 
 	
-	
-	
+	/**
+	 * @return
+	 */
 	public long getUserID() {
 		return userID;
 	}
 
+	/**
+	 * @param userID
+	 */
 	public void setUserID(long userID) {
 		this.userID = userID;
 	}
@@ -242,13 +259,8 @@ public class ChatEngine extends Observable{
 	 * @param uid
 	 */
 	public	boolean	ignore_user(long nodeID){
-			if(nodeID!=ne.getNodeID()){
-				ignored.add(nodeID);
-				System.out.println(ignored);
-				return true;
-			} else {
-				return false;
-			}
+			if(nodeID!=ne.getNodeID())return ignored.add(nodeID);
+			else return false;
 	}
 	
 	/**
@@ -387,14 +399,7 @@ public class ChatEngine extends Observable{
 		
 	}
 	
-	public Node getNodeforAlias(String alias){
-		Set<Node> tmp=new HashSet<Node>();
-		for(Node x: getUsers()){
-			if(x.getAlias().startsWith(alias))tmp.add(x);
-		}
-		if(tmp.size()==1)return ((Node)tmp.toArray()[0]);
-		return null;
-	}
+	
 
 	public void shutdown() {
 		ne.disconnect();

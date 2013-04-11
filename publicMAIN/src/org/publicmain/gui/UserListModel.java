@@ -2,6 +2,7 @@ package org.publicmain.gui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -15,24 +16,23 @@ import org.publicmain.common.Node;
  *
  */
 
-public class UserListModel extends AbstractListModel<String>{
+public class UserListModel extends AbstractListModel<Node>{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3915185276474553682L;
-	private List<String> users = (new ArrayList<String>());
+	private List<Node> users;
 	private Thread userListWriter;
 	
 	public UserListModel() {
+		users = new ArrayList<Node>();
 		this.userListWriter = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				while (true) {
 					users.clear();
-					for (Node userAlias : ChatEngine.getCE().getUsers()) {
-						users.add(userAlias.getAlias());
-					}
+					users.addAll(ChatEngine.getCE().getUsers());
 					fireContentsChanged(this, 0, users.size());
 					synchronized (ChatEngine.getCE().getUsers()) {
 						try {
@@ -46,7 +46,13 @@ public class UserListModel extends AbstractListModel<String>{
 		});
     	userListWriter.start();
     	
-	    Collections.sort(users);
+	    Collections.sort(users, new Comparator<Node>() {
+
+			@Override
+			public int compare(Node o1, Node o2) {
+				return o1.getAlias().compareTo(o2.getAlias());
+			}
+		});
     }
     @Override
     public int getSize() {
@@ -60,7 +66,7 @@ public class UserListModel extends AbstractListModel<String>{
     }
     
     @Override
-    public String getElementAt(int index) {
+    public Node getElementAt(int index) {
     	return users.get(index);
     }
 }

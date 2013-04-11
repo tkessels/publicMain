@@ -24,9 +24,7 @@ public class GroupListModel extends AbstractListModel<String>{
 			public void run() {
 				while (true) {
 					groups.clear();
-					for(String grpName : ChatEngine.getCE().getAllGroups()){
-						groups.add(grpName);
-					}
+					groups.addAll(ChatEngine.getCE().getAllGroups());
 					fireContentsChanged(this, 0, groups.size());
 					synchronized (ChatEngine.getCE().getAllGroups()) {
 						try {

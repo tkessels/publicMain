@@ -54,7 +54,7 @@ import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 public class GUI extends JFrame implements Observer , ChangeListener{
 
-	private final int GRP_NAME_LENGTH = 10; 
+	private final int GRP_NAME_LENGTH = 20; 
 	
 	// Deklarationen:
 	private ChatEngine ce;

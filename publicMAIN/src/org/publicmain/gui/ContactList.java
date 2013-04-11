@@ -141,19 +141,25 @@ public class ContactList extends JWindow {
 	}
 	
 	class myMouseAdapter implements MouseListener {
-		@Override
+
 		public void mouseClicked(MouseEvent e) {
 			JList<String> source = (JList<String>) e.getSource();
 			// Doppelklick:
-			if(e.getClickCount() == 2) {
+			if (e.getClickCount() == 2) {
 				int index = source.locationToIndex(e.getPoint());
-				if(index >= 0){
+				if (index >= 0) {
 					Object o = source.getModel().getElementAt(index);
-					if(source.getModel().getClass().getSimpleName().startsWith("Group")){
+					if (source.getModel().getClass().getSimpleName()
+							.startsWith("Group")) {
 						GUI.getGUI().addGrpCW(o.toString());
 					}
-					if(source.getModel().getClass().getSimpleName().startsWith("User")){
-						GUI.getGUI().addPrivCW(((Node) o).getUserID());
+					if (source.getModel().getClass().getSimpleName()
+							.startsWith("User")) {
+
+						if (!(users.getSelectedValue().getUserID() == ChatEngine
+								.getCE().getUserID())) {
+							GUI.getGUI().addPrivCW(((Node) o).getUserID());
+						}
 					}
 				}
 			}
@@ -193,34 +199,36 @@ public class ContactList extends JWindow {
 	class PopupUser extends JPopupMenu{
 		
 		private JMenuItem whisper;
+		private JMenuItem sendFile;
 		private JMenuItem ignore;
 		private JMenuItem unignore;
 		private JMenuItem info;
-		private JMenuItem sendFile;
 		private String user;
 		
 		public PopupUser(String user, ActionListener popupListener){
 			this.user = user;
 			this.whisper = new JMenuItem("whisper to " + user);
+			this.sendFile = new JMenuItem("send File to " + user);
 			this.ignore = new JMenuItem("ignore " + user);
 			this.unignore = new JMenuItem("unignore " + user);
 			this.info = new JMenuItem("info's about " + user);
-			this.sendFile = new JMenuItem("send File to " + user);
 			
 			this.whisper.addActionListener(popupListener);
+			this.sendFile.addActionListener(popupListener);
 			this.ignore.addActionListener(popupListener);
 			this.unignore.addActionListener(popupListener);
 			this.info.addActionListener(popupListener);
-			this.sendFile.addActionListener(popupListener);
 			
-			this.add(whisper);
-			this.add(new Separator());
-			this.add(ignore);
-			this.add(unignore);
-			this.add(new Separator());
+			if (!(users.getSelectedValue().getUserID()==ChatEngine.getCE().getUserID())) {
+				this.add(whisper);
+				this.add(new Separator());
+				this.add(sendFile);
+				this.add(new Separator());
+				this.add(ignore);
+				this.add(unignore);
+				this.add(new Separator());
+			}
 			this.add(info);
-			this.add(new Separator());
-			this.add(sendFile);
 		}
 	
 	}

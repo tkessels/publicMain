@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -31,7 +32,7 @@ public class ConnectionHandler {
 	private ObjectInputStream	line_in;
 	private volatile ConnectionHandler	me;
 	private String				hostname;
-	private long				latency				= Integer.MAX_VALUE;
+	private long					latency				= Integer.MAX_VALUE;
 
 	private Thread				pakets_rein_hol_bot	= new Thread(new Reciever());
 	private Thread				pingpongBot			= new Thread(new Pinger());
@@ -53,8 +54,8 @@ public class ConnectionHandler {
 		hostname = line.getInetAddress().getHostAddress();
 
 		ping();
-//		endpoint = line.getInetAddress().getHostName();
-		//pingpongBot.start();
+		
+		if(Config.getConfig().getPingEnabled())pingpongBot.start();
 
 		LogEngine.log(this, "Verbunden");
 		me = this;
@@ -251,9 +252,10 @@ public class ConnectionHandler {
 	
 
 	class Pinger implements Runnable {
-		private static final long	PING_INTERVAL	= 30000;
+		private final long PING_INTERVAL	= Config.getConfig().getPingInterval();
 
 		public void run() {
+			hostname = line.getInetAddress().getHostName();
 			while (isConnected()) {
 				try {
 					ping();

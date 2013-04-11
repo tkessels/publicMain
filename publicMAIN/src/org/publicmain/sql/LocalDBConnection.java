@@ -22,6 +22,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
@@ -63,9 +64,9 @@ public class LocalDBConnection {
 	private static LocalDBConnection me;
 	
 	private LocalDBConnection() {
-		this.url 					= "jdbc:mysql://localhost:3306/";
-		this.user 					= "root";
-		this.passwd 				= "";
+		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
+		this.user 					= Config.getConfig().getLocalDBUser();
+		this.passwd 				= Config.getConfig().getLocalDBPw();
 		this.dbName 				= "db_publicMain";
 		this.chatLogTbl				= "t_chatLog";
 		this.msgTbl					= "t_msg";

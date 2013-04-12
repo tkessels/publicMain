@@ -3,7 +3,9 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.publicmain.chatengine.ChatEngine;
@@ -106,7 +108,6 @@ public class Node implements Serializable {
 	
 	@Override
 	public String toString() {
-		// 
 		return alias+"@"+hostname;
 	}
 
@@ -135,6 +136,18 @@ public class Node implements Serializable {
 		if (nodeID != other.nodeID) return false;
 		if (userID != other.userID) return false;
 		return true;
+	}
+	public Map<String, String> getData(){
+		Map<String, String> rück = new HashMap<String, String>();
+		rück.put("alias",alias);
+		rück.put("hostname",hostname);
+		rück.put("username",username);
+		rück.put("userid",String.valueOf(userID));
+		rück.put("nodeid",String.valueOf(nodeID));
+		rück.put("port",String.valueOf(server_port));
+		int index =0;
+		for (InetAddress soc : sockets)rück.put("ip_"+(index++),soc.getHostAddress());
+		return rück;
 	}
 	
 	

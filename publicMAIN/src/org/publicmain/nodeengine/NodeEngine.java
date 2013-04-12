@@ -274,8 +274,14 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 							int requestHash = paket.hashCode();
 							routesend(paket);
 							MSG antwort = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_REPLY, nid, null, true, Config.getConfig().getFileTransferTimeout());
-							if (antwort == null)LogEngine.log(this, "Host  answer timed out", LogEngine.WARNING);
-							else LogEngine.log(this, "File transfer "+((requestHash==(int)antwort.getData())?"finished!":"failed!"), LogEngine.WARNING);
+							if (antwort == null) {
+								GUI.getGUI().info( "Host  answer timed out", getNode(nid).getUserID(), 1);
+								LogEngine.log(this, "Host  answer timed out", LogEngine.WARNING);
+							}
+							else {
+								GUI.getGUI().info(  "File transfer "+((requestHash==(int)antwort.getData())?"finished!":"failed!"), getNode(nid).getUserID(), (requestHash==(int)antwort.getData())?0:1);
+								LogEngine.log(this, "File transfer "+((requestHash==(int)antwort.getData())?"finished!":"failed!"), LogEngine.WARNING);
+							}
 						}
 						catch (IOException e1) 
 						{
@@ -830,7 +836,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "update":
 			GUI.getGUI().notifyGUI();
 			break;
-
+			
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -61,10 +62,6 @@ public class ChatEngine extends Observable{
 	 */
 	public ChatEngine() throws IOException {
 		ce = this;
-		// TODO:Load Settings & UserDATA
-		// this.db = db.getDBConnection();
-		// TODO:Load Settings & UserDATA
-
 		// <<<<<<<< Temporär >>>>>>>>
 		setUserID((long) (Math.random() * Long.MAX_VALUE));
 		
@@ -79,12 +76,7 @@ public class ChatEngine extends Observable{
 		inbox = new LinkedBlockingQueue<MSG>();
 
 		// temporäre Initialisierung der GruppenListe mit default Groups
-		ne.getGroups().addAll(Arrays.asList(new String[] { "public", "hs5" }));
-		// myGroups.addAll(ne.getGroups());
-		// TODO:GUI müsste für all diese Gruppen je ein Fenster anlgegen beim
-		// Starten
-		// TODO: All diese Gruppen müssten gejoint werden.
-
+		ne.getGroups().addAll(Arrays.asList(new String[] { "public"}));
 		msgSorterBot.start();
 	}
 	
@@ -111,8 +103,9 @@ public class ChatEngine extends Observable{
 	 */
 	public Node getNodeforAlias(String alias) {
 		Set<Node> tmp = new HashSet<Node>();
+		alias=alias.toLowerCase();
 		for (Node x : getUsers()) {
-			if (x.getAlias().startsWith(alias)) {
+			if (x.getAlias().toLowerCase().startsWith(alias)) {
 				tmp.add(x);
 			}
 		}
@@ -427,6 +420,17 @@ public class ChatEngine extends Observable{
 		case "disconnect":
 			shutdown();
 			break;
+			
+		case "info":
+			Node nodeforAlias = ce.getNodeforAlias(parameter);
+			if (nodeforAlias != null) {
+				Map<String, String> tmp = nodeforAlias.getData();
+				for (String x : tmp.keySet()) {
+					GUI.getGUI().info(x + ":" + tmp.get(x), null, 0);
+				}
+			}
+			break;
+
 		default:
 			ne.debug(command,parameter);
 			break;

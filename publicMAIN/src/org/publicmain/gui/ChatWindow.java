@@ -398,10 +398,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		public void drop(DropTargetDropEvent event) {
 				 event.acceptDrop(DnDConstants.ACTION_COPY);
 			            try {
+			            	if(isPrivCW){
 						List<File> files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
 						if(files.size()==1) {
 							gui.sendFile(files.get(0), userID);
 						}
+						else warn("Only single files can be transfered");
+						}
+			            	else warn("You dropped some files into a GroupChat.... Don't do that!");
 			            } catch (Exception e) {
 			                LogEngine.log(this,"You can only drop one File",LogEngine.ERROR);
 			            }

@@ -539,7 +539,21 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	}
 	
 	
-	
+	/**Displays a text message in the referenced ChatWindow (Group/UID) or the active Window if reference is <code>null</code>
+	 * @param nachricht Text of the message
+	 * @param reference Groupname or UID of ChatWindow to put the message in or <code>null</code> to take the active one. 
+	 * @param typ <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
+	 */
+	public void info(String nachricht, Object reference,int typ) {
+		ChatWindow tmp;
+		if(reference==null)tmp=(ChatWindow) jTabbedPane.getSelectedComponent();
+		else tmp = getCW(reference);
+		if(tmp!=null){
+			if (typ == 0)tmp.info(nachricht);
+			else if (typ == 1)tmp.warn(nachricht);
+			else tmp.error(nachricht);
+		}
+	}
 	
 	
 	

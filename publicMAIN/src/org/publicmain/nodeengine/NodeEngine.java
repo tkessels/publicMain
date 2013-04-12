@@ -626,7 +626,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			if((quelle!=con)&&con.getGroups().contains(gruppe)) {
 				con.send(paket);
 			}
-			if(hasParent())sendroot(paket);
+			if(hasParent()&&(root_connection!=quelle))sendroot(paket);
 		}
 	}
 
@@ -805,6 +805,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				if (!tmp.getAlias().equals(newAlias)) {
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
+					GUI.getGUI().notifyGUI();
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}
@@ -825,6 +826,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			
 		case "file":
 			System.out.println(ce.request_File(new File("test.txt"), meinNode));
+			break;
+		case "update":
+			GUI.getGUI().notifyGUI();
 			break;
 
 		default:

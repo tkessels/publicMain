@@ -3,14 +3,24 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -71,7 +81,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	public ChatWindow( long uid) {
 		this.userID = uid;
 		this.isPrivCW = true;
-		updateName();
+		Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
+		if(nodeForUID!=null)this.name = nodeForUID.getAlias();
 		doWindowbuildingstuff();
 	}
 
@@ -85,7 +96,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 	public void updateName() {
-		if(isPrivCW)this.name = GUI.getGUI().getNodeForUID(userID).getAlias();
+		if(isPrivCW) {
+			Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
+			if(nodeForUID!=null)this.name = nodeForUID.getAlias();
+			myTab.updateAlias();
+		}
 	}
 	/**
 	 * Erstellt Content und macht Layout für das Chatpanel
@@ -117,26 +132,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.eingabeFeld.addKeyListener(new History(eingabeFeld));
 
 		this.sendenBtn.addActionListener(this);
-		this.sendenBtn.addMouseListener(new MouseListener() {
-			public void mouseReleased(MouseEvent e) {
-			}
-			public void mousePressed(MouseEvent e) {
-			}
-			public void mouseExited(MouseEvent e) {
-				JButton source = (JButton) e.getSource();
-				if(onlineState){
-					source.setForeground(Color.BLACK);
-				}
-			}
-			public void mouseEntered(MouseEvent e) {
-				JButton source = (JButton) e.getSource();
-				if(onlineState){
-					source.setForeground(new Color(255, 130, 13));
-				}
-			}
-			public void mouseClicked(MouseEvent e) {
-			}
-		});
+		this.sendenBtn.addMouseListener(new MouseListenerImplementation());
 
 		this.eingabeFeld.addActionListener(this);
 		this.keyHistory=new History(eingabeFeld);
@@ -148,38 +144,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.add(panel, BorderLayout.SOUTH);
 
 		
-		this.onlineStateSetter = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(true){
-					if (isPrivCW) {
-						if (gui.getNodeForUID(userID) == null) {
-							onlineState = false;
-							myTab.setOffline();
-							eingabeFeld.setEnabled(false);
-							sendenBtn.setForeground(Color.GRAY);
-							sendenBtn.setEnabled(false);
-						} else {
-							onlineState = true;
-							myTab.setOnline();
-							eingabeFeld.setEnabled(true);
-							sendenBtn.setForeground(Color.BLACK);
-							sendenBtn.setEnabled(true);
-						}
-						synchronized (ChatEngine.getCE().getUsers()) {
-							try {
-								ChatEngine.getCE().getUsers().wait();
-							} catch (InterruptedException e) {
-								LogEngine.log(e);
-							}
-						}
-					}
-				}
-			}
-		});
+		this.onlineStateSetter = new Thread(new RunnableImplementation());
 		if(isPrivCW){
 			this.onlineStateSetter.start();
 		}
+		new DropTarget(msgTextPane, new DropTargetListenerImplementation());
 		
 		this.setVisible(true);
 	}
@@ -231,21 +200,21 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	/**
 	 * @param x
 	 */
-	private void info(String x){
+	public void info(String x){
 		putMSG(new MSG(x,MSGCode.CW_INFO_TEXT));
 	}
 	
 	/**
 	 * @param x
 	 */
-	private void warn(String x){
+	public void warn(String x){
 		putMSG(new MSG(x,MSGCode.CW_WARNING_TEXT));
 	}
 	
 	/**
 	 * @param x
 	 */
-	private void error(String x){
+	public void error(String x){
 		putMSG(new MSG(x,MSGCode.CW_ERROR_TEXT));
 	}
 	
@@ -410,32 +379,105 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj!=null) {
-			if (obj instanceof String)return gruppe.equals((String)obj);
-			else if(obj instanceof Long)return userID == (Long)obj;
+			if(gruppe!=null&& gruppe.equals(obj))return true;
+			if(userID!=null&&userID.equals(obj))return true;
+			if(obj instanceof ChatWindow) {
+				ChatWindow other = (ChatWindow) obj;
+				if (other.isPrivCW != isPrivCW)return false;
+				if (other.gruppe != gruppe)return false;
+				if (other.userID != userID)return false;
+				return true;
+			}
 		}
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ChatWindow other = (ChatWindow) obj;
-		if (gruppe == null) {
-			if (other.gruppe != null)
-				return false;
-		} else if (!gruppe.equals(other.gruppe))
-			return false;
-		if (isPrivCW != other.isPrivCW)
-			return false;
-		if (userID != other.userID)
-			return false;
-		return true;
+		return false;
 	}
 	
+	private final class DropTargetListenerImplementation implements DropTargetListener {
+		public void dropActionChanged(DropTargetDragEvent dtde) {
+		}
+		public void drop(DropTargetDropEvent event) {
+				 event.acceptDrop(DnDConstants.ACTION_COPY);
+			            try {
+						List<File> files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+						if(files.size()==1) {
+							gui.sendFile(files.get(0), userID);
+						}
+			            } catch (Exception e) {
+			                LogEngine.log(this,"You can only drop one File",LogEngine.ERROR);
+			            }
+			        event.dropComplete(true);
+		}
+		
+		public void dragOver(DropTargetDragEvent dtde) {
+		}
+		public void dragExit(DropTargetEvent dte) {
+		}
+		public void dragEnter(DropTargetDragEvent dtde) {
+		}
+	}
+
+
+	private final class RunnableImplementation implements Runnable {
+		@Override
+		public void run() {
+			while(true){
+				if (isPrivCW) {
+					if (gui.getNodeForUID(userID) == null) {
+						onlineState = false;
+						myTab.setOffline();
+						eingabeFeld.setEnabled(false);
+						sendenBtn.setForeground(Color.GRAY);
+						sendenBtn.setEnabled(false);
+					} else {
+						onlineState = true;
+						myTab.setOnline();
+						eingabeFeld.setEnabled(true);
+						sendenBtn.setForeground(Color.BLACK);
+						sendenBtn.setEnabled(true);
+					}
+					synchronized (ChatEngine.getCE().getUsers()) {
+						try {
+							ChatEngine.getCE().getUsers().wait();
+						} catch (InterruptedException e) {
+							LogEngine.log(e);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	private final class MouseListenerImplementation implements MouseListener {
+		public void mouseReleased(MouseEvent e) {
+		}
+
+		public void mousePressed(MouseEvent e) {
+		}
+
+		public void mouseExited(MouseEvent e) {
+			JButton source = (JButton) e.getSource();
+			if(onlineState){
+				source.setForeground(Color.BLACK);
+			}
+		}
+
+		public void mouseEntered(MouseEvent e) {
+			JButton source = (JButton) e.getSource();
+			if(onlineState){
+				source.setForeground(new Color(255, 130, 13));
+			}
+		}
+
+		public void mouseClicked(MouseEvent e) {
+		}
+	}
+
+
 	/**
 	 * KeyListener für Nachrichtenhistorie ggf. für andere Dinge verwendbar
 	 */
-		class History implements KeyListener{
+	private class History implements KeyListener{
 
 			private ArrayList<String> eingabeHistorie;
 			private int eingabeAktuell;
@@ -477,5 +519,5 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 				}
 		}
-	};
+	}
 }

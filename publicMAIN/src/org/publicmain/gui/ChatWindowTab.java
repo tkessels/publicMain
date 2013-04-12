@@ -36,7 +36,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		this.setOpaque(false);
 
 		// TitelLabel für Tabbeschriftung erzeugen:
-		this.lblTitle = new JLabel(title);
+		this.lblTitle = new JLabel(owner.getChatWindowName());
 		// MouseListener zu JLabel (lblTitle) hinzufügen:
 		this.lblTitle.addMouseListener(this);
 
@@ -70,6 +70,10 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		this.add(lblClose);
 
 		// den neuen Tab an die Stelle von index setzen:
+	}
+	
+	void updateAlias() {
+		lblTitle.setText(owner.getChatWindowName());
 	}
 	
 
@@ -205,6 +209,8 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		public void stopit() {
 			active = false;
 		}
+		
+
 	}
 }
 	

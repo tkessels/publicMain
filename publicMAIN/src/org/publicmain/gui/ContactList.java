@@ -84,7 +84,7 @@ public class ContactList extends JWindow {
 				String tmpGrpName = null;
 				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("gruppe.png")), null, null);
 				if(tmpGrpName!=null && !tmpGrpName.equals("")){
-					GUI.getGUI().addGrpCW(tmpGrpName);
+					GUI.getGUI().addGrpCW(tmpGrpName, true);
 				} 
 				
 			}
@@ -145,16 +145,12 @@ public class ContactList extends JWindow {
 				int index = source.locationToIndex(e.getPoint());
 				if (index >= 0) {
 					Object o = source.getModel().getElementAt(index);
-					if (source.getModel().getClass().getSimpleName()
-							.startsWith("Group")) {
-						GUI.getGUI().addGrpCW(o.toString());
+					if (source.getModel().getClass().getSimpleName().startsWith("Group")) {
+						GUI.getGUI().addGrpCW(o.toString(), true);
 					}
-					if (source.getModel().getClass().getSimpleName()
-							.startsWith("User")) {
-
-						if (!(users.getSelectedValue().getUserID() == ChatEngine
-								.getCE().getUserID())) {
-							GUI.getGUI().addPrivCW(((Node) o).getUserID());
+					if (source.getModel().getClass().getSimpleName().startsWith("User")) {
+						if (!(users.getSelectedValue().getUserID() == ChatEngine.getCE().getUserID())) {
+							GUI.getGUI().addPrivCW(((Node) o).getUserID(), true);
 						}
 					}
 				}
@@ -261,7 +257,7 @@ public class ContactList extends JWindow {
 			JMenuItem source = (JMenuItem)e.getSource();
 			
 			if(source.getText().startsWith("join")){
-				GUI.getGUI().addGrpCW(chatname);
+				GUI.getGUI().addGrpCW(chatname, true);
 			}
 			else if(source.getText().startsWith("leave")){
 				GUI.getGUI().delChat(chatname);
@@ -269,7 +265,7 @@ public class ContactList extends JWindow {
 			else if(source.getText().startsWith("whisper")){
 				
 //				GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(chatname).getUserID());
-				GUI.getGUI().addPrivCW(users.getSelectedValue().getUserID());
+				GUI.getGUI().addPrivCW(users.getSelectedValue().getUserID(), true);
 			}
 			else if(source.getText().startsWith("ignore")){
 				GUI.getGUI().ignoreUser(users.getSelectedValue().getUserID());

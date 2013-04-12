@@ -79,7 +79,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private JMenuItem lafNimROD;
 	private ButtonGroup btnGrp;
 	
-	private DragableJTabbedPane jTabbedPane;
+//	private DragableJTabbedPane jTabbedPane;
+	private JTabbedPane jTabbedPane;
 	private JToggleButton contactListBtn;
 	private boolean contactListActive;
 	private ContactList contactListWin;
@@ -112,8 +113,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.exit			= new JMenuItem("Exit");
 		this.lafMenu		= new JMenu("Switch Design");
 		this.btnGrp 		= new ButtonGroup();
-		this.chatList 		= new ArrayList<ChatWindow>();
-		this.jTabbedPane 	= new DragableJTabbedPane();
+		this.chatList 		= Collections.synchronizedList(new ArrayList<ChatWindow>());
+		//this.jTabbedPane 	= new DragableJTabbedPane();
+		this.jTabbedPane 	= new JTabbedPane();
 		this.contactListBtn = new JToggleButton(new ImageIcon(getClass().getResource("UserListAusklappen.png")));
 		this.contactListActive = false;
 		this.menuBar 		= new JMenuBar();
@@ -208,9 +210,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.add(jTabbedPane);
 		
 		// StandardGruppe erstellen:
-		this.addGrpCW("public");
+		this.addGrpCW("public", true);
 		// StandardGruppe joinen:
-		this.ce.group_join("public");
+		//this.ce.group_join("public"); //Überflüssig weil die addGrpCW das macht
 		
 		//registriert Hauptfenster als Empfänger für noch nicht gefangene Privatnachrichten
 		this.ce.register_defaultMSGListener(this);
@@ -265,21 +267,19 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 	}
 	
-	/**
-	 * Diese Methode fügt ein ChatWindow hinzu
-	 * 
-	 * Diese Methode fügt ein ChatWindow zum GUI hinzu und setzt dessen
-	 * Komponenten
-	 * 
-	 * @param cw
+
+	/** Diese Methode erstellt ein neues ChatFenster. Ist das der Parameter ein {@link String} erstellt sie ein Gruppenfenster ist er {@link Long} ein PrivatChatFenster
+	 * @param referenz Für was soll ein Fenster erstellt werden. 
+	 * @return
 	 */
 	public ChatWindow createChat(Object referenz) {
 		
-		// Title festlegen:
 		ChatWindow cw;
 		if(referenz instanceof String)cw=new ChatWindow((String)referenz);
 		else if (referenz instanceof Long)cw=new ChatWindow((Long)referenz);
 		else return null;
+
+		// Title festlegen:
 		String title = cw.getChatWindowName();
 		
 
@@ -295,12 +295,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		// den neuen Tab an die Stelle von index setzen:
 		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
 		
-		if(cw.isGroup()){
-			ce.group_join((String) referenz);
-			ce.add_MSGListener(cw, (String) referenz);
-		}else{
-			ce.add_MSGListener(cw, (Long) referenz);
-		}
+		if(cw.isGroup()) ce.add_MSGListener(cw, (String) referenz);
+		else ce.add_MSGListener(cw, (Long) referenz);
 		
 		return cw;
 	}
@@ -308,69 +304,47 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	/**
 	 * Diese Methode erstellt ein ChatWindow für Gruppen, falls ChatWindow bereits vorhanden, wird dieses fokusiert.
 	 * @param grpName
+	 * @param focus TODO
 	 */
-	public void addGrpCW(String grpName){
+	public void addGrpCW(String grpName, boolean focus){
 		// Gruppenname auf Konvention prüfen, ggf. Änderungen vornehmen.
-		String grp_name = grpName;
-		if(grp_name.length() > GRP_NAME_LENGTH){
-			grp_name = grp_name.substring(0, GRP_NAME_LENGTH); 
+		String clean_group = sanatizeGroupname(grpName);
+		// Hol ref. auf Gruppenfenster wenn existent
+		ChatWindow tmp_cw=getCW(clean_group);
+		//wenn ref. leer dann erstelle neues Gruppenfesnter
+		if(tmp_cw == null)  tmp_cw=createChat(clean_group);
+		//fokusiere das Gruppenfenster
+		if(focus)focus(tmp_cw);
+	}
+
+	/** Säubert einen eingegebenen Gruppenstring von ungewollten Zeichen
+	 * @param grpName Der vom Benutzer eingegebene Gruppenname
+	 * @return einen gesäuberten String zu verwendung als Gruppenname
+	 */
+	private String sanatizeGroupname(String grpName) {
+		String clean_grpname = grpName;
+		if(clean_grpname.length() > GRP_NAME_LENGTH){
+			clean_grpname = clean_grpname.substring(0, GRP_NAME_LENGTH); 
 		}
-		grp_name = grp_name.trim();
-		grp_name = grp_name.replaceAll("[&#*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
-		grp_name = grp_name.toLowerCase();
-		
-		// Chatwindow erstellen oder wenn schon vorhanden fokusieren
-		ChatWindow tmp_cw;// = new ChatWindow(grp_name);
-		if((tmp_cw=getCW(grp_name)) == null){
-//			tmp_cw = new ChatWindow(grp_name);
-//			createChat(tmp_cw);
-			tmp_cw=createChat(grp_name);
-			// ChatWindow am Gruppen NachrichtenListener (MSGListener) anmelden und Gruppe joinen:
-//			ce.group_join(grp_name);
-//			ce.add_MSGListener(tmp_cw, grp_name);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp_cw));
-		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp_cw));
-		}
+		clean_grpname = clean_grpname.trim();
+		clean_grpname = clean_grpname.replaceAll("[^a-zA-Z0-9\\-_]", "");
+//		grp_name = grp_name.replaceAll("[&#*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
+		clean_grpname = clean_grpname.toLowerCase();
+		return clean_grpname;
 	}
 	
-	/**
-	 * Diese Methode erstellt ein ChatWindow für Privatechats, welches fokussiert wird.
-	 * @param aliasName
-	 */
-	public void addPrivCW(long uid){
-		//String tmpAlias = ce.getNodeForUID(uid).getAlias();
-		
+	public void addPrivCW(long uid,boolean focus){
 		ChatWindow tmp = getCW(uid);
-		if(tmp == null){
-//			tmp=new ChatWindow(uid);
-//			createChat(tmp);
-			tmp=createChat(uid);
-			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-//			ce.add_MSGListener(tmp, uid);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp));
-		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp));
-		}
+		if(tmp == null)tmp=createChat(uid);
+		if (focus) focus(tmp);
 	}
-	
-	
-	/**
-	 * Diese Methode erstellt ein ChatWindow für einkommende Privatechats, falls ChatWindow bereits vorhanden, wird dieses fokussiert.
-	 * @param uid
+
+	/**Fokussiert das angegebene ChatWindow
+	 * @param cw Das zu fokussierende Chatwindow
 	 */
-	public void addPrivIncomingCW(long uid){
-		//String tmpAlias = ce.getNodeForUID(uid).getAlias();
-		ChatWindow tmp = getCW(uid);
-		if(tmp == null){
-//			tmp=new ChatWindow(uid);
-//			createChat(tmp);
-			tmp=createChat(uid);
-			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-//			ce.add_MSGListener(tmp, uid);
-		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp));
-		}
+	private void focus(ChatWindow cw) {
+		int index = jTabbedPane.indexOfComponent(cw);
+		if(index>=0)jTabbedPane.setSelectedIndex(index);
 	}
 	
 	/**
@@ -405,8 +379,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * @param chatname
 	 */
-	public void delChat(String chatname){
-		delChat(getCW(chatname));
+	public void delChat(Object refObject){
+		delChat(getCW(refObject));
 	}
 	
 	/**
@@ -465,25 +439,20 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		return (index>=0)?chatList.get(index):null;
 	}
 	
+	/** Die Methode  liefert das zu einer Referenz gehörende {@link ChatWindow}.
+	 *    
+	 *    <br>Sie ersetzt die alte <code>existCW</code> und liefert ein ChatWindow zu einer Referenz. Die Referenz muss zwansläufig entweder ein {@link String} oder ein {@link Long}.
+	 *    Ein <code>String</code> bezieht sich auf GruppenChatFenster und liefert falls vorhanden das ChatFenster zu dieser Gruppe. Ein <code>Long</code> liefert entsprechend das 
+	 *    PrivatChatFenster wenn der übergebene wert eine gültige UID war und einFenster zu diesem Nutzer bereits existiert. Sollte eine ungültige Referenz übergeben werden oder kein
+	 *     Fenster zu dieser Referenz existieren liefert die Methode <code>null</code> zurück.
+	 * @param referenz Der Gruppenname (String) oder die UserID (Long) zu der ein Fenster gesucht werden soll.
+	 * @return die laufende Instanz des Chatwindows zur angegebenen Referenz oder <code>null</code> falls keine Instanz gefunden.
+	 */
 	private ChatWindow getCW(Object referenz){
-		for (ChatWindow cur : chatList) {
-			if (cur.equals(referenz)) return cur;
+		if(referenz!=null) {
+			for (ChatWindow cur : chatList) if (cur.equals(referenz)) return cur;
 		}
 		return null;
-	
-		/*
-		if(referenz instanceof String){
-			for (ChatWindow cur : chatList) {
-				if (cur.equals(referenz)) return cur;
-			}
-			return null;
-		}else if(referenz instanceof Long){
-			for (ChatWindow cur : chatList) {
-				if (cur.equals(referenz)) return cur;
-			}
-			return null;
-		}
-		return null;*/
 	}
 	
 	/**
@@ -532,10 +501,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		ChatWindow tmpCW = getCW(empfGrp);
 		if(tmpCW == null){
 			tmpCW= new ChatWindow(empfGrp);
-			addGrpCW(empfGrp);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
+			addGrpCW(empfGrp, true);
+			focus(tmpCW);
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
+			focus(tmpCW);
 		}
 		ce.send_group(empfGrp, msg);
 	}
@@ -558,19 +527,21 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			return ce.unignore_user(uid);
 	}
 	
-	/**
-	 * @param aliasName
-	 */
+
 	public void sendFile(long uid) {
-		// TODO: hier stimmen noch paar sachen nicht später überarbeiten!
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal = fileChooser.showOpenDialog(me);
 		File selectedFile = fileChooser.getSelectedFile();
-		if(returnVal == JFileChooser.APPROVE_OPTION){
-			System.out.println("You chose to send this file: " + selectedFile.getName());
-		}
-		if(selectedFile!=null)ce.send_file(selectedFile, uid);
+		if(selectedFile!=null)sendFile(selectedFile, uid);
 	}
+	
+	public void sendFile(File datei, long uid) {
+		if(datei.isFile()&&datei.canRead()) ce.send_file(datei, uid);
+	}
+	
+	
+	
+	
+	
 	
 	/**
 	 * Diese Methode liefert ein Fileobjekt
@@ -603,10 +574,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * Diese Methode soll über Änderungen informieren
 	 */
 	public void notifyGUI() {
-		// TODO:
-		// da muss noch was gemacht werden !!!
-		// evtl fliegt die Methode auch raus wenn wir das
-		// mit den Observerpattern machen...
+		for (ChatWindow cw : chatList) {
+			cw.updateName();
+		}
 	}
 
 	/*
@@ -620,7 +590,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
 			Node tmp_node = ce.getNodeForNID(tmp.getSender());
-			me.addPrivIncomingCW(tmp_node.getUserID());
+			me.addPrivCW(tmp_node.getUserID(), false);
 			ce.put(tmp);
 		}
 	}

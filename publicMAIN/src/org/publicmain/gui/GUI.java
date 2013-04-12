@@ -295,21 +295,25 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param grpName
 	 */
 	public void addGrpCW(String grpName){
+		// Gruppenname auf Konvention prüfen, ggf. Änderungen vornehmen.
 		String grp_name = grpName;
 		if(grp_name.length() > GRP_NAME_LENGTH){
 			grp_name = grp_name.substring(0, GRP_NAME_LENGTH); 
 		}
 		grp_name = grp_name.trim();
-		grp_name = grp_name.replaceAll("[*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
+		grp_name = grp_name.replaceAll("[&#*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
 		grp_name = grp_name.toLowerCase();
-		if(existCW(grp_name) == null){
-			createChat(new ChatWindow(grp_name));
+		
+		// Chatwindow erstellen oder wenn schon vorhanden fokusieren
+		ChatWindow new_cw = new ChatWindow(grp_name);
+		if(existCW(new_cw) == null){
+			createChat(new_cw);
 			// ChatWindow am Gruppen NachrichtenListener (MSGListener) anmelden und Gruppe joinen:
 			ce.group_join(grp_name);
-			ce.add_MSGListener(existCW(grp_name), grp_name);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(grp_name)));
+			ce.add_MSGListener(existCW(new_cw), grp_name);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(new_cw)));
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(grp_name)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(new_cw)));
 		}
 	}
 	
@@ -319,13 +323,15 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	public void addPrivCW(long uid){
 		String tmpAlias = ce.getNodeForUID(uid).getAlias();
-		if(existCW(tmpAlias) == null){
-			createChat(new ChatWindow(uid, tmpAlias));
+		
+		ChatWindow tmp = new ChatWindow(uid);
+		if(existCW(tmp) == null){
+			createChat(tmp);
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-			ce.add_MSGListener(existCW(tmpAlias), uid);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
+			ce.add_MSGListener(existCW(tmp), uid);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
 		}
 	}
 	
@@ -336,12 +342,13 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	public void addPrivIncomingCW(long uid){
 		String tmpAlias = ce.getNodeForUID(uid).getAlias();
-		if(existCW(tmpAlias) == null){
-			createChat(new ChatWindow(uid, tmpAlias));
+		ChatWindow tmp = new ChatWindow(uid);
+		if(existCW(tmp) == null){
+			createChat(tmp);
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-			ce.add_MSGListener(existCW(tmpAlias), uid);
+			ce.add_MSGListener(existCW(tmp), uid);
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmpAlias)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
 		}
 	}
 	
@@ -378,7 +385,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param chatname
 	 */
 	public void delChat(String chatname){
-		delChat(existCW(chatname));
+		delChat(existCW(new ChatWindow(chatname)));
 	}
 	
 	/**
@@ -423,16 +430,18 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * Diese Methode prüft ob ein ChatWindow vorhanden ist falls ja wird dieses returned
 	 * falls nein wird null returned
-	 * @param chatWindowname Name Chatwindow
+	 * @param empfGrp Name Chatwindow
 	 * @return ChatWindow or null 
 	 */
-	private ChatWindow existCW(String chatWindowname){
-		for(ChatWindow x : chatList){
-			if(x.getChatWindowName().equals(chatWindowname)){
-				return x;
-			}
-		}
-		return null;
+	private ChatWindow existCW(ChatWindow referenz){
+//		for(ChatWindow x : chatList){
+//			if(x.getChatWindowName().equals(chatWindowname)){
+//				return x;
+//			}
+//		}
+//		return null;
+		int index = chatList.indexOf(referenz);
+		return (index>=0)?chatList.get(index):null;
 	}
 	
 	/**
@@ -452,7 +461,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * falls nicht wird eines angelegt und die private nachricht an die UID versendet
 	 * @param empfAlias String Empfänger Alias
 	 * @param msg String die Nachricht
-	 */
+	 *//*
 	void privSend(String empfAlias, String msg){
 		ChatWindow tmpCW = existCW(empfAlias);
 		long tmpUID = -1;
@@ -468,7 +477,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			ce.send_private(tmpUID, msg);
 		}
 	}
-	
+	*/
 	/**
 	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet
 	 * Falls noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
@@ -477,10 +486,12 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param cw ChatWindow das aufrufende ChatWindow
 	 */
 	void groupSend(String empfGrp, String msg){
-		ChatWindow tmpCW = existCW(empfGrp);
+		
+		ChatWindow tmp = new ChatWindow(empfGrp);
+		ChatWindow tmpCW = existCW(tmp);
 		if(tmpCW == null){
 			addGrpCW(empfGrp);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(empfGrp)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
 		} else {
 			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
 		}

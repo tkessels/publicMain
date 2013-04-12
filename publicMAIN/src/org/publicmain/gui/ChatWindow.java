@@ -46,33 +46,35 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private JScrollPane msgTextScroller;
 	private JTextField eingabeFeld;
 	private String gruppe;
-	private long userID;
+	private Long userID;
 	private boolean isPrivCW;
 	private GUI gui;
 	private History keyHistory;
 	private ChatWindowTab myTab;
 	private JPanel panel;
 	private String helptext="<br><table color='#05405E'>" +
-			"<tr><td colspan='3'><b>Kurzbefehl</b></td><td><b>Erläuterung</b></td></tr>" +
-			"<tr><td colspan='3'>/clear</td><td>Anzeige löschen</td></tr>" +
-			"<tr><td colspan='3'>/exit</td><td>Programm beenden</td></tr>" +
-			"<tr><td colspan='3'>/help</td><td>zeigt diese Hilfe an</td></tr>" +
-			"<tr><td>/ignore</td><td colspan='2'>&lt;username&gt;</td><td>User ignorieren</td></tr>" +
-			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>User nicht weiter ignorieren</td></tr>" +
-			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>Informationen über User erhalten</td></tr>" +
-			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>Nachricht an Gruppe</tr>" +
-			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>Flüsternachricht</tr>" +
-			"<tr><td>/s</td><td  colspan='2'>&lt;message&gt;</td>schreien</tr>" +
+			"<tr><td colspan='3'><b>Command</b></td><td><b>Description</b></td></tr>" +
+			"<tr><td colspan='3'>/clear</td><td>clear screen</td></tr>" +
+			"<tr><td colspan='3'>/exit</td><td>exit program</td></tr>" +
+			"<tr><td colspan='3'>/help</td><td>display this help</td></tr>" +
+			"<tr><td>/ignore</td><td colspan='2'>&lt;username&gt;</td><td>ignore this user</td></tr>" +
+			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>unignore this user</td></tr>" +
+			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>display information about user</td></tr>" +
+			"<tr><td>/alias</td><td colspan='2'>&lt;username&gt;</td><td>change username</td></tr>" +
+			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>message to group</tr>" +
+			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>whisper to user</tr>" +
+			"<tr><td>/s</td><td  colspan='2'>&lt;message&gt;</td>shout</tr>" +
 			"</table><br>";
 	private boolean onlineState;
 	private Thread onlineStateSetter;
 
-	public ChatWindow( long uid, String username) {
+	public ChatWindow( long uid) {
 		this.userID = uid;
-		this.name = username;
 		this.isPrivCW = true;
+		updateName();
 		doWindowbuildingstuff();
 	}
+
 
 	public ChatWindow(String gruppenname) {
 		gruppe = gruppenname;
@@ -82,6 +84,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		doWindowbuildingstuff();
 	}
 
+	public void updateName() {
+		if(isPrivCW)this.name = gui.getNodeForUID(userID).getAlias();
+	}
 	/**
 	 * Erstellt Content und macht Layout für das Chatpanel
 	 */
@@ -287,12 +292,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						LogEngine.log("Ignorieren von " + tmp[1] + " nicht möglich!", LogEngine.INFO);
 					}
 				}
-				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
-					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
-				}
-				else if (eingabe.startsWith("/alias ") && (tmp = eingabe.split(" ", 2)).length == 2) {
-					GUI.getGUI().changeAlias(tmp[1]);
-				}
 				else if (eingabe.startsWith("/unignore ") && (tmp = eingabe.split(" ", 2)).length == 2){
 					
 					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
@@ -301,6 +300,12 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					} else {
 						warn(tmp[1] + "wurde nicht gefunden!");
 					}
+				}
+				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
+					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
+				}
+				else if (eingabe.startsWith("/alias ") && (tmp = eingabe.split(" ", 2)).length == 2) {
+					GUI.getGUI().changeAlias(tmp[1]);
 				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					Node tmp_node=ChatEngine.getCE().getNodeforAlias(tmp[1]);
@@ -400,6 +405,31 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 		msgTextPane.setCaretPosition(htmlDoc.getLength());
 		//LogEngine.log(this,"printing",msg);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj!=null) {
+			if (obj instanceof String)return gruppe.equals((String)obj);
+			else if(obj instanceof Long)return userID == (Long)obj;
+		}
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ChatWindow other = (ChatWindow) obj;
+		if (gruppe == null) {
+			if (other.gruppe != null)
+				return false;
+		} else if (!gruppe.equals(other.gruppe))
+			return false;
+		if (isPrivCW != other.isPrivCW)
+			return false;
+		if (userID != other.userID)
+			return false;
+		return true;
 	}
 	
 	/**

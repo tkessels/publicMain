@@ -11,6 +11,8 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.print.attribute.standard.MediaSize.Other;
 import javax.swing.ImageIcon;
@@ -58,6 +60,11 @@ public class LocalDBConnection {
 	private SimpleDateFormat splDateFormt;
 	
 	
+	//--------neue Sachen------------
+	private BlockingQueue<MSG> locDBInbox;
+	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=???
+	//--------neue Sachen ende------------
+	
 	// verbindungssachen
 	private boolean isDBConnected;		// noch richtig implementieren oder weg lassen weil ehh jedesmal neu prüfen?
 	private boolean askForConnectionRetry;
@@ -81,9 +88,13 @@ public class LocalDBConnection {
 		this.cal					= Calendar.getInstance();
 		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-		if(connectToLocDBServer()){
-			isDBConnected = true;
-		}
+		//--------neue Sachen------------
+		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
+		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=???
+		//--------neue Sachen ende------------
+		
+		connectToLocDBServer();
+		
 	}
 	public static LocalDBConnection getDBConnection() {
 		if (me == null) {
@@ -91,36 +102,24 @@ public class LocalDBConnection {
 		}
 		return me;
 	}
-	private boolean connectToLocDBServer(){	// wird nur vom Construktor aufgerufen
-		try {
-			this.con = DriverManager.getConnection(url, user, passwd);
-			this.stmt = con.createStatement();
-			createDbAndTables();
-			LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
-			return true;
-		} catch (SQLException e) {
-			LogEngine.log(this, "DB-Verbindung fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
-			isDBConnected = false;
-			if(askForConnectionRetry){
-				askForConnectionRetry = false;
-				int eingabe = JOptionPane.showConfirmDialog(null,
-		                "Es besteht keine Verbindung zum lokalen DB-Server!\n"
-						+ "Fehlerbeschreibung: " + e.getCause() + "\n"
-						+ "möchten sie einen erneuten versuch unternehmen?",
-		                "Fehler bei der DB-Verbindung.",
-		                JOptionPane.YES_NO_OPTION);
-				if (eingabe == 1){
-					askForConnectionRetry = false;	// nein ist 1
-						
-				} else if (eingabe == 0){
-					askForConnectionRetry = true;
-					connectToLocDBServer();	
+	private void connectToLocDBServer(){	// wird nur vom Construktor aufgerufen
+		Runnable tmp = new Runnable(){
+
+			public void run() {
+				try {
+					con = DriverManager.getConnection(url, user, passwd);
+					LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
+					dbStatus = 1;
+				} catch (SQLException e) {
+					LogEngine.log(this, "DB-Verbindung fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
 				}
 			}
 			
-			return false;
-		}
+		};
+		tmp.run();
+		createDbAndTables();
 	}
+	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		try {
 			this.stmt = con.createStatement();
@@ -186,150 +185,156 @@ public class LocalDBConnection {
 	}
 	
 	// TODO in seperate Klasse auslagern! 
-	public void saveMsg (final MSG m){
-		Runnable tmp = new Runnable() {
-			public void run() {
-				if (isDBConnected) {
-					if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
-						String saveStmt = ("insert into " + chatLogTbl + " (msgID,timestamp,sender,empfaenger,typ,grp,data)"
-								+ " VALUES ("
-								+ m.getId() + ","
-								+ m.getTimestamp() 	+ "," 
-								+ m.getSender() 	+ ","
-								+ m.getEmpfänger() 	+ ","
-								+ "'" + m.getTyp() 	+ "'"	+ ","
-								+ "'" + m.getGroup()+ "'"	+ ","
-								+ "'" + m.getData() + "'" + ")");
-						try {
-							//System.out.println(saveStmt);
-							stmt.execute(saveStmt);
-							LogEngine.log(LocalDBConnection.this,
-									"Nachicht in DB-Tabelle " + chatLogTbl
-											+ " eingetragen.", LogEngine.INFO);
-						} catch (Exception e) {
-							LogEngine.log(LocalDBConnection.this,
-									"Fehler beim eintragen in : " + chatLogTbl
-											+ " " + e.getMessage(),
-									LogEngine.ERROR);
-							isDBConnected = false;
-						}
-					}
-				} else {
-					//System.out.println("es besteht keine DB-Verbindung!");
-					if (askForConnectionRetry) {
-						if (connectToLocDBServer()){
-						isDBConnected = true;
-						createDbAndTables();
-						saveMsg(m);
-						}
-					} else {
-						// Erneuter Verbindungsversuch nicht gewollt
-					}
-				}
-			}
-		};
-		(new Thread(tmp)).start();
+	public void saveMsg (MSG m){
+//TODO Hier wird message in ne Blocking que geschrieben
+		locDBInbox.add(m);
+	}
+	
+	public void writeMsgToDB (){
+//		Runnable tmp = new Runnable() {
+//			public void run() {
+//				if (isDBConnected) {
+//					if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
+//						String saveStmt = ("insert into " + chatLogTbl + " (msgID,timestamp,sender,empfaenger,typ,grp,data)"
+//								+ " VALUES ("
+//								+ m.getId() + ","
+//								+ m.getTimestamp() 	+ "," 
+//								+ m.getSender() 	+ ","
+//								+ m.getEmpfänger() 	+ ","
+//								+ "'" + m.getTyp() 	+ "'"	+ ","
+//								+ "'" + m.getGroup()+ "'"	+ ","
+//								+ "'" + m.getData() + "'" + ")");
+//						try {
+//							//System.out.println(saveStmt);
+//							stmt.execute(saveStmt);
+//							LogEngine.log(LocalDBConnection.this,
+//									"Nachicht in DB-Tabelle " + chatLogTbl
+//											+ " eingetragen.", LogEngine.INFO);
+//						} catch (Exception e) {
+//							LogEngine.log(LocalDBConnection.this,
+//									"Fehler beim eintragen in : " + chatLogTbl
+//											+ " " + e.getMessage(),
+//									LogEngine.ERROR);
+//							isDBConnected = false;
+//						}
+//					}
+//				} else {
+//					//System.out.println("es besteht keine DB-Verbindung!");
+//					if (askForConnectionRetry) {
+//						if (connectToLocDBServer()){
+//						isDBConnected = true;
+//						createDbAndTables();
+//						saveMsg(m);
+//						}
+//					} else {
+//						// Erneuter Verbindungsversuch nicht gewollt
+//					}
+//				}
+//			}
+//		};
+//		(new Thread(tmp)).start();
 	}
 	
 	public void deleteAllMsgs () {
-		if (isDBConnected) {
-			int eingabe = JOptionPane.showConfirmDialog(null,
-					"Yout´re about to delete your ChatLog!\n"
-							+ "Are you really shore that you want to do it?",
-					"Delete confirmation", JOptionPane.YES_NO_OPTION);
-			if (eingabe == 1) {
-				// no, he´s not shore!
-
-			} else if (eingabe == 0) {
-				askForConnectionRetry = true;
-				connectToLocDBServer();
-
-				try {
-					this.stmt = con.createStatement();
-					stmt.addBatch("DROP TABLE IF EXISTS " + chatLogTbl);
-					stmt.executeBatch();
-					createDbAndTables();
-
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}else {
-			askForConnectionRetry = true;
-			if (connectToLocDBServer()) {
-				isDBConnected = true;
-				deleteAllMsgs();
-			} else {
-				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
-			}
-		}
+//		if (isDBConnected) {
+//			int eingabe = JOptionPane.showConfirmDialog(null,
+//					"Yout´re about to delete your ChatLog!\n"
+//							+ "Are you really shore that you want to do it?",
+//					"Delete confirmation", JOptionPane.YES_NO_OPTION);
+//			if (eingabe == 1) {
+//				// no, he´s not shore!
+//
+//			} else if (eingabe == 0) {
+//				askForConnectionRetry = true;
+//				connectToLocDBServer();
+//
+//				try {
+//					this.stmt = con.createStatement();
+//					stmt.addBatch("DROP TABLE IF EXISTS " + chatLogTbl);
+//					stmt.executeBatch();
+//					createDbAndTables();
+//
+//				} catch (SQLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}else {
+//			askForConnectionRetry = true;
+//			if (connectToLocDBServer()) {
+//				isDBConnected = true;
+//				deleteAllMsgs();
+//			} else {
+//				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
+//			}
+//		}
 	}
 	
 	public void searchInHistory (JTextPane historyContentTxt, String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
-		if (isDBConnected){
-			try {
-				String tmpStmtStr = (
-						"SELECT * " +
-						"FROM " + chatLogTbl + " " +
-						"WHERE timestamp BETWEEN '" + fromDateTime.getTime() + "' AND '" + toDateTime.getTime() + "'");
-				if (!chosenNTyp.equals("ALL")){
-					tmpStmtStr = tmpStmtStr + " AND typ = '" + chosenNTyp + "'";
-				}
-				if (!chosenAliasOrGrpName.equals("...type in here.")){
-					//TODO: hier die übersetung von nr in string einbinden
-//					tmpStmtStr = tmpStmtStr + " AND ";
-				}
-				Statement searchStmt = con.createStatement();
-				ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
-				
-				
-				
-				//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
-				historyContentTxt.setText("");
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
-						+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
-						+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
-						+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
-				while (rs.next()) {
-					
-					cal.setTimeInMillis(rs.getLong("timestamp"));
-					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
-							"<tr>" + "<td>" + rs.getInt("id") + "<td>"
-									+ rs.getInt("msgID") + "<td>"
-									+ splDateFormt.format(cal.getTime())+ "<td>"
-									+ rs.getLong("sender") + "<td>"
-									+ rs.getLong("empfaenger") + "<td>"
-									+ rs.getString("typ") + "<td>"
-									+ rs.getString("grp") + "<td>"
-									+ rs.getString("data"), 0, 0, null);
-					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</tr>", 0, 0,
-							null);
-				}
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</table>", 0, 0,
-						null);
-			} catch (BadLocationException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} 
-		}else {
-			JOptionPane.showMessageDialog(null,
-	                "Für diese Operation ist eine Verbindung zum lokalen DB-Server zwingend notwendig",
-	                "Hinweis",
-	                JOptionPane.INFORMATION_MESSAGE);
-			askForConnectionRetry = true;
-			if (connectToLocDBServer()) {
-				isDBConnected = true;
-				searchInHistory(historyContentTxt, chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);
-				
-			} else {
-				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
-			}
-		}
+//		if (isDBConnected){
+//			try {
+//				String tmpStmtStr = (
+//						"SELECT * " +
+//						"FROM " + chatLogTbl + " " +
+//						"WHERE timestamp BETWEEN '" + fromDateTime.getTime() + "' AND '" + toDateTime.getTime() + "'");
+//				if (!chosenNTyp.equals("ALL")){
+//					tmpStmtStr = tmpStmtStr + " AND typ = '" + chosenNTyp + "'";
+//				}
+//				if (!chosenAliasOrGrpName.equals("...type in here.")){
+//					//TODO: hier die übersetung von nr in string einbinden
+////					tmpStmtStr = tmpStmtStr + " AND ";
+//				}
+//				Statement searchStmt = con.createStatement();
+//				ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
+//				
+//				
+//				
+//				//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
+//				historyContentTxt.setText("");
+//				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
+//						+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
+//						+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
+//						+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
+//				while (rs.next()) {
+//					
+//					cal.setTimeInMillis(rs.getLong("timestamp"));
+//					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
+//							"<tr>" + "<td>" + rs.getInt("id") + "<td>"
+//									+ rs.getInt("msgID") + "<td>"
+//									+ splDateFormt.format(cal.getTime())+ "<td>"
+//									+ rs.getLong("sender") + "<td>"
+//									+ rs.getLong("empfaenger") + "<td>"
+//									+ rs.getString("typ") + "<td>"
+//									+ rs.getString("grp") + "<td>"
+//									+ rs.getString("data"), 0, 0, null);
+//					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</tr>", 0, 0,
+//							null);
+//				}
+//				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</table>", 0, 0,
+//						null);
+//			} catch (BadLocationException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (SQLException e) {
+//				e.printStackTrace();
+//			} 
+//		}else {
+//			JOptionPane.showMessageDialog(null,
+//	                "Für diese Operation ist eine Verbindung zum lokalen DB-Server zwingend notwendig",
+//	                "Hinweis",
+//	                JOptionPane.INFORMATION_MESSAGE);
+//			askForConnectionRetry = true;
+//			if (connectToLocDBServer()) {
+//				isDBConnected = true;
+//				searchInHistory(historyContentTxt, chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);
+//				
+//			} else {
+//				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
+//			}
+//		}
 	}
+	
 	public void shutdownLocDB() {
 		// TODO alle verbindungen trennen
 		try {

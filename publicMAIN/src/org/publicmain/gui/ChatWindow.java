@@ -85,7 +85,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 	public void updateName() {
-		if(isPrivCW)this.name = gui.getNodeForUID(userID).getAlias();
+		if(isPrivCW)this.name = GUI.getGUI().getNodeForUID(userID).getAlias();
 	}
 	/**
 	 * Erstellt Content und macht Layout für das Chatpanel

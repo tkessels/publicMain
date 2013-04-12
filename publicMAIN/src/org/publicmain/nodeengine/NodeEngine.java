@@ -281,6 +281,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 						{
 							LogEngine.log(e1);
 						}
+					}else {
+						
 					}
 				}
 			}).start();

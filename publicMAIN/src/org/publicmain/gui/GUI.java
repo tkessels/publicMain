@@ -106,7 +106,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me = this;
 		this.log = new LogEngine();
-		this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
+		//this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.exit			= new JMenuItem("Exit");
@@ -273,9 +273,15 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * @param cw
 	 */
-	public void createChat(ChatWindow cw) {
+	public ChatWindow createChat(Object referenz) {
+		
 		// Title festlegen:
+		ChatWindow cw;
+		if(referenz instanceof String)cw=new ChatWindow((String)referenz);
+		else if (referenz instanceof Long)cw=new ChatWindow((Long)referenz);
+		else return null;
 		String title = cw.getChatWindowName();
+		
 
 		// neues ChatWindow (cw) zur Chatliste (ArrayList<ChatWindow>)
 		// hinzufügen:
@@ -288,6 +294,15 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		int index = jTabbedPane.indexOfComponent(cw);
 		// den neuen Tab an die Stelle von index setzen:
 		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
+		
+		if(cw.isGroup()){
+			ce.group_join((String) referenz);
+			ce.add_MSGListener(cw, (String) referenz);
+		}else{
+			ce.add_MSGListener(cw, (Long) referenz);
+		}
+		
+		return cw;
 	}
 
 	/**
@@ -305,15 +320,17 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		grp_name = grp_name.toLowerCase();
 		
 		// Chatwindow erstellen oder wenn schon vorhanden fokusieren
-		ChatWindow new_cw = new ChatWindow(grp_name);
-		if(existCW(new_cw) == null){
-			createChat(new_cw);
+		ChatWindow tmp_cw;// = new ChatWindow(grp_name);
+		if((tmp_cw=getCW(grp_name)) == null){
+//			tmp_cw = new ChatWindow(grp_name);
+//			createChat(tmp_cw);
+			tmp_cw=createChat(grp_name);
 			// ChatWindow am Gruppen NachrichtenListener (MSGListener) anmelden und Gruppe joinen:
-			ce.group_join(grp_name);
-			ce.add_MSGListener(existCW(new_cw), grp_name);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(new_cw)));
+//			ce.group_join(grp_name);
+//			ce.add_MSGListener(tmp_cw, grp_name);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp_cw));
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(new_cw)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp_cw));
 		}
 	}
 	
@@ -322,16 +339,18 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param aliasName
 	 */
 	public void addPrivCW(long uid){
-		String tmpAlias = ce.getNodeForUID(uid).getAlias();
+		//String tmpAlias = ce.getNodeForUID(uid).getAlias();
 		
-		ChatWindow tmp = new ChatWindow(uid);
-		if(existCW(tmp) == null){
-			createChat(tmp);
+		ChatWindow tmp = getCW(uid);
+		if(tmp == null){
+//			tmp=new ChatWindow(uid);
+//			createChat(tmp);
+			tmp=createChat(uid);
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-			ce.add_MSGListener(existCW(tmp), uid);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
+//			ce.add_MSGListener(tmp, uid);
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp));
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp));
 		}
 	}
 	
@@ -341,14 +360,16 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param uid
 	 */
 	public void addPrivIncomingCW(long uid){
-		String tmpAlias = ce.getNodeForUID(uid).getAlias();
-		ChatWindow tmp = new ChatWindow(uid);
-		if(existCW(tmp) == null){
-			createChat(tmp);
+		//String tmpAlias = ce.getNodeForUID(uid).getAlias();
+		ChatWindow tmp = getCW(uid);
+		if(tmp == null){
+//			tmp=new ChatWindow(uid);
+//			createChat(tmp);
+			tmp=createChat(uid);
 			// ChatWindow am privaten NachrichtenListener (MSGListener) anmelden:
-			ce.add_MSGListener(existCW(tmp), uid);
+//			ce.add_MSGListener(tmp, uid);
 		} else {
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmp));
 		}
 	}
 	
@@ -385,7 +406,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param chatname
 	 */
 	public void delChat(String chatname){
-		delChat(existCW(new ChatWindow(chatname)));
+		delChat(getCW(chatname));
 	}
 	
 	/**
@@ -422,7 +443,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}).start();
 		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
 		ce.shutdown();
-		locDBCon.shutdownLocDB();
+		if(locDBCon!=null)locDBCon.shutdownLocDB();
 	}
 
 	/**
@@ -442,6 +463,27 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 //		return null;
 		int index = chatList.indexOf(referenz);
 		return (index>=0)?chatList.get(index):null;
+	}
+	
+	private ChatWindow getCW(Object referenz){
+		for (ChatWindow cur : chatList) {
+			if (cur.equals(referenz)) return cur;
+		}
+		return null;
+	
+		/*
+		if(referenz instanceof String){
+			for (ChatWindow cur : chatList) {
+				if (cur.equals(referenz)) return cur;
+			}
+			return null;
+		}else if(referenz instanceof Long){
+			for (ChatWindow cur : chatList) {
+				if (cur.equals(referenz)) return cur;
+			}
+			return null;
+		}
+		return null;*/
 	}
 	
 	/**
@@ -487,11 +529,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	void groupSend(String empfGrp, String msg){
 		
-		ChatWindow tmp = new ChatWindow(empfGrp);
-		ChatWindow tmpCW = existCW(tmp);
+		ChatWindow tmpCW = getCW(empfGrp);
 		if(tmpCW == null){
+			tmpCW= new ChatWindow(empfGrp);
 			addGrpCW(empfGrp);
-			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(existCW(tmp)));
+			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
 		} else {
 			jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
 		}

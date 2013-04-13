@@ -96,12 +96,13 @@ public class LocalDBConnection {
 		
 		
 		
-//		Runnable tmp = new Runnable(){
-//			public void run() {
+		Runnable tmp = new Runnable(){
+			public void run() {
 				connectToLocDBServer(); //TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
-//			}
-//		};
+			}
+		};
 //		tmp.run();
+		new Thread(tmp).start();
 		
 		
 	}

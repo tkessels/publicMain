@@ -26,7 +26,7 @@ import org.publicmain.nodeengine.NodeEngine;
  */
 public class MSG implements Serializable,Comparable<MSG>{
 	private static Integer id_counter=0;
-	private static final long serialVersionUID = -2010661171218754968L;
+	private static final long serialVersionUID = 8L;
 
 	//Typisierung
 	private final NachrichtenTyp typ;
@@ -75,7 +75,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this.data=text;
 	}
 
-
+/*
 	public MSG(File datei, long nid) throws IOException {
 		this(NachrichtenTyp.DATA);
 		if(!datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
@@ -98,7 +98,31 @@ public class MSG implements Serializable,Comparable<MSG>{
 		setEmpfänger(nid);
 		group=datei.getName();
 	}
-	
+	*/
+	public MSG(FileTransferData tmp_FR) throws IOException {
+		this(NachrichtenTyp.DATA);
+		this.empfänger=tmp_FR.getReceiver_nid();
+		
+		if(! tmp_FR.datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		GZIPOutputStream zip = new GZIPOutputStream(bout);
+		BufferedOutputStream bos = new BufferedOutputStream(zip);
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(tmp_FR.datei));
+		byte[] cup=new byte[64000];
+		int leng=-1;
+		while((leng=bis.read(cup))!=-1){
+				bos.write(cup,0,leng);
+		}
+		bos.flush();
+		zip.finish();
+		bos.close();
+		Object tmp_data[]=new Object[2];
+		tmp_data[0]=tmp_FR;
+		tmp_data[1]=bout.toByteArray();
+		data=tmp_data;
+		setEmpfänger(tmp_FR.getReceiver_nid());
+	}
+
 	public void save(File datei) throws IOException{
 		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof Object[]&&((Object[])data).length==2&&((Object[])data)[0]instanceof File&&((Object[])data)[1]instanceof byte[]){
 			byte[] tmp_data=(byte[]) ((Object[])data)[1];

@@ -1,11 +1,17 @@
 package org.publicmain.gui;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingWorker;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
@@ -69,4 +75,5 @@ public class UserListModel extends AbstractListModel<Node>{
     public Node getElementAt(int index) {
     	return users.get(index);
     }
+    
 }

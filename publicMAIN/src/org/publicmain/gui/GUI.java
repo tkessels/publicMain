@@ -39,6 +39,7 @@ import javax.swing.event.ChangeListener;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.Config;
+import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
@@ -530,12 +531,20 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 
 	public void sendFile(long uid) {
 		JFileChooser fileChooser = new JFileChooser();
+		int returnVal = fileChooser.showOpenDialog(me);
 		File selectedFile = fileChooser.getSelectedFile();
 		if(selectedFile!=null)sendFile(selectedFile, uid);
 	}
 	
 	public void sendFile(File datei, long uid) {
-		if(datei.isFile()&&datei.canRead()) ce.send_file(datei, uid);
+		if(datei.isFile()) {
+			if(datei.canRead()) {
+				if(datei.length()>0)ce.send_file(datei, uid);
+				else info("File has a size of 0 bytes!", uid, 3);
+			}
+			else info("Cant read file \""+datei.getName()+"\"!", uid, 3);
+		}
+		else info("Only single Files are supported!", uid, 3);
 	}
 	
 	
@@ -545,16 +554,14 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @param typ <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
 	 */
 	public void info(String nachricht, Object reference,int typ) {
-		ChatWindow tmp;
-		if(reference==null)tmp=(ChatWindow) jTabbedPane.getSelectedComponent();
-		else tmp = getCW(reference);
+		ChatWindow tmp=getCW(reference);;
+		if(tmp==null)tmp=(ChatWindow) jTabbedPane.getSelectedComponent();
 		if(tmp!=null){
 			if (typ == 0)tmp.info(nachricht);
 			else if (typ == 1)tmp.warn(nachricht);
 			else tmp.error(nachricht);
 		}
 	}
-	
 	
 	
 	/**
@@ -566,9 +573,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * 
 	 * @return File
 	 */
-	public File request_File(File datei,Node user) {
-		String dateiname = datei.getName();
-		Long size = datei.length();
+	public File request_File(FileTransferData fr) {
+		String dateiname = fr.datei.getName();
+		Long size = fr.size;
 		int x = JOptionPane.showConfirmDialog(null, "Möchten sie eine die Datei "+dateiname+ " annehmen? ("+size +")","Dateiversand",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
 		if(x==JOptionPane.YES_OPTION) {
 			JFileChooser fileChooser = new JFileChooser();
@@ -803,6 +810,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			System.out.println(obj + "\n\t" + def.get(obj));
 		}
 	}
+
+
 
 
 }

@@ -34,6 +34,7 @@ public class LogEngine {
 		String sourceString=(source instanceof String)?(String)source:source.getClass().getSimpleName() ;
 		if(verbosity>=ERROR){
 			log(sourceString + ":"+e.getMessage(),ERROR);
+			e.printStackTrace();
 		}
 	}
 	

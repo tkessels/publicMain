@@ -1,6 +1,8 @@
 package org.publicmain.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -15,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -23,6 +26,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JWindow;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
 import org.publicmain.chatengine.ChatEngine;
@@ -69,6 +73,7 @@ public class ContactList extends JWindow {
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.VERTICAL);
 		this.users.setVisibleRowCount(-1);
+		//this.users.setCellRenderer(new MyListCellRenderer());
 		
 		this.groups.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.groups.setLayoutOrientation(JList.VERTICAL);
@@ -281,4 +286,21 @@ public class ContactList extends JWindow {
 			}
 		}
 	}
+	
+	//Experimentel 
+	class MyListCellRenderer extends JLabel implements ListCellRenderer {
+	        public MyListCellRenderer() {
+	            setOpaque(true);
+	        }
+	        public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+	            setText(value.toString());
+	            Node tmp = (Node) value;
+	            if (ChatEngine.getCE().is_ignored(tmp.getNodeID()))setForeground(new Color(255, 133,18));
+	            else setForeground(Color.BLACK);
+	            if(isSelected) setBackground(new Color(25, 169, 241));
+	            else setBackground(Color.WHITE);
+	            if(cellHasFocus)setBackground(getBackground().darker());
+	            return this;
+	        }
+	    }
 }

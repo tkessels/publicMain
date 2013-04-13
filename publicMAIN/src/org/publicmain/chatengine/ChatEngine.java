@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
@@ -197,7 +198,9 @@ public class ChatEngine extends Observable{
 	 * @return id des Dateitransfers für spätere Rückfragen
 	 */
 	public void send_file(File datei, long uid){
-		ne.send_file(datei, getNodeForUID(uid).getNodeID());
+		Node tmp_node = getNodeForUID(uid);
+		if(tmp_node==null)GUI.getGUI().info("User currently offline. Unable to transmit File.", uid, 2);
+		else ne.send_file(datei, tmp_node.getNodeID());
 	}
 	
 	/** 
@@ -269,8 +272,8 @@ public class ChatEngine extends Observable{
 	 * @return abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
 	 * der Nutzer den Empfang ablehnt 
 	 */
-	public	File	request_File(FileRequest parameterObject){
-		return GUI.getGUI().request_File(parameterObject.datei,parameterObject.user);
+	public	File	request_File(FileTransferData parameterObject){
+		return GUI.getGUI().request_File(parameterObject);
 	}
 	
 	/**
@@ -442,6 +445,16 @@ public class ChatEngine extends Observable{
 
 	public void shutdown() {
 		ne.disconnect();
+	}
+
+	public boolean is_ignored(long nodeID) {
+		return ignored.contains(nodeID);
+	}
+
+	public void inform(FileTransferData tmp) {
+		String str = tmp.receiver.getAlias() + ((tmp.accepted)?" accept ":" declined ") + "receiving File:\""+tmp.datei.getName() +"\"" ;
+		GUI.getGUI().info(str, tmp.receiver.getUserID(), 0);
+		
 	}
 }
 

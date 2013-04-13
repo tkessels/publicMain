@@ -34,12 +34,11 @@ public class publicMAIN {
 				//TODO: hier darauf warten bis nutzer daten eingegeben und "submit" gedrückt hat. also zum Beispiel ein boolean im Startwindwo überprüfen
 				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)
 				
-//				Runnable tmp = new Runnable(){
-//					public void run() {
-						LocalDBConnection.getDBConnection(); //TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
-//					}
-//				};
-//				tmp.run();
+				//TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
+				//Du hattest das ja nie in einen Thread gepackt sonder lediglich in ein Runnable und dann die run Methode selbst ausgeführt anstatt DAS von einem Thread machen zu lassen
+				//habe das im DB Construktor korrigiert ... den Rest schau ich mir später an viel Spaß beim planschen  ;)
+				LocalDBConnection.getDBConnection(); 
+				
 				
 
 				GUI.getGUI();

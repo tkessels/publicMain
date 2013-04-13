@@ -75,12 +75,13 @@ public class ConnectionHandler {
 				if (isConnected()) {
 					try {
 						LogEngine.log(ConnectionHandler.this, "sending", paket);
-						//line_out.writeObject(paket);
 						line_out.writeUnshared(paket);
+						//line_out.writeObject(paket);
 						line_out.flush();
-						line_out.reset();
+						//line_out.reset();
 					} catch (IOException e) {
 						LogEngine.log(ConnectionHandler.this, "failure", paket);
+						System.out.println(e.getMessage());
 					}
 				} else
 					LogEngine.log(ConnectionHandler.this, "dropped", paket);
@@ -199,18 +200,12 @@ public class ConnectionHandler {
 
 	class Reciever implements Runnable {
 		public void run() {
-			while(me==null) {
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e1) {
-					LogEngine.log(this,e1);
-				}}
+			
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
 				try {
 //					readObject = line_in.readObject();
 					readObject = line_in.readUnshared();
-					
 					
 					if (readObject != null && readObject instanceof MSG) {
 						MSG tmp = (MSG) readObject;
@@ -225,10 +220,21 @@ public class ConnectionHandler {
 								case NODE_UPDATE:
 									me.getChildren().add((Node) tmp.getData());
 								default:
-									ne.handle(tmp, me);
+									try {
+										ne.handle(tmp, me);
+									}catch (Exception e) {
+										LogEngine.log("handle",e);
+									}
 							}
 						}
-						else ne.handle(tmp, me);
+						else {
+							try {
+								ne.handle(tmp, me);
+							}catch (Exception e) {
+								LogEngine.log("handle",e);
+							}
+
+						}
 					}
 					else LogEngine.log(me, "Empfangenes Objekt ist keine MSG");
 				}
@@ -239,7 +245,7 @@ public class ConnectionHandler {
 					LogEngine.log(e);
 					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist -> Thread beenden
 				}
-				catch (Exception e) {
+/*				catch (Exception e) {
 					//Zum aufspüren komischer NULL-MSGs
 					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
 					System.out.println(e.getMessage());
@@ -250,7 +256,8 @@ public class ConnectionHandler {
 					if(readObject!=null)System.out.println(readObject.getClass());
 					if (readObject != null) System.out.println((readObject instanceof MSG) ? ((MSG) readObject).toString() : readObject.toString());
 					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
-				}
+				}*/
+				
 			}
 			close();
 		}

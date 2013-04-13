@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -24,9 +25,11 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.security.auth.x500.X500Principal;
+
 import org.publicmain.chatengine.ChatEngine;
-import org.publicmain.chatengine.FileRequest;
 import org.publicmain.common.Config;
+import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -267,90 +270,103 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 * versendet Datein über eine TCP-Direktverbindung wird nur von send() aufgerufen nachdem festgestellt wurde, dass nachicht > 5MB
 	 */
 
-	public void send_file(final File datei, final long nid) {
+	public void send_file(final File datei, final long receiver) {
 		if (datei.isFile() && datei.exists() && datei.canRead() && datei.length() > 0) {
 			new Thread(new Runnable() 
 			{
 				public void run() 
 				{
+					final FileTransferData tmp_FR = new FileTransferData(datei, datei.length(), meinNode, getNode(receiver));
 					if (datei.length() < Config.getConfig().getMaxFileSize()) 
 					{
-						MSG paket;
 						try {
-							paket = new MSG(datei, nid);
-							int requestHash = paket.hashCode();
-							routesend(paket);
-							MSG antwort = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_REPLY, nid, null, true, Config.getConfig().getFileTransferTimeout());
-							if (antwort == null) {
-								GUI.getGUI().info( "Host  answer timed out", getNode(nid).getUserID(), 1);
-								LogEngine.log(this, "Host  answer timed out", LogEngine.WARNING);
-							}
-							else {
-								GUI.getGUI().info(  "File transfer "+((requestHash==(int)antwort.getData())?"finished!":"failed!"), getNode(nid).getUserID(), (requestHash==(int)antwort.getData())?0:1);
-								LogEngine.log(this, "File transfer "+((requestHash==(int)antwort.getData())?"finished!":"failed!"), LogEngine.WARNING);
-							}
+							routesend(new MSG(tmp_FR));
 						}
 						catch (IOException e1) 
 						{
 							LogEngine.log(e1);
 						}
 					}else {
-						//datei holen
-						//soket öffnen
-						try(BufferedInputStream bis=new BufferedInputStream(new FileInputStream(datei));
-							final ServerSocket f_server=new ServerSocket(0)){
-							datei.hashCode();
-							//warten
-							new Thread(new FileTransferAbort(f_server)).start();
-							//Verbindung anbiete
-							f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
-							Socket x = f_server.accept();
-							//übetragen
-							if(x!=null&&x.isConnected()&&!x.isClosed()) {
-								BufferedOutputStream bos = new BufferedOutputStream(x.getOutputStream());
-								byte[] cup = new byte[65535];
-								int len=-1;
-								while((len=bis.read(cup))!=-1) {
-									bos.write(cup, 0, len);
+						
+						
+						new Thread(new Runnable() {
+							public void run() {
+								//datei holen
+								//soket öffnen
+								try (final BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei)); final ServerSocket f_server = new ServerSocket(0)) {
+									//warten
+									Socket client = null;
+									f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
+									synchronized (tmp_FR) {
+										tmp_FR.server_port=f_server.getLocalPort();
+										tmp_FR.notify();
+									}
+									new Thread(new Runnable() {
+										public void run() {
+											if (angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout()) != null)
+												try {
+													f_server.close();
+												} catch (IOException e) {
+												}}}).start();
+									//Verbindung anbieten
+									client = f_server.accept();
+									//übetragen
+									if (client != null && client.isConnected() && !client.isClosed()) {
+										BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+										byte[] cup = new byte[65535];
+										int len = -1;
+										while ((len = bis.read(cup)) != -1) {
+											bos.write(cup, 0, len);
+										}
+										bos.flush();
+										bos.close();
+										System.out.println("Done");
+									}
+									//Ergebnis melden
+								} catch (FileNotFoundException e) {
+									LogEngine.log("FileTransfer", e.getMessage(), LogEngine.ERROR);
+								} catch (SocketTimeoutException e) {
+									LogEngine.log("FileTransfer", "Timed Out", LogEngine.ERROR);
+								} catch (SocketException e) {
+									LogEngine.log("FileTransfer", "Aborted", LogEngine.ERROR);
+								} catch (IOException e) {
+									LogEngine.log("FileTransfer", e);
 								}
-								
 							}
-							//Ergebnis melden
+						}).start();
+						
+						synchronized (tmp_FR) {
+							try {
+								if(tmp_FR.server_port==-2)tmp_FR.wait();
+							} catch (InterruptedException e) {
+							}
 						}
-						catch (FileNotFoundException e) {
-							LogEngine.log("FileTransfer",e.getMessage(), LogEngine.ERROR);
-						}catch(SocketTimeoutException e) {
-							LogEngine.log("FileTransfer","Timed Out", LogEngine.ERROR);
-						}
-						catch(SocketException e) {
-							LogEngine.log("FileTransfer","Aborted", LogEngine.ERROR);
-						}
-						catch (IOException e) {
-							LogEngine.log("FileTransfer",e);
-						}
+						
+						MSG request = new MSG(tmp_FR,MSGCode.FILE_TCP_REQUEST);
+						request.setEmpfänger(tmp_FR.getReceiver_nid());
+						routesend(request);
+
+						
+						
 					}
 				}
 			}).start();
 			}
 		}
 
-	private void recieve_file(final MSG paket) {
-		/*
-		 * System.out.println("RECIEVED FILE REQUEST");
-				File tmp_file = ce.request_File(((File)paket.getData()), getNode(paket.getSender()));
-				if(tmp_file!=null) recieve_file(paket, tmp_file);
-		 */
-		Object[] tmp = (Object[]) paket.getData();
-		File tmp_file = (File) tmp[0];
-		final File destination = ce.request_File(new FileRequest((tmp_file), 0, getNode(paket.getSender())));
-		if(destination!=null) {
-		MSG reply = new MSG(paket.hashCode(),MSGCode.FILE_REPLY);
-		reply.setEmpfänger(paket.getSender());
+	private void recieve_file(final MSG data_paket) {
+		Object[] tmp = (Object[]) data_paket.getData();
+		FileTransferData tmp_file = (FileTransferData) tmp[0];
+		final File destination = ce.request_File(tmp_file);
+		tmp_file.accepted=(destination!=null);
+		MSG reply = new MSG(tmp_file,MSGCode.FILE_RECIEVED);
+		reply.setEmpfänger(data_paket.getSender());
 		routesend(reply);
+		if(destination!=null) {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					paket.save(destination);
+					data_paket.save(destination);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -626,7 +642,12 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				updateMyGroups();
 				addGroup(groups);
 				break;
-			case FILE_REQUEST:
+			case FILE_TCP_REQUEST:
+				FileTransferData tmp = (FileTransferData) paket.getData();
+				recieve_file(tmp);
+				break;
+			case FILE_RECIEVED:
+				ce.inform((FileTransferData) paket.getData());
 				break;
 			case NODE_LOOKUP:
 				Node tmp_node = null;
@@ -648,6 +669,44 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 	
 
+
+	private void recieve_file(final FileTransferData tmp) {
+		new Thread(new Runnable() {
+			public void run() {
+				final File destination = ce.request_File(tmp);
+				tmp.accepted = (destination != null);
+				MSG reply = new MSG(tmp, MSGCode.FILE_RECIEVED);
+				reply.setEmpfänger(tmp.getSender_nid());
+				routesend(reply);
+				if (destination != null) {
+					Socket data_con = null;
+					for (InetAddress ip : tmp.sender.getSockets()) {
+						System.out.println("trying:" + ip + "/" + tmp.server_port);
+						if (!meinNode.getSockets().contains(ip))
+							try {
+								data_con = new Socket(ip, tmp.server_port);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+					}
+					if (data_con != null) {
+						try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
+							byte[] cup = new byte[65535];
+							int len = -1;
+							while ((len = bis.read(cup)) != -1) {
+								bos.write(cup, 0, len);
+							}
+							bos.flush();
+							bos.close();
+							data_con.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}).start();
+	}
 
 	private void routesend(MSG paket) {
 		long empfänger = paket.getEmpfänger();
@@ -868,10 +927,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "gc2":
 			System.gc();
 			break;
-			
-		case "file":
-			System.out.println(ce.request_File(new FileRequest(new File("test.txt"), 0, meinNode)));
+		case "poll":
+			sendchild(new MSG(null, MSGCode.POLL_ALLNODES), null);
 			break;
+		case "nup":
+			sendtcp(new MSG(meinNode, MSGCode.NODE_UPDATE));
+			break;
+	
 		case "update":
 			GUI.getGUI().notifyGUI();
 			break;
@@ -889,20 +951,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 	
 	
-	private final class FileTransferAbort implements Runnable {
-		private final ServerSocket	f_server;
-
-		private FileTransferAbort(ServerSocket f_server) {
-			this.f_server = f_server;
-		}
-		public void run() {
-			try {
-				Thread.sleep(Config.getConfig().getFileTransferTimeout());
-				f_server.close();
-			} catch (Exception e) {
-			}
-		}
-	}
+	
 
 	/**
 	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.

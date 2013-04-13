@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -63,11 +64,11 @@ public class LocalDBConnection {
 	//--------neue Sachen------------
 	private BlockingQueue<MSG> locDBInbox;
 	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=???
+	private int maxVersuche;
+	private long warteZeitInSec;
 	//--------neue Sachen ende------------
 	
 	// verbindungssachen
-	private boolean isDBConnected;		// noch richtig implementieren oder weg lassen weil ehh jedesmal neu prüfen?
-	private boolean askForConnectionRetry;
 	private static LocalDBConnection me;
 	
 	private LocalDBConnection() {
@@ -83,17 +84,25 @@ public class LocalDBConnection {
 		this.configTbl				= "t_config";
 		this.eventTypeTbl			= "t_eventType";
 		this.routingOverviewTbl		= "t_routingOverView";
-		this.isDBConnected 			= false;
-		this.askForConnectionRetry	= true;
 		this.cal					= Calendar.getInstance();
 		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 		//--------neue Sachen------------
 		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
-		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=???
+		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=???
+		this.maxVersuche = 5;
+		this.warteZeitInSec = 10;
 		//--------neue Sachen ende------------
 		
-		connectToLocDBServer();
+		
+		
+//		Runnable tmp = new Runnable(){
+//			public void run() {
+				connectToLocDBServer(); //TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
+//			}
+//		};
+//		tmp.run();
+		
 		
 	}
 	public static LocalDBConnection getDBConnection() {
@@ -104,20 +113,34 @@ public class LocalDBConnection {
 	}
 	private void connectToLocDBServer(){	// wird nur vom Construktor aufgerufen
 		Runnable tmp = new Runnable(){
+		int versuche = 0;
 
 			public void run() {
-				try {
-					con = DriverManager.getConnection(url, user, passwd);
-					LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
-					dbStatus = 1;
-				} catch (SQLException e) {
-					LogEngine.log(this, "DB-Verbindung fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
+				System.out.println("hier");
+				while ((versuche < maxVersuche) && (dbStatus == 0)){ //hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
+					System.out.println("hier1");
+					try {
+								con = DriverManager.getConnection(url, user, passwd);
+								LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
+								dbStatus = 1;
+								versuche = 0;
+					} catch (SQLException e) {
+						LogEngine.log(this, "DB-Verbindungsaufbau fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
+						try {
+							Thread.sleep(warteZeitInSec * 1000);
+						} catch (InterruptedException e1) {
+							LogEngine.log(this, "Fehler beim Warten: " + e1.getMessage(), LogEngine.ERROR);
+						}
+						versuche ++;
+						dbStatus = 0;
+					}
 				}
 			}
-			
 		};
 		tmp.run();
-		createDbAndTables();
+		if (dbStatus == 1 ){
+			createDbAndTables();
+		}
 	}
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
@@ -178,61 +201,57 @@ public class LocalDBConnection {
 					"primary key(id))" +
 					"engine = INNODB");	
 			stmt.executeBatch();
+			dbStatus = 2;
 			LogEngine.log(this, "createDbAndTables erstellt", LogEngine.INFO);
 		} catch (SQLException e) {
 			LogEngine.log(this, "createDbAndTables fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
 		}
 	}
 	
-	// TODO in seperate Klasse auslagern! 
 	public void saveMsg (MSG m){
-//TODO Hier wird message in ne Blocking que geschrieben
+		//Hier wird message in ne Blocking queue geschrieben
 		locDBInbox.add(m);
+		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
+			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
+			// hier muss man doch was mit Syncornized machen wenn nachichten hier rein geschriebn und unten raus geholt werden...
+		}
 	}
 	
-	public void writeMsgToDB (){
-//		Runnable tmp = new Runnable() {
-//			public void run() {
-//				if (isDBConnected) {
-//					if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
-//						String saveStmt = ("insert into " + chatLogTbl + " (msgID,timestamp,sender,empfaenger,typ,grp,data)"
-//								+ " VALUES ("
-//								+ m.getId() + ","
-//								+ m.getTimestamp() 	+ "," 
-//								+ m.getSender() 	+ ","
-//								+ m.getEmpfänger() 	+ ","
-//								+ "'" + m.getTyp() 	+ "'"	+ ","
-//								+ "'" + m.getGroup()+ "'"	+ ","
-//								+ "'" + m.getData() + "'" + ")");
-//						try {
-//							//System.out.println(saveStmt);
-//							stmt.execute(saveStmt);
-//							LogEngine.log(LocalDBConnection.this,
-//									"Nachicht in DB-Tabelle " + chatLogTbl
-//											+ " eingetragen.", LogEngine.INFO);
-//						} catch (Exception e) {
-//							LogEngine.log(LocalDBConnection.this,
-//									"Fehler beim eintragen in : " + chatLogTbl
-//											+ " " + e.getMessage(),
-//									LogEngine.ERROR);
-//							isDBConnected = false;
-//						}
-//					}
-//				} else {
-//					//System.out.println("es besteht keine DB-Verbindung!");
-//					if (askForConnectionRetry) {
-//						if (connectToLocDBServer()){
-//						isDBConnected = true;
-//						createDbAndTables();
-//						saveMsg(m);
-//						}
-//					} else {
-//						// Erneuter Verbindungsversuch nicht gewollt
-//					}
-//				}
-//			}
-//		};
-//		(new Thread(tmp)).start();
+	public void writeMsgToDB() {
+		Runnable tmp = new Runnable() {
+			public void run() {
+				if (dbStatus >= 2) {
+					while (!locDBInbox.isEmpty() && dbStatus >=2) {
+							MSG m = locDBInbox.poll();
+							if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
+								String saveStmt = ("insert into "
+										+ chatLogTbl
+										+ " (msgID,timestamp,sender,empfaenger,typ,grp,data)"
+										+ " VALUES (" + m.getId() + ","
+										+ m.getTimestamp() + "," + m.getSender()
+										+ "," + m.getEmpfänger() + "," + "'"
+										+ m.getTyp() + "'" + "," + "'"
+										+ m.getGroup() + "'" + "," + "'"
+										+ m.getData() + "'" + ")");
+								try {
+									stmt.execute(saveStmt);
+									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " in DB-Tabelle " + chatLogTbl + " eingetragen.", LogEngine.INFO);
+								} catch (Exception e) {
+									LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ chatLogTbl + " "+ e.getMessage(),LogEngine.ERROR);
+									locDBInbox.add(m);	//TODO: Schreibt nachicht, die rausgenommen wurde, bei der es einen Fehler beim abspeichern gab wieder zurück in Queue! Wie schafft man das, dass es an die richtige stelle geschrieben wird
+									dbStatus = 0;
+									connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
+									//hier falls während der schreibvorgänge die verbind verloren geht.
+								}
+							}
+					}
+				} else {
+					LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ chatLogTbl, LogEngine.ERROR);
+				}
+				
+			}
+		};
+		(new Thread(tmp)).start();
 	}
 	
 	public void deleteAllMsgs () {
@@ -338,19 +357,25 @@ public class LocalDBConnection {
 	public void shutdownLocDB() {
 		// TODO alle verbindungen trennen
 		try {
-			if(con!=null)con.close();
+			if(stmt!=null){
+				stmt.close();
+				LogEngine.log(LocalDBConnection.this,"stmt des LocDBServers closed",LogEngine.INFO);
+			}
+		} catch (SQLException e) {
+			LogEngine.log(this, e);
+		}
+		try {
+			if(con!=null){
+				con.close();
+				LogEngine.log(LocalDBConnection.this,"Connection to LocDBServer closed",LogEngine.INFO);
+			}
 			
 			// TODO What else?
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
 		}
 		
-		try {
-			if(stmt!=null)stmt.close();
-		} catch (SQLException e) {
-			LogEngine.log(this, e);
-			// TODO Auto-generated catch block
-		}
+
 	}
 
 }

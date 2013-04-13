@@ -107,7 +107,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}
 		this.me 			= this;
 		this.log 			= new LogEngine();
+<<<<<<< HEAD
 		//this.locDBCon 		= LocalDBConnection.getDBConnection();
+=======
+		this.locDBCon 		= LocalDBConnection.getDBConnection();
+>>>>>>> branch 'tcp' of https://tkessels@gitent-scm.com/git/publicmain/publicMain
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.exit			= new JMenuItem("Exit");

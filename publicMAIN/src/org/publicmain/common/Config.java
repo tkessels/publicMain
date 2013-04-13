@@ -11,6 +11,7 @@ import java.util.Properties;
 
 
 public class Config {
+	private static final String CONFIG_PATH=System.getenv("APPDATA")+File.separator;
 	private static Config me; 
 	private Properties settings;
 	
@@ -49,6 +50,7 @@ public class Config {
 		sourceSettings.put("sql.local_db_port","3306");
 		sourceSettings.put("sql.local_db_user","root");
 		sourceSettings.put("sql.local_db_password","");
+		sourceSettings.put("sql.local_db_databasename","db_publicMain");
 		
 		
 		
@@ -127,10 +129,33 @@ public class Config {
 		return Integer.parseInt(settings.getProperty("gui.max_alias_length"));
 	}
 
+	public int getMaxFileSize() {
+		return Integer.parseInt(settings.getProperty("ne.max_file_size")) ;
+	}
 
+	public Long getUserID() {
+		String uid=settings.getProperty("System.UserID");
+		return (uid!=null)?Long.parseLong(uid):null;
+	}
 	
+	public String getAlias() {
+		return settings.getProperty("System.alias");
+	}
+
+	public long getFileTransferTimeout() {
+		return Long.parseLong(settings.getProperty("ne.file_transfer_timeout"));
+	}
+
+	public String getLocalDBDatabasename() {
+		return settings.getProperty("sql.local_db_databasename");
+	}
+	
+	/**Method tries to Lock a file <code>pmlockfile</code> in Users APPDATA folder. And returns result as boolen.
+	 * It also adds a shutdown hook to the VM to remove Lock from File if Program exits.
+	 * @return <code>true</code> if File could be locked <code>false</code> if File has already been locked
+	 */
 	public static boolean getLock() {
-		final String lockFile = System.getenv("APPDATA")+"\\pmlockfile.";
+		final String lockFile = CONFIG_PATH +"\\pmlockfile.";
         try {
             final File file = new File(lockFile);
             final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
@@ -155,21 +180,5 @@ public class Config {
         return false;
     }
 
-	public int getMaxFileSize() {
-		return Integer.parseInt(settings.getProperty("ne.max_file_size")) ;
-	}
-
-	public Long getUserID() {
-		String uid=settings.getProperty("System.UserID");
-		return (uid!=null)?Long.parseLong(uid):null;
-	}
-	
-	public String getAlias() {
-		return settings.getProperty("System.alias");
-	}
-
-	public long getFileTransferTimeout() {
-		return Long.parseLong(settings.getProperty("ne.file_transfer_timeout"));
-	}
 }
 

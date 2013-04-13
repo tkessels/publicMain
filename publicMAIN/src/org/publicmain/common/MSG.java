@@ -225,7 +225,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 			return tmp;
 			
 		} catch (Exception e) {
-			LogEngine.log(e);
+			LogEngine.log("MSG.getMSG",e);
 		}
 		return null;
 	}

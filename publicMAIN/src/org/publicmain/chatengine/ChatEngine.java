@@ -264,13 +264,13 @@ public class ChatEngine extends Observable{
 	/** 
 	 * Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
 	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten
+	 * @param parameterObject TODO
 	 * @param filename TODO
-	 * 
 	 * @return abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
 	 * der Nutzer den Empfang ablehnt 
 	 */
-	public	File	request_File(File datei , Node user){
-		return GUI.getGUI().request_File(datei,user);
+	public	File	request_File(FileRequest parameterObject){
+		return GUI.getGUI().request_File(parameterObject.datei,parameterObject.user);
 	}
 	
 	/**

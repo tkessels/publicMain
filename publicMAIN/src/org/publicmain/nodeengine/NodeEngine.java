@@ -1,12 +1,18 @@
 package org.publicmain.nodeengine;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +25,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.chatengine.FileRequest;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -288,7 +295,39 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 							LogEngine.log(e1);
 						}
 					}else {
-						
+						//datei holen
+						//soket öffnen
+						try(BufferedInputStream bis=new BufferedInputStream(new FileInputStream(datei));
+							final ServerSocket f_server=new ServerSocket(0)){
+							datei.hashCode();
+							//warten
+							new Thread(new FileTransferAbort(f_server)).start();
+							//Verbindung anbiete
+							f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
+							Socket x = f_server.accept();
+							//übetragen
+							if(x!=null&&x.isConnected()&&!x.isClosed()) {
+								BufferedOutputStream bos = new BufferedOutputStream(x.getOutputStream());
+								byte[] cup = new byte[65535];
+								int len=-1;
+								while((len=bis.read(cup))!=-1) {
+									bos.write(cup, 0, len);
+								}
+								
+							}
+							//Ergebnis melden
+						}
+						catch (FileNotFoundException e) {
+							LogEngine.log("FileTransfer",e.getMessage(), LogEngine.ERROR);
+						}catch(SocketTimeoutException e) {
+							LogEngine.log("FileTransfer","Timed Out", LogEngine.ERROR);
+						}
+						catch(SocketException e) {
+							LogEngine.log("FileTransfer","Aborted", LogEngine.ERROR);
+						}
+						catch (IOException e) {
+							LogEngine.log("FileTransfer",e);
+						}
 					}
 				}
 			}).start();
@@ -303,7 +342,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		 */
 		Object[] tmp = (Object[]) paket.getData();
 		File tmp_file = (File) tmp[0];
-		final File destination = ce.request_File((tmp_file), getNode(paket.getSender()));
+		final File destination = ce.request_File(new FileRequest((tmp_file), 0, getNode(paket.getSender())));
 		if(destination!=null) {
 		MSG reply = new MSG(paket.hashCode(),MSGCode.FILE_REPLY);
 		reply.setEmpfänger(paket.getSender());
@@ -831,12 +870,17 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			break;
 			
 		case "file":
-			System.out.println(ce.request_File(new File("test.txt"), meinNode));
+			System.out.println(ce.request_File(new FileRequest(new File("test.txt"), 0, meinNode)));
 			break;
 		case "update":
 			GUI.getGUI().notifyGUI();
 			break;
-			
+		case "tron":
+			Runtime.getRuntime().traceMethodCalls(true);
+			break;
+		case "troff":
+			Runtime.getRuntime().traceMethodCalls(false);
+			break;
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;
@@ -845,6 +889,21 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 	
 	
+	private final class FileTransferAbort implements Runnable {
+		private final ServerSocket	f_server;
+
+		private FileTransferAbort(ServerSocket f_server) {
+			this.f_server = f_server;
+		}
+		public void run() {
+			try {
+				Thread.sleep(Config.getConfig().getFileTransferTimeout());
+				f_server.close();
+			} catch (Exception e) {
+			}
+		}
+	}
+
 	/**
 	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.
 	 */

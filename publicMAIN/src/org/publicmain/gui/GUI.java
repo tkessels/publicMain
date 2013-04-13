@@ -105,9 +105,9 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		} catch (Exception e) {
 			log.log(e);
 		}
-		this.me = this;
-		this.log = new LogEngine();
-		//this.locDBCon = LocalDBConnection.getDBConnection(); // bei bedarf einbinden!
+		this.me 			= this;
+		this.log 			= new LogEngine();
+		//this.locDBCon 		= LocalDBConnection.getDBConnection();
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
 		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(getClass().getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
 		this.exit			= new JMenuItem("Exit");

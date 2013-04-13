@@ -74,7 +74,7 @@ public class LocalDBConnection {
 		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
 		this.user 					= Config.getConfig().getLocalDBUser();
 		this.passwd 				= Config.getConfig().getLocalDBPw();
-		this.dbName 				= "db_publicMain";
+		this.dbName 			= Config.getConfig().getLocalDBDatabasename();
 		this.chatLogTbl				= "t_chatLog";
 		this.msgTbl					= "t_msg";
 		this.usrTbl					= "t_usr";

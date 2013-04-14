@@ -342,8 +342,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 							}
 						}
 						
-						MSG request = new MSG(tmp_FR,MSGCode.FILE_TCP_REQUEST);
-						request.setEmpfänger(tmp_FR.getReceiver_nid());
+						MSG request = new MSG(tmp_FR,MSGCode.FILE_TCP_REQUEST,tmp_FR.getReceiver_nid());
+//						request.setEmpfänger(tmp_FR.getReceiver_nid());
 						routesend(request);
 
 						
@@ -359,8 +359,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		FileTransferData tmp_file = (FileTransferData) tmp[0];
 		final File destination = ce.request_File(tmp_file);
 		tmp_file.accepted=(destination!=null);
-		MSG reply = new MSG(tmp_file,MSGCode.FILE_RECIEVED);
-		reply.setEmpfänger(data_paket.getSender());
+		MSG reply = new MSG(tmp_file,MSGCode.FILE_RECIEVED,data_paket.getSender());
+//		reply.setEmpfänger(data_paket.getSender());
 		routesend(reply);
 		if(destination!=null) {
 		new Thread(new Runnable() {
@@ -511,8 +511,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 
 	private void sendRA() {
-		MSG ra= new MSG(meinNode, MSGCode.ROOT_ANNOUNCE);
-		ra.setEmpfänger(getNodes().size());
+		MSG ra= new MSG(meinNode, MSGCode.ROOT_ANNOUNCE,getNodes().size());
+//		ra.setEmpfänger(getNodes().size());
 		sendmutlicast(ra);
 		root_claims_stash.add(ra);
 	}
@@ -567,112 +567,112 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 */
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
-		System.out.println(angler);
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
 		if (angler.check(paket)) return;
-		switch (paket.getTyp()) {
-		case PRIVATE:
-			if(paket.getEmpfänger()==nodeID)ce.put(paket);
-			else routesend(paket);
-			break;
+		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
+		else {
+			switch (paket.getTyp()) {
+			case PRIVATE:
+				ce.put(paket);
+				break;
+			case GROUP:
+				//sendtcpexcept(paket, quelle);
+				groupRouteSend(paket,quelle);
+				ce.put(paket);
+				break;
+			case SYSTEM:
+				switch (paket.getCode()) {
+				case NODE_UPDATE:
+					allnodes_add((Node) paket.getData());
+					sendtcpexcept(paket, quelle);
+					break;
 
-		case GROUP:
-			//sendtcpexcept(paket, quelle);
-			groupRouteSend(paket,quelle);
-			ce.put(paket);
-			break;
-		case SYSTEM:
-			switch (paket.getCode()) {
-			case NODE_UPDATE:
-				allnodes_add((Node) paket.getData());
-				sendtcpexcept(paket, quelle);
-				break;
-
-			case POLL_ALLNODES:
-				if (quelle != root_connection)
-					quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
-				break;
-			case REPORT_ALLNODES:
-				allnodes_set((Set<Node>) paket.getData());
-				break;
-			case POLL_CHILDNODES:
-				if (quelle == root_connection) {
-					Set<Node> tmp = new HashSet<Node>();
-					for (ConnectionHandler x : connections)
-						tmp.addAll(x.getChildren());
-					sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
+				case POLL_ALLNODES:
+					if (quelle != root_connection)
+						quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
+					break;
+				case REPORT_ALLNODES:
+					allnodes_set((Set<Node>) paket.getData());
+					break;
+				case POLL_CHILDNODES:
+					if (quelle == root_connection) {
+						Set<Node> tmp = new HashSet<Node>();
+						for (ConnectionHandler x : connections)
+							tmp.addAll(x.getChildren());
+						sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
+					}
+					break;
+				case REPORT_CHILDNODES:
+					if (quelle != root_connection) {
+						quelle.setChildren((Collection<Node>) paket.getData());
+					}
+					break;
+				case NODE_SHUTDOWN:
+					allnodes_remove(quelle.getChildren());
+					quelle.close();
+					break;
+				case CHILD_SHUTDOWN:
+					if (quelle != root_connection) quelle.removeChildren((Collection<Node>) paket.getData());
+					allnodes_remove((Collection<Node>) paket.getData());
+					sendtcpexcept(paket, quelle);
+					break;
+				case GROUP_JOIN:
+					quelle.add((Collection<String>) paket.getData());
+					joinGroup((Collection<String>) paket.getData(), quelle);
+					break;
+				case GROUP_LEAVE:
+					quelle.remove((Collection<String>) paket.getData());
+					leaveGroup((Collection<String>) paket.getData(), quelle);
+					break;
+				case GROUP_ANNOUNCE:
+					if (addGroup((Collection<String>) paket.getData()))
+						sendchild(paket, null);
+					break;
+				case GROUP_EMPTY:
+					if (removeGroup((Collection<String>) paket.getData()))
+						sendchild(paket, null);
+					break;
+				case GROUP_POLL:
+					quelle.send(new MSG(allGroups, MSGCode.GROUP_REPLY));
+					break;
+				case GROUP_REPLY:
+					Set<String> groups = (Set<String>) paket.getData();
+					quelle.add(groups);
+					updateMyGroups();
+					addGroup(groups);
+					break;
+				case FILE_TCP_REQUEST:
+					FileTransferData tmp = (FileTransferData) paket.getData();
+					recieve_file(tmp);
+					break;
+				case FILE_RECIEVED:
+					ce.inform((FileTransferData) paket.getData());
+					break;
+				case NODE_LOOKUP:
+					Node tmp_node = null;
+					if ((tmp_node = getNode((long) paket.getData())) != null)quelle.send(new MSG(tmp_node));
+					else
+						sendroot(paket);
+					break;
+				case PATH_PING_REQUEST:
+					if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
+					else routesend(paket);
+					break;
+				case PATH_PING_RESPONSE:
+					if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
+					else routesend(paket);
+					break;
+				default:
+					LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
+					break;
 				}
 				break;
-			case REPORT_CHILDNODES:
-				if (quelle != root_connection) {
-					quelle.setChildren((Collection<Node>) paket.getData());
-				}
-				break;
-			case NODE_SHUTDOWN:
-				allnodes_remove(quelle.getChildren());
-				quelle.close();
-				break;
-			case CHILD_SHUTDOWN:
-				if (quelle != root_connection) quelle.removeChildren((Collection<Node>) paket.getData());
-				allnodes_remove((Collection<Node>) paket.getData());
-				sendtcpexcept(paket, quelle);
-				break;
-			case GROUP_JOIN:
-				quelle.add((Collection<String>) paket.getData());
-				joinGroup((Collection<String>) paket.getData(), quelle);
-				break;
-			case GROUP_LEAVE:
-				quelle.remove((Collection<String>) paket.getData());
-				leaveGroup((Collection<String>) paket.getData(), quelle);
-				break;
-			case GROUP_ANNOUNCE:
-				if (addGroup((Collection<String>) paket.getData()))
-					sendchild(paket, null);
-				break;
-			case GROUP_EMPTY:
-				if (removeGroup((Collection<String>) paket.getData()))
-					sendchild(paket, null);
-				break;
-			case GROUP_POLL:
-				quelle.send(new MSG(allGroups, MSGCode.GROUP_REPLY));
-				break;
-			case GROUP_REPLY:
-				Set<String> groups = (Set<String>) paket.getData();
-				quelle.add(groups);
-				updateMyGroups();
-				addGroup(groups);
-				break;
-			case FILE_TCP_REQUEST:
-				FileTransferData tmp = (FileTransferData) paket.getData();
-				recieve_file(tmp);
-				break;
-			case FILE_RECIEVED:
-				ce.inform((FileTransferData) paket.getData());
-				break;
-			case NODE_LOOKUP:
-				Node tmp_node = null;
-				if ((tmp_node = getNode((long) paket.getData())) != null)quelle.send(new MSG(tmp_node));
-				else
-					sendroot(paket);
-				break;
-			case PATH_PING_REQUEST:
-				if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
-				else routesend(paket);
-				break;
-			case PATH_PING_RESPONSE:
-				if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
-				else routesend(paket);
+			case DATA:
+				if(paket.getEmpfänger()!=nodeID)routesend(paket);
+				else recieve_file(paket);
 				break;
 			default:
-				LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
-				break;
 			}
-			break;
-		case DATA:
-			if(paket.getEmpfänger()!=nodeID)routesend(paket);
-			else recieve_file(paket);
-			break;
-		default:
 		}
 	}
 	
@@ -683,8 +683,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			public void run() {
 				final File destination = ce.request_File(tmp);
 				tmp.accepted = (destination != null);
-				MSG reply = new MSG(tmp, MSGCode.FILE_RECIEVED);
-				reply.setEmpfänger(tmp.getSender_nid());
+				MSG reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
+//				reply.setEmpfänger(tmp.getSender_nid());
 				routesend(reply);
 				if (destination != null) {
 					Socket data_con = null;

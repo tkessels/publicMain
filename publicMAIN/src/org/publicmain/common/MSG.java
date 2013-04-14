@@ -26,7 +26,7 @@ import org.publicmain.nodeengine.NodeEngine;
  */
 public class MSG implements Serializable,Comparable<MSG>{
 	private static Integer id_counter=0;
-	private static final long serialVersionUID = 899L;
+	private static final long serialVersionUID = 8991L;
 
 	//Typisierung
 	private final NachrichtenTyp typ;
@@ -36,7 +36,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 	private long timestamp;
 	private final int id;
 	//Optionale Datenfelder für beispielsweise Empfänger
-	private long empfänger;
+	private long empfänger=-1;
 	private String group;
 	//Payload
 	private Object data;
@@ -125,7 +125,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		tmp_data[0]=tmp_FR;
 		tmp_data[1]=bout.toByteArray();
 		data=tmp_data;
-		setEmpfänger(tmp_FR.getReceiver_nid());
+//		setEmpfänger(tmp_FR.getReceiver_nid());
 	}
 
 	public void save(File datei) throws IOException{
@@ -218,10 +218,10 @@ public class MSG implements Serializable,Comparable<MSG>{
 	public int getId() {
 		return id;
 	}
-	public void setEmpfänger(long value) {
+	/*public void setEmpfänger(long value) {
 		empfänger=value;
 	}
-
+*/
 
 	
 	

@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 
 public class FileTransferData implements Serializable{
-	private static final long	serialVersionUID	= 1L;
+	private static final long	serialVersionUID	= 1221L;
 	public final File	datei;
 	public final long	size;
 	

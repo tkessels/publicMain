@@ -71,7 +71,7 @@ public class ConnectionHandler {
 	 * @throws IOException
 	 *             Wenn es zu einem Fehler beim senden auf dem TCP-Socket kommt
 	 */
-	public void send(final MSG paket) {
+	public synchronized void send(final MSG paket) {
 				if (isConnected()) {
 					try {
 						LogEngine.log(ConnectionHandler.this, "sending", paket);

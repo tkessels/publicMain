@@ -1,7 +1,10 @@
 package org.publicmain.nodeengine;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -19,18 +22,16 @@ import org.publicmain.common.NachrichtenTyp;
 
 public class Hook {
 	private boolean onlyFirstMatch=true;
-	private List<Haken> allHooks=new ArrayList<Haken>();  //Liste aller registrierten Filter
+	private volatile List<Haken> allHooks=new CopyOnWriteArrayList<Haken>();  //Liste aller registrierten Filter
 	
-	private synchronized void add(Haken toAdd) {
-		synchronized (allHooks) {
+	private void add(Haken toAdd) {
+		System.out.println("Adding" +toAdd);
 			allHooks.add(toAdd);
-		}
 	}
 	
-	private synchronized void remove(Haken toRemove) {
-		synchronized (allHooks) {
-			allHooks.add(toRemove);
-		}
+	private void remove(Haken toRemove) {
+		System.out.println("Removing" + toRemove);
+			allHooks.remove(toRemove);
 	}
 
 	/**
@@ -48,6 +49,21 @@ public class Hook {
 		add(x);
 		synchronized (x) {
 			try {
+				x.wait(timeout);
+			}
+			catch (InterruptedException e) {
+			}
+		}
+		remove(x);
+		return x.getHookedMSG();
+	}
+	
+	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,Object payload,boolean filter, long timeout,MSG paket) {
+		Haken x = new Haken(typ,code, nid,payload,filter);
+		add(x);
+		synchronized (x) {
+			try {
+				NodeEngine.getNE().routesend(paket);
 				x.wait(timeout);
 			}
 			catch (InterruptedException e) {
@@ -79,18 +95,21 @@ public class Hook {
 		}
 	}).start();
 }
+
 	
 	public boolean check(MSG paket) {
-			boolean tmp=false;
-			synchronized (allHooks) {
-			for (Haken cur : allHooks) {
-				if (cur.check(paket)) {
-					if(onlyFirstMatch)return cur.filter;
-					else tmp|=cur.filter;
-				}
+		boolean tmp = false;
+		for (Haken cur : allHooks) {
+			if (cur.check(paket)) {
+				if (onlyFirstMatch) return cur.filter;
+				else tmp |= cur.filter;
 			}
-			}
-			return tmp;
+		}
+		return tmp;
+	}
+	@Override
+	public String toString() {
+		return allHooks.toString();
 	}
 	
 	
@@ -124,12 +143,19 @@ public class Hook {
 		}
 		
 		private synchronized boolean check(MSG x) {
+			System.out.println(allHooks);
 			boolean typ_check=(typ==null)||typ==x.getTyp();
-			boolean code_check=(code==null)||code==x.getCode();
-			boolean sender_check=(sender==null)||sender==x.getSender();
-			boolean payload_check=(payload==null)||payload==x.getData();
+			boolean code_check=(code==null)||code.equals(x.getCode());
+			boolean sender_check=(sender==null)||sender.equals(x.getSender());
+			System.out.println(sender);
+			System.out.println(x.getSender());
+			boolean payload_check=(payload==null)||payload.equals(x.getData());
 //			boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
 //			boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
+			System.out.println("typ:"+typ_check);
+			System.out.println("code:"+code_check);
+			System.out.println("sender:"+sender_check);
+			System.out.println("payload:"+payload_check);
 			
 			
 			if(typ_check&&code_check&&sender_check&&payload_check) {//&&reciever_check&&gruppe_check) {
@@ -147,6 +173,10 @@ public class Hook {
 
 		private MSG getHookedMSG() {
 			return hookedMSG;
+		}
+
+		private Hook getOuterType() {
+			return Hook.this;
 		}
 	}
 

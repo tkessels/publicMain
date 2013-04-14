@@ -26,7 +26,7 @@ import org.publicmain.nodeengine.NodeEngine;
  */
 public class MSG implements Serializable,Comparable<MSG>{
 	private static Integer id_counter=0;
-	private static final long serialVersionUID = 8L;
+	private static final long serialVersionUID = 899L;
 
 	//Typisierung
 	private final NachrichtenTyp typ;
@@ -55,6 +55,11 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this(NachrichtenTyp.SYSTEM);
 		this.code = code;
 		this.data = payload;
+	}
+	
+	public MSG(Object payload, MSGCode code, long recipient) {
+		this(payload,code);
+		this.empfänger=recipient;
 	}
 
 	public MSG(Node daNode){

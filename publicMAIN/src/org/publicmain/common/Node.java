@@ -17,46 +17,44 @@ import org.publicmain.nodeengine.NodeEngine;
  */
 
 public class Node implements Serializable {
-
-	private static Node me;
-	private long nodeID;
-	private long userID;
+	private static final long	serialVersionUID	= 23132123131L;
+//	private static Node me;
+	private final long nodeID;
+	private final long userID;
 	private String alias;
 	private final String username;
-	private List<InetAddress> sockets;
-	private String hostname;
+	private final List<InetAddress> sockets;
+	private final String hostname;
 	private int server_port;
 	
 	public Node() {
-		nodeID = NodeEngine.getNE().getNodeID();
-		userID = ChatEngine.getCE().getUserID();
+		this.nodeID = NodeEngine.getNE().getNodeID();
+		this.userID = ChatEngine.getCE().getUserID();
 		this.username = ChatEngine.getCE().getAlias();
 		this.alias=this.username;
 		
-		sockets=getMyIPs();
+		this.hostname=getMyHostname();
+		this.sockets=getMyIPs();
 		server_port = NodeEngine.getNE().getServer_port();
-		try {
-			hostname = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
 	}
 	
+	
+
 	public long getNodeID() {
 		return nodeID;
 	}
 
-	public void setNodeID(long nodeID) {
+/*	public void setNodeID(long nodeID) {
 		this.nodeID = nodeID;
 	}
-
+*/
 	public long getUserID() {
 		return userID;
 	}
 
-	public void setUserID(long userID) {
+/*	public void setUserID(long userID) {
 		this.userID = userID;
-	}
+	}*/
 
 	public String getAlias() {
 		return alias;
@@ -75,9 +73,7 @@ public class Node implements Serializable {
 		return hostname;
 	}
 
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
+
 /*
 	public boolean isRoot() {
 		return isRoot;
@@ -110,6 +106,17 @@ public class Node implements Serializable {
 	public String toString() {
 		return alias+"@"+hostname;
 	}
+	
+	
+	private static String getMyHostname() {
+		String tmp;
+		try {
+			tmp=java.net.InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			tmp=System.getProperty("os.name")+(int)(Math.random()*10000);
+		}
+		return tmp;
+	}
 
 	/* Liefert  Hashcode des Knoten über die beiden eindeutigen IDs 
 	 * 
@@ -129,13 +136,9 @@ public class Node implements Serializable {
 	 * Ist das Vergleichsobjekt kein Node gehen wir davon aus, dass es eine andere NodeID hätte und der User gerade in Vermont zum shoppen ist. (=Ungleicheit) 
 	 */
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		Node other = (Node) obj;
-		if (nodeID != other.nodeID) return false;
-		if (userID != other.userID) return false;
-		return true;
+		return (obj!=null&&obj instanceof Node &&((Node)obj).getNodeID()==nodeID);
+		
+
 	}
 	public Map<String, String> getData(){
 		Map<String, String> rück = new HashMap<String, String>();
@@ -149,6 +152,10 @@ public class Node implements Serializable {
 		for (InetAddress soc : sockets)rück.put("ip_"+(index++),soc.getHostAddress());
 		return rück;
 	}
+	
+
+
+
 	
 	
 

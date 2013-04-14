@@ -424,6 +424,17 @@ public class ChatEngine extends Observable{
 			shutdown();
 			break;
 			
+		case "ping":
+			final Node tmp_ping = ce.getNodeforAlias(parameter);
+			if (tmp_ping != null) {
+				new Thread(new Runnable() {
+					public void run() {
+						GUI.getGUI().info("Ping(" + tmp_ping.getAlias() + "):" + ne.pathPing(tmp_ping), null, 0);
+					}
+				}).start();
+			}
+			break;
+			
 		case "info":
 			Node nodeforAlias = ce.getNodeforAlias(parameter);
 			if (nodeforAlias != null) {

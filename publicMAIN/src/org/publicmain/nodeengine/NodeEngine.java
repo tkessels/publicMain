@@ -404,7 +404,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.addAll(getChilds());
 			allNodes.notifyAll();
 		}
-		if (hasParent()) sendroot(new MSG(allNodes, MSGCode.REPORT_ALLNODES));
+		if (hasParent()) sendroot(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
 
 	}
 
@@ -434,8 +434,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		for (InetAddress x : knoten.getSockets()) {
 			if (!meinNode.getSockets().contains(x)) {
 				try {
-					tmp_socket = new Socket(x.getHostAddress(),
-							knoten.getServer_port());
+					tmp_socket = new Socket(x.getHostAddress(),knoten.getServer_port());
 				} catch (UnknownHostException e) {
 					LogEngine.log(e);
 				} catch (IOException e) {
@@ -568,6 +567,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 */
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
+		System.out.println(angler);
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
 		if (angler.check(paket)) return;
 		switch (paket.getTyp()) {
@@ -655,6 +655,14 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				else
 					sendroot(paket);
 				break;
+			case PATH_PING_REQUEST:
+				if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
+				else routesend(paket);
+				break;
+			case PATH_PING_RESPONSE:
+				if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
+				else routesend(paket);
+				break;
 			default:
 				LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
 				break;
@@ -708,7 +716,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}).start();
 	}
 
-	private void routesend(MSG paket) {
+	public void routesend(MSG paket) {
 		long empfänger = paket.getEmpfänger();
 		for (ConnectionHandler con : connections) {
 			if(con.hasChild(empfänger)) {
@@ -901,6 +909,22 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 	
+	public long pathPing(Node remote) {
+		System.out.println(remote);
+		if (remote.equals(meinNode))return 0;
+		else {
+			long currentTimeMillis = System.currentTimeMillis();
+			MSG paket = new MSG(currentTimeMillis, MSGCode.PATH_PING_REQUEST,remote.getNodeID());
+//			routesend(paket);
+			MSG response = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.PATH_PING_RESPONSE, remote.getNodeID(),currentTimeMillis, true, 1000,paket);
+			if(response==null)return -1;
+			else {
+				return (System.currentTimeMillis()-currentTimeMillis);
+			}
+			
+		}
+	}
+	
 	private boolean updateAlias(String newAlias, long nid) {
 		Node tmp;
 		
@@ -928,7 +952,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			System.gc();
 			break;
 		case "poll":
-			sendchild(new MSG(null, MSGCode.POLL_ALLNODES), null);
+			sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 			break;
 		case "nup":
 			sendtcp(new MSG(meinNode, MSGCode.NODE_UPDATE));

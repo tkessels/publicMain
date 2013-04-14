@@ -25,7 +25,12 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.security.auth.x500.X500Principal;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
@@ -36,7 +41,6 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
-import org.publicmain.nodeengine.ConnectionHandler.Reciever;
 
 /**
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
@@ -662,6 +666,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
 					else routesend(paket);
 					break;
+				case TREE_DATA_POLL:
+					sendroot(new MSG(getTree(), MSGCode.TREE_DATA));
+					break;
 				default:
 					LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
 					break;
@@ -961,17 +968,47 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "update":
 			GUI.getGUI().notifyGUI();
 			break;
-		case "tron":
-			Runtime.getRuntime().traceMethodCalls(true);
-			break;
-		case "troff":
-			Runtime.getRuntime().traceMethodCalls(false);
+			
+		case "tree":
+			showTree();
 			break;
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;
 		}
 		
+	}
+	
+	public DefaultMutableTreeNode getTree() {
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode( meinNode );
+		        // Zuerst werden alle Knoten hergestellt...
+		for (final ConnectionHandler con : connections) {
+			Runnable tmp = new Runnable() {
+				public void run() {
+					con.send(new MSG(null, MSGCode.TREE_DATA_POLL));
+				}
+			};
+			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.TREE_DATA, null, null, true, Config.getConfig().getTreeBuildTime(), tmp);
+			if(polled_tree!=null) root.add((MutableTreeNode) polled_tree.getData());
+		}
+		        return root;
+		    
+	}
+	
+	public void showTree() {
+	        TreeNode root = getTree();
+	        
+	        // Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
+	        JTree tree = new JTree( root );
+	        
+	        // Ein Frame herstellen, um den Tree auch anzuzeigen
+	        JFrame frame = new JFrame( "JTree - Demo" );
+	        frame.add( new JScrollPane( tree ));
+	        
+	        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	        frame.pack();
+	        frame.setLocationRelativeTo( null );
+	        frame.setVisible( true );
 	}
 	
 	

@@ -73,6 +73,23 @@ public class Hook {
 		return x.getHookedMSG();
 	}
 	
+	
+	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,Object payload,boolean filter, long timeout,Runnable dothat) {
+		Haken x = new Haken(typ,code, nid,payload,filter);
+		add(x);
+		synchronized (x) {
+			try {
+				new Thread(dothat).start();
+				x.wait(timeout);
+			}
+			catch (InterruptedException e) {
+			}
+		}
+		remove(x);
+		return x.getHookedMSG();
+	}
+	
+	
 	/**Nicht blockende Methode die für eine gewisse Zeit <code>timeout</code> alle Nachrichten verwirft die den angegebennen Krieterien entspricht.
 	 * @param typ Typ der zu verwerfenden Nachricht
 	 * @param typ	Nachrichtentyp der zu filternden Nachricht. (z.b:<code>SYSTEM, GROUP, PRIVATE</code> oder <code>DATA</code>)

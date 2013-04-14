@@ -76,9 +76,7 @@ public class ConnectionHandler {
 					try {
 						LogEngine.log(ConnectionHandler.this, "sending", paket);
 						line_out.writeUnshared(paket);
-						//line_out.writeObject(paket);
 						line_out.flush();
-						//line_out.reset();
 					} catch (IOException e) {
 						LogEngine.log(ConnectionHandler.this, "failure", paket);
 						System.out.println(e.getMessage());
@@ -204,7 +202,6 @@ public class ConnectionHandler {
 			while (me != null && me.isConnected()) {
 				Object readObject = null;
 				try {
-//					readObject = line_in.readObject();
 					readObject = line_in.readUnshared();
 					
 					if (readObject != null && readObject instanceof MSG) {
@@ -245,18 +242,6 @@ public class ConnectionHandler {
 					LogEngine.log(e);
 					break; //wenn ein Empfangen vom Socket nicht mehr möglich ist -> Thread beenden
 				}
-/*				catch (Exception e) {
-					//Zum aufspüren komischer NULL-MSGs
-					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
-					System.out.println(e.getMessage());
-					e.printStackTrace();
-					System.out.println("--------------------------------------------------------------------------------------------------------------------------------");
-					System.out.println(me);
-					System.out.println(readObject);
-					if(readObject!=null)System.out.println(readObject.getClass());
-					if (readObject != null) System.out.println((readObject instanceof MSG) ? ((MSG) readObject).toString() : readObject.toString());
-					System.out.println("------------------------------------BITTE DEN LOG ZUR ANALYSE ABSPEICHERN-(tobi)--------------------------------------------------------------------------------");
-				}*/
 				
 			}
 			close();

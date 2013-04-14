@@ -22,10 +22,10 @@ public enum MSGCode {
 	
 	POLL_ALLNODES,
 	REPORT_ALLNODES,
-	/*
+	
 	TREE_DATA_POLL,
 	TREE_DATA,
-	*/
+	
 	NODE_SHUTDOWN,
 	CHILD_SHUTDOWN,
 	

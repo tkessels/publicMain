@@ -18,6 +18,9 @@ public abstract class Kanal extends Observable {
 
 	public abstract boolean add(MSG nachricht);
 
+	/**
+	 * TODO: Kommentar
+	 */
 	public Kanal(Object reference) {
 		this.referenz = reference;
 	}

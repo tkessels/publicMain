@@ -11,6 +11,9 @@ import org.publicmain.common.NachrichtenTyp;
 
 public class GruppenKanal extends Kanal {
 
+	/**
+	 * TODO: Kommentar
+	 */
 	public GruppenKanal(String gruppe) {
 		super(gruppe.toLowerCase());
 	}

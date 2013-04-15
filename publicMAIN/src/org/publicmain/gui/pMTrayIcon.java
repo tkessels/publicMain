@@ -28,7 +28,9 @@ public class pMTrayIcon {
 	private CheckboxMenuItem alertPublicMsg;
 	
 	
-	
+	/**
+	 * TODO: Kommentar
+	 */
     public pMTrayIcon() {
     	this.log = new LogEngine();
         // Prüfung ob Systemtray unterstützt:
@@ -46,8 +48,6 @@ public class pMTrayIcon {
         this.alertGroupMsg = new CheckboxMenuItem("group Messages");
         this.alertPublicMsg = new CheckboxMenuItem("public Massages");
         this.exitItem = new MenuItem("Exit");
-        
-        //Add components to popup menu
         popup.add(pMainOpenItem);
         popup.addSeparator();
         popup.add(alerts);
@@ -56,16 +56,17 @@ public class pMTrayIcon {
         alerts.add(alertPublicMsg);
         popup.addSeparator();
         popup.add(exitItem);
-        
         trayIcon.setPopupMenu(popup);
-        
         try {
             sysTray.add(trayIcon);
         } catch (AWTException e) {
         	log.log(this, "TrayIcon konnte nicht hinzugefügt werden.", LogEngine.ERROR);
             return;
         }
-        
+
+        /**
+    	 * TODO: Kommentar
+    	 */
         trayIcon.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             	if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
@@ -75,6 +76,9 @@ public class pMTrayIcon {
             }
         });
         
+    	/**
+    	 * TODO: Kommentar
+    	 */
         pMainOpenItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
         		if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
@@ -84,7 +88,9 @@ public class pMTrayIcon {
             }
         });
         
-        
+    	/**
+    	 * TODO: Kommentar
+    	 */
         ActionListener listener = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 MenuItem item = (MenuItem)e.getSource();
@@ -108,7 +114,6 @@ public class pMTrayIcon {
         alertPrivMsg.addActionListener(listener);
         alertGroupMsg.addActionListener(listener);
         alertPublicMsg.addActionListener(listener);
-        
         exitItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 sysTray.remove(trayIcon);
@@ -117,7 +122,9 @@ public class pMTrayIcon {
         });
     }
     
-    //Obtain the image URL
+	/**
+	 * TODO: Kommentar
+	 */
     protected static Image createImage(String path, String description) {
         URL imageURL = pMTrayIcon.class.getResource(path);
         

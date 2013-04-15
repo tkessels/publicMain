@@ -35,8 +35,6 @@ import org.publicmain.sql.LocalDBConnection;
  * Diese Klasse stellt das AnzeigeFenster und den dazugehörogen Inhalt für die History bereit
  * Mithilfe dieses Fensters soll der nutzer seine History der lokalen DB durchsuchen können.
  * 
- * @author rpfaffner
- * 
  */
 // TODO Auswahlmöglichkeiten für Datum(DropdownKalender implementierbar?)von-bis, Uhrzeit(Dropdown)von-bis, Gesprächspartner/-Gruppe Name, public/private
 // TODO nicht ausgewählte Felder werden nicht beachtet!

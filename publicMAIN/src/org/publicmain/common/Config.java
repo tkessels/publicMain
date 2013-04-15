@@ -60,7 +60,7 @@ public class Config {
 		
 		
 		
-		try(FileInputStream in = new FileInputStream("config.cfg")){
+		try(FileInputStream in = new FileInputStream(CONFIG_PATH+"config.cfg")){
 			settings.load(in);
 		} catch (FileNotFoundException e) {
 			LogEngine.log(this, "default config not found: generating",LogEngine.WARNING);
@@ -76,7 +76,7 @@ public class Config {
 	
 	public void write(){
 		try {
-			settings.store(new FileOutputStream("config.cfg"), "publicMAIN Config");
+			settings.store(new FileOutputStream(CONFIG_PATH+"config.cfg"), "publicMAIN Config");
 		} catch (IOException e1) {
 			LogEngine.log(this, "Could not generate config.cfg. reason:"+e1.getMessage(), LogEngine.WARNING);
 		}
@@ -160,7 +160,7 @@ public class Config {
 	 * @return <code>true</code> if File could be locked <code>false</code> if File has already been locked
 	 */
 	public static boolean getLock() {
-		final String lockFile = CONFIG_PATH +"\\pmlockfile.";
+		final String lockFile = CONFIG_PATH +"pmlockfile.";
         try {
             final File file = new File(lockFile);
             final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");

@@ -55,7 +55,7 @@ public class ChatEngine extends Observable{
 	public static ChatEngine getCE() {
 		return ce;
 	}
-	
+
 	/**
 	 * TODO: Kommentieren!
 	 * 
@@ -65,7 +65,7 @@ public class ChatEngine extends Observable{
 		ce = this;
 		// <<<<<<<< Temporär >>>>>>>>
 		setUserID((long) (Math.random() * Long.MAX_VALUE));
-		
+
 		setAlias(System.getProperties().getProperty("user.name"));
 
 		this.ne = new NodeEngine(this);
@@ -77,34 +77,35 @@ public class ChatEngine extends Observable{
 		inbox = new LinkedBlockingQueue<MSG>();
 
 		// temporäre Initialisierung der GruppenListe mit default Groups
-		ne.getGroups().addAll(Arrays.asList(new String[] { "public"}));
+		ne.getGroups().addAll(Arrays.asList(new String[] { "public" }));
 		msgSorterBot.start();
 	}
-	
+
 	/**
 	 * Findet zu einer definierten NodeID zugehörigen Node in der Liste
 	 * 
-	 * @param nid NodeID
+	 * @param nid, NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
 	 */
-	public Node getNodeForNID(long nid){
+	public Node getNodeForNID(long nid) {
 		return ne.getNode(nid);
 	}
-	
-	public Node getNodeForUID(long uid){
+
+	public Node getNodeForUID(long uid) {
 		return ne.getNodeForUID(uid);
 	}
-	
+
 	/**
-	 * Findet zu einem bestimmten <code>alias</code>, falls eindeutig, den {@link Node} und
-	 * liefert diesen zurück. <br><b>Diese Methode ist nur für Befehlseingaben vorgesehen!</b>
+	 * Findet zu einem bestimmten <code>alias</code>, falls eindeutig, den
+	 * {@link Node} und liefert diesen zurück. <br>
+	 * <b>Diese Methode ist nur für Befehlseingaben vorgesehen!</b>
 	 * 
 	 * @param
 	 * @return {@link Node}
 	 */
 	public Node getNodeforAlias(String alias) {
 		Set<Node> tmp = new HashSet<Node>();
-		alias=alias.toLowerCase();
+		alias = alias.toLowerCase();
 		for (Node x : getUsers()) {
 			if (x.getAlias().toLowerCase().startsWith(alias)) {
 				tmp.add(x);
@@ -121,10 +122,10 @@ public class ChatEngine extends Observable{
 	 * 
 	 * @return
 	 */
-	public long getMyNodeID(){
+	public long getMyNodeID() {
 		return ne.getNodeID();
 	}
-	
+
 	/**
 	 * Getter für die <code>UserID</code>.
 	 * 
@@ -164,79 +165,86 @@ public class ChatEngine extends Observable{
 			ne.updateAlias();
 		}
 	}
-	
-	/**
-	 * Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der entsprechen
-	 * <code>uid</code> zu schicken. 
-	 * 
-	 * @param uid UID des Empfängers
-	 * @param text Nachricht
-	 */
-	public void send_private(long uid, String text){
-		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(),text);
-		put(tmp);
-		ne.sendtcp(tmp);
-	}
-	
-	/**
-	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu
-	 * schicken.
-	 * 
-	 * @param group Gruppenbezeichnung
-	 * @param text Nachricht
-	 */
-	public void send_group(String group, String text){
-		MSG tmp = new MSG(group,text);
-		put(tmp);
-		ne.sendtcp(tmp);
-	}
-	
-	/**
-	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden
-	 * <code>uid</code> zu schicken.
 
-	 * @param datei Datei
-	 * @param uid UID des Empfängers
+	/**
+	 * Weisst die ChatEngine an einen <code>text</code> an den Nutzer mit der
+	 * entsprechen <code>uid</code> zu schicken.
+	 * 
+	 * @param uid
+	 * @param text
+	 */
+	public void send_private(long uid, String text) {
+		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(), text);
+		put(tmp);
+		ne.sendtcp(tmp);
+	}
+
+	/**
+	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe
+	 * <code>group</code> zu schicken.
+	 * 
+	 * @param group
+	 *            Gruppenbezeichnung
+	 * @param text
+	 *            Nachricht
+	 */
+	public void send_group(String group, String text) {
+		MSG tmp = new MSG(group, text);
+		put(tmp);
+		ne.sendtcp(tmp);
+	}
+	
+	/**
+	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der
+	 * entsprechenden <code>uid</code> zu schicken.
+	 * 
+	 * @param datei
+	 *            Datei
+	 * @param uid
+	 *            UID des Empfängers
 	 * 
 	 * @return id des Dateitransfers für spätere Rückfragen
 	 */
-	public void send_file(File datei, long uid){
+	public void send_file(File datei, long uid) {
 		Node tmp_node = getNodeForUID(uid);
-		if(tmp_node==null) {
-			GUI.getGUI().info("User currently offline. Unable to transmit File.", uid, 2);
-		}
-		else {
+		if (tmp_node == null) {
+			GUI.getGUI().info(
+					"User currently offline. Unable to transmit File.", uid, 2);
+		} else {
 			ne.send_file(datei, tmp_node.getNodeID());
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Gibt den Zustand der Übertragung einer Datei an
 	 * 
 	 * @param file_transfer_ID
-	 * @return <ul>	<li><code>-1</code> Dateitransfer nicht möglich</li>
-	 * 				<li><code>-2</code> Benutzer lehnt transfer ab</li>
-	 * 				<li><code>0</code> - <code>100</code> Vortschritt der Datenübertragung in Prozent 
+	 * @return <ul>
+	 *         <li><code>-1</code> Dateitransfer nicht möglich</li>
+	 *         <li><code>-2</code> Benutzer lehnt transfer ab</li>
+	 *         <li><code>0</code> - <code>100</code> Vortschritt der
+	 *         Datenübertragung in Prozent
 	 */
-	public int file_transfer_status(int file_transfer_ID){
-		//TODO: CODE HERE
+	public int file_transfer_status(int file_transfer_ID) {
+		// TODO: CODE HERE
 		return 0;
 	}
-	
+
 	/**
-	 * Fragt ein Array alle User ab 
+	 * Fragt ein Array alle User ab
 	 * 
 	 * @return Array aller verbundener Nodes
 	 */
-	public	Set<Node> getUsers(){
+	public Set<Node> getUsers() {
 		return ne.getNodes();
 	}
-	
+
 	/**
 	 * Beitritt zu einer Gruppe
 	 * 
-	 * @param gruppen_name Gruppennamen sind CaseInSensitiv
-	 * und bestehen aus alphanumerischen Zeichen
+	 * @param gruppen_name
+	 *            Gruppennamen sind CaseInSensitiv und bestehen aus
+	 *            alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name) {
 		synchronized (myGroups) {
@@ -245,106 +253,109 @@ public class ChatEngine extends Observable{
 			}
 		}
 	}
-	
+
 	/**
 	 * Verlässt eine Gruppe wieder
 	 * 
-	 * @param gruppen_name Gruppennamen sind CaseInSensitiv
-	 * und bestehen aus alphanumerischen Zeichen
+	 * @param gruppen_name, Gruppennamen sind CaseInSensitiv und
+	 *            			bestehen aus alphanumerischen Zeichen
 	 */
-	public void group_leave(String gruppen_name){
+	public void group_leave(String gruppen_name) {
 		synchronized (myGroups) {
-			if(myGroups.remove(gruppen_name)){
+			if (myGroups.remove(gruppen_name)) {
 				ne.leaveGroup(Arrays.asList(gruppen_name), null);
 			}
 		}
 	}
-	
+
 	/**
 	 * Liefert eine Liste der verfügbaren Gruppenstrings
 	 * 
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
-	public	Set<String> getAllGroups(){
+	public Set<String> getAllGroups() {
 		synchronized (ne.getGroups()) {
 			return ne.getGroups();
 		}
 	}
-	
-	/** 
+
+	/**
 	 * Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
 	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten.
 	 * 
-	 * @param parameterObject TODO
-	 * @param filename TODO
+	 * @param parameterObject
+	 *            TODO
+	 * @param filename
+	 *            TODO
 	 * 
-	 * @return, abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
-	 * der Nutzer den Empfang ablehnt
+	 * @return, abstraktes Fileobjekt zu speicherung einer Datei oder "null"
+	 *          wenn der Nutzer den Empfang ablehnt
 	 */
-	public	File	request_File(FileTransferData parameterObject){
+	public File request_File(FileTransferData parameterObject) {
 		return GUI.getGUI().request_File(parameterObject);
 	}
-	
+
 	/**
-	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code>
-	 * nicht mehr angezeigt werden. Die Prüfung ob der Nutzer vorhanden
-	 * ist muss durch die GUI realisiert werden.
+	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code> nicht
+	 * mehr angezeigt werden. Die Prüfung ob der Nutzer vorhanden ist muss durch
+	 * die GUI realisiert werden.
 	 * 
 	 * @param uid
 	 */
-	public	boolean	ignore_user(long uid){
-			if(uid!=userID) {
-				return ignored.add(getNodeForUID(uid).getNodeID());
-			}
-			return false;
+	public boolean ignore_user(long uid) {
+		if (uid != userID) {
+			return ignored.add(getNodeForUID(uid).getNodeID());
+		}
+		return false;
 	}
-	
+
 	/**
-	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code>
-	 * wieder angezeigt werden. Hier wird geprüft ob der Benutzer überhaupt
-	 * in der <code>ignored</code> ist. Wenn ja wird das Long aus der
-	 * HashSet gelöscht und "true" zurückgeliefert anderenfalls wird mit
-	 * "false" das Fehlen des Eintrages signalisiert 
+	 * Veranlasst das Nachrichten vom Benutzer mit der <code>uid</code> wieder
+	 * angezeigt werden. Hier wird geprüft ob der Benutzer überhaupt in der
+	 * <code>ignored</code> ist. Wenn ja wird das Long aus der HashSet gelöscht
+	 * und "true" zurückgeliefert anderenfalls wird mit "false" das Fehlen des
+	 * Eintrages signalisiert
 	 * 
 	 * @param uid
 	 */
 	public boolean unignore_user(long uid) {
 		return ignored.remove(getNodeForUID(uid).getNodeID());
-	}	
-	
+	}
+
 	/**
-	 * Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an.
+	 * Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal
+	 * an.
 	 * 
-	 * @param chatPanel Das abonierende Fenster
-	 * @param gruppen_name zu abonierender Gruppen Kanal
+	 * @param chatPanel, das abonierende Fenster
+	 * @param gruppen_name, zu abonierender Gruppen Kanal
 	 */
-	public void add_MSGListener(Observer chatPanel,String gruppen_name){
+	public void add_MSGListener(Observer chatPanel, String gruppen_name) {
 		for (Kanal cur : group_channels) {
-				if(cur.is(gruppen_name)) {
-					cur.addObserver(chatPanel);
-					return;
-				}
+			if (cur.is(gruppen_name)) {
+				cur.addObserver(chatPanel);
+				return;
 			}
-		GruppenKanal tmp =new GruppenKanal(gruppen_name);
+		}
+		GruppenKanal tmp = new GruppenKanal(gruppen_name);
 		tmp.addObserver(chatPanel);
 		group_channels.add(tmp);
 		group_join(gruppen_name);
 	}
-	
-	
+
 	/**
-	 * Meldet einen Nachrichten-Listener an einem privaten - Nachrichten Kanal an.
-	 *  
-	 * @param chatPanel Das abonierende Fenster
-	 * @param gruppen_name zu abonierender Gruppen Kanal
+	 * Meldet einen Nachrichten-Listener an einem privaten - Nachrichten Kanal
+	 * an.
+	 * 
+	 * @param chatPanel, das abonierende Fenster
+	 * @param gruppen_name, zu abonierender Gruppen Kanal
 	 */
-	public void add_MSGListener(Observer chatPanel,long uid){
+	public void add_MSGListener(Observer chatPanel, long uid) {
 		long nid = ce.getNodeForUID(uid).getNodeID();
 		for (KnotenKanal cur : private_channels) {
-				if(cur.is(nid)) {
-					cur.addObserver(chatPanel);
-					return;
-				}
+			if (cur.is(nid)) {
+				cur.addObserver(chatPanel);
+				return;
+			}
 		}
 		KnotenKanal tmp = new KnotenKanal(nid);
 		tmp.addObserver(chatPanel);
@@ -352,56 +363,58 @@ public class ChatEngine extends Observable{
 	}
 	
 	/**
-	 * TODO: Kommentar
+	 * Den Default-Kanal für eingehende, nicht zuordenbare Nachrichten registrieren.
+	 * TODO: Kommentar prüfen!
 	 * 
 	 * @param gui
 	 */
-	public void register_defaultMSGListener(Observer gui){
+	public void register_defaultMSGListener(Observer gui) {
 		default_channel.addObserver(gui);
 	}
 
-	
 	/**
 	 * Entfernt ein Chatpannel aus allen Kanälen.
 	 * 
 	 * @param chatPanel
 	 */
-	public	void	remove_MSGListener(Observer chatPanel){
-		Set<Kanal> empty=new HashSet<Kanal>();
-		
+	public void remove_MSGListener(Observer chatPanel) {
+		Set<Kanal> empty = new HashSet<Kanal>();
+
 		for (Kanal x : group_channels) {
 			x.deleteObserver(chatPanel);
-			if(x.countObservers()==0) { //wenn kanal leer ist
+			 // Wenn der Kanal leer ist.
+			if (x.countObservers() == 0) {
 				empty.add(x);
 				group_leave((String) x.referenz);
 			}
 		}
 		group_channels.removeAll(empty);
-		
+
 		empty.clear();
 		for (Kanal x : private_channels) {
 			x.deleteObserver(chatPanel);
-			if(x.countObservers()==0) {
-				empty.add(x); //wenn kanal leer
+			 // Wenn der Kanal leer ist.
+			if (x.countObservers() == 0) {
+				empty.add(x);
 			}
 		}
 		private_channels.removeAll(empty);
 
 	}
-	
+
 	/**
-	 * Wird von der NodeEngine aufgerufen um für den User interressante Nachrichten
-	 * an die ChatEngine zu übermitteln.
+	 * Wird von der NodeEngine aufgerufen um für den User interressante
+	 * Nachrichten an die ChatEngine zu übermitteln.
 	 * 
 	 * @param nachricht, die neue Nachricht
 	 */
-	public void put(MSG nachricht){
-		if(!ignored.contains(nachricht.getSender())){
+	public void put(MSG nachricht) {
+		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
 			LocalDBConnection.getDBConnection().saveMsg(nachricht);
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar
 	 * 
@@ -410,43 +423,46 @@ public class ChatEngine extends Observable{
 		public void run() {
 			while (true) {
 				try {
-					MSG tmp = inbox.take(); 
-					LogEngine.log("msgSorterBot","sorting",tmp);
-					if (tmp.getTyp() == NachrichtenTyp.GROUP)
-					{
-						for (Kanal x : group_channels)if (x.add(tmp)) break;
-					}
-					else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) 
-					{
+					MSG tmp = inbox.take();
+					LogEngine.log("msgSorterBot", "sorting", tmp);
+					if (tmp.getTyp() == NachrichtenTyp.GROUP) {
+						for (Kanal x : group_channels)
+							if (x.add(tmp))
+								break;
+					} else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
 						System.out.println("PRIVATE MSG");
-						boolean msgAssigned=false;
-						for (KnotenKanal y : private_channels){
-							if (y.add(tmp)){
-								msgAssigned=true;
+						boolean msgAssigned = false;
+						for (KnotenKanal y : private_channels) {
+							if (y.add(tmp)) {
+								msgAssigned = true;
 								break;
 							}
 						}
-						//Kein CW angemeldet um die Nachricht aufzunehmen  sende es an GUI via DEFAULT CHANNEL
-						if(!msgAssigned)default_channel.add(tmp);
+						// Kein CW angemeldet um die Nachricht aufzunehmen sende
+						// es an GUI via DEFAULT CHANNEL
+						if (!msgAssigned)
+							default_channel.add(tmp);
 					}
-				} catch (InterruptedException e) {//Unterbrochen beim Warten... hmmm ist das Schlimm?
+				} catch (InterruptedException e) {
+					// Unterbrochen beim Warten...
+					// hmmm ist das Schlimm?
 				}
 			}
 		}
 	}
 
 	/**
-	 * TODO: Kommentar
+	 * Die eigenen Gruppenmigliedschaften holen.
 	 * 
 	 */
 	public Set<String> getMyGroups() {
 		synchronized (myGroups) {
-			return  myGroups;
+			return myGroups;
 		}
 	}
-	
+
 	/**
-	 * TODO: Kommentar
+	 * Den eigenen Benutzeralias ändern.
 	 * 
 	 */
 	public void updateAlias(String newAlias) {
@@ -455,10 +471,11 @@ public class ChatEngine extends Observable{
 	}
 
 	/**
-	 * TODO: Kommentar
+	 * Verschiedene Debug-Funktionen zum testen usw. diese werden später
+	 * aus dem Programm entfernt.
 	 * 
 	 */
-	public void debug(String command,String parameter) {
+	public void debug(String command, String parameter) {
 		switch (command) {
 		case "alias":
 			setAlias(parameter);
@@ -466,18 +483,20 @@ public class ChatEngine extends Observable{
 		case "disconnect":
 			shutdown();
 			break;
-			
+
 		case "ping":
 			final Node tmp_ping = ce.getNodeforAlias(parameter);
 			if (tmp_ping != null) {
 				new Thread(new Runnable() {
 					public void run() {
-						GUI.getGUI().info("Ping(" + tmp_ping.getAlias() + "):" + ne.pathPing(tmp_ping), null, 0);
+						GUI.getGUI().info(
+								"Ping(" + tmp_ping.getAlias() + "):"
+										+ ne.pathPing(tmp_ping), null, 0);
 					}
 				}).start();
 			}
 			break;
-			
+
 		case "info":
 			Node nodeforAlias = ce.getNodeforAlias(parameter);
 			if (nodeforAlias != null) {
@@ -489,12 +508,12 @@ public class ChatEngine extends Observable{
 			break;
 
 		default:
-			ne.debug(command,parameter);
+			ne.debug(command, parameter);
 			break;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Geordnetes Herunterfahren und Abmelden von pM vom Netzwerk.
 	 * 
@@ -502,9 +521,10 @@ public class ChatEngine extends Observable{
 	public void shutdown() {
 		ne.disconnect();
 	}
-	
+
 	/**
-	 * Prüfen ob nid auf der ignored-Liste steht und ein entsprechendes boolean zurückliefern. 
+	 * Prüfen ob nid auf der ignored-Liste steht und ein entsprechendes boolean
+	 * zurückliefern.
 	 * 
 	 * @param nodeID
 	 * @return
@@ -512,16 +532,17 @@ public class ChatEngine extends Observable{
 	public boolean is_ignored(long nodeID) {
 		return ignored.contains(nodeID);
 	}
-	
+
 	/**
-	 * TODO: Kommentar
+	 * Benutzer über einen anstehenden Dateitransfers informieren.
 	 * 
 	 * @param tmp
 	 */
 	public void inform(FileTransferData tmp) {
-		String str = tmp.receiver.getAlias() + ((tmp.accepted)?" accept ":" declined ") + "receiving File:\""+tmp.datei.getName() +"\"" ;
+		String str = tmp.receiver.getAlias()
+				+ ((tmp.accepted) ? " accept " : " declined ")
+				+ "receiving File:\"" + tmp.datei.getName() + "\"";
 		GUI.getGUI().info(str, tmp.receiver.getUserID(), 0);
-		
+
 	}
 }
-

@@ -118,6 +118,7 @@ public class ChatEngine extends Observable{
 
 	/**
 	 * Diese Methode liefert die eigene NodeID
+	 * 
 	 * @return
 	 */
 	public long getMyNodeID(){
@@ -154,8 +155,7 @@ public class ChatEngine extends Observable{
 	/**
 	 * Setter für den Anzeigenamen (Alias) des eigenen Benutzers.
 	 * 
-	 * @param alias
-	 *            neuer Anzeigename [a-zA-Z0-9]{12}
+	 * @param alias, neuer Anzeigename [a-zA-Z0-9]{12}
 	 */
 	public void setAlias(String alias) {
 		int tmpCounter = 0;
@@ -179,7 +179,8 @@ public class ChatEngine extends Observable{
 	}
 	
 	/**
-	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu schicken.
+	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe <code>group</code> zu
+	 * schicken.
 	 * 
 	 * @param group Gruppenbezeichnung
 	 * @param text Nachricht
@@ -191,7 +192,9 @@ public class ChatEngine extends Observable{
 	}
 	
 	/**
-	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden <code>uid</code> zu schicken.
+	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der entsprechenden
+	 * <code>uid</code> zu schicken.
+
 	 * @param datei Datei
 	 * @param uid UID des Empfängers
 	 * 
@@ -199,8 +202,12 @@ public class ChatEngine extends Observable{
 	 */
 	public void send_file(File datei, long uid){
 		Node tmp_node = getNodeForUID(uid);
-		if(tmp_node==null)GUI.getGUI().info("User currently offline. Unable to transmit File.", uid, 2);
-		else ne.send_file(datei, tmp_node.getNodeID());
+		if(tmp_node==null) {
+			GUI.getGUI().info("User currently offline. Unable to transmit File.", uid, 2);
+		}
+		else {
+			ne.send_file(datei, tmp_node.getNodeID());
+		}
 	}
 	
 	/** 
@@ -266,11 +273,13 @@ public class ChatEngine extends Observable{
 	
 	/** 
 	 * Bittet die ChatEngine um ein Fileobjekt zur Ablage der empfangenen Datei
-	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten
+	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten.
+	 * 
 	 * @param parameterObject TODO
 	 * @param filename TODO
-	 * @return abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
-	 * der Nutzer den Empfang ablehnt 
+	 * 
+	 * @return, abstraktes Fileobjekt zu speicherung einer Datei oder "null" wenn
+	 * der Nutzer den Empfang ablehnt
 	 */
 	public	File	request_File(FileTransferData parameterObject){
 		return GUI.getGUI().request_File(parameterObject);
@@ -284,7 +293,9 @@ public class ChatEngine extends Observable{
 	 * @param uid
 	 */
 	public	boolean	ignore_user(long uid){
-			if(uid!=userID)return ignored.add(getNodeForUID(uid).getNodeID());
+			if(uid!=userID) {
+				return ignored.add(getNodeForUID(uid).getNodeID());
+			}
 			return false;
 	}
 	
@@ -301,7 +312,9 @@ public class ChatEngine extends Observable{
 		return ignored.remove(getNodeForUID(uid).getNodeID());
 	}	
 	
-	/** Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an 
+	/**
+	 * Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal an.
+	 * 
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
@@ -319,7 +332,9 @@ public class ChatEngine extends Observable{
 	}
 	
 	
-	/** Meldet einen Nachrichten-Listener an einem privaten - Nachrichten Kanal an 
+	/**
+	 * Meldet einen Nachrichten-Listener an einem privaten - Nachrichten Kanal an.
+	 *  
 	 * @param chatPanel Das abonierende Fenster
 	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
@@ -336,12 +351,19 @@ public class ChatEngine extends Observable{
 		private_channels.add(tmp);
 	}
 	
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @param gui
+	 */
 	public void register_defaultMSGListener(Observer gui){
 		default_channel.addObserver(gui);
 	}
 
 	
-	/** Entefert ein Chatpannel aus allen Kanälen
+	/**
+	 * Entfernt ein Chatpannel aus allen Kanälen.
+	 * 
 	 * @param chatPanel
 	 */
 	public	void	remove_MSGListener(Observer chatPanel){
@@ -359,14 +381,19 @@ public class ChatEngine extends Observable{
 		empty.clear();
 		for (Kanal x : private_channels) {
 			x.deleteObserver(chatPanel);
-			if(x.countObservers()==0)empty.add(x); //wenn kanal leer
+			if(x.countObservers()==0) {
+				empty.add(x); //wenn kanal leer
+			}
 		}
 		private_channels.removeAll(empty);
 
 	}
 	
-	/**Wir von der NodeEngine aufgerufen um für den User interressante Nachrichten an die ChatEngine zu übermitteln
-	 * @param nachricht Die neue Nachricht.
+	/**
+	 * Wird von der NodeEngine aufgerufen um für den User interressante Nachrichten
+	 * an die ChatEngine zu übermitteln.
+	 * 
+	 * @param nachricht, die neue Nachricht
 	 */
 	public void put(MSG nachricht){
 		if(!ignored.contains(nachricht.getSender())){
@@ -375,6 +402,10 @@ public class ChatEngine extends Observable{
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar
+	 * 
+	 */
 	private final class MsgSorter implements Runnable {
 		public void run() {
 			while (true) {
@@ -404,17 +435,29 @@ public class ChatEngine extends Observable{
 		}
 	}
 
+	/**
+	 * TODO: Kommentar
+	 * 
+	 */
 	public Set<String> getMyGroups() {
 		synchronized (myGroups) {
 			return  myGroups;
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar
+	 * 
+	 */
 	public void updateAlias(String newAlias) {
 		setAlias(newAlias);
 		ne.updateAlias();
 	}
 
+	/**
+	 * TODO: Kommentar
+	 * 
+	 */
 	public void debug(String command,String parameter) {
 		switch (command) {
 		case "alias":
@@ -452,16 +495,29 @@ public class ChatEngine extends Observable{
 		
 	}
 	
-	
-
+	/**
+	 * Geordnetes Herunterfahren und Abmelden von pM vom Netzwerk.
+	 * 
+	 */
 	public void shutdown() {
 		ne.disconnect();
 	}
-
+	
+	/**
+	 * Prüfen ob nid auf der ignored-Liste steht und ein entsprechendes boolean zurückliefern. 
+	 * 
+	 * @param nodeID
+	 * @return
+	 */
 	public boolean is_ignored(long nodeID) {
 		return ignored.contains(nodeID);
 	}
-
+	
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @param tmp
+	 */
 	public void inform(FileTransferData tmp) {
 		String str = tmp.receiver.getAlias() + ((tmp.accepted)?" accept ":" declined ") + "receiving File:\""+tmp.datei.getName() +"\"" ;
 		GUI.getGUI().info(str, tmp.receiver.getUserID(), 0);

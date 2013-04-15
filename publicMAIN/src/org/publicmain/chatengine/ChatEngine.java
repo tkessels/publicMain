@@ -48,7 +48,7 @@ public class ChatEngine extends Observable{
 	private Set<String> myGroups = new HashSet<String>();
 	
 	/**
-	 * Liefert die Instanz der ChatEngine
+	 * Liefert die laufende Instanz der ChatEngine
 	 * 
 	 * @return: ChatEngine
 	 */
@@ -183,10 +183,8 @@ public class ChatEngine extends Observable{
 	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe
 	 * <code>group</code> zu schicken.
 	 * 
-	 * @param group
-	 *            Gruppenbezeichnung
-	 * @param text
-	 *            Nachricht
+	 * @param group, Gruppenbezeichnung
+	 * @param text, Nachricht
 	 */
 	public void send_group(String group, String text) {
 		MSG tmp = new MSG(group, text);
@@ -195,13 +193,11 @@ public class ChatEngine extends Observable{
 	}
 	
 	/**
-	 * Weisst die ChatEngine an einen <code>datei</code> an einen Nutzer mit der
+	 * Weisst die ChatEngine an eine <code>Datei</code> an einen Nutzer mit der
 	 * entsprechenden <code>uid</code> zu schicken.
 	 * 
-	 * @param datei
-	 *            Datei
-	 * @param uid
-	 *            UID des Empfängers
+	 * @param datei, Datei
+	 * @param uid, UID des Empfängers
 	 * 
 	 * @return id des Dateitransfers für spätere Rückfragen
 	 */

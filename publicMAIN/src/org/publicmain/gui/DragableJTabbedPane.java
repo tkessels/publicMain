@@ -30,6 +30,16 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+/**
+ * Diese Klasse wird nur für die verschiebbaren Registerkarten verwendet und wurde nicht durch
+ * das Projektteam erstellt ggf. wird dies wieder entfernt. Quellenangabe siehe nachstehend
+ * aufgeführtem Link: 
+ * 
+ * @author Eugene Yokota at http://www.stackoverflow.com
+ * http://stackoverflow.com/questions/60269/how-to-implement-draggable-tab-using-java-swing
+ * 
+ */
+
 public class DragableJTabbedPane extends JTabbedPane {
 	public static final long serialVersionUID = 1L;
 	private static final int LINEWIDTH = 3;

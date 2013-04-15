@@ -10,6 +10,9 @@ import org.images.Help;
 import org.publicmain.common.LogEngine;
 
 /**
+ * Diese Methode stellt das Icon in der SystemTray mit Kontextmenü bereit, hier
+ * können Benachrichtigungen und andere Einstellungen getätigt werden.
+ * 
  * @author ATRM
  * 
  */
@@ -20,17 +23,14 @@ public class pMTrayIcon {
 	private TrayIcon trayIcon;
 	private SystemTray sysTray;
 	private PopupMenu popup;
-	private MenuItem pMainOpenItem;
-	private MenuItem exitItem;
-	private Menu alerts;
-	private CheckboxMenuItem alertPrivMsg;
-	private CheckboxMenuItem alertGroupMsg;
-	private CheckboxMenuItem alertPublicMsg;
+	private MenuItem display;
+	private MenuItem exit;
+	private Menu notifies;
+	private CheckboxMenuItem notifyPrivMsg;
+	private CheckboxMenuItem notifyGroupMsg;
+	private CheckboxMenuItem notifyPublicMsg;
+	private CheckboxMenuItem sync;
 	
-	
-	/**
-	 * TODO: Kommentar
-	 */
     public pMTrayIcon() {
     	this.log = new LogEngine();
         // Prüfung ob Systemtray unterstützt:
@@ -42,20 +42,24 @@ public class pMTrayIcon {
         this.popup = new PopupMenu();
         this.trayIcon = new TrayIcon(new ImageIcon(getClass().getResource("TrayIcon.png")).getImage());
         this.sysTray = SystemTray.getSystemTray();
-        this.pMainOpenItem = new MenuItem("pMain öffnen");
-        this.alerts = new Menu("Alert me");
-        this.alertPrivMsg = new CheckboxMenuItem("private Messages");
-        this.alertGroupMsg = new CheckboxMenuItem("group Messages");
-        this.alertPublicMsg = new CheckboxMenuItem("public Massages");
-        this.exitItem = new MenuItem("Exit");
-        popup.add(pMainOpenItem);
+        this.display = new MenuItem("Display");
+        this.notifies = new Menu("Notify");
+        this.notifyPrivMsg = new CheckboxMenuItem("Private Messages");
+        this.notifyGroupMsg = new CheckboxMenuItem("Group Messages");
+        this.notifyPublicMsg = new CheckboxMenuItem("Public Massages");
+        this.sync = new CheckboxMenuItem("Synchronize");
+        
+        this.exit = new MenuItem("Exit");
+
+        popup.add(display);
         popup.addSeparator();
-        popup.add(alerts);
-        alerts.add(alertPrivMsg);
-        alerts.add(alertGroupMsg);
-        alerts.add(alertPublicMsg);
+        popup.add(notifies);
+        notifies.add(notifyPrivMsg);
+        notifies.add(notifyGroupMsg);
+        notifies.add(notifyPublicMsg);
+        popup.add(sync);
         popup.addSeparator();
-        popup.add(exitItem);
+        popup.add(exit);
         trayIcon.setPopupMenu(popup);
         try {
             sysTray.add(trayIcon);
@@ -79,7 +83,7 @@ public class pMTrayIcon {
     	/**
     	 * TODO: Kommentar
     	 */
-        pMainOpenItem.addActionListener(new ActionListener() {
+        display.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e){
         		if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
         			GUI.getGUI().setExtendedState(JFrame.NORMAL);
@@ -111,10 +115,10 @@ public class pMTrayIcon {
             }
         };
         
-        alertPrivMsg.addActionListener(listener);
-        alertGroupMsg.addActionListener(listener);
-        alertPublicMsg.addActionListener(listener);
-        exitItem.addActionListener(new ActionListener() {
+        notifyPrivMsg.addActionListener(listener);
+        notifyGroupMsg.addActionListener(listener);
+        notifyPublicMsg.addActionListener(listener);
+        exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 sysTray.remove(trayIcon);
                 System.exit(0);

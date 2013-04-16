@@ -109,15 +109,15 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.log 			= new LogEngine();
 		//this.locDBCon 		= LocalDBConnection.getDBConnection();
 		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
-//		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(Help.class.getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
-		this.helpContents	= new JMenuItem("Help Contents", new ImageIcon(Help.class.getResource("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
+//		this.helpContents	= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
+		this.helpContents	= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));	// evtl. noch anderes Icon wählen
 		this.exit			= new JMenuItem("Exit");
 		this.lafMenu		= new JMenu("Switch Design");
 		this.btnGrp 		= new ButtonGroup();
 		this.chatList 		= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		//this.jTabbedPane 	= new DragableJTabbedPane();
 		this.jTabbedPane 	= new JTabbedPane();
-		this.contactListBtn = new JToggleButton(new ImageIcon(Help.class.getResource("UserListAusklappen.png")));
+		this.contactListBtn = new JToggleButton(Help.getIcon("UserListAusklappen.png"));
 		this.contactListActive = false;
 		this.menuBar 		= new JMenuBar();
 		this.fileMenu 		= new JMenu("File");
@@ -221,7 +221,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.ce.register_defaultMSGListener(this);
 
 		// GUI JFrame Einstellungen:
-		this.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
 		this.setMinimumSize(new Dimension(250,250));
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -244,7 +244,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		if(!contactListActive){
 			
 			this.contactListBtn.setToolTipText("hide contacts");
-			this.contactListBtn.setIcon(new ImageIcon(Help.class.getResource("UserListEinklappen.png")));
+			this.contactListBtn.setIcon(Help.getIcon("UserListEinklappen.png"));
 			this.contactListBtn.setSelected(true);
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible(true);
@@ -263,7 +263,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		if(contactListActive){
 			
 			this.contactListBtn.setToolTipText("show contacts");
-			this.contactListBtn.setIcon(new ImageIcon(Help.class.getResource("UserListAusklappen.png")));
+			this.contactListBtn.setIcon(Help.getIcon("UserListAusklappen.png"));
 			this.contactListBtn.setSelected(false);
 			
 			this.contactListWin.setVisible(false);

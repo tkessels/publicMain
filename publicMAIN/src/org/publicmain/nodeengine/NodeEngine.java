@@ -576,7 +576,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		LocalDBConnection.getDBConnection().saveMsg(paket);
+		
 		if (angler.check(paket)) return;
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
 		else {
@@ -590,6 +590,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				ce.put(paket);
 				break;
 			case SYSTEM:
+				LocalDBConnection.getDBConnection().saveMsg(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
 					allnodes_add((Node) paket.getData());

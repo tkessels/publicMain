@@ -17,9 +17,9 @@ import javax.swing.JTextField;
 
 import org.images.Help;
 
-public class startWindow extends JFrame implements ActionListener{
+public class StartWindow extends JFrame implements ActionListener{
 
-	private startWindow instanz;
+	private StartWindow instanz;
 	private JLabel welcomeLogo;
 	private JLabel welcomeLabel1;
 
@@ -42,7 +42,7 @@ public class startWindow extends JFrame implements ActionListener{
 	private Insets set;
 	private boolean pushedGo;	//TODO: Diese Variante zu prüfen ob startWindow "fertig" ist gefällt mir (noch) nicht -> aber gerade keine andere idee ist ja schon spät :-)
 	
-	private startWindow() {
+	private StartWindow() {
 		
 		instanz =this;
 		this.welcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png"));
@@ -112,7 +112,7 @@ public class startWindow extends JFrame implements ActionListener{
 	}
 
 	public static boolean getStartWindow(){
-		startWindow me = new startWindow();
+		StartWindow me = new StartWindow();
 		boolean x = me.bla();
 		me.dispose();
 		return x;

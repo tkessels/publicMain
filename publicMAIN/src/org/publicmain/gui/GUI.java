@@ -46,8 +46,6 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.sql.LocalDBConnection;
 
-import com.nilo.plaf.nimrod.NimRODLookAndFeel;
-
 /**
  * @author ATRM
  * 
@@ -141,7 +139,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 			desgin.add(tempJMenuItem);
 			btnGrp.add(tempJMenuItem);
-			tempJMenuItem.addActionListener(new lafController(desgin, laf));
+			tempJMenuItem.addActionListener(new lafController(laf));
 		}
 
 		/**
@@ -158,7 +156,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.contactListBtn.setToolTipText("show contacts");
 		this.contactListBtn.addActionListener(new ActionListener() {
-			@Override
+
+			/**
+			 * TODO: Kommentar
+			 */
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton) e.getSource();
 				if (source.isSelected()) {
@@ -220,7 +221,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	
 	/**
 	 * Diese Methode klappt die Benutzerliste auf.
-	 * 
 	 */
 	private void contactListAufklappen(){
 
@@ -238,7 +238,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	
 	/**
 	 * Diese Methode klappt die Benutzerliste zu.
-	 * 
 	 */
 	private void contactListZuklappen() {
 
@@ -528,17 +527,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 //	}
 
 	/**
-	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet
-	 * Falls noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
-	 * @param empfGrp String Empfängergruppe
-	 * @param msg String die Nachricht/Msg
-	 * @param cw ChatWindow das aufrufende ChatWindow
+	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet Falls
+	 * noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
+	 * 
+	 * @param empfGrp, String Empfängergruppe
+	 * @param msg, String die Nachricht/Msg
+	 * @param cw, ChatWindow das aufrufende ChatWindow
 	 */
-	void groupSend(String empfGrp, String msg){
-		
+	void groupSend(String empfGrp, String msg) {
+
 		ChatWindow tmpCW = getCW(empfGrp);
-		if(tmpCW == null){
-			tmpCW= new ChatWindow(empfGrp);
+		if (tmpCW == null) {
+			tmpCW = new ChatWindow(empfGrp);
 			addGrpCW(empfGrp, true);
 			focus(tmpCW);
 		} else {
@@ -549,87 +549,118 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	
 	/**
 	 * Diese Methode ist für das Ignorien eines users
-	 * @param alias String Alias des Users
-	 * @returns true Wenn User gefunden
+	 * 
+	 * @param alias, String Alias des Users
+	 * @returns, true Wenn User gefunden
 	 */
-	boolean ignoreUser(long uid){
+	boolean ignoreUser(long uid) {
 		return ce.ignore_user(uid);
 	}
 
 	/**
-	 * Diese Methode ist für das nicht weitere Ignorieren eines users
-	 * @param alias String Alias des Users
-	 * @return true Wenn User gefunden
+	 * Diese Methode ist für das nicht weitere Ignorieren eines Benutzers.
+	 * 
+	 * @param alias, String Alias des Users
+	 * @return, true Wenn User gefunden
 	 */
-	boolean unignoreUser(long uid){
-			return ce.unignore_user(uid);
-	}
-	
+	boolean unignoreUser(long uid) {
+		return ce.unignore_user(uid);
+	}	
 
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @param uid
+	 */
 	public void sendFile(long uid) {
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal = fileChooser.showOpenDialog(me);
+		fileChooser.showOpenDialog(me);
 		File selectedFile = fileChooser.getSelectedFile();
-		if(selectedFile!=null)sendFile(selectedFile, uid);
-	}
-	
-	public void sendFile(File datei, long uid) {
-		if(datei.isFile()) {
-			if(datei.canRead()) {
-				if(datei.length()>0)ce.send_file(datei, uid);
-				else info("File has a size of 0 bytes!", uid, 3);
-			}
-			else info("Cant read file \""+datei.getName()+"\"!", uid, 3);
+		if (selectedFile != null) {
+			sendFile(selectedFile, uid);
 		}
-		else info("Only single Files are supported!", uid, 3);
 	}
-	
-	
-	/**Displays a text message in the referenced ChatWindow (Group/UID) or the active Window if reference is <code>null</code>
-	 * @param nachricht Text of the message
-	 * @param reference Groupname or UID of ChatWindow to put the message in or <code>null</code> to take the active one. 
-	 * @param typ <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
+
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @param datei
+	 * @param uid
 	 */
-	public void info(String nachricht, Object reference,int typ) {
-		ChatWindow tmp=getCW(reference);;
-		if(tmp==null)tmp=getActiveCW();
-		if(tmp!=null){
-			if (typ == 0)tmp.info(nachricht);
-			else if (typ == 1)tmp.warn(nachricht);
-			else tmp.error(nachricht);
+	public void sendFile(File datei, long uid) {
+		if (datei.isFile()) {
+			if (datei.canRead()) {
+				if (datei.length() > 0) {
+					ce.send_file(datei, uid);
+				} else {
+					info("File has a size of 0 bytes!", uid, 3);
+				}
+			} else {
+				info("Cant read file \"" + datei.getName() + "\"!", uid, 3);
+			}
+		} else {
+			info("Only single Files are supported!", uid, 3);
 		}
-	}
-	
+	}	
 	
 	/**
-	 * Diese Methode liefert ein Fileobjekt
+	 * Displays a text message in the referenced ChatWindow (Group/UID) or the
+	 * active Window if reference is <code>null</code>
 	 * 
-	 * Diese Methode bittet die GUI(den Nutzer) um ein Fileobjekt zur Ablage der
-	 * empfangenen Datei
-	 * @param filename TODO
+	 * @param nachricht, Text of the message
+	 * @param reference, Groupname or UID of ChatWindow to put the message in or
+	 *            		 <code>null</code> to take the active one.
+	 * @param typ, <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
+	 */
+	public void info(String nachricht, Object reference, int typ) {
+		ChatWindow tmp = getCW(reference);
+		;
+		if (tmp == null) {
+			tmp = getActiveCW();
+		}
+		if (tmp != null) {
+			if (typ == 0) {
+				tmp.info(nachricht);
+			} else if (typ == 1) {
+				tmp.warn(nachricht);
+			} else {
+				tmp.error(nachricht);
+			}
+		}
+	}
+	
+	/**
+	 * Diese Methode liefert ein Fileobjekt, sie benachrichtigt über die GUI den
+	 * Nutzer und fordert einen Ablageort an.
 	 * 
+	 * @param filename
 	 * @return File
 	 */
 	public File request_File(FileTransferData fr) {
 		String dateiname = fr.datei.getName();
 		Long size = fr.size;
-		int x = JOptionPane.showConfirmDialog(null, "Möchten sie eine die Datei "+dateiname+ " annehmen? ("+size +")","Dateiversand",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
-		if(x==JOptionPane.YES_OPTION) {
+		int x = JOptionPane.showConfirmDialog(null,
+				"Möchten sie eine die Datei " + dateiname + " annehmen? ("
+						+ size + ")", "Dateiversand",
+				JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if (x == JOptionPane.YES_OPTION) {
 			JFileChooser fileChooser = new JFileChooser();
-			if(dateiname!=null)fileChooser.setSelectedFile(new File(dateiname));
+			if (dateiname != null)
+				fileChooser.setSelectedFile(new File(dateiname));
 			int returnVal = fileChooser.showSaveDialog(me);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
+				System.out.println("You chose to save this file: "
+						+ fileChooser.getSelectedFile().getName());
 			}
 			return fileChooser.getSelectedFile();
-		}else {
+		} else {
 			return null;
 		}
-		
+
 	}
 
 	/**
-	 * Diese Methode soll über Änderungen informieren
+	 * Diese Methode  informiert die GUI über Änderungen.
 	 */
 	public void notifyGUI() {
 		for (ChatWindow cw : chatList) {
@@ -690,7 +721,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	/* (non-Javadoc)
 	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
 	}
@@ -705,40 +735,36 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	class lafController implements ActionListener {
 
-		private JMenuItem lafMenu;
 		private UIManager.LookAndFeelInfo laf;
 		private boolean userListWasActive;
 
-		public lafController(JMenuItem lafMenu, UIManager.LookAndFeelInfo laf) {
-			this.lafMenu = lafMenu;
+		/**
+		 * TODO: Kommentar
+		 * 
+		 * @param lafMenu
+		 * @param laf
+		 */
+		public lafController(UIManager.LookAndFeelInfo laf) {
 			this.laf = laf;
 		}
 
-		@Override
+		/**
+		 * TODO: Kommentar
+		 */
 		public void actionPerformed(ActionEvent e) {
-			
+
 			userListWasActive = contactListActive;
-			JMenuItem source = (JMenuItem)e.getSource();
-			
 			contactListZuklappen();
-			
-			if(source.getText().equals("NimROD")){
-				try{
-					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-				} catch (Exception ex){
-					LogEngine.log(ex);
-				}
-			} else {
-				try {
-					UIManager.setLookAndFeel(laf.getClassName());
-				} catch (Exception ex) {
-					LogEngine.log(ex);
-				}
+			try {
+				UIManager.setLookAndFeel(laf.getClassName());
+			} catch (Exception ex) {
+				LogEngine.log(ex);
 			}
+
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
-			if(userListWasActive)contactListAufklappen();
-			
+			if (userListWasActive)
+				contactListAufklappen();
 		}
 	}
 	

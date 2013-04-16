@@ -37,9 +37,8 @@ public class publicMAIN {
 			
 		}
 		else{
-			GUI.getGUI().setVisible(true);
-//			JOptionPane.showMessageDialog(null, "publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft");
-//			LogEngine.log("publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft", LogEngine.ERROR);
+			JOptionPane.showMessageDialog(null, "publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft");
+			LogEngine.log("publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft", LogEngine.ERROR);
 		}
 		
 	}

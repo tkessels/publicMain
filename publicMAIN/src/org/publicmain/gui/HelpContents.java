@@ -3,14 +3,13 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.MultipleGradientPaint.ColorSpaceType;
 import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
@@ -20,15 +19,16 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.images.Help;
 
 /**
- * Diese Klasse stellt das HilfeFenster und den dazugehörogen Inhalt bereit
+ * Diese Klasse stellt die Hilfeseiten Help/Help Content zur Verfügung.
+ * TODO: Kommentar
  * 
- * @author rpfaffner
+ * @author ATRM
  * 
  */
 
 public class HelpContents {
-
-	private JFrame hcFrame;
+	
+	private JDialog hcDialog;
 	private JTextField searchField;
 	private JButton searchButton;
 	private JPanel searchPanel;
@@ -36,16 +36,18 @@ public class HelpContents {
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
 
-	// TODO: Suche ermöglichen!
-
+	/**
+	 * Konstruktor für das Help Content Frame
+	 */
 	public HelpContents() {
-		this.hcFrame = new JFrame("Help Contents");
-		this.searchField = new JTextField("What to hell are you searching for?");
-		this.searchButton = new JButton("Search");
-		this.searchPanel = new JPanel();
+		
+		this.hcDialog 		= new JDialog(GUI.getGUI(), "Help Content", false);
+		this.searchField 	= new JTextField("Search Keyword...");
+		this.searchButton 	= new JButton("Find");
+		this.searchPanel 	= new JPanel();
 		this.helpContentTxt = new JTextPane();
-		this.htmlKit = new HTMLEditorKit();
-		this.htmlDoc = new HTMLDocument();
+		this.htmlKit 		= new HTMLEditorKit();
+		this.htmlDoc 		= new HTMLDocument();
 
 		helpContentTxt.setBackground(new Color(229, 195, 0));
 		helpContentTxt.setEditable(false);
@@ -54,48 +56,50 @@ public class HelpContents {
 
 		searchPanel.setLayout(new BorderLayout());
 		
-		
 		// hinzufügen
-		hcFrame.add(searchPanel, BorderLayout.NORTH);
+		hcDialog.add(searchPanel, BorderLayout.NORTH);
 		searchPanel.add(searchField, BorderLayout.CENTER);
 		searchPanel.add(searchButton, BorderLayout.EAST);
-		hcFrame.add(helpContentTxt, BorderLayout.CENTER);
+		hcDialog.add(helpContentTxt, BorderLayout.CENTER);
 
 		addIndex();
-		addChapter();
+//		addChapter();
 		
-		hcFrame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
-		hcFrame.setMinimumSize(new Dimension(250, 400));
-		hcFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		hcFrame.pack();
-		hcFrame.setLocationRelativeTo(null);
-		hcFrame.setVisible(true);
+		hcDialog.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+		hcDialog.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		hcDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		hcDialog.pack();
+		hcDialog.setLocation(GUI.getGUI().getLocation().x+GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
+		hcDialog.setVisible(true);
 	}
 
+	/**
+	 * TODO: Kommentar
+	 */
 	private void addIndex() {
-		//TODO: herausfinden warum überschriften <h1,2,3,> nicht interpretiert werden! Was wird überhaupt alles interpretiert?
 		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),	"<h1>Index</h1>		<br>" +
-																"<h2>Kapitel 1</h2>		<br>" + 
-																"<h3>Kapitel 2</h3>		<br>", 0, 0, null);
+			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
+					"<h1>Index</h1><br>" + "<h2>Kapitel 1</h2><br>"
+							+ "<h3>Kapitel 2</h3><br>", 0, 0, null);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
-
-	private void addChapter(){
-		//TODO mit Inhalt füllen
+	
+	/**
+	 * TODO: Kommentar
+	 */
+	private void addChapter() {
 		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),	"<h2>Kapitel 1</h2>		<br>" +
-																"hier steht witziger erklärungstext vom ersten kapitel		<br>" +
-//																"<img src='http://www.cms.hu-berlin.de/ueberblick/stellen/feed-icon16x16.png'> und unter umständen noch symbole" +
-																"<h3>Kapitel 2</h3>		<br>" +
-																"hier steht witziger erklärungstext vom zweiten kapitel		<br>" //+
-															//	"<img src='./media/g4174.png'>"
-																, 0, 0, null);
+			htmlKit.insertHTML(
+					htmlDoc,
+					htmlDoc.getLength(),
+					"<h2>Kapitel 1</h2><br>"
+							+ "hier steht witziger erklärungstext vom ersten kapitel<br>"
+							+ "<h3>Kapitel 2</h3><br>"
+							+ "hier steht witziger erklärungstext vom zweiten kapitel<br>", 0, 0, null);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

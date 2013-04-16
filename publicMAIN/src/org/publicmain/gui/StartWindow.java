@@ -193,7 +193,7 @@ public class StartWindow extends JFrame implements ActionListener{
 			long userID = (long) (Math.random() * Long.MAX_VALUE);
 			String choosenAlias = nickNameTextField.getText();
 			String choosenBackupDBUserName = userNameTextField.getText();
-			String choosenBackupDBUserPwd	= passWordTextField.getPassword().toString();
+			int choosenBackupDBUserPwdHash	= passWordTextField.getPassword().hashCode();
 			String choosenBackupDBIP		= backupserverIPTextField.getText();
 			
 			Pattern nickNamePattern = Pattern.compile(".*[^a-zA-Z0-9öäüÖÄÜßéá].*");
@@ -305,7 +305,7 @@ public class StartWindow extends JFrame implements ActionListener{
 						Config.getConfig().setAlias(choosenAlias);
 						Config.getConfig().setUserID(userID);
 						Config.getConfig().setBackupDBChoosenUsername(choosenBackupDBUserName);
-						Config.getConfig().setBackupDBChoosenUserPassWord(choosenBackupDBUserPwd);
+						Config.getConfig().setBackupDBChoosenUserPassWord(String.valueOf(choosenBackupDBUserPwdHash));
 						Config.getConfig().setBackupDBChoosenIP(choosenBackupDBIP);
 						Config.getConfig().write();
 						plsRunGUI = true;

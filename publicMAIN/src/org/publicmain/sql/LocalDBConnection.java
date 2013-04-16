@@ -155,7 +155,6 @@ public class LocalDBConnection {
 			e2.printStackTrace();
 		}
 		
-		
 //		try {
 //			this.stmt = con.createStatement();
 //			stmt.addBatch("create database if not exists " + dbName);

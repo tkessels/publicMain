@@ -175,8 +175,9 @@ public class Config {
 		settings.setProperty("sql.backup_db_choosen_username", usrName);
 	}
 	
-	public String getBackupDBChoosenPassWord(){
-		return settings.getProperty("sql.backup_db_choosen_user_password");
+	public int getBackupDBChoosenUserPassWordHash(){
+		String pwHash = settings.getProperty("sql.backup_db_choosen_user_password_hash");
+		return Integer.parseInt(pwHash);
 	}
 	
 	public void setBackupDBChoosenUserPassWord(String userPassWord){

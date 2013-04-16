@@ -48,18 +48,17 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.sql.LocalDBConnection;
 
-import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
  * @author ATRM
  * 
  */
 
-public class GUI extends JFrame implements Observer , ChangeListener{
+public class GUI extends JFrame implements Observer, ChangeListener {
 
 	private final int GRP_NAME_LENGTH = Config.getConfig().getMaxGroupLength();
 	private final int PRIV_NAME_LENGTH = Config.getConfig().getMaxAliasLength();
-	
+
 	// Deklarationen:
 	private ChatEngine ce;
 	LogEngine log;
@@ -67,23 +66,19 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private static GUI me;
 	private List<ChatWindow> chatList;
 	private JMenuBar menuBar;
-	private JMenu fileMenu;
-	private JMenu configMenu;
-	private JMenu lafMenu;
-	private JMenu helpMenu;
-	private JMenu historyMenu;
+	private JMenu file;
+	private JMenu options;
+	private JMenu desgin;
+	private JMenu help;
 	private JMenu backupServer;
-	private JMenuItem pullHistoryFromBackUpServer;
-	private JMenuItem pushHistoryToBackUpServer;
-	private JMenuItem backUpServerSettings;
-	private JMenuItem checkoutHistory;
-	private JMenuItem aboutPMAIN;
-	private JMenuItem helpContents;
+	private JMenuItem pullHistory;
+	private JMenuItem pushHistory;
+	private JMenuItem settings;
+	private JMenuItem history;
+	private JMenuItem about;
+	private JMenuItem helpContent;
 	private JMenuItem exit;
-	private JMenuItem lafNimROD;
 	private ButtonGroup btnGrp;
-	
-//	private DragableJTabbedPane jTabbedPane;
 	private JTabbedPane jTabbedPane;
 	private JToggleButton contactListBtn;
 	private boolean contactListActive;
@@ -92,83 +87,82 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private LocalDBConnection locDBCon;
 
 	/**
-	 * Konstruktor für GUI
+	 * Konstruktor für das GUI mit Initialisierungen
 	 */
 	private GUI() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
-			log.log(ex);
+			LogEngine.log(ex);
 		}
 
 		// Initialisierungen:
 		try {
-			this.ce=new ChatEngine();
+			this.ce = new ChatEngine();
 		} catch (Exception e) {
-			log.log(e);
+			LogEngine.log(e);
 		}
-		this.me 			= this;
-		this.log 			= new LogEngine();
-		//this.locDBCon 		= LocalDBConnection.getDBConnection();
-		this.aboutPMAIN 	= new JMenuItem("About pMAIN");
-//		this.helpContents	= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png")));	// evtl. noch anderes Icon wählen
-		this.helpContents	= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));	// evtl. noch anderes Icon wählen
-		this.exit			= new JMenuItem("Exit");
-		this.lafMenu		= new JMenu("Switch Design");
-		this.btnGrp 		= new ButtonGroup();
-		this.chatList 		= Collections.synchronizedList(new ArrayList<ChatWindow>());
-		//this.jTabbedPane 	= new DragableJTabbedPane();
-		this.jTabbedPane 	= new JTabbedPane();
-		this.contactListBtn = new JToggleButton(Help.getIcon("UserListAusklappen.png"));
-		this.contactListActive = false;
-		this.menuBar 		= new JMenuBar();
-		this.fileMenu 		= new JMenu("File");
-		this.configMenu 	= new JMenu("Settings");
-		this.helpMenu 		= new JMenu("Help");
-		this.historyMenu 	= new JMenu("History");
-		this.backupServer	= new JMenu("Backup-Server");
-		this.pushHistoryToBackUpServer 		= new JMenuItem("push History to Backup-Server");
-		this.pullHistoryFromBackUpServer	= new JMenuItem("pull History from Backup-Server");
-		this.backUpServerSettings 			= new JMenuItem("Backup-Server Settings");
-		this.checkoutHistory				= new JMenuItem("checkout History");
-		this.lafNimROD 		= new JRadioButtonMenuItem("NimROD");
-		this.trayIcon 		= new pMTrayIcon();
 		
-		// Anlegen der Menüeinträge für Designwechsel (installierte
-		// LookAndFeels)
-		// + hinzufügen zum lafMenu ("Designwechsel")
-		// + hinzufügen der ActionListener (lafController)
-		for (UIManager.LookAndFeelInfo laf : UIManager.getInstalledLookAndFeels()) {
-			JRadioButtonMenuItem tempJMenuItem = new JRadioButtonMenuItem(laf.getName());
-			if((laf.getName().equals("Windows")) &&
-					(UIManager.getSystemLookAndFeelClassName().equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))){
+		GUI.me 					= this;
+		this.log 				= new LogEngine();
+		// this.locDBCon 		= LocalDBConnection.getDBConnection();
+		this.about 				= new JMenuItem("About");
+		// TODO: evtl. noch anderes Icon wählen
+		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
+		this.exit				= new JMenuItem("Exit");
+		this.desgin				= new JMenu("Design");
+		this.btnGrp 			= new ButtonGroup();
+		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
+		this.jTabbedPane 		= new JTabbedPane();
+		this.contactListBtn 	= new JToggleButton(Help.getIcon("UserListAusklappen.png"));
+		this.contactListActive 	= false;
+		this.menuBar 			= new JMenuBar();
+		this.file	 			= new JMenu("File");
+		this.options 			= new JMenu("Options");
+		this.help	 			= new JMenu("Help");
+		this.backupServer		= new JMenu("Backup-Server");
+		this.pushHistory		= new JMenuItem("Push History");
+		this.pullHistory		= new JMenuItem("Pull History");
+		this.settings 			= new JMenuItem("Settings");
+		this.history			= new JMenuItem("History");
+		this.trayIcon 			= new pMTrayIcon();
+		
+		/**
+		 * Erstellen der Menüeinträge für die insttallierten LookAndFeels, hinzufügen zum
+		 * Menü Options/Design und hinzufügen des ActionListeners
+		 */
+		for (UIManager.LookAndFeelInfo laf : UIManager
+				.getInstalledLookAndFeels()) {
+			JRadioButtonMenuItem tempJMenuItem = new JRadioButtonMenuItem(
+					laf.getName());
+			if ((laf.getName().equals("Windows"))
+					&& (UIManager.getSystemLookAndFeelClassName()
+							.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))) {
 				tempJMenuItem.setSelected(true);
 			}
-			lafMenu.add(tempJMenuItem);
+			desgin.add(tempJMenuItem);
 			btnGrp.add(tempJMenuItem);
-			tempJMenuItem.addActionListener(new lafController(lafMenu, laf));
+			tempJMenuItem.addActionListener(new lafController(laf));
 		}
 
-		// Anlegen benötigter Controller und Listener:
-		// WindowListener für das GUI-Fenster:
-		this.addWindowListener(new winController());
+		/**
+		 * Erstellen erforderlicher Controller und Listener
+		 */
+		this.addWindowListener(new winController());				// WindowListener für das GUI-Fenster
+		this.jTabbedPane.addChangeListener(this);					// ChangeListener für den Focus auf dem Eingabefeld
+		this.exit.addActionListener(new menuContoller());			
+		this.about.addActionListener(new menuContoller());
+		this.helpContent.addActionListener(new menuContoller());
+		this.history.addActionListener(new menuContoller());
+		this.settings.addActionListener(new menuContoller());
 		
-		// ChangeListener für Focus auf Eingabefeld
-		this.jTabbedPane.addChangeListener(this);
-
-		// ActionListener für Menu's:
-		this.exit.addActionListener(new menuContoller());
-		this.aboutPMAIN.addActionListener(new menuContoller());
-		this.helpContents.addActionListener(new menuContoller());
-		this.lafNimROD.addActionListener(new lafController(lafNimROD, null));
-		this.checkoutHistory.addActionListener(new menuContoller());
-		this.backUpServerSettings.addActionListener(new menuContoller());
-		
-		// Konfiguration contactListBtn:
 		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.contactListBtn.setToolTipText("show contacts");
 		this.contactListBtn.addActionListener(new ActionListener() {
-			@Override
+
+			/**
+			 * TODO: Kommentar
+			 */
 			public void actionPerformed(ActionEvent e) {
 				JToggleButton source = (JToggleButton) e.getSource();
 				if (source.isSelected()) {
@@ -179,52 +173,44 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			}
 		});
 		
-		//lafNimROD zur ButtonGroup btnGrp hinzufügen:
-		this.btnGrp.add(lafNimROD);
-		
-		// Menüs hinzufügen:
-		this.lafMenu.add(lafNimROD);
-		
-		this.configMenu.add(lafMenu);
-		
-		this.fileMenu.add(exit);
-		
-		this.helpMenu.add(aboutPMAIN);
-		this.helpMenu.add(helpContents);
-		
-		this.historyMenu.add(checkoutHistory);
-		this.historyMenu.add(backupServer);
-		
-		this.backupServer.add(pushHistoryToBackUpServer);
-		this.backupServer.add(pullHistoryFromBackUpServer);
-		this.backupServer.add(backUpServerSettings);
-		
+		/**
+		 * Menü-Komponenten hinzufügen
+		 */
+		this.options.add(history);
+		this.options.add(backupServer);
+		this.options.add(desgin);
+		this.file.add(exit);
+		this.help.add(helpContent);
+		this.help.add(about);
+		this.backupServer.add(pushHistory);
+		this.backupServer.add(pullHistory);
+		this.backupServer.add(settings);
 		this.menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.LINE_AXIS));
 		this.menuBar.add(contactListBtn);
-		this.menuBar.add(fileMenu);
-		this.menuBar.add(configMenu);
-		this.menuBar.add(helpMenu);
-		this.menuBar.add(historyMenu);
-		
-		//Einkommentieren wenn Logo gewünscht:
-//		this.menuBar.add(Box.createHorizontalGlue());
-//		this.menuBar.add(new JLabel(new ImageIcon(Help.class.getResource("miniSpin.gif"))));
+		this.menuBar.add(file);
+		this.menuBar.add(options);
+		this.menuBar.add(help);
+
+		// Einkommentieren wenn Logo gewünscht:
+		// this.menuBar.add(Box.createHorizontalGlue());
+		// this.menuBar.add(new JLabel(new
+		// ImageIcon(Help.class.getResource("miniSpin.gif"))));
 
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
 		this.add(jTabbedPane);
-		
+
 		// StandardGruppe erstellen:
 		this.addGrpCW("public", true);
 		// StandardGruppe joinen:
-		//this.ce.group_join("public"); //Überflüssig weil die addGrpCW das macht
-		
-		//registriert Hauptfenster als Empfänger für noch nicht gefangene Privatnachrichten
+
+		// Registriert Hauptfenster als Empfänger für noch nicht gefangene
+		// Privatnachrichten.
 		this.ce.register_defaultMSGListener(this);
 
-		// GUI JFrame Einstellungen:
+		// GUI JFrame Einstellungen
 		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
-		this.setMinimumSize(new Dimension(250,250));
+		this.setMinimumSize(new Dimension(250, 250));
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -233,13 +219,11 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.setVisible(true);
 		this.chatList.get(0).focusEingabefeld();
 		this.contactListAufklappen();
-		
+
 	}
 	
 	/**
-	 * Diese Methode klappt die Contactlist auf
-	 * 
-	 * 
+	 * Diese Methode klappt die Benutzerliste auf.
 	 */
 	private void contactListAufklappen(){
 
@@ -256,91 +240,102 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	}
 	
 	/**
-	 * Diese Methode klappt die Contactlist zu
-	 * 
-	 * 
+	 * Diese Methode klappt die Benutzerliste zu.
 	 */
-	private void contactListZuklappen(){
+	private void contactListZuklappen() {
 
-		if(contactListActive){
-			
+		if (contactListActive) {
 			this.contactListBtn.setToolTipText("show contacts");
 			this.contactListBtn.setIcon(Help.getIcon("UserListAusklappen.png"));
 			this.contactListBtn.setSelected(false);
-			
 			this.contactListWin.setVisible(false);
-			
 			this.contactListActive = false;
 		}
 	}
-	
 
-	/** Diese Methode erstellt ein neues ChatFenster. Ist das der Parameter ein {@link String} erstellt sie ein Gruppenfenster ist er {@link Long} ein PrivatChatFenster
-	 * @param referenz Für was soll ein Fenster erstellt werden. 
+	/** 
+	 * Diese Methode erstellt ein neues ChatFenster. Ist das der Parameter ein {@link String} erstellt
+	 * sie ein Gruppenfenster ist er {@link Long} ein PrivatChatFenster.
+	 * 
+	 * @param referenz, für was soll ein Fenster erstellt werden. 
 	 * @return
 	 */
 	public ChatWindow createChat(Object referenz) {
-		
+
 		ChatWindow cw;
-		if(referenz instanceof String)cw=new ChatWindow((String)referenz);
-		else if (referenz instanceof Long)cw=new ChatWindow((Long)referenz);
-		else return null;
+		if (referenz instanceof String) {
+			cw = new ChatWindow((String) referenz);
+		} else if (referenz instanceof Long) {
+			cw = new ChatWindow((Long) referenz);
+		} else {
+			return null;
+		}
 
-		// Title festlegen:
+		// Titel festlegen
 		String title = cw.getChatWindowName();
-		
 
-		// neues ChatWindow (cw) zur Chatliste (ArrayList<ChatWindow>)
-		// hinzufügen:
+		// Neues ChatWindow (cw) zur Chatliste (ArrayList<ChatWindow>)
+		// hinzufügen
 		this.chatList.add(cw);
-		// erzeugen von neuem Tab für neues ChatWindow:
+		// erzeugen von neuem Tab für neues ChatWindow
 		this.jTabbedPane.addTab(title, cw);
-
 		// Index vom ChatWindow im JTabbedPane holen um am richtigen Ort
-		// einzufügen:
+		// einzufügen
 		int index = jTabbedPane.indexOfComponent(cw);
-		// den neuen Tab an die Stelle von index setzen:
+		// den neuen Tab an die Stelle von index setzen
 		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
-		
-		if(cw.isGroup()) ce.add_MSGListener(cw, (String) referenz);
-		else ce.add_MSGListener(cw, (Long) referenz);
-		
+		if (cw.isGroup()) {
+			ce.add_MSGListener(cw, (String) referenz);
+		} else {
+			ce.add_MSGListener(cw, (Long) referenz);
+		}
+
 		return cw;
 	}
 
 	/**
-	 * Diese Methode erstellt ein ChatWindow für Gruppen, falls ChatWindow bereits vorhanden, wird dieses fokusiert.
+	 * Diese Methode erstellt ein ChatWindow für Gruppen, falls ChatWindow
+	 * bereits vorhanden, wird dieses fokusiert.
+	 * 
 	 * @param grpName
-	 * @param focus TODO
+	 * @param focus
 	 */
-	public void addGrpCW(String grpName, boolean focus){
+	public void addGrpCW(String grpName, boolean focus) {
 		// Gruppenname auf Konvention prüfen, ggf. Änderungen vornehmen.
 		String clean_group = sanatizeGroupname(grpName);
 		// Hol ref. auf Gruppenfenster wenn existent
-		ChatWindow tmp_cw=getCW(clean_group);
-		//wenn ref. leer dann erstelle neues Gruppenfesnter
-		if(tmp_cw == null)  tmp_cw=createChat(clean_group);
-		//fokusiere das Gruppenfenster
-		if(focus)focus(tmp_cw);
+		ChatWindow tmp_cw = getCW(clean_group);
+		// wenn ref. leer dann erstelle neues Gruppenfesnter
+		if (tmp_cw == null) {
+			tmp_cw = createChat(clean_group);
+		}
+		// fokusiere das Gruppenfenster
+		if (focus) {
+			focus(tmp_cw);
+		}
 	}
 
-	/** Säubert einen eingegebenen Gruppenstring von ungewollten Zeichen
-	 * @param grpName Der vom Benutzer eingegebene Gruppenname
-	 * @return einen gesäuberten String zu verwendung als Gruppenname
+	/**
+	 * Bereinigt einen eingegebenen Gruppenstring von ungewollten Zeichen
+	 * 
+	 * @param grpName, der vom Benutzer eingegebene Gruppenname
+	 * @return, einen bereinigten String zur Verwendung als Gruppenname
 	 */
 	private String sanatizeGroupname(String grpName) {
 		String clean_grpname = grpName;
-		if(clean_grpname.length() > GRP_NAME_LENGTH){
-			clean_grpname = clean_grpname.substring(0, GRP_NAME_LENGTH); 
+		if (clean_grpname.length() > GRP_NAME_LENGTH) {
+			clean_grpname = clean_grpname.substring(0, GRP_NAME_LENGTH);
 		}
 		clean_grpname = clean_grpname.trim();
 		clean_grpname = clean_grpname.replaceAll("[^a-zA-Z0-9\\-_]", "");
-//		grp_name = grp_name.replaceAll("[&#*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
+		// grp_name = grp_name.replaceAll("[&#*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
 		clean_grpname = clean_grpname.toLowerCase();
 		return clean_grpname;
 	}
 	
 	/**
+	 * TODO: Kommentar
+	 * 
 	 * @param uid
 	 * @param focus
 	 */
@@ -350,12 +345,15 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		if (focus) focus(tmp);
 	}
 
-	/**Fokussiert das angegebene ChatWindow
-	 * @param cw Das zu fokussierende Chatwindow
+	/**
+	 * Fokussiert das angegebene ChatWindow
+	 * 
+	 * @param cw, das zu fokussierende Chatwindow
 	 */
 	private void focus(ChatWindow cw) {
 		int index = jTabbedPane.indexOfComponent(cw);
-		if(index>=0)jTabbedPane.setSelectedIndex(index);
+		if (index >= 0)
+			jTabbedPane.setSelectedIndex(index);
 	}
 	
 	/**
@@ -383,22 +381,22 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	}
 	
 	/**
-	 * Diese Methode entfernt ein ChatWindow anhand des Namens
-	 * 
-	 * Diese Methode sorgt dafür das ChatWindows aus der ArrayList "chatList"
-	 * entfernt werden und im GUI nicht mehr angezeigt werden.
+	 * Diese Methode entfernt ein ChatWindow anhand des Namens, sie sorgt dafür
+	 * das ChatWindows aus der ArrayList "chatList" entfernt werden und im GUI
+	 * nicht mehr angezeigt werden.
 	 * 
 	 * @param chatname
 	 */
-	public void delChat(Object refObject){
+	public void delChat(Object refObject) {
 		delChat(getCW(refObject));
 	}
 	
 	/**
-	 * Diese Methode nimmt die Änderungsanforderung entgegen und prüft ob der Name bereits an einen anderen
-	 * Benutzer oder an eine Gruppe vergeben wurde. Existiert der Alias wird false zurückgeliefert in jedem
-	 * anderen Fall wird der Name über die ChatEngine geändert.
-	 *   
+	 * Diese Methode nimmt die Änderungsanforderung entgegen und prüft ob der
+	 * Name bereits an einen anderen Benutzer oder an eine Gruppe vergeben
+	 * wurde. Existiert der Alias wird false zurückgeliefert in jedem anderen
+	 * Fall wird der Name über die ChatEngine geändert.
+	 * 
 	 * @param alias
 	 * @return boolean
 	 */
@@ -407,16 +405,20 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 //			System.out.println("GUI: Name existiert bereits! Wird nicht geändert!");
 			return false;
 		} else {
-			//TODO: ChatWindowTab Name ändern;
+			// TODO: ChatWindowTab Name ändern;
 			ce.setAlias(alias);
 			return true;
 		}
 	}
 	
-	public ChatWindow getActiveCW(){
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @return
+	 */
+	public ChatWindow getActiveCW() {
 		return (ChatWindow) jTabbedPane.getSelectedComponent();
-	}
-	
+	}	
 	
 	
 	/**
@@ -434,90 +436,111 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		}).start();
 		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
 		ce.shutdown();
-		if(locDBCon!=null)locDBCon.shutdownLocDB();
+		if (locDBCon != null) {
+			locDBCon.shutdownLocDB();
+		}
 	}
 
 	/**
-	 * Diese Methode prüft ob ein ChatWindow bereits vorhanden ist
+	 * Diese Methode prüft ob ein ChatWindow bereits vorhanden ist, sie prüft ob
+	 * ein ChatWindow vorhanden ist falls ja wird dieses zurückgegeben. In jedem
+	 * anderen Fall wird null zurückgegeben.
 	 * 
-	 * Diese Methode prüft ob ein ChatWindow vorhanden ist falls ja wird dieses returned
-	 * falls nein wird null returned
-	 * @param empfGrp Name Chatwindow
-	 * @return ChatWindow or null 
+	 * TODO: BEREINIGEN!
+	 * 
+	 * @param empfGrp, Name des Chatwindow
+	 * @return, ChatWindow or null
 	 */
-	private ChatWindow existCW(ChatWindow referenz){
-//		for(ChatWindow x : chatList){
-//			if(x.getChatWindowName().equals(chatWindowname)){
-//				return x;
-//			}
-//		}
-//		return null;
+	private ChatWindow existCW(ChatWindow referenz) {
+		// for(ChatWindow x : chatList){
+		// if(x.getChatWindowName().equals(chatWindowname)){
+		// return x;
+		// }
+		// }
+		// return null;
 		int index = chatList.indexOf(referenz);
-		return (index>=0)?chatList.get(index):null;
+		return (index >= 0) ? chatList.get(index) : null;
 	}
 	
-	/** Die Methode  liefert das zu einer Referenz gehörende {@link ChatWindow}.
-	 *    
-	 *    <br>Sie ersetzt die alte <code>existCW</code> und liefert ein ChatWindow zu einer Referenz. Die Referenz muss zwansläufig entweder ein {@link String} oder ein {@link Long}.
-	 *    Ein <code>String</code> bezieht sich auf GruppenChatFenster und liefert falls vorhanden das ChatFenster zu dieser Gruppe. Ein <code>Long</code> liefert entsprechend das 
-	 *    PrivatChatFenster wenn der übergebene wert eine gültige UID war und einFenster zu diesem Nutzer bereits existiert. Sollte eine ungültige Referenz übergeben werden oder kein
-	 *     Fenster zu dieser Referenz existieren liefert die Methode <code>null</code> zurück.
-	 * @param referenz Der Gruppenname (String) oder die UserID (Long) zu der ein Fenster gesucht werden soll.
-	 * @return die laufende Instanz des Chatwindows zur angegebenen Referenz oder <code>null</code> falls keine Instanz gefunden.
+	/**
+	 * Die Methode liefert das zu einer Referenz gehörende {@link ChatWindow}.
+	 * 
+	 * <br>Sie ersetzt die alte <code>existCW</code> und liefert ein ChatWindow zu
+	 * einer Referenz. Die Referenz muss zwansläufig entweder ein {@link String}
+	 * oder ein {@link Long}. Ein <code>String</code> bezieht sich auf
+	 * GruppenChatFenster und liefert falls vorhanden das ChatFenster zu dieser
+	 * Gruppe. Ein <code>Long</code> liefert entsprechend das PrivatChatFenster
+	 * wenn der übergebene wert eine gültige UID war und einFenster zu diesem
+	 * Nutzer bereits existiert. Sollte eine ungültige Referenz übergeben werden
+	 * oder kein Fenster zu dieser Referenz existieren liefert die Methode
+	 * <code>null</code> zurück.
+	 * 
+	 * @param referenz, der Gruppenname (String) oder die UserID (Long) zu der ein
+	 *            		Fenster gesucht werden soll.
+	 * @return, 		die laufende Instanz des Chatwindows zur angegebenen Referenz
+	 *         			oder <code>null</code> falls keine Instanz gefunden.
 	 */
-	private ChatWindow getCW(Object referenz){
-		if(referenz!=null) {
-			for (ChatWindow cur : chatList) if (cur.equals(referenz)) return cur;
+	private ChatWindow getCW(Object referenz) {
+		if (referenz != null) {
+			for (ChatWindow cur : chatList) {
+				if (cur.equals(referenz)) {
+					return cur;
+				}
+			}
 		}
 		return null;
 	}
 	
 	/**
-	 * Diese Methode wird in einem privaten ChatWindow zum versenden der Nachricht verwendet
-	 * @param empfUID long EmpfängerUID
-	 * @param msg String die Nachricht
+	 * Diese Methode wird in einem privaten ChatWindow zum versenden der
+	 * Nachricht verwendet
+	 * 
+	 * @param empfUID, long EmpfängerUID
+	 * @param msg, String die Nachricht
 	 */
-	void privSend(long empfUID,String msg){
+	void privSend(long empfUID, String msg) {
 		ce.send_private(empfUID, msg);
 	}
-	
-	/**
-	 * Diese Methode sendet eine private Nachricht durch /w
-	 * 
-	 * Diese Methode wird vom ChatWindow durch die Eingabe von /w aufgerufen
-	 * zunächst wird geprüft ob schon ein ChatWindow für den privaten Chat existiert
-	 * falls nicht wird eines angelegt und die private nachricht an die UID versendet
-	 * @param empfAlias String Empfänger Alias
-	 * @param msg String die Nachricht
-	 *//*
-	void privSend(String empfAlias, String msg){
-		ChatWindow tmpCW = existCW(empfAlias);
-		long tmpUID = -1;
-		tmpUID = ce.getNodeforAlias(empfAlias).getUserID();
-		if(tmpUID != -1){
-			if(tmpCW == null){
-				addPrivCW(tmpUID);
+
+//	TODO: DIE HIER WAR AUSKOMMENTIERT, BRAUCHEN WIR DIE NOCH???
+//	/**
+//	 * Diese Methode sendet eine private Nachricht durch /w. Diese Methode wird
+//	 * vom ChatWindow durch die Eingabe von /w aufgerufen zunächst wird geprüft
+//	 * ob schon ein ChatWindow für den privaten Chat existiert falls nicht wird
+//	 * eines angelegt und die private nachricht an die UID versendet
+//	 * 
+//	 * @param empfAlias, String Empfänger Alias
+//	 * @param msg, String die Nachricht
+//	 */
+//		void privSend(String empfAlias, String msg){
+//		ChatWindow tmpCW = existCW(empfAlias);
+//		long tmpUID = -1;
+//		tmpUID = ce.getNodeforAlias(empfAlias).getUserID();
+//		if(tmpUID != -1){
+//			if(tmpCW == null){
+//				addPrivCW(tmpUID);
 //					tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
 //					jTabbedPane.setSelectedIndex(tabNr);
-			} else {
-				jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
-			}
-			ce.send_private(tmpUID, msg);
-		}
-	}
-	*/
+//			} else {
+//				jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
+//			}
+//			ce.send_private(tmpUID, msg);
+//		}
+//	}
+
 	/**
-	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet
-	 * Falls noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
-	 * @param empfGrp String Empfängergruppe
-	 * @param msg String die Nachricht/Msg
-	 * @param cw ChatWindow das aufrufende ChatWindow
+	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet Falls
+	 * noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
+	 * 
+	 * @param empfGrp, String Empfängergruppe
+	 * @param msg, String die Nachricht/Msg
+	 * @param cw, ChatWindow das aufrufende ChatWindow
 	 */
-	void groupSend(String empfGrp, String msg){
-		
+	void groupSend(String empfGrp, String msg) {
+
 		ChatWindow tmpCW = getCW(empfGrp);
-		if(tmpCW == null){
-			tmpCW= new ChatWindow(empfGrp);
+		if (tmpCW == null) {
+			tmpCW = new ChatWindow(empfGrp);
 			addGrpCW(empfGrp, true);
 			focus(tmpCW);
 		} else {
@@ -528,65 +551,89 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	
 	/**
 	 * Diese Methode ist für das Ignorien eines users
-	 * @param alias String Alias des Users
-	 * @returns true Wenn User gefunden
+	 * 
+	 * @param alias, String Alias des Users
+	 * @returns, true Wenn User gefunden
 	 */
-	boolean ignoreUser(long uid){
+	boolean ignoreUser(long uid) {
 		return ce.ignore_user(uid);
 	}
 
 	/**
-	 * Diese Methode ist für das nicht weitere Ignorieren eines users
-	 * @param alias String Alias des Users
-	 * @return true Wenn User gefunden
+	 * Diese Methode ist für das nicht weitere Ignorieren eines Benutzers.
+	 * 
+	 * @param alias, String Alias des Users
+	 * @return, true Wenn User gefunden
 	 */
-	boolean unignoreUser(long uid){
-			return ce.unignore_user(uid);
-	}
-	
+	boolean unignoreUser(long uid) {
+		return ce.unignore_user(uid);
+	}	
 
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @param uid
+	 */
 	public void sendFile(long uid) {
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal = fileChooser.showOpenDialog(me);
+		int returnVal=fileChooser.showOpenDialog(me);
 		File selectedFile = fileChooser.getSelectedFile();
 		if((returnVal== JFileChooser.APPROVE_OPTION)&&selectedFile!=null)sendFile(selectedFile, uid);
 	}
-	
-	public void sendFile(File datei, long uid) {
-		if(datei.isFile()) {
-			if(datei.canRead()) {
-				if(datei.length()>0)ce.send_file(datei, uid);
-				else info("File has a size of 0 bytes!", uid, 3);
-			}
-			else info("Cant read file \""+datei.getName()+"\"!", uid, 3);
-		}
-		else info("Only single Files are supported!", uid, 3);
-	}
-	
-	
-	/**Displays a text message in the referenced ChatWindow (Group/UID) or the active Window if reference is <code>null</code>
-	 * @param nachricht Text of the message
-	 * @param reference Groupname or UID of ChatWindow to put the message in or <code>null</code> to take the active one. 
-	 * @param typ <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
+
+	/**
+	 * TODO: Kommentar
+	 * 
+	 * @param datei
+	 * @param uid
 	 */
-	public void info(String nachricht, Object reference,int typ) {
-		ChatWindow tmp=getCW(reference);;
-		if(tmp==null)tmp=getActiveCW();
-		if(tmp!=null){
-			if (typ == 0)tmp.info(nachricht);
-			else if (typ == 1)tmp.warn(nachricht);
-			else tmp.error(nachricht);
+	public void sendFile(File datei, long uid) {
+		if (datei.isFile()) {
+			if (datei.canRead()) {
+				if (datei.length() > 0) {
+					ce.send_file(datei, uid);
+				} else {
+					info("File has a size of 0 bytes!", uid, 3);
+				}
+			} else {
+				info("Cant read file \"" + datei.getName() + "\"!", uid, 3);
+			}
+		} else {
+			info("Only single Files are supported!", uid, 3);
 		}
-	}
-	
+	}	
 	
 	/**
-	 * Diese Methode liefert ein Fileobjekt
+	 * Displays a text message in the referenced ChatWindow (Group/UID) or the
+	 * active Window if reference is <code>null</code>
 	 * 
-	 * Diese Methode bittet die GUI(den Nutzer) um ein Fileobjekt zur Ablage der
-	 * empfangenen Datei
-	 * @param filename TODO
+	 * @param nachricht, Text of the message
+	 * @param reference, Groupname or UID of ChatWindow to put the message in or
+	 *            		 <code>null</code> to take the active one.
+	 * @param typ, <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
+	 */
+	public void info(String nachricht, Object reference, int typ) {
+		ChatWindow tmp = getCW(reference);
+		;
+		if (tmp == null) {
+			tmp = getActiveCW();
+		}
+		if (tmp != null) {
+			if (typ == 0) {
+				tmp.info(nachricht);
+			} else if (typ == 1) {
+				tmp.warn(nachricht);
+			} else {
+				tmp.error(nachricht);
+			}
+		}
+	}
+	
+	/**
+	 * Diese Methode liefert ein Fileobjekt, sie benachrichtigt über die GUI den
+	 * Nutzer und fordert einen Ablageort an.
 	 * 
+	 * @param filename
 	 * @return File
 	 */
 	public File request_File(FileTransferData fr) {
@@ -612,28 +659,22 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		
 		
 		if(x!=null&&x instanceof Integer &&((Integer)x)==0) {
-			if(dateiname!=null)fileChooser.setSelectedFile(new File(dateiname));
+			if (dateiname != null)
+				fileChooser.setSelectedFile(new File(dateiname));
 			int returnVal = fileChooser.showSaveDialog(me);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 //				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
 				return fileChooser.getSelectedFile();
 			}
 			return null;
-		}else {
+		} else {
 			return null;
 		}
 
-			
-		
-		
-		/*
-		//int x = JOptionPane.showConfirmDialog(null, "Möchten sie die Datei \""+dateiname+ "\" von "+ fr.sender.getAlias() +" annehmen? ("+fr.getNiceSize() +")","Dateiversand",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
-		if(x==JOptionPane.YES_OPTION) {
-		*/
 	}
 
 	/**
-	 * Diese Methode soll über Änderungen informieren
+	 * Diese Methode  informiert die GUI über Änderungen.
 	 */
 	public void notifyGUI() {
 		for (ChatWindow cw : chatList) {
@@ -694,7 +735,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	/* (non-Javadoc)
 	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
 	}
@@ -709,40 +749,36 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	class lafController implements ActionListener {
 
-		private JMenuItem lafMenu;
 		private UIManager.LookAndFeelInfo laf;
 		private boolean userListWasActive;
 
-		public lafController(JMenuItem lafMenu, UIManager.LookAndFeelInfo laf) {
-			this.lafMenu = lafMenu;
+		/**
+		 * TODO: Kommentar
+		 * 
+		 * @param lafMenu
+		 * @param laf
+		 */
+		public lafController(UIManager.LookAndFeelInfo laf) {
 			this.laf = laf;
 		}
 
-		@Override
+		/**
+		 * TODO: Kommentar
+		 */
 		public void actionPerformed(ActionEvent e) {
-			
+
 			userListWasActive = contactListActive;
-			JMenuItem source = (JMenuItem)e.getSource();
-			
 			contactListZuklappen();
-			
-			if(source.getText().equals("NimROD")){
-				try{
-					UIManager.setLookAndFeel(new NimRODLookAndFeel());
-				} catch (Exception ex){
-					LogEngine.log(ex);
-				}
-			} else {
-				try {
-					UIManager.setLookAndFeel(laf.getClassName());
-				} catch (Exception ex) {
-					LogEngine.log(ex);
-				}
+			try {
+				UIManager.setLookAndFeel(laf.getClassName());
+			} catch (Exception ex) {
+				LogEngine.log(ex);
 			}
+
 			SwingUtilities.updateComponentTreeUI(GUI.me);
 			GUI.me.pack();
-			if(userListWasActive)contactListAufklappen();
-			
+			if (userListWasActive)
+				contactListAufklappen();
 		}
 	}
 	

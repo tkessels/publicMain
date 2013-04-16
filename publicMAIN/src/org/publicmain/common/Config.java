@@ -38,7 +38,7 @@ public class Config {
 		sourceSettings.put("ne.root_claim_timeout", "200");
 		sourceSettings.put("ne.max_clients","5");
 		sourceSettings.put("ne.max_file_size","5000000");
-		sourceSettings.put("ne.file_transfer_timeout","120000");
+		sourceSettings.put("ne.file_transfer_timeout","12000");
 		sourceSettings.put("ne.file_transfer_info_interval","30000");
 		sourceSettings.put("ne.tree_build_time","1000");
 		
@@ -183,8 +183,9 @@ public class Config {
 		settings.setProperty("sql.backup_db_choosen_username", usrName);
 	}
 	
-	public String getBackupDBChoosenPassWord(){
-		return settings.getProperty("sql.backup_db_choosen_user_password");
+	public int getBackupDBChoosenUserPassWordHash(){
+		String pwHash = settings.getProperty("sql.backup_db_choosen_user_password_hash");
+		return Integer.parseInt(pwHash);
 	}
 	
 	public void setBackupDBChoosenUserPassWord(String userPassWord){

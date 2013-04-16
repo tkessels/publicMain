@@ -317,16 +317,24 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 									//Server Close Thread
 									new Thread(new Runnable() {
 										public void run() {
-											if (angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout()) != null)
+											MSG tmp_msg = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout());
+											if (tmp_msg != null) {
 												try {
 													GUI.getGUI().info("User " + tmp_FR.receiver.getAlias()+ "has denied recieving the file: "+ tmp_FR.datei.getName(), tmp_FR.receiver.getUserID(), 0);
 													f_server.close();
 												} catch (IOException e) {
-												}}}).start();
+												}
+											}
+										}
+									}).start();
 									
 									
 									//Verbindung anbieten
 									client = f_server.accept();
+									try {
+										f_server.close();
+									} catch (Exception e) {
+									}
 									//übetragen
 									if (client != null && client.isConnected() && !client.isClosed()) {
 										BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
@@ -718,8 +726,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				final File destination = ce.request_File(tmp);
 				if(System.currentTimeMillis()<until) {
 				tmp.accepted = (destination != null);
-				MSG reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
-//				reply.setEmpfänger(tmp.getSender_nid());
+				MSG reply;
+				if(tmp.accepted)reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
+				else reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid());
 				routesend(reply);
 				if (destination != null) {
 					Socket data_con = null;

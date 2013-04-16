@@ -5,7 +5,7 @@ import javax.swing.JOptionPane;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.gui.GUI;
-import org.publicmain.gui.startWindow;
+import org.publicmain.gui.StartWindow;
 import org.publicmain.sql.LocalDBConnection;
 
 /**
@@ -22,12 +22,13 @@ public class publicMAIN {
 	public static void main(String[] args) throws IOException {
 		if(Config.getConfig().getLock()){
 			if(Config.getConfig().getUserID() == null){
-				boolean tom = startWindow.getStartWindow();
 				//TODO: hier darauf warten bis nutzer daten eingegeben und "submit" gedrückt hat. also zum Beispiel ein boolean im Startwindwo überprüfen
 				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)
-				
-				LocalDBConnection.getDBConnection(); 
-				GUI.getGUI();
+				boolean tom = StartWindow.getStartWindow();
+				if (tom) {
+					LocalDBConnection.getDBConnection();
+					GUI.getGUI();
+				}
 			}else {
 				LocalDBConnection.getDBConnection(); //TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
 				GUI.getGUI();

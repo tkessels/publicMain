@@ -52,7 +52,11 @@ public class Config {
 		sourceSettings.put("sql.local_db_user","root");
 		sourceSettings.put("sql.local_db_password","");
 		sourceSettings.put("sql.local_db_databasename","db_publicMain");
-		
+		// daten für externen DB-Backup-Server
+		sourceSettings.put("sql.backup_db_port","3306");					//TODO: inhalt anpassen
+		sourceSettings.put("sql.backup_db_user","root");					//TODO: inhalt anpassen
+		sourceSettings.put("sql.backup_db_password","");					//TODO: inhalt anpassen
+		sourceSettings.put("sql.backup_db_databasename","db_publicMain");	//TODO: inhalt anpassen
 		
 		
 //		this.settings = new Properties(sourceSettings);
@@ -143,8 +147,16 @@ public class Config {
 		return (uid!=null)?Long.parseLong(uid):null;
 	}
 	
+	public void setUserID(long userID) {
+		settings.setProperty("System.UserID", String.valueOf(userID) );
+	}
+	
 	public String getAlias() {
 		return settings.getProperty("System.alias");
+	}
+	
+	public void setAlias(String alias){
+		settings.setProperty("System.alias", alias);
 	}
 
 	public long getFileTransferTimeout() {
@@ -154,6 +166,31 @@ public class Config {
 	public String getLocalDBDatabasename() {
 		return settings.getProperty("sql.local_db_databasename");
 	}
+	
+	public String getBackupDBChoosenUsername(){
+		return settings.getProperty("sql.backup_db_choosen_username");
+	}
+	
+	public void setBackupDBChoosenUsername(String usrName){
+		settings.setProperty("sql.backup_db_choosen_username", usrName);
+	}
+	
+	public String getBackupDBChoosenPassWord(){
+		return settings.getProperty("sql.backup_db_choosen_user_password");
+	}
+	
+	public void setBackupDBChoosenUserPassWord(String userPassWord){
+		settings.setProperty("sql.backup_db_choosen_user_password", userPassWord);
+	}
+	
+	public String getBackupDBChoosenIP(){
+		return settings.getProperty("sql.backup_db_choosen_ip");
+	}
+	
+	public void setBackupDBChoosenIP(String ip){
+		settings.setProperty("sql.backup_db_choosen_ip", ip);
+	}
+	
 	
 	/**Method tries to Lock a file <code>pmlockfile</code> in Users APPDATA folder. And returns result as boolen.
 	 * It also adds a shutdown hook to the VM to remove Lock from File if Program exits.

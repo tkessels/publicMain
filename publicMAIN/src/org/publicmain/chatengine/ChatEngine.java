@@ -64,12 +64,8 @@ public class ChatEngine{
 	public ChatEngine() throws IOException {
 		ce = this;
 		// <<<<<<<< Temporär >>>>>>>>
-		this.userID = (long) (Math.random() * Long.MAX_VALUE);
-//		setUserID(Config.getConfig().getUserID());
-
-		setAlias(System.getProperties().getProperty("user.name"));
-//		setAlias(Config.getConfig().getAlias());
-
+		this.userID = Config.getConfig().getUserID();
+		this.alias = Config.getConfig().getAlias();
 		this.ne = new NodeEngine(this);
 
 		group_channels = new HashSet<GruppenKanal>();
@@ -399,7 +395,7 @@ public class ChatEngine{
 	public void put(MSG nachricht) {
 		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
-			
+			LocalDBConnection.getDBConnection().saveMsg(nachricht);
 		}
 	}
 

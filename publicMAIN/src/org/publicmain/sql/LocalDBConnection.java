@@ -1,27 +1,22 @@
 package org.publicmain.sql;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Timer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.print.attribute.standard.MediaSize.Other;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
@@ -29,7 +24,6 @@ import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
-import org.publicmain.gui.GUI;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -49,7 +43,7 @@ public class LocalDBConnection {
 	private String passwd;
 	
 	//Tabellen der Loc DB
-	private String chatLogTbl;
+	private String msgLogTbl;
 	private String msgTbl;
 	private String usrTbl;
 	private String nodeTbl;
@@ -76,7 +70,7 @@ public class LocalDBConnection {
 		this.user 					= Config.getConfig().getLocalDBUser();
 		this.passwd 				= Config.getConfig().getLocalDBPw();
 		this.dbName 			= Config.getConfig().getLocalDBDatabasename();
-		this.chatLogTbl				= "t_chatLog";
+		this.msgLogTbl				= "t_messages";
 		this.msgTbl					= "t_msg";
 		this.usrTbl					= "t_usr";
 		this.nodeTbl				= "t_node";
@@ -117,9 +111,7 @@ public class LocalDBConnection {
 		int versuche = 0;
 
 			public void run() {
-				System.out.println("hier");
 				while ((versuche < maxVersuche) && (dbStatus == 0)){ //hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
-					System.out.println("hier1");
 					try {
 								con = DriverManager.getConnection(url, user, passwd);
 								LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
@@ -145,77 +137,97 @@ public class LocalDBConnection {
 	}
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
-		try {
+		String read=null;
+		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_db.sql").toURI())))){
 			this.stmt = con.createStatement();
-			stmt.addBatch("create database if not exists " + dbName);
-			stmt.addBatch("use " + dbName);
-			// erstellen der Message Tabelle
-			stmt.addBatch("create table if not exists "+ chatLogTbl + "(id INTEGER NOT NULL AUTO_INCREMENT," +		// hier autoincrement nutzen - kann ja mehrere mit der selben geben
-																	"msgID INTEGER NOT NULL," +
-																	"timestamp BIGINT NOT NULL," +
-																	"sender BIGINT NOT NULL," +
-																	"empfaenger BIGINT NOT NULL," +
-																	"typ varchar(30) NOT NULL," +
-																	"grp varchar(20) NOT NULL," +
-																	"data varchar(200) NOT NULL," +
-																	"primary key(id))" +
-																	"engine = INNODB");
-			// TODO Datentypen anpassen! 
-			// erstellen der user-Tabelle
-			stmt.addBatch("create table if not exists "+ usrTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
-					"alias VARCHAR(20) NOT NULL," +														// hier auf 20 Zeichen begrenzt
-					"primary key(id))" +
-					"engine = INNODB");
-			// erstellen der message-Tabelle was soll die machen? Verstehe ich nicht!??
-//						stmt.addBatch("create table if not exists "+ msgTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
-//								"alias VARCHAR(20)," +														// hier auf 20 Zeichen begrenzt
-//								"primary key(id))" +
-//								"engine = INNODB");
-			// erstellen der node-Tabelle für ALLE nodes?
-			stmt.addBatch("create table if not exists "+ nodeTbl + "(ip VARCHAR(15) NOT NULL," +// Als sting abspeichern? 192.168.100.200 -> 15  
-					"hostname VARCHAR(20) NOT NULL," +											//TODO: wie lang max? 
-					"nodeID BIGINT NOT NULL," +
-					"primary key(nodeID))" +
-					"engine = INNODB");	
-			// erstellen der Gruppen-Tabelle
-			stmt.addBatch("create table if not exists "+ groupTbl + "(groupID BIGINT NOT NULL," +			
-					"name VARCHAR(20) NOT NULL," +													//TODO: wie lang max? 
-					"password VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
-					"groupOwner BIGINT NOT NULL," +
-					"primary key(groupID))" +
-					"engine = INNODB");	
-			// erstellen der Config-Tabelle
-			stmt.addBatch("create table if not exists "+ configTbl + "(nodeID BIGINT NOT NULL," +			
-					"userID BIGINT NOT NULL," +														//TODO: wie lang max? 
-					"layout VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
-					"remotDBSvrIP VARCHAR(15) NOT NULL," +											//TODO: Als sting abspeichern? 192.168.100.200 -> 15  
-					"Alias VARCHAR(20) NOT NULL," +
-					"primary key(nodeID,userID))" +
-					"engine = INNODB");	
-			// erstellen der EventTyp-Tabelle														//TODO: was macht das wo kommen daten her? Was wird genau gespeichert?!?
-			stmt.addBatch("create table if not exists "+ eventTypeTbl + "(id BIGINT NOT NULL," +			
-					"description VARCHAR(200) NOT NULL," +														//TODO: wie lang max? 
-					"primary key(ID))" +
-					"engine = INNODB");	
-			// erstellen die Routing-Tabelle
-			stmt.addBatch("create table if not exists "+ routingOverviewTbl + "(id BIGINT NOT NULL," +	//TODO: hier nochmal extrem nachdenken ;-)
-					"primary key(id))" +
-					"engine = INNODB");	
-			stmt.executeBatch();
+			while((read = in.readLine()) != null) {
+				stmt.execute(read);
+			}
 			dbStatus = 2;
-			LogEngine.log(this, "createDbAndTables erstellt", LogEngine.INFO);
+			LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		} catch (SQLException e) {
-			LogEngine.log(this, "createDbAndTables fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
+			e.printStackTrace();
+		} catch (URISyntaxException e2) {
+			e2.printStackTrace();
 		}
+		
+		
+//		try {
+//			this.stmt = con.createStatement();
+//			stmt.addBatch("create database if not exists " + dbName);
+//			stmt.addBatch("use " + dbName);
+//			// erstellen der Message Tabelle
+//			stmt.addBatch("create table if not exists "+ chatLogTbl + "(id INTEGER NOT NULL AUTO_INCREMENT," +		// hier autoincrement nutzen - kann ja mehrere mit der selben geben
+//																	"msgID INTEGER NOT NULL," +
+//																	"timestamp BIGINT NOT NULL," +
+//																	"sender BIGINT NOT NULL," +
+//																	"empfaenger BIGINT NOT NULL," +
+//																	"typ varchar(30) NOT NULL," +
+//																	"grp varchar(20) NOT NULL," +
+//																	"data varchar(200) NOT NULL," +
+//																	"primary key(id))" +
+//																	"engine = INNODB");
+//			// TODO Datentypen anpassen! 
+//			// erstellen der user-Tabelle
+//			stmt.addBatch("create table if not exists "+ usrTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
+//					"alias VARCHAR(20) NOT NULL," +														// hier auf 20 Zeichen begrenzt
+//					"primary key(id))" +
+//					"engine = INNODB");
+//			// erstellen der message-Tabelle was soll die machen? Verstehe ich nicht!??
+////						stmt.addBatch("create table if not exists "+ msgTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
+////								"alias VARCHAR(20)," +														// hier auf 20 Zeichen begrenzt
+////								"primary key(id))" +
+////								"engine = INNODB");
+//			// erstellen der node-Tabelle für ALLE nodes?
+//			stmt.addBatch("create table if not exists "+ nodeTbl + "(ip VARCHAR(15) NOT NULL," +// Als sting abspeichern? 192.168.100.200 -> 15  
+//					"hostname VARCHAR(20) NOT NULL," +											//TODO: wie lang max? 
+//					"nodeID BIGINT NOT NULL," +
+//					"primary key(nodeID))" +
+//					"engine = INNODB");	
+//			// erstellen der Gruppen-Tabelle
+//			stmt.addBatch("create table if not exists "+ groupTbl + "(groupID BIGINT NOT NULL," +			
+//					"name VARCHAR(20) NOT NULL," +													//TODO: wie lang max? 
+//					"password VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
+//					"groupOwner BIGINT NOT NULL," +
+//					"primary key(groupID))" +
+//					"engine = INNODB");	
+//			// erstellen der Config-Tabelle
+//			stmt.addBatch("create table if not exists "+ configTbl + "(nodeID BIGINT NOT NULL," +			
+//					"userID BIGINT NOT NULL," +														//TODO: wie lang max? 
+//					"layout VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
+//					"remotDBSvrIP VARCHAR(15) NOT NULL," +											//TODO: Als sting abspeichern? 192.168.100.200 -> 15  
+//					"Alias VARCHAR(20) NOT NULL," +
+//					"primary key(nodeID,userID))" +
+//					"engine = INNODB");	
+//			// erstellen der EventTyp-Tabelle														//TODO: was macht das wo kommen daten her? Was wird genau gespeichert?!?
+//			stmt.addBatch("create table if not exists "+ eventTypeTbl + "(id BIGINT NOT NULL," +			
+//					"description VARCHAR(200) NOT NULL," +														//TODO: wie lang max? 
+//					"primary key(ID))" +
+//					"engine = INNODB");	
+//			// erstellen die Routing-Tabelle
+//			stmt.addBatch("create table if not exists "+ routingOverviewTbl + "(id BIGINT NOT NULL," +	//TODO: hier nochmal extrem nachdenken ;-)
+//					"primary key(id))" +
+//					"engine = INNODB");	
+//			stmt.executeBatch();
+//			dbStatus = 2;
+//			LogEngine.log(this, "createDbAndTables erstellt", LogEngine.INFO);
+//		} catch (SQLException e) {
+//			LogEngine.log(this, "createDbAndTables fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
+//		}
 	}
 	
 	public void saveMsg (MSG m){
 		//Hier wird message in ne Blocking queue geschrieben
 		locDBInbox.add(m);
-		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
-			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
-			// hier muss man doch was mit Syncornized machen wenn nachichten hier rein geschriebn und unten raus geholt werden...
-		}
+		//TODO: Einbinden!
+//		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
+//			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
+////			 hier muss man doch was mit Syncornized machen wenn nachichten hier rein geschriebn und unten raus geholt werden...
+//		}
 	}
 	
 	public void writeMsgToDB() {
@@ -226,8 +238,8 @@ public class LocalDBConnection {
 							MSG m = locDBInbox.poll();
 							if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
 								String saveStmt = ("insert into "
-										+ chatLogTbl
-										+ " (msgID,timestamp,sender,empfaenger,typ,grp,data)"
+										+ msgLogTbl
+										+ " (msgID,timestamp,sender,empfaenger,typ,grp,data,t_user_userID)"
 										+ " VALUES (" + m.getId() + ","
 										+ m.getTimestamp() + "," + m.getSender()
 										+ "," + m.getEmpfänger() + "," + "'"
@@ -236,9 +248,9 @@ public class LocalDBConnection {
 										+ m.getData() + "'" + ")");
 								try {
 									stmt.execute(saveStmt);
-									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " in DB-Tabelle " + chatLogTbl + " eingetragen.", LogEngine.INFO);
+									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " in DB-Tabelle " + msgLogTbl + " eingetragen.", LogEngine.INFO);
 								} catch (Exception e) {
-									LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ chatLogTbl + " "+ e.getMessage(),LogEngine.ERROR);
+									LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ msgLogTbl + " "+ e.getMessage(),LogEngine.ERROR);
 									locDBInbox.add(m);	//TODO: Schreibt nachicht, die rausgenommen wurde, bei der es einen Fehler beim abspeichern gab wieder zurück in Queue! Wie schafft man das, dass es an die richtige stelle geschrieben wird
 									dbStatus = 0;
 									connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
@@ -247,7 +259,7 @@ public class LocalDBConnection {
 							}
 					}
 				} else {
-					LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ chatLogTbl, LogEngine.ERROR);
+					LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ msgLogTbl, LogEngine.ERROR);
 				}
 				
 			}

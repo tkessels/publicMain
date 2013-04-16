@@ -95,8 +95,6 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	private GUI() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			//TODO: Schriftart Einbindung noch nicht Funktionsfähig!
-			UIManager.getLookAndFeelDefaults().put("defaultFont", new Font("SourceSansPro-Regular.otf", Font.BOLD, 50));
 		} catch (Exception ex) {
 			log.log(ex);
 		}
@@ -205,8 +203,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.menuBar.add(configMenu);
 		this.menuBar.add(helpMenu);
 		this.menuBar.add(historyMenu);
-		this.menuBar.add(Box.createHorizontalGlue());
-		this.menuBar.add(new JLabel(Help.getIcon("miniSpin.gif")));
+		
+		//Einkommentieren wenn Logo gewünscht:
+//		this.menuBar.add(Box.createHorizontalGlue());
+//		this.menuBar.add(new JLabel(new ImageIcon(Help.class.getResource("miniSpin.gif"))));
 
 		// GUI Komponenten hinzufügen:
 		this.setJMenuBar(menuBar);
@@ -230,6 +230,8 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		this.contactListWin = new ContactList(me);
 		this.setVisible(true);
 		this.chatList.get(0).focusEingabefeld();
+		this.contactListAufklappen();
+		
 	}
 	
 	/**
@@ -336,6 +338,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		return clean_grpname;
 	}
 	
+	/**
+	 * @param uid
+	 * @param focus
+	 */
 	public void addPrivCW(long uid,boolean focus){
 		ChatWindow tmp = getCW(uid);
 		if(tmp == null)tmp=createChat(uid);
@@ -404,6 +410,12 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			return true;
 		}
 	}
+	
+	public ChatWindow getActiveCW(){
+		return (ChatWindow) jTabbedPane.getSelectedComponent();
+	}
+	
+	
 	
 	/**
 	 * Fährt das Programm ordnungsgemäß runter
@@ -557,7 +569,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	public void info(String nachricht, Object reference,int typ) {
 		ChatWindow tmp=getCW(reference);;
-		if(tmp==null)tmp=(ChatWindow) jTabbedPane.getSelectedComponent();
+		if(tmp==null)tmp=getActiveCW();
 		if(tmp!=null){
 			if (typ == 0)tmp.info(nachricht);
 			else if (typ == 1)tmp.warn(nachricht);

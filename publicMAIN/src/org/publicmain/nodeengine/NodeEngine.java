@@ -1,5 +1,6 @@
 package org.publicmain.nodeengine;
 
+import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -32,6 +34,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
+import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.FileTransferData;
@@ -573,7 +576,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		LocalDBConnection.getDBConnection().saveMsg(paket);
+		
 		if (angler.check(paket)) return;
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
 		else {
@@ -587,6 +590,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				ce.put(paket);
 				break;
 			case SYSTEM:
+				LocalDBConnection.getDBConnection().saveMsg(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
 					allnodes_add((Node) paket.getData());
@@ -1004,9 +1008,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	        JTree tree = new JTree( root );
 	        
 	        // Ein Frame herstellen, um den Tree auch anzuzeigen
-	        JFrame frame = new JFrame( "JTree - Demo" );
+	        JFrame frame = new JFrame( "publicMAIN - Topology" );
 	        frame.add( new JScrollPane( tree ));
 	        
+	        frame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+	        frame.setMinimumSize(new Dimension(250, 400));
 	        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	        frame.pack();
 	        frame.setLocationRelativeTo( null );

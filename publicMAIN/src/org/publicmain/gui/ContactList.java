@@ -74,11 +74,12 @@ public class ContactList extends JWindow {
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.VERTICAL);
 		this.users.setVisibleRowCount(-1);
-		//this.users.setCellRenderer(new MyListCellRenderer());
+		this.users.setCellRenderer(new MyListCellRenderer());
 		
 		this.groups.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.groups.setLayoutOrientation(JList.VERTICAL);
 		this.groups.setVisibleRowCount(-1);
+//		this.groups.setCellRenderer(new MyListCellRenderer());
 		
 		// Listener adden
 		this.users.addMouseListener(new myMouseAdapter());
@@ -280,7 +281,7 @@ public class ContactList extends JWindow {
 				GUI.getGUI().unignoreUser(users.getSelectedValue().getUserID());
 			}
 			else if(source.getText().startsWith("info")){
-				//TODO: CODE HERE
+				GUI.getGUI().getActiveCW().printInfo(users.getSelectedValue());
 			}
 			else if(source.getText().startsWith("send")){
 				GUI.getGUI().sendFile(users.getSelectedValue().getUserID());
@@ -294,14 +295,29 @@ public class ContactList extends JWindow {
 	            setOpaque(true);
 	        }
 	        public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-	            setText(value.toString());
-	            Node tmp = (Node) value;
-	            if (ChatEngine.getCE().is_ignored(tmp.getNodeID()))setForeground(new Color(255, 133,18));
-	            else setForeground(Color.BLACK);
-	            if(isSelected) setBackground(new Color(25, 169, 241));
-	            else setBackground(Color.WHITE);
-	            if(cellHasFocus)setBackground(getBackground().darker());
-	            return this;
+	            
+					//die Anzeige des Alias in der UserList anpassen:
+					String tmpText = value.toString();
+					String[] cutText = tmpText.split("@", 2);
+					setText(cutText[0]);
+					Node tmp = (Node) value;
+					if (ChatEngine.getCE().is_ignored(tmp.getNodeID())){
+						setText(cutText[0] + " (ignored)");
+						setForeground(Color.RED);
+					}
+					else if (ChatEngine.getCE().getMyNodeID() == tmp
+							.getNodeID())
+						setForeground(new Color(255, 133, 18));
+					else
+						setForeground(Color.BLACK);
+					if (isSelected)
+						setBackground(new Color(25, 169, 241));
+					else
+						setBackground(Color.WHITE);
+					if (cellHasFocus)
+						setBackground(getBackground().darker());
+					return this;
+				
 	        }
 	    }
 }

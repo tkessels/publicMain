@@ -12,6 +12,7 @@ import java.util.Properties;
 
 public class Config {
 	private static final String CONFIG_PATH=System.getenv("APPDATA")+File.separator;
+	private static final int MINVERSION=1;
 	private static Config me; 
 	private Properties settings;
 	
@@ -28,6 +29,8 @@ public class Config {
 		me=this;
 		Properties sourceSettings = new Properties();
 		
+		sourceSettings.put("config.version", "2");
+		
 		sourceSettings.put("ne.multicast_group_ip", "230.223.223.223");
 		sourceSettings.put("ne.multicast_group_port", "6789");
 		sourceSettings.put("ne.multicast_ttl",	"10");
@@ -36,6 +39,7 @@ public class Config {
 		sourceSettings.put("ne.max_clients","5");
 		sourceSettings.put("ne.max_file_size","5000000");
 		sourceSettings.put("ne.file_transfer_timeout","120000");
+		sourceSettings.put("ne.file_transfer_info_interval","30000");
 		sourceSettings.put("ne.tree_build_time","1000");
 		
 		sourceSettings.put("ch.ping_intervall","30000");
@@ -65,9 +69,13 @@ public class Config {
 		
 		
 		try(FileInputStream in = new FileInputStream(CONFIG_PATH+"config.cfg")){
-			settings.load(in);
+			Properties read = new Properties();
+			if(read.getProperty("config.version")==null||Integer.parseInt(read.getProperty("config.version"))<MINVERSION) {
+				LogEngine.log(this, "Config found but no longer compatible: generating",LogEngine.WARNING);
+				write();
+			}
+			else settings.load(in);
 		} catch (FileNotFoundException e) {
-			LogEngine.log(this, "default config not found: generating",LogEngine.WARNING);
 			write();
 		} catch (IOException e) {
 			LogEngine.log(this, "default config could not be read. reason:"+e.getMessage(),LogEngine.WARNING);
@@ -162,7 +170,7 @@ public class Config {
 	public long getFileTransferTimeout() {
 		return Long.parseLong(settings.getProperty("ne.file_transfer_timeout"));
 	}
-
+	
 	public String getLocalDBDatabasename() {
 		return settings.getProperty("sql.local_db_databasename");
 	}
@@ -221,6 +229,10 @@ public class Config {
         }
         return false;
     }
+
+	public long getFileTransferInfoInterval() {
+		return Long.parseLong(settings.getProperty("ne.file_transfer_info_interval"));
+	}
 
 
 

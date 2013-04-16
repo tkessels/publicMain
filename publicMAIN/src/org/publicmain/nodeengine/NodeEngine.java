@@ -330,15 +330,22 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 									//übetragen
 									if (client != null && client.isConnected() && !client.isClosed()) {
 										BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+										long infoupdate=System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
+										long transmitted =0;
 										byte[] cup = new byte[65535];
 										int len = -1;
 										while ((len = bis.read(cup)) != -1) {
 											bos.write(cup, 0, len);
+											transmitted+=len;
+											if(System.currentTimeMillis()>infoupdate) {
+												infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
+												GUI.getGUI().info(tmp_FR.datei.getName()+"("+((transmitted*100)/tmp_FR.size)+"%)", tmp_FR.sender.getUserID(), 0);
+											}
 										}
 										bos.flush();
 										bos.close();
 										
-										GUI.getGUI().info("Filetransfer done", tmp_FR.sender.getUserID(), 0);
+										GUI.getGUI().info(tmp_FR.datei.getName()+" Done", tmp_FR.sender.getUserID(), 0);
 									}
 									//Ergebnis melden
 								} catch (FileNotFoundException e) {
@@ -726,14 +733,22 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					}
 					if (data_con != null) {
 						try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
+							long infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
+							long transmitted=0;
 							byte[] cup = new byte[65535];
 							int len = -1;
 							while ((len = bis.read(cup)) != -1) {
 								bos.write(cup, 0, len);
+								transmitted+=len;
+								if(System.currentTimeMillis()>infoupdate) {
+									infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
+									GUI.getGUI().info(tmp.datei.getName()+"("+((transmitted*100)/tmp.size)+"%)", tmp.sender.getUserID(), 0);
+								}
 							}
 							bos.flush();
 							bos.close();
 							data_con.close();
+							GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

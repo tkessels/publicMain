@@ -91,7 +91,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	 */
 	void setOnline(){
 		this.lblTitle.setForeground(Color.BLACK);
-		this.tabCloseImgIcon.setImage(Help.getIcon("TaCloseBlack.png").getImage());
+		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png").getImage());
 		this.lblIcon.setIcon(Help.getIcon("private.png"));
 	}
 	

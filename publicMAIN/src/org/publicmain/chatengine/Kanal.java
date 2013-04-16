@@ -14,7 +14,7 @@ import org.publicmain.common.MSG;
 public abstract class Kanal extends Observable {
 	protected final Object referenz;
 
-	protected TreeSet<MSG> messages = new TreeSet<MSG>();
+	//protected TreeSet<MSG> messages = new TreeSet<MSG>();
 
 	public abstract boolean add(MSG nachricht);
 
@@ -31,7 +31,7 @@ public abstract class Kanal extends Observable {
 	 * @param count, die gewünschte Anzahl von Nachrichten
 	 * @return, Set der x-Letzen Nachrichten
 	 */
-	public Set<MSG> getLastMSGs(int count) {
+	/*public Set<MSG> getLastMSGs(int count) {
 		if (messages.size() >= count) {
 			Iterator<MSG> x = messages.descendingIterator();
 			MSG last = messages.last();
@@ -42,15 +42,15 @@ public abstract class Kanal extends Observable {
 			return messages.tailSet(last, true);
 		}
 		return messages;
-	}
-
-	/**
+	}*/
+/*
+	*//**
 	 * Löscht alle Nachrichten aus dem Kanal.
-	 */
+	 *//*
 	public void purgeMSGs() {
 		messages.clear();
 	}
-	
+	*/
 	/**
 	 * TODO: Kommentar
 	 */

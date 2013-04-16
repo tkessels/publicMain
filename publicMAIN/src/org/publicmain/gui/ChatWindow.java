@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -49,7 +48,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 	// Deklarationen:
 	private String name;
-	private ArrayList<MSG> msgList;
 	private JButton sendenBtn;
 	private JTextPane msgTextPane;
 	private HTMLEditorKit htmlKit;
@@ -113,7 +111,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 		// Initialisierungen:
 		this.gui = GUI.getGUI();
-		this.msgList = new ArrayList<MSG>();
 		this.sendenBtn = new JButton("send");
 		this.msgTextPane = new JTextPane();
 		this.htmlKit = new HTMLEditorKit();
@@ -275,12 +272,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 				else if (eingabe.startsWith("/info ") && (tmp = eingabe.split(" ", 2)).length == 2) {
 					Node nodeforalias=ChatEngine.getCE().getNodeforAlias(tmp[1]);
-					if (nodeforalias!=null) {
-						Map<String, String> tmp_data = nodeforalias.getData();
-						for (String x : tmp_data.keySet()) {
-							GUI.getGUI().info(x + ":" + tmp_data.get(x), null,0);
-						}
-					}
+					printInfo(nodeforalias);
 				}
 				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
 					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
@@ -314,6 +306,18 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 	}
 
+
+	public void printInfo(Node nodeforalias) {
+		if (nodeforalias!=null) {
+			Map<String, String> tmp_data = nodeforalias.getData();
+			GUI.getGUI().info("Infos for User : " + nodeforalias.getAlias(), null,0);
+			for (String x : tmp_data.keySet()) {
+				GUI.getGUI().info(x.toUpperCase() + "\t: " + tmp_data.get(x), null,1);
+			}
+			GUI.getGUI().info("----------------------------------------------------", null,0);
+		}
+	}
+
 	public void update(Observable sourceChannel, Object msg) {
 		if(GUI.getGUI().getTabbedPane().indexOfComponent(this)!=GUI.getGUI().getTabbedPane().getSelectedIndex()){
 			this.myTab.startBlink();
@@ -327,7 +331,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param msg
 	 */
 	public void putMSG(MSG msg){
-		this.msgList.add(msg);
 		this.printMSG(msg);
 	}
 	/**
@@ -379,6 +382,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				LogEngine.log(e);
 			}
 			break;
+			default:
 		
 		}
 		msgTextPane.setCaretPosition(htmlDoc.getLength());

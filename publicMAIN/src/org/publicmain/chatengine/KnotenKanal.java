@@ -23,7 +23,7 @@ public class KnotenKanal extends Kanal {
 	public boolean add(MSG nachricht) {
 		if ((nachricht.getSender() == (long) referenz)
 				|| (nachricht.getEmpfänger() == (long) referenz)) {
-			messages.add(nachricht);
+		//	messages.add(nachricht);
 			setChanged();
 			notifyObservers(nachricht);
 			return true;

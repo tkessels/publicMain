@@ -34,7 +34,7 @@ public class GruppenKanal extends Kanal {
 				&& nachricht.getGroup().equals(referenz)) {
 			LogEngine.log(this, "[" + referenz + "]" + countObservers() + ":",
 					nachricht);
-			messages.add(nachricht);
+		//	messages.add(nachricht);
 			setChanged();
 			notifyObservers(nachricht);
 			return true;

@@ -25,12 +25,10 @@ public class Hook {
 	private volatile List<Haken> allHooks=new CopyOnWriteArrayList<Haken>();  //Liste aller registrierten Filter
 	
 	private void add(Haken toAdd) {
-		System.out.println("Adding" +toAdd);
 			allHooks.add(toAdd);
 	}
 	
 	private void remove(Haken toRemove) {
-		System.out.println("Removing" + toRemove);
 			allHooks.remove(toRemove);
 	}
 
@@ -160,19 +158,19 @@ public class Hook {
 		}
 		
 		private synchronized boolean check(MSG x) {
-			System.out.println(allHooks);
+//			System.out.println(allHooks);
 			boolean typ_check=(typ==null)||typ==x.getTyp();
 			boolean code_check=(code==null)||code.equals(x.getCode());
 			boolean sender_check=(sender==null)||sender.equals(x.getSender());
-			System.out.println(sender);
-			System.out.println(x.getSender());
+//			System.out.println(sender);
+//			System.out.println(x.getSender());
 			boolean payload_check=(payload==null)||payload.equals(x.getData());
 //			boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
 //			boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
-			System.out.println("typ:"+typ_check);
-			System.out.println("code:"+code_check);
-			System.out.println("sender:"+sender_check);
-			System.out.println("payload:"+payload_check);
+//			System.out.println("typ:"+typ_check);
+//			System.out.println("code:"+code_check);
+//			System.out.println("sender:"+sender_check);
+//			System.out.println("payload:"+payload_check);
 			
 			
 			if(typ_check&&code_check&&sender_check&&payload_check) {//&&reciever_check&&gruppe_check) {

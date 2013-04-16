@@ -35,7 +35,7 @@ public class Config {
 		sourceSettings.put("ne.root_claim_timeout", "200");
 		sourceSettings.put("ne.max_clients","5");
 		sourceSettings.put("ne.max_file_size","5000000");
-		sourceSettings.put("ne.file_transfer_timeout","30000");
+		sourceSettings.put("ne.file_transfer_timeout","120000");
 		sourceSettings.put("ne.tree_build_time","1000");
 		
 		sourceSettings.put("ch.ping_intervall","30000");

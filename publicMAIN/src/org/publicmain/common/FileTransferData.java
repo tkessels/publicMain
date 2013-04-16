@@ -2,6 +2,7 @@ package org.publicmain.common;
 
 import java.io.File;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 
 
 public class FileTransferData implements Serializable{
@@ -43,6 +44,14 @@ public class FileTransferData implements Serializable{
 
 	public long getReceiver_nid() {
 		return receiver.getNodeID();
+	}
+	
+	
+	public String getNiceSize() {
+		if(size <= 0) return "0";
+		final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
+		int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+		return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
 	}
 
 }

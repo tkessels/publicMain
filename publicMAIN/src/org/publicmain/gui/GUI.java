@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +21,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -402,7 +404,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 */
 	public boolean changeAlias(String alias){
 		if(ce.getNodeforAlias(alias)!=null){
-			System.out.println("GUI: Name existiert bereits! Wird nicht geändert!");
+//			System.out.println("GUI: Name existiert bereits! Wird nicht geändert!");
 			return false;
 		} else {
 			//TODO: ChatWindowTab Name ändern;
@@ -547,7 +549,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showOpenDialog(me);
 		File selectedFile = fileChooser.getSelectedFile();
-		if(selectedFile!=null)sendFile(selectedFile, uid);
+		if((returnVal== JFileChooser.APPROVE_OPTION)&&selectedFile!=null)sendFile(selectedFile, uid);
 	}
 	
 	public void sendFile(File datei, long uid) {
@@ -588,21 +590,46 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	 * @return File
 	 */
 	public File request_File(FileTransferData fr) {
+		final long timeout = Config.getConfig().getFileTransferTimeout() - 1000;
 		String dateiname = fr.datei.getName();
-		Long size = fr.size;
-		int x = JOptionPane.showConfirmDialog(null, "Möchten sie eine die Datei "+dateiname+ " annehmen? ("+size +")","Dateiversand",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
-		if(x==JOptionPane.YES_OPTION) {
-			JFileChooser fileChooser = new JFileChooser();
+		JOptionPane yesno_pane= new  JOptionPane("Möchten sie die Datei \""+dateiname+ "\" von "+ fr.sender.getAlias() +" annehmen? ("+fr.getNiceSize() +")",JOptionPane.QUESTION_MESSAGE,JOptionPane.YES_NO_OPTION);
+		final JDialog yesno_dialog=yesno_pane.createDialog(me, "Dateitransfer");
+		final JFileChooser fileChooser = new JFileChooser();
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(timeout);
+				} catch (InterruptedException e) {
+				}
+				yesno_dialog.dispose();
+				fileChooser.cancelSelection();
+			}
+		}).start();
+		
+		yesno_dialog.show();
+		Object  x = yesno_pane.getValue();
+		
+		
+		if(x!=null&&x instanceof Integer &&((Integer)x)==0) {
 			if(dateiname!=null)fileChooser.setSelectedFile(new File(dateiname));
 			int returnVal = fileChooser.showSaveDialog(me);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
+//				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
+				return fileChooser.getSelectedFile();
 			}
-			return fileChooser.getSelectedFile();
+			return null;
 		}else {
 			return null;
 		}
+
+			
 		
+		
+		/*
+		//int x = JOptionPane.showConfirmDialog(null, "Möchten sie die Datei \""+dateiname+ "\" von "+ fr.sender.getAlias() +" annehmen? ("+fr.getNiceSize() +")","Dateiversand",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
+		if(x==JOptionPane.YES_OPTION) {
+		*/
 	}
 
 	/**
@@ -812,7 +839,7 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 	/**
 	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus
 	 */
-	private void getLookAndFeelDefaultsToConsole(){
+/*	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
 		Vector<?> vec = new Vector<Object>(def.keySet());
 		Collections.sort(vec, new Comparator<Object>() {
@@ -821,11 +848,10 @@ public class GUI extends JFrame implements Observer , ChangeListener{
 			}
 		});
 		for (Object obj : vec) {
-			System.out.println(obj + "\n\t" + def.get(obj));
+//			System.out.println(obj + "\n\t" + def.get(obj));
 		}
 	}
-
-
+*/
 
 
 }

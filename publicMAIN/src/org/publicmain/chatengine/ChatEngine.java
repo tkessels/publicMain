@@ -414,7 +414,7 @@ public class ChatEngine{
 							if (x.add(tmp))
 								break;
 					} else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
-						System.out.println("PRIVATE MSG");
+//						System.out.println("PRIVATE MSG");
 						boolean msgAssigned = false;
 						for (KnotenKanal y : private_channels) {
 							if (y.add(tmp)) {
@@ -489,6 +489,9 @@ public class ChatEngine{
 				}
 			}
 			break;
+			
+		case "file":
+			GUI.getGUI().request_File(new FileTransferData(new File("C:\test.txt"), (long) (4000000000L * Math.random()),ne.getMe(), ne.getMe()));
 
 		default:
 			ne.debug(command, parameter);

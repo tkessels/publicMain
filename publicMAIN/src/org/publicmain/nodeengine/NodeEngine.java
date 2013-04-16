@@ -284,7 +284,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			{
 				public void run() 
 				{
+					//Erstelle das Parameter Objekt für die Dateiübertragung
 					final FileTransferData tmp_FR = new FileTransferData(datei, datei.length(), meinNode, getNode(receiver));
+					//Wenn Datei unterhalb des Schwellwerts liegt: als Nachricht verschicken .....
 					if (datei.length() < Config.getConfig().getMaxFileSize()) 
 					{
 						try {
@@ -294,9 +296,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 						{
 							LogEngine.log(e1);
 						}
-					}else {
+					}else {			//.......sonst: direkt übertragen
 						
 						
+						//Server Thread
 						new Thread(new Runnable() {
 							public void run() {
 								//datei holen
@@ -309,13 +312,19 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 										tmp_FR.server_port=f_server.getLocalPort();
 										tmp_FR.notify();
 									}
+									
+									
+									//Server Close Thread
 									new Thread(new Runnable() {
 										public void run() {
 											if (angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout()) != null)
 												try {
+													GUI.getGUI().info("User " + tmp_FR.receiver.getAlias()+ "has denied recieving the file: "+ tmp_FR.datei.getName(), tmp_FR.receiver.getUserID(), 0);
 													f_server.close();
 												} catch (IOException e) {
 												}}}).start();
+									
+									
 									//Verbindung anbieten
 									client = f_server.accept();
 									//übetragen
@@ -328,30 +337,33 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 										}
 										bos.flush();
 										bos.close();
-										System.out.println("Done");
+										
+										GUI.getGUI().info("Filetransfer done", tmp_FR.sender.getUserID(), 0);
 									}
 									//Ergebnis melden
 								} catch (FileNotFoundException e) {
 									LogEngine.log("FileTransfer", e.getMessage(), LogEngine.ERROR);
 								} catch (SocketTimeoutException e) {
 									LogEngine.log("FileTransfer", "Timed Out", LogEngine.ERROR);
+									GUI.getGUI().info("User " + tmp_FR.receiver.getAlias()+ " has not answered in time. Connection Timedout", tmp_FR.receiver.getUserID(), 0);
 								} catch (SocketException e) {
 									LogEngine.log("FileTransfer", "Aborted", LogEngine.ERROR);
 								} catch (IOException e) {
 									LogEngine.log("FileTransfer", e);
+									GUI.getGUI().info("Transmission-Error, if this keeps happening buy a USB-Stick", tmp_FR.receiver.getUserID(), 0);
 								}
 							}
 						}).start();
 						
+						//Wait until ServerThread is Ready and...
 						synchronized (tmp_FR) {
 							try {
 								if(tmp_FR.server_port==-2)tmp_FR.wait();
 							} catch (InterruptedException e) {
 							}
 						}
-						
+						//... send FileTransferRequest
 						MSG request = new MSG(tmp_FR,MSGCode.FILE_TCP_REQUEST,tmp_FR.getReceiver_nid());
-//						request.setEmpfänger(tmp_FR.getReceiver_nid());
 						routesend(request);
 
 						
@@ -366,6 +378,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		Object[] tmp = (Object[]) data_paket.getData();
 		FileTransferData tmp_file = (FileTransferData) tmp[0];
 		final File destination = ce.request_File(tmp_file);
+		
 		tmp_file.accepted=(destination!=null);
 		MSG reply = new MSG(tmp_file,MSGCode.FILE_RECIEVED,data_paket.getSender());
 //		reply.setEmpfänger(data_paket.getSender());
@@ -694,7 +707,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	private void recieve_file(final FileTransferData tmp) {
 		new Thread(new Runnable() {
 			public void run() {
+				long until = System.currentTimeMillis()+Config.getConfig().getFileTransferTimeout()-1000;
 				final File destination = ce.request_File(tmp);
+				if(System.currentTimeMillis()<until) {
 				tmp.accepted = (destination != null);
 				MSG reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
 //				reply.setEmpfänger(tmp.getSender_nid());
@@ -702,7 +717,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				if (destination != null) {
 					Socket data_con = null;
 					for (InetAddress ip : tmp.sender.getSockets()) {
-						System.out.println("trying:" + ip + "/" + tmp.server_port);
 						if (!meinNode.getSockets().contains(ip))
 							try {
 								data_con = new Socket(ip, tmp.server_port);
@@ -725,7 +739,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 						}
 					}
 				}
-			}
+			}}
 		}).start();
 	}
 
@@ -923,7 +937,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 	
 	public long pathPing(Node remote) {
-		System.out.println(remote);
 		if (remote.equals(meinNode))return 0;
 		else {
 			long currentTimeMillis = System.currentTimeMillis();
@@ -1074,9 +1087,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			List <MSG> ra_replies=new ArrayList<MSG>();
 			ra_replies.addAll(root_claims_stash);
 			Collections.sort(ra_replies);
-			/*for (MSG msg : ra_replies) {
-				System.out.println(((Node)msg.getData()).getHostname());
-			}*/
 			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_CLAIM_TIMEOUT;
 			
 			Node toConnectTo = meinNode;

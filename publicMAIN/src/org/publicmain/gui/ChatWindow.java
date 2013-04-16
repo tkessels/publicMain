@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -262,7 +263,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					}
 				}
 				else if (eingabe.startsWith("/unignore ") && (tmp = eingabe.split(" ", 2)).length == 2){
-					
 					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
 					if((tmp_node!=null) && this.gui.unignoreUser(tmp_node.getUserID())){
 						info(tmp_node + " wird nicht weiter ignoriert!");
@@ -270,11 +270,20 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						warn(tmp[1] + "wurde nicht gefunden!");
 					}
 				}
-				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
-					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
-				}
 				else if (eingabe.startsWith("/alias ") && (tmp = eingabe.split(" ", 2)).length == 2) {
 					GUI.getGUI().changeAlias(tmp[1]);
+				}
+				else if (eingabe.startsWith("/info ") && (tmp = eingabe.split(" ", 2)).length == 2) {
+					Node nodeforalias=ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if (nodeforalias!=null) {
+						Map<String, String> tmp_data = nodeforalias.getData();
+						for (String x : tmp_data.keySet()) {
+							GUI.getGUI().info(x + ":" + tmp_data.get(x), null,0);
+						}
+					}
+				}
+				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
+					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
 				}
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					Node tmp_node=ChatEngine.getCE().getNodeforAlias(tmp[1]);

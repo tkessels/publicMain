@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.images.Help;
 import org.publicmain.sql.BackupDBConnection;
 
 public class registrationWindow {
@@ -51,7 +52,7 @@ public class registrationWindow {
 	
 	private registrationWindow() {
 		this.registrationWindowFrame=	new JFrame();
-		this.wellcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
+		this.wellcomeLogo			= 	new JLabel(new ImageIcon(Help.class.getResource("textlogo.png")));
 		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
@@ -82,7 +83,7 @@ public class registrationWindow {
 		this.set 					= new Insets(5, 5, 5, 5);
 		
 		registrationWindowFrame.setTitle("Registration");
-		registrationWindowFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		registrationWindowFrame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
 		registrationWindowFrame.getContentPane().setBackground(Color.WHITE);
 		registrationWindowFrame.setMinimumSize(new Dimension(200, 180));
 		

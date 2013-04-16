@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.publicmain.common.Config;
 import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -26,11 +27,10 @@ import org.publicmain.sql.LocalDBConnection;
  * 
  */
 
-public class ChatEngine extends Observable{
+public class ChatEngine{
 
 	private static ChatEngine ce;
-	public NodeEngine ne;
-	public LogEngine log;
+	private NodeEngine ne;
 	private Set<Long> ignored;
 	private long userID;
 	private String alias;
@@ -64,9 +64,11 @@ public class ChatEngine extends Observable{
 	public ChatEngine() throws IOException {
 		ce = this;
 		// <<<<<<<< Temporär >>>>>>>>
-		setUserID((long) (Math.random() * Long.MAX_VALUE));
+		this.userID = (long) (Math.random() * Long.MAX_VALUE);
+//		setUserID(Config.getConfig().getUserID());
 
 		setAlias(System.getProperties().getProperty("user.name"));
+//		setAlias(Config.getConfig().getAlias());
 
 		this.ne = new NodeEngine(this);
 
@@ -136,15 +138,6 @@ public class ChatEngine extends Observable{
 	}
 
 	/**
-	 * Setter für die <code>UserID</code>.
-	 * 
-	 * @param userID
-	 */
-	public void setUserID(long userID) {
-		this.userID = userID;
-	}
-
-	/**
 	 * Getter für den Anzeigenamen (Alias) zurück.
 	 * 
 	 * @return userID
@@ -159,7 +152,6 @@ public class ChatEngine extends Observable{
 	 * @param alias, neuer Anzeigename [a-zA-Z0-9]{12}
 	 */
 	public void setAlias(String alias) {
-		int tmpCounter = 0;
 		this.alias = alias;
 		if (ne != null && ne.isOnline()) {
 			ne.updateAlias();
@@ -211,7 +203,7 @@ public class ChatEngine extends Observable{
 		}
 	}
 
-	/**
+	/**NOT IMPLEMENTED YET
 	 * Gibt den Zustand der Übertragung einer Datei an
 	 * 
 	 * @param file_transfer_ID
@@ -407,7 +399,7 @@ public class ChatEngine extends Observable{
 	public void put(MSG nachricht) {
 		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
-			LocalDBConnection.getDBConnection().saveMsg(nachricht);
+			
 		}
 	}
 
@@ -436,8 +428,7 @@ public class ChatEngine extends Observable{
 						}
 						// Kein CW angemeldet um die Nachricht aufzunehmen sende
 						// es an GUI via DEFAULT CHANNEL
-						if (!msgAssigned)
-							default_channel.add(tmp);
+						if (!msgAssigned)default_channel.add(tmp);
 					}
 				} catch (InterruptedException e) {
 					// Unterbrochen beim Warten...

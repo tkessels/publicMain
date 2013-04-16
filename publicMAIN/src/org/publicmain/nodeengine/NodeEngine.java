@@ -41,6 +41,7 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
+import org.publicmain.sql.LocalDBConnection;
 
 /**
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie verwaltet die bestehenden Verbindungen, sendet Nachichten und Datein und ist für das Routing zuständig
@@ -572,6 +573,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
+		LocalDBConnection.getDBConnection().saveMsg(paket);
 		if (angler.check(paket)) return;
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
 		else {

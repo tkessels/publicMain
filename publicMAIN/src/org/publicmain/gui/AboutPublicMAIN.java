@@ -3,10 +3,13 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Frame;
+
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+
+import org.images.Help;
 
 /**
  * @author ATRM
@@ -32,7 +35,7 @@ public class AboutPublicMAIN extends JDialog {
 		aboutPMAINtextArea.setEditable(false);
 		aboutPMAINtextArea.setBackground(Color.BLACK);
 		aboutPMAINtextArea.setForeground(Color.WHITE);
-		this.add(new JLabel(new ImageIcon(getClass().getResource("Mainbluepersp.png"))), BorderLayout.WEST);
+		this.add(new JLabel(new ImageIcon(Help.class.getResource("Mainbluepersp.png"))), BorderLayout.WEST);
 		this.add(aboutPMAINtextArea, BorderLayout.CENTER);
 		this.getContentPane().setBackground(new Color(255, 255, 255, 0));
 		this.pack();

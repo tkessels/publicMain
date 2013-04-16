@@ -48,7 +48,7 @@ public class HelpContents {
 		this.htmlDoc = new HTMLDocument();
 
 		hcFrame.setLocationRelativeTo(null);
-		hcFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		hcFrame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
 		hcFrame.setMinimumSize(new Dimension(250, 400));
 		
 		helpContentTxt.setBackground(new Color(229, 195, 0));

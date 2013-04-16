@@ -19,14 +19,13 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.images.Help;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.sql.LocalDBConnection;
 
@@ -104,7 +103,7 @@ public class checkoutHistoryWindow {
 		delAllMsgsButton.addActionListener(new searchContoller());
 		
 		historyFrame.setLocationRelativeTo(null);
-		historyFrame.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		historyFrame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
 		historyFrame.setMinimumSize(new Dimension(200, 400));
 		
 		historyContentTxt.setBackground(new Color(229, 195, 0));

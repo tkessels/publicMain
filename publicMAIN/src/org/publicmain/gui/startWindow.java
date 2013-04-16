@@ -15,6 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import org.images.Help;
+
 public class startWindow extends JFrame implements ActionListener{
 
 	private startWindow instanz;
@@ -43,7 +45,7 @@ public class startWindow extends JFrame implements ActionListener{
 	private startWindow() {
 		
 		instanz =this;
-		this.welcomeLogo			= 	new JLabel(new ImageIcon(getClass().getResource("textlogo.png")));
+		this.welcomeLogo			= 	new JLabel(new ImageIcon(Help.class.getResource("textlogo.png")));
 		this.welcomeLabel1			=	new JLabel("Enter your Nick an push \"GO\" if you just want to chat.");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
@@ -60,7 +62,7 @@ public class startWindow extends JFrame implements ActionListener{
 		this.pullButton.addActionListener(this);
 		
 		this.setTitle("Welcome!");
-		this.setIconImage(new ImageIcon(getClass().getResource("pM_Logo2.png")).getImage());
+		this.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(200, 180));
 		

@@ -29,6 +29,7 @@ import javax.swing.JWindow;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
+import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Node;
 
@@ -53,7 +54,7 @@ public class ContactList extends JWindow {
 		this.parent=parent;
 		this.internalFrame = new JInternalFrame("contacts");
 		this.breite = 150;
-		this.internalFrame.setFrameIcon(new ImageIcon(getClass().getResource("g18050.png")));
+		this.internalFrame.setFrameIcon(new ImageIcon(Help.class.getResource("g18050.png")));
 		this.users = new JList<Node>(new UserListModel());
 		this.groups = new JList<String>(new GroupListModel());
 		this.usersScroller = new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -87,7 +88,7 @@ public class ContactList extends JWindow {
 			public void actionPerformed(ActionEvent e) {
 				//TODO: hier nochmal überprüfen!!! und evtl trim und upper oder lowercase...
 				String tmpGrpName = null;
-				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(getClass().getResource("gruppe.png")), null, null);
+				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, new ImageIcon(Help.class.getResource("gruppe.png")), null, null);
 				if(tmpGrpName!=null && !tmpGrpName.equals("")){
 					GUI.getGUI().addGrpCW(tmpGrpName, true);
 				} 

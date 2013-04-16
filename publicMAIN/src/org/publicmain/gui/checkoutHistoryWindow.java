@@ -103,7 +103,7 @@ public class checkoutHistoryWindow {
 		delAllMsgsButton.addActionListener(new searchContoller());
 		
 		historyFrame.setLocationRelativeTo(null);
-		historyFrame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+		historyFrame.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
 		historyFrame.setMinimumSize(new Dimension(200, 400));
 		
 		historyContentTxt.setBackground(new Color(229, 195, 0));

@@ -47,10 +47,6 @@ public class HelpContents {
 		this.htmlKit = new HTMLEditorKit();
 		this.htmlDoc = new HTMLDocument();
 
-		hcFrame.setLocationRelativeTo(null);
-		hcFrame.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
-		hcFrame.setMinimumSize(new Dimension(250, 400));
-		
 		helpContentTxt.setBackground(new Color(229, 195, 0));
 		helpContentTxt.setEditable(false);
 		helpContentTxt.setEditorKit(htmlKit);
@@ -67,7 +63,12 @@ public class HelpContents {
 
 		addIndex();
 		addChapter();
+		
+		hcFrame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+		hcFrame.setMinimumSize(new Dimension(250, 400));
+		hcFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		hcFrame.pack();
+		hcFrame.setLocationRelativeTo(null);
 		hcFrame.setVisible(true);
 	}
 

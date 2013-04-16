@@ -275,12 +275,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 				else if (eingabe.startsWith("/info ") && (tmp = eingabe.split(" ", 2)).length == 2) {
 					Node nodeforalias=ChatEngine.getCE().getNodeforAlias(tmp[1]);
-					if (nodeforalias!=null) {
-						Map<String, String> tmp_data = nodeforalias.getData();
-						for (String x : tmp_data.keySet()) {
-							GUI.getGUI().info(x + ":" + tmp_data.get(x), null,0);
-						}
-					}
+					printInfo(nodeforalias);
 				}
 				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
 					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
@@ -311,6 +306,18 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						}
 		// In jedem Fall wird das Eingabefeld gelöscht
 		this.eingabeFeld.setText("");
+		}
+	}
+
+
+	public void printInfo(Node nodeforalias) {
+		if (nodeforalias!=null) {
+			Map<String, String> tmp_data = nodeforalias.getData();
+			GUI.getGUI().info("Infos for User : " + nodeforalias.getAlias(), null,0);
+			for (String x : tmp_data.keySet()) {
+				GUI.getGUI().info(x.toUpperCase() + "\t: " + tmp_data.get(x), null,1);
+			}
+			GUI.getGUI().info("----------------------------------------------------", null,0);
 		}
 	}
 

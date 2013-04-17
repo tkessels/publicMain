@@ -50,7 +50,7 @@ public class Config {
 		
 		sourceSettings.put("gui.max_group_length","19");
 		sourceSettings.put("gui.max_alias_length","19");
-		sourceSettings.put("gui.group_pattern","[a-z0-9\\-_]{2,}");
+		sourceSettings.put("gui.name_pattern", ".*[^a-zA-Z0-9צהüײִÜßיב].*");		//"[a-z0-9\\-_]{2,}");
 		
 		sourceSettings.put("sql.local_db_port","3306");
 		sourceSettings.put("sql.local_db_user","root");
@@ -142,6 +142,10 @@ public class Config {
 	
 	public int getMaxAliasLength() {
 		return Integer.parseInt(settings.getProperty("gui.max_alias_length"));
+	}
+	
+	public String getNamePattern() {
+		return settings.getProperty("gui.name_pattern");
 	}
 
 	public int getMaxFileSize() {

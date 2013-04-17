@@ -302,7 +302,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private String sanatizeNames(String grpName) {
 		String clean_grpname = grpName;
 		clean_grpname = clean_grpname.trim();
-		clean_grpname = clean_grpname.replaceAll("[^a-zA-Z‰¸ˆƒ‹÷ﬂ·È0-9\\-_]", "");
+		clean_grpname = clean_grpname.replaceAll(Config.getConfig().getNamePattern(), "");
 		// grp_name = grp_name.replaceAll("[&#*?\\/@<>‰\\t\\n\\x0B\\f\\r]*", "");
 		clean_grpname = clean_grpname.toLowerCase();
 		if (clean_grpname.length() > NAME_LENGTH) {

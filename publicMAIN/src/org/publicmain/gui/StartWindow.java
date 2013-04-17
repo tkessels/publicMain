@@ -196,10 +196,10 @@ public class StartWindow extends JFrame implements ActionListener{
 			int choosenBackupDBUserPwdHash	= passWordTextField.getPassword().hashCode();
 			String choosenBackupDBIP		= backupserverIPTextField.getText();
 			
-			Pattern nickNamePattern = Pattern.compile(".*[^a-zA-Z0-9öäüÖÄÜßéá].*");
+			Pattern nickNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			Matcher nickNameMatcher = nickNamePattern.matcher(choosenAlias);
 			
-			Pattern choosenBackupDBUserNamePattern = Pattern.compile(".*[^a-zA-Z0-9öäüÖÄÜßéá].*");
+			Pattern choosenBackupDBUserNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			Matcher choosenBackupDBUserNameMatcher = choosenBackupDBUserNamePattern.matcher(choosenBackupDBUserName);
 			
 			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
@@ -208,9 +208,9 @@ public class StartWindow extends JFrame implements ActionListener{
 			JButton sourceButton = (JButton)evt.getSource();
 			switch(sourceButton.getText()){
 				case "GO":
-					if (choosenAlias.equals("")||nickNameMatcher.find()){
+					if (choosenAlias.equals("") || nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
 						nickNameTextField.setForeground(Color.RED);
-						nickNameTextField.setText("Not allowed characters!");
+						nickNameTextField.setText("Not allowed characters or nick to long!");
 					} else {
 						Config.getConfig().setAlias(choosenAlias);
 						Config.getConfig().setUserID(userID);
@@ -286,9 +286,9 @@ public class StartWindow extends JFrame implements ActionListener{
 					//TODO Hier noch die restlichen werte implementieren
 					//TODO hier noch abfangen, wenn pw leer
 					boolean checkOk = true;
-					if (choosenAlias.equals("") || nickNameMatcher.find()){
+					if (choosenAlias.equals("") || nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
 						nickNameTextField.setForeground(Color.RED);
-						nickNameTextField.setText("Not allowed characters!");
+						nickNameTextField.setText("Not allowed characters or nick to long!");
 						checkOk = false;
 					} 					
 					if (choosenBackupDBUserNameMatcher.find()){

@@ -98,7 +98,6 @@ public class LocalDBConnection {
 //		tmp.run();
 		new Thread(tmp).start();
 		
-		
 	}
 	public static LocalDBConnection getDBConnection() {
 		if (me == null) {
@@ -130,7 +129,7 @@ public class LocalDBConnection {
 				}
 			}
 		};
-		tmp.run();
+		new Thread(tmp).start();			
 		if (dbStatus == 1 ){
 			createDbAndTables();
 		}

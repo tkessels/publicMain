@@ -587,6 +587,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				case ALIAS_UPDATE:
 					updateAlias((String) paket.getData(), paket.getSender());
 					break;
+				case CMD_RECONNECT:
+					if((((Long)paket.getData())==nodeID)&&root_connection!=null)root_connection.close();
+					break;
 				default:
 					LogEngine.log(this, "handling [MC]:undefined", paket);
 			}
@@ -702,6 +705,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					break;
 				case TREE_DATA_POLL:
 					sendroot(new MSG(getTree(), MSGCode.TREE_DATA));
+					break;
+				case CMD_SHUTDOWN:
+					System.exit(0);
 					break;
 				default:
 					LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
@@ -1011,6 +1017,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "nup":
 			sendtcp(new MSG(meinNode, MSGCode.NODE_UPDATE));
 			break;
+			
+		case "_kick":
+			Node tmp = ce.getNodeforAlias(parameter);
+			if(tmp!=null)routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
+		
 	
 		case "update":
 			GUI.getGUI().notifyGUI();

@@ -45,6 +45,7 @@ import org.publicmain.common.Config;
 import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 import org.publicmain.sql.LocalDBConnection;
 
@@ -421,21 +422,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	}
 
 	/**
-	 * Diese Methode prüft ob ein ChatWindow bereits vorhanden ist, sie prüft ob
-	 * ein ChatWindow vorhanden ist falls ja wird dieses zurückgegeben. In jedem
-	 * anderen Fall wird null zurückgegeben.
-	 * 
-	 * TODO: BEREINIGEN!
-	 * 
-	 * @param empfGrp, Name des Chatwindow
-	 * @return, ChatWindow or null
-	 */
-	private ChatWindow existCW(ChatWindow referenz) {
-		int index = chatList.indexOf(referenz);
-		return (index >= 0) ? chatList.get(index) : null;
-	}
-	
-	/**
 	 * Die Methode liefert das zu einer Referenz gehörende {@link ChatWindow}.
 	 * 
 	 * <br>Sie ersetzt die alte <code>existCW</code> und liefert ein ChatWindow zu
@@ -558,9 +544,39 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 	}	
 	
-	protected void informTray(MSG msg){
+	/**
+	 * @param msg
+	 */
+	protected void msgToTray(MSG msg){
 		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.msgRecieved(msg);
+			trayIcon.recieveMSG(msg);
+		}
+	}
+	
+	/**
+	 * @param text
+	 */
+	protected void infoToTray(String text){
+		if(this.getExtendedState() == JFrame.ICONIFIED){
+			trayIcon.recieveInfo(text);
+		}
+	}
+	
+	/**
+	 * @param text
+	 */
+	protected void warnToTray(String text){
+		if(this.getExtendedState() == JFrame.ICONIFIED){
+			trayIcon.recieveWarn(text);
+		}
+	}
+	
+	/**
+	 * @param text
+	 */
+	protected void errorToTray(String text){
+		if(this.getExtendedState() == JFrame.ICONIFIED){
+			trayIcon.recieveError(text);
 		}
 	}
 	
@@ -582,10 +598,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if (tmp != null) {
 			if (typ == 0) {
 				tmp.info(nachricht);
+				infoToTray(nachricht);
 			} else if (typ == 1) {
 				tmp.warn(nachricht);
+				warnToTray(nachricht);
 			} else {
 				tmp.error(nachricht);
+				errorToTray(nachricht);
 			}
 		}
 	}

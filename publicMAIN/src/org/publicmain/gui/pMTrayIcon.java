@@ -133,7 +133,7 @@ public class pMTrayIcon {
     	sysTray.remove(trayIcon);
     }
     
-	protected void msgRecieved(MSG msg) {
+	protected void recieveMSG(MSG msg) {
 		String msgSender;
 		
 		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
@@ -142,7 +142,19 @@ public class pMTrayIcon {
 			msgSender = msg.getGroup();
 		}
 		if(notifyGrp || notifyPriv){
-			trayIcon.displayMessage("Incoming Message", msgSender + ": " + (String)msg.getData(), TrayIcon.MessageType.INFO);
+			trayIcon.displayMessage(msgSender, (String)msg.getData(), TrayIcon.MessageType.NONE);
 		}
+	}
+
+	protected void recieveInfo(String text) {
+		trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
+	}
+	
+	protected void recieveWarn(String text) {
+		trayIcon.displayMessage("Incoming Warning", text, TrayIcon.MessageType.WARNING);
+	}
+	
+	protected void recieveError(String text) {
+		trayIcon.displayMessage("Incoming Error", text, TrayIcon.MessageType.ERROR);
 	}
 }

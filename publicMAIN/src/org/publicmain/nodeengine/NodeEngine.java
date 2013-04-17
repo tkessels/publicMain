@@ -758,7 +758,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 							bos.close();
 							data_con.close();
 							GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
-						} catch (IOException e) {
+						}
+						catch (SocketException e) {
+							GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
+						}
+						catch (IOException e) {
 							e.printStackTrace();
 						}
 					}

@@ -856,6 +856,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+//			LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB((HashSet<Node>) allNodes); //TODO:Hier richtig?
 		}
 	}
 	

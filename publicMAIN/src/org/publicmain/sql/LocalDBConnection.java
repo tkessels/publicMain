@@ -13,6 +13,9 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,6 +27,8 @@ import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
+import org.publicmain.common.Node;
+import org.publicmain.nodeengine.NodeEngine;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -57,7 +62,7 @@ public class LocalDBConnection {
 	
 	//--------neue Sachen------------
 	private BlockingQueue<MSG> locDBInbox;
-	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=???
+	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=Tabellen angelegt 3=mit db verbunden
 	private int maxVersuche;
 	private long warteZeitInSec;
 	//--------neue Sachen ende------------
@@ -69,11 +74,11 @@ public class LocalDBConnection {
 		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
 		this.user 					= Config.getConfig().getLocalDBUser();
 		this.passwd 				= Config.getConfig().getLocalDBPw();
-		this.dbName 			= Config.getConfig().getLocalDBDatabasename();
+		this.dbName 				= Config.getConfig().getLocalDBDatabasename();
 		this.msgLogTbl				= "t_messages";
 		this.msgTbl					= "t_msg";
-		this.usrTbl					= "t_usr";
-		this.nodeTbl				= "t_node";
+		this.usrTbl					= "t_user";
+		this.nodeTbl				= "t_nodes";
 		this.groupTbl				= "t_group";
 		this.configTbl				= "t_config";
 		this.eventTypeTbl			= "t_eventType";
@@ -113,6 +118,7 @@ public class LocalDBConnection {
 				while ((versuche < maxVersuche) && (dbStatus == 0)){ //hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
 					try {
 								con = DriverManager.getConnection(url, user, passwd);
+								stmt = con.createStatement();
 								LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
 								dbStatus = 1;
 								versuche = 0;
@@ -126,23 +132,39 @@ public class LocalDBConnection {
 						versuche ++;
 						dbStatus = 0;
 					}
+				}	
+				if (dbStatus == 1 && Config.getConfig().getLocalDBCreatet()==0){
+					createDbAndTables();
 				}
+				if (Config.getConfig().getLocalDBCreatet()==1 && dbStatus == 1) {
+					dbStatus = 2;
+				}
+				if (dbStatus == 2){
+					try {
+						stmt.execute("use " + dbName);
+						dbStatus = 3;
+					} catch (SQLException e) {
+						LogEngine.log(this, "fehler bei verbinden mit " +dbName, LogEngine.ERROR);
+					}
+				}
+				//TODO: folgende 2 Zeilen nur zum Test, raus nehmen!!!
+//				HashSet<Node> nodehs = (HashSet)NodeEngine.getNE().getNodes();
+//				writeAllUsersAndNodesToLocDB(nodehs);
 			}
 		};
 		new Thread(tmp).start();			
-		if (dbStatus == 1 ){
-			createDbAndTables();
-		}
+
 	}
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		String read=null;
 		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_db.sql").toURI())))){
-			this.stmt = con.createStatement();
 			while((read = in.readLine()) != null) {
 				stmt.execute(read);
 			}
 			dbStatus = 2;
+			Config.getConfig().setLocalDBCreatet(1);
+			Config.getConfig().write();
 			LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -224,7 +246,7 @@ public class LocalDBConnection {
 		//TODO: Einbinden!
 //		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
 //			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
-////			 hier muss man doch was mit Syncornized machen wenn nachichten hier rein geschriebn und unten raus geholt werden...
+//			 hier muss man doch was mit Syncornized machen wenn nachichten hier rein geschriebn und unten raus geholt werden...
 //		}
 	}
 	
@@ -237,7 +259,7 @@ public class LocalDBConnection {
 							if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
 								String saveStmt = ("insert into "
 										+ msgLogTbl
-										+ " (msgID,timestamp,sender,empfaenger,typ,grp,data,t_user_userID)"
+										+ " (msgID,timestamp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,data)"
 										+ " VALUES (" + m.getId() + ","
 										+ m.getTimestamp() + "," + m.getSender()
 										+ "," + m.getEmpfänger() + "," + "'"
@@ -263,6 +285,28 @@ public class LocalDBConnection {
 			}
 		};
 		(new Thread(tmp)).start();
+	}
+	public void writeAllUsersAndNodesToLocDB(HashSet<Node> allNodes){
+		if (dbStatus >= 2) {
+			Iterator<Node> it = allNodes.iterator();
+			while (it.hasNext()){
+				Node tmpNode = (Node) it.next();
+				String saveUserStmt = ("insert into " + usrTbl + " (userID, alias, username) VALUES (" + tmpNode.getUserID() + "," + tmpNode.getAlias() + "," + tmpNode.getUsername() + ")");
+				String saveNodeStmt = ("insert into " + nodeTbl + " (nodeID, hostname, t_user_userID, t_nodes_nodeID) VALUES (" + tmpNode.getNodeID() + "," + tmpNode.getHostname() + "," + tmpNode.getUserID() + /*TODO:"," +  +*/ ")");
+				try {
+					stmt.execute(saveUserStmt);
+					stmt.execute(saveNodeStmt);
+					LogEngine.log(LocalDBConnection.this, "user" + tmpNode.getUserID() + " in DB-Tabelle " + usrTbl + " eingetragen.", LogEngine.INFO);
+				} catch (Exception e) {
+					LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ usrTbl + " or " + nodeTbl	 + " "+ e.getMessage(),LogEngine.ERROR);
+					connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
+					//hier falls während der schreibvorgänge die verbind verloren geht.
+				}
+			}
+		} else {
+			LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ usrTbl	+" or " +nodeTbl, LogEngine.ERROR);
+		}
+		
 	}
 	
 	public void deleteAllMsgs () {

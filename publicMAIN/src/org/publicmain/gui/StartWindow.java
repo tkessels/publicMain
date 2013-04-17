@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.regex.Matcher;
@@ -53,29 +55,29 @@ public class StartWindow extends JFrame implements ActionListener{
 	private StartWindow() {
 		
 		instanz =this;
-		this.welcomeLogo			= 	new JLabel(new ImageIcon(Help.class.getResource("textlogo.png")));
-		this.welcomeLabel1			=	new JLabel("Enter your Nick an push \"GO\" if you just want to chat.");
-		this.nickNameLabel			=	new JLabel("Nickname");
-		this.nickNameTextField		=	new JTextField();
+		this.welcomeLogo				= 	new JLabel(new ImageIcon(Help.class.getResource("textlogo.png")));
+		this.welcomeLabel1				=	new JLabel("Enter your Nick an push \"GO\" if you just want to chat.");
+		this.nickNameLabel				=	new JLabel("Nickname");
+		this.nickNameTextField			=	new JTextField();
 
-		this.goButton				=	new JButton("GO");
-		this.pullButton				=	new JButton("PULL from Backup");
+		this.goButton					=	new JButton("GO");
+		this.pullButton					=	new JButton("PULL from Backup");
 
-		this.c 						= 	new GridBagConstraints();
-		this.set 					=	new Insets(5, 5, 5, 5);
+		this.c 							= 	new GridBagConstraints();
+		this.set 						=	new Insets(5, 5, 5, 5);
 		
-		this.plsRunGUI				=	false;
+		this.plsRunGUI					=	false;
 		
 		//Die, die dann noch dazu kommen wenn man "Pull from Backup" clickt
-		this.wellcomeLabel2			=	new JLabel("For using backupserver enter Username, Password");
-		this.wellcomeLabel3			=	new JLabel("and the IP of your backupserver");
-		this.userNameLabel			=	new JLabel("Username");
-		this.userNameTextField 		=	new JTextField();
-		this.passWordLabel			=	new JLabel("Password");
+		this.wellcomeLabel2				=	new JLabel("For using backupserver enter Username, Password");
+		this.wellcomeLabel3				=	new JLabel("and the IP of your backupserver");
+		this.userNameLabel				=	new JLabel("Username");
+		this.userNameTextField 			=	new JTextField();
+		this.passWordLabel				=	new JLabel("Password");
 		this.	passWordTextField		=	new JPasswordField();
 		this.	statusTextField			=	new JTextField();
 		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
-		this.	backupserverIPTextField=	new JTextField();
+		this.	backupserverIPTextField	=	new JTextField();
 		this.txtFieldML = new MouseListener() {
 			public void mouseReleased(MouseEvent arg0) {
 			}
@@ -91,10 +93,15 @@ public class StartWindow extends JFrame implements ActionListener{
 			}
 		};
 		this.goButton.addActionListener(this);
+		this.goButton.setActionCommand("GO");
 		this.pullButton.addActionListener(this);
+		this.pullButton.setActionCommand("PULL from Backup");
+		this.nickNameTextField.addActionListener(this);
+		this.nickNameTextField.setActionCommand("GO");
 		this.nickNameTextField.addMouseListener(txtFieldML);
 		this.userNameTextField.addMouseListener(txtFieldML);
 		this.backupserverIPTextField.addMouseListener(txtFieldML);
+
 		
 		this.setTitle("Welcome!");
 		this.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
@@ -156,6 +163,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		statusTextField.setBackground(new Color(229, 195, 0));
 		statusTextField.setEditable(false);
 		sourceButton.setText("PULL from Backup & GO");
+		sourceButton.setActionCommand("PULL from Backup & GO");
 		
 		c.gridx 	= 0;
 		c.gridy 	= 3;
@@ -224,8 +232,7 @@ public class StartWindow extends JFrame implements ActionListener{
 			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
 			Matcher choosenBackupDBIPMatcher = choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
 			
-			JButton sourceButton = (JButton)evt.getSource();
-			switch(sourceButton.getText()){
+			switch(evt.getActionCommand()){
 				case "GO":
 					if (choosenAlias.equals("") || nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
 						nickNameTextField.setForeground(Color.RED);
@@ -243,6 +250,7 @@ public class StartWindow extends JFrame implements ActionListener{
 					break;
 					
 				case "PULL from Backup":
+					JButton sourceButton = (JButton)evt.getSource();
 					changeStructure(sourceButton);
 				break;
 				

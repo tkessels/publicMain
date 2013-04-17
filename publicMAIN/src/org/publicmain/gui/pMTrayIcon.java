@@ -7,7 +7,11 @@ import javax.swing.*;
 
 import org.images.Help;
 
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
+import org.publicmain.common.NachrichtenTyp;
 
 /**
  * Diese Klasse stellt das Icon in der SystemTray mit Kontextmenü bereit, hier
@@ -19,7 +23,6 @@ import org.publicmain.common.LogEngine;
 
 public class pMTrayIcon {
     
-	private LogEngine log;
 	private TrayIcon trayIcon;
 	private SystemTray sysTray;
 	private PopupMenu popup;
@@ -28,14 +31,15 @@ public class pMTrayIcon {
 	private Menu notifies;
 	private CheckboxMenuItem notifyPrivMsg;
 	private CheckboxMenuItem notifyGroupMsg;
-	private CheckboxMenuItem notifyPublicMsg;
 	private CheckboxMenuItem sync;
+	private boolean notifyPriv;
+	private boolean notifyGrp;
+	
 	
     public pMTrayIcon() {
-    	this.log = new LogEngine();
         // Prüfung ob Systemtray unterstützt:
         if (!SystemTray.isSupported()) {
-            log.log(this, "SystemTray is not supported", LogEngine.ERROR);
+            LogEngine.log(this, "SystemTray is not supported", LogEngine.ERROR);
             return;
         }
         
@@ -46,7 +50,8 @@ public class pMTrayIcon {
         this.notifies = new Menu("Notify");
         this.notifyPrivMsg = new CheckboxMenuItem("Private Messages");
         this.notifyGroupMsg = new CheckboxMenuItem("Group Messages");
-        this.notifyPublicMsg = new CheckboxMenuItem("Public Massages");
+        this.notifyPriv = false;
+        this.notifyGrp = false;
         this.sync = new CheckboxMenuItem("Synchronize");
         
         this.exit = new MenuItem("Exit");
@@ -56,7 +61,6 @@ public class pMTrayIcon {
         popup.add(notifies);
         notifies.add(notifyPrivMsg);
         notifies.add(notifyGroupMsg);
-        notifies.add(notifyPublicMsg);
         popup.add(sync);
         popup.addSeparator();
         popup.add(exit);
@@ -64,7 +68,7 @@ public class pMTrayIcon {
         try {
             sysTray.add(trayIcon);
         } catch (AWTException e) {
-        	log.log(this, "TrayIcon konnte nicht hinzugefügt werden.", LogEngine.ERROR);
+        	LogEngine.log(this, "TrayIcon konnte nicht hinzugefügt werden.", LogEngine.ERROR);
             return;
         }
 
@@ -95,48 +99,50 @@ public class pMTrayIcon {
     	/**
     	 * TODO: Kommentar
     	 */
-        ActionListener listener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MenuItem item = (MenuItem)e.getSource();
-                switch (item.getLabel()){
-	                case "private Messages" :
-	                	trayIcon.displayMessage("Sun TrayIcon Demo", "Message von Tobi", TrayIcon.MessageType.ERROR);
-	                	break;
-	                case "group Messages" :
-	                	trayIcon.displayMessage("Sun TrayIcon Demo", "Message von Gruppe", TrayIcon.MessageType.WARNING);
-	                	break;
-	                case "public Messages" :
-	                	 trayIcon.displayMessage("Sun TrayIcon Demo", "Message von Public", TrayIcon.MessageType.INFO);
-	                	break;
-                	default :
-                		trayIcon.displayMessage("Sun TrayIcon Demo", "Martin", TrayIcon.MessageType.NONE);
-                		break;
-                }
-            }
-        };
+        ItemListener listener = new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				 CheckboxMenuItem item = (CheckboxMenuItem)e.getSource();
+	                switch (item.getLabel()){
+		                case "Private Messages" :
+		                	notifyPriv = item.getState();
+		                	break;
+		                case "Group Messages" :
+		                	notifyGrp = item.getState();
+		                	break;
+	                	default :
+	                		trayIcon.displayMessage("Sun TrayIcon Demo", "Martin", TrayIcon.MessageType.NONE);
+	                		break;
+	                }
+			}
+		};
         
-        notifyPrivMsg.addActionListener(listener);
-        notifyGroupMsg.addActionListener(listener);
-        notifyPublicMsg.addActionListener(listener);
+        notifyPrivMsg.addItemListener(listener);
+        notifyGroupMsg.addItemListener(listener);
+        
         exit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 sysTray.remove(trayIcon);
-                System.exit(0);
+                GUI.getGUI().shutdown();
             }
         });
     }
-    
-	/**
-	 * TODO: Kommentar
-	 */
-    protected static Image createImage(String path, String description) {
-        URL imageURL = pMTrayIcon.class.getResource(path);
-        
-        if (imageURL == null) {
-            System.err.println("Resource not found: " + path);
-            return null;
-        } else {
-            return (new ImageIcon(imageURL, description)).getImage();
-        }
+
+    protected void removeTray(){
+    	sysTray.remove(trayIcon);
     }
+    
+	protected void msgRecieved(MSG msg) {
+		String msgSender;
+		
+		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
+			msgSender = ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias();
+		} else {
+			msgSender = msg.getGroup();
+		}
+		if(notifyGrp || notifyPriv){
+			trayIcon.displayMessage("Incoming Message", msgSender + ": " + (String)msg.getData(), TrayIcon.MessageType.INFO);
+		}
+	}
 }

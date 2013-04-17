@@ -413,6 +413,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}).start();
 		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
+		trayIcon.removeTray();
 		ce.shutdown();
 		if (locDBCon != null) {
 			locDBCon.shutdownLocDB();
@@ -548,6 +549,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			info("Only single Files are supported!", uid, 3);
 		}
 	}	
+	
+	protected void informTray(MSG msg){
+		if(this.getExtendedState() == JFrame.ICONIFIED){
+			trayIcon.msgRecieved(msg);
+		}
+	}
 	
 	/**
 	 * Displays a text message in the referenced ChatWindow (Group/UID) or the

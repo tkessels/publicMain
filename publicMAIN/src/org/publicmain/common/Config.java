@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class Config {
 	private static final String CONFIG_PATH=System.getenv("APPDATA")+File.separator;
-	private static final int MINVERSION=1;
+	private static final int MINVERSION=2;
 	private static Config me; 
 	private Properties settings;
 	

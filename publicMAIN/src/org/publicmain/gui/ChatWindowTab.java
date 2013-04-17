@@ -42,9 +42,9 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 
 		// ImageIcon für SchließenLabel erstellen:
 		if(owner.getOnlineState()){
-			this.tabCloseImgIcon = Help.getIcon("TabCloseBlack.png");
+			this.tabCloseImgIcon = Help.getIcon("TabCloseBlack.png",10);
 		} else {
-			this.tabCloseImgIcon = Help.getIcon("TabCloseGray.png");
+			this.tabCloseImgIcon = Help.getIcon("TabCloseGray.png",10);
 		}
 		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
 		this.lblClose = new JLabel(tabCloseImgIcon);
@@ -82,7 +82,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	 */
 	void setOffline(){
 		this.lblTitle.setForeground(Color.GRAY);
-		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseGray.png").getImage());
+		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseGray.png",10).getImage());
 		this.lblIcon.setIcon(Help.getIcon("privateOffline.png"));
 	}
 	
@@ -91,7 +91,7 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	 */
 	void setOnline(){
 		this.lblTitle.setForeground(Color.BLACK);
-		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png").getImage());
+		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png",10).getImage());
 		this.lblIcon.setIcon(Help.getIcon("private.png"));
 	}
 	
@@ -120,9 +120,9 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	public void mouseEntered(MouseEvent e) {
 		if (e.getSource() == lblClose){
 			if(owner.getOnlineState()){
-				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseOrange.png").getImage());
+				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseOrange.png",10).getImage());
 			} else {
-				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png").getImage());
+				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png",10).getImage());
 			}
 		} else {
 			JLabel source = (JLabel) e.getSource();
@@ -138,9 +138,9 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 	public void mouseExited(MouseEvent e) {
 		if (e.getSource() == lblClose){
 			if(owner.getOnlineState()){
-				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png").getImage());
+				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png",10).getImage());
 			} else {
-				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseGray.png").getImage());
+				this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseGray.png",10).getImage());
 			}
 		} else {
 			JLabel source = (JLabel) e.getSource();

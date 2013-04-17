@@ -188,7 +188,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.ce.register_defaultMSGListener(this);
 
 		// GUI JFrame Einstellungen
-		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
+		this.setIconImage(Help.getIcon("pM_Logo2.png",64).getImage());
 		this.setMinimumSize(new Dimension(250, 250));
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -209,7 +209,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(!contactListActive){
 			
 			this.contactListBtn.setToolTipText("hide contacts");
-			this.contactListBtn.setIcon(Help.getIcon("UserListEinklappen.png"));
+			this.contactListBtn.setIcon(Help.getIcon("g18025.png"));
 			this.contactListBtn.setSelected(true);
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible(true);
@@ -225,7 +225,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		if (contactListActive) {
 			this.contactListBtn.setToolTipText("show contacts");
-			this.contactListBtn.setIcon(Help.getIcon("UserListAusklappen.png"));
+			this.contactListBtn.setIcon(Help.getIcon("g20051.png"));
 			this.contactListBtn.setSelected(false);
 			this.contactListWin.setVisible(false);
 			this.contactListActive = false;

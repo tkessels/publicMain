@@ -44,7 +44,7 @@ public class pMTrayIcon {
         }
         
         this.popup = new PopupMenu();
-        this.trayIcon = new TrayIcon(Help.getIcon("pM16x16_new.png").getImage());
+        this.trayIcon = new TrayIcon(Help.getIcon("g26370.png",16).getImage());
         this.sysTray = SystemTray.getSystemTray();
         this.display = new MenuItem("Display");
         this.notifies = new Menu("Notify");

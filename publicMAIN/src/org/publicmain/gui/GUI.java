@@ -503,7 +503,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @returns, true Wenn User gefunden
 	 */
 	boolean ignoreUser(long uid) {
-		return ce.ignore_user(uid);
+		if(ce.ignore_user(uid)) {
+			notifyGUI();
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -513,7 +517,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return, true Wenn User gefunden
 	 */
 	boolean unignoreUser(long uid) {
-		return ce.unignore_user(uid);
+		if(ce.unignore_user(uid)) {
+			notifyGUI();
+			return true;
+		}
+		return false;
 	}	
 
 	/**
@@ -633,6 +641,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		for (ChatWindow cw : chatList) {
 			cw.updateName();
 		}
+		contactListWin.repaint();
 	}
 
 	/*

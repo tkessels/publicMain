@@ -70,11 +70,13 @@ public class Config {
 		
 		try(FileInputStream in = new FileInputStream(CONFIG_PATH+"config.cfg")){
 			Properties read = new Properties();
-			if(read.getProperty("config.version")==null||Integer.parseInt(read.getProperty("config.version"))<MINVERSION) {
+			read.load(in);
+			if(	read.getProperty("config.version")==null||(Integer.parseInt(read.getProperty("config.version")) <	MINVERSION)) {
 				LogEngine.log(this, "Config found but no longer compatible: generating",LogEngine.WARNING);
 				write();
+				
 			}
-			else settings.load(in);
+			else settings=read;
 		} catch (FileNotFoundException e) {
 			write();
 		} catch (IOException e) {

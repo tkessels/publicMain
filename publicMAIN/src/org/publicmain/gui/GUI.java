@@ -45,6 +45,7 @@ import org.publicmain.common.Config;
 import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 import org.publicmain.sql.LocalDBConnection;
 
@@ -385,6 +386,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			return false;
 		} else {
 			ce.setAlias(alias);
+			Config.getConfig().setAlias(alias);
+			Config.getConfig().write();
 			return true;
 		}
 	}
@@ -420,21 +423,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 	}
 
-	/**
-	 * Diese Methode prüft ob ein ChatWindow bereits vorhanden ist, sie prüft ob
-	 * ein ChatWindow vorhanden ist falls ja wird dieses zurückgegeben. In jedem
-	 * anderen Fall wird null zurückgegeben.
-	 * 
-	 * TODO: BEREINIGEN!
-	 * 
-	 * @param empfGrp, Name des Chatwindow
-	 * @return, ChatWindow or null
-	 */
-	private ChatWindow existCW(ChatWindow referenz) {
-		int index = chatList.indexOf(referenz);
-		return (index >= 0) ? chatList.get(index) : null;
-	}
-	
 	/**
 	 * Die Methode liefert das zu einer Referenz gehörende {@link ChatWindow}.
 	 * 
@@ -558,9 +546,21 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 	}	
 	
-	protected void informTray(MSG msg){
+	/**
+	 * @param msg
+	 */
+	protected void msgToTray(MSG msg){
 		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.msgRecieved(msg);
+			trayIcon.recieveMSG(msg);
+		}
+	}
+	
+	/**
+	 * @param text
+	 */
+	protected void textToTray(String text, MSGCode code){
+		if(this.getExtendedState() == JFrame.ICONIFIED){
+			trayIcon.recieveText(text, code);
 		}
 	}
 	
@@ -582,10 +582,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if (tmp != null) {
 			if (typ == 0) {
 				tmp.info(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_INFO_TEXT);
 			} else if (typ == 1) {
 				tmp.warn(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_WARNING_TEXT);
 			} else {
 				tmp.error(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_ERROR_TEXT);
 			}
 		}
 	}

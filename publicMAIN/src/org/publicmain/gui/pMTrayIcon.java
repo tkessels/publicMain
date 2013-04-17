@@ -44,7 +44,7 @@ public class pMTrayIcon {
         }
         
         this.popup = new PopupMenu();
-        this.trayIcon = new TrayIcon(Help.getIcon("TrayIcon.png").getImage());
+        this.trayIcon = new TrayIcon(Help.getIcon("pM16x16_new.png").getImage());
         this.sysTray = SystemTray.getSystemTray();
         this.display = new MenuItem("Display");
         this.notifies = new Menu("Notify");
@@ -133,7 +133,7 @@ public class pMTrayIcon {
     	sysTray.remove(trayIcon);
     }
     
-	protected void msgRecieved(MSG msg) {
+	protected void recieveMSG(MSG msg) {
 		String msgSender;
 		
 		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
@@ -142,7 +142,17 @@ public class pMTrayIcon {
 			msgSender = msg.getGroup();
 		}
 		if(notifyGrp || notifyPriv){
-			trayIcon.displayMessage("Incoming Message", msgSender + ": " + (String)msg.getData(), TrayIcon.MessageType.INFO);
+			trayIcon.displayMessage(msgSender, (String)msg.getData(), TrayIcon.MessageType.NONE);
+		}
+	}
+
+	protected void recieveText(String text, MSGCode code) {
+		if(code == MSGCode.TRAY_INFO_TEXT){
+			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
+		} else if(code == MSGCode.TRAY_WARNING_TEXT){
+			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.WARNING);
+		} else if(code == MSGCode.TRAY_ERROR_TEXT){
+			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.ERROR);
 		}
 	}
 }

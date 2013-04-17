@@ -323,7 +323,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			this.myTab.startBlink();
 		}
 		MSG tmpMSG = (MSG) msg;
-		gui.informTray(tmpMSG);
+		gui.msgToTray(tmpMSG);
 		this.putMSG(tmpMSG);
 		LogEngine.log(this,"ausgabe",tmpMSG);
 	}

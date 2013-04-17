@@ -556,27 +556,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	/**
 	 * @param text
 	 */
-	protected void infoToTray(String text){
+	protected void textToTray(String text, MSGCode code){
 		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveInfo(text);
-		}
-	}
-	
-	/**
-	 * @param text
-	 */
-	protected void warnToTray(String text){
-		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveWarn(text);
-		}
-	}
-	
-	/**
-	 * @param text
-	 */
-	protected void errorToTray(String text){
-		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveError(text);
+			trayIcon.recieveText(text, code);
 		}
 	}
 	
@@ -598,13 +580,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if (tmp != null) {
 			if (typ == 0) {
 				tmp.info(nachricht);
-				infoToTray(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_INFO_TEXT);
 			} else if (typ == 1) {
 				tmp.warn(nachricht);
-				warnToTray(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_WARNING_TEXT);
 			} else {
 				tmp.error(nachricht);
-				errorToTray(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_ERROR_TEXT);
 			}
 		}
 	}

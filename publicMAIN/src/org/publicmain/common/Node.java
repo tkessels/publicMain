@@ -30,8 +30,8 @@ public class Node implements Serializable {
 	public Node() {
 		this.nodeID = NodeEngine.getNE().getNodeID();
 		this.userID = ChatEngine.getCE().getUserID();
-		this.username = System.getProperty("user.name");
-		this.alias=this.username;
+		this.username 	=	System.getProperty("user.name");
+		this.alias		=	ChatEngine.getCE().getAlias();
 		
 		this.hostname=getMyHostname();
 		this.sockets=getMyIPs();

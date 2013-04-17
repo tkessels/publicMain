@@ -68,7 +68,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private JMenuBar menuBar;
 	private JMenu file;
 	private JMenu options;
-	private JMenu desgin;
 	private JMenu help;
 	private JMenu backupServer;
 	private JMenuItem pullHistory;
@@ -110,7 +109,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// TODO: evtl. noch anderes Icon wählen
 		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
 		this.exit				= new JMenuItem("Exit");
-		this.desgin				= new JMenu("Design");
 		this.btnGrp 			= new ButtonGroup();
 		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		this.jTabbedPane 		= new JTabbedPane();
@@ -127,24 +125,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.history			= new JMenuItem("History");
 		this.trayIcon 			= new pMTrayIcon();
 		
-		/**
-		 * Erstellen der Menüeinträge für die insttallierten LookAndFeels, hinzufügen zum
-		 * Menü Options/Design und hinzufügen des ActionListeners
-		 */
-		for (UIManager.LookAndFeelInfo laf : UIManager
-				.getInstalledLookAndFeels()) {
-			JRadioButtonMenuItem tempJMenuItem = new JRadioButtonMenuItem(
-					laf.getName());
-			if ((laf.getName().equals("Windows"))
-					&& (UIManager.getSystemLookAndFeelClassName()
-							.equals("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"))) {
-				tempJMenuItem.setSelected(true);
-			}
-			desgin.add(tempJMenuItem);
-			btnGrp.add(tempJMenuItem);
-			tempJMenuItem.addActionListener(new lafController(laf));
-		}
-
 		/**
 		 * Erstellen erforderlicher Controller und Listener
 		 */
@@ -178,7 +158,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		 */
 		this.options.add(history);
 		this.options.add(backupServer);
-		this.options.add(desgin);
 		this.file.add(exit);
 		this.help.add(helpContent);
 		this.help.add(about);
@@ -402,10 +381,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public boolean changeAlias(String alias){
 		if(ce.getNodeforAlias(alias)!=null){
-//			System.out.println("GUI: Name existiert bereits! Wird nicht geändert!");
+			info("Username already in use", null, 1);
 			return false;
 		} else {
-			// TODO: ChatWindowTab Name ändern;
 			ce.setAlias(alias);
 			return true;
 		}
@@ -452,12 +430,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return, ChatWindow or null
 	 */
 	private ChatWindow existCW(ChatWindow referenz) {
-		// for(ChatWindow x : chatList){
-		// if(x.getChatWindowName().equals(chatWindowname)){
-		// return x;
-		// }
-		// }
-		// return null;
 		int index = chatList.indexOf(referenz);
 		return (index >= 0) ? chatList.get(index) : null;
 	}
@@ -501,32 +473,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	void privSend(long empfUID, String msg) {
 		ce.send_private(empfUID, msg);
 	}
-
-//	TODO: DIE HIER WAR AUSKOMMENTIERT, BRAUCHEN WIR DIE NOCH???
-//	/**
-//	 * Diese Methode sendet eine private Nachricht durch /w. Diese Methode wird
-//	 * vom ChatWindow durch die Eingabe von /w aufgerufen zunächst wird geprüft
-//	 * ob schon ein ChatWindow für den privaten Chat existiert falls nicht wird
-//	 * eines angelegt und die private nachricht an die UID versendet
-//	 * 
-//	 * @param empfAlias, String Empfänger Alias
-//	 * @param msg, String die Nachricht
-//	 */
-//		void privSend(String empfAlias, String msg){
-//		ChatWindow tmpCW = existCW(empfAlias);
-//		long tmpUID = -1;
-//		tmpUID = ce.getNodeforAlias(empfAlias).getUserID();
-//		if(tmpUID != -1){
-//			if(tmpCW == null){
-//				addPrivCW(tmpUID);
-//					tabNr = jTabbedPane.indexOfComponent(existCW(empfAlias));
-//					jTabbedPane.setSelectedIndex(tabNr);
-//			} else {
-//				jTabbedPane.setSelectedIndex(jTabbedPane.indexOfComponent(tmpCW));
-//			}
-//			ce.send_private(tmpUID, msg);
-//		}
-//	}
 
 	/**
 	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet Falls
@@ -739,48 +685,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
 	}
 	
-	/**
-	 * ActionListener für Design wechsel (LookAndFeel)
-	 * 
-	 * hier wird das Umschalten des LookAndFeels im laufenden Betrieb ermöglicht
-	 * 
-	 * @author ABerthold
-	 * 
-	 */
-	class lafController implements ActionListener {
-
-		private UIManager.LookAndFeelInfo laf;
-		private boolean userListWasActive;
-
-		/**
-		 * TODO: Kommentar
-		 * 
-		 * @param lafMenu
-		 * @param laf
-		 */
-		public lafController(UIManager.LookAndFeelInfo laf) {
-			this.laf = laf;
-		}
-
-		/**
-		 * TODO: Kommentar
-		 */
-		public void actionPerformed(ActionEvent e) {
-
-			userListWasActive = contactListActive;
-			contactListZuklappen();
-			try {
-				UIManager.setLookAndFeel(laf.getClassName());
-			} catch (Exception ex) {
-				LogEngine.log(ex);
-			}
-
-			SwingUtilities.updateComponentTreeUI(GUI.me);
-			GUI.me.pack();
-			if (userListWasActive)
-				contactListAufklappen();
-		}
-	}
 	
 	/**
 	 * ActionListener für Menu's
@@ -830,7 +734,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	class winController implements WindowListener{
 		public void windowOpened(WindowEvent arg0) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		// Wird das GUI minimiert wird die Userlist zugeklappt und der
@@ -842,22 +745,19 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 		@Override
 		public void windowDeiconified(WindowEvent arg0) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		public void windowDeactivated(WindowEvent arg0) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		public void windowClosing(WindowEvent arg0) {
-			// TODO Auto-generated method stub
 		}
 		@Override
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
 			shutdown();
 			// Object[] eventCache =
-			// {"super, so ne scheisse","deine Mama liegt im Systemtray"};
+			// {"super"," liegt im Systemtray"};
 			// Object anchor = true;
 			// JOptionPane.showInputDialog(me,
 			// "pMAIN wird ins Systemtray gelegt!",

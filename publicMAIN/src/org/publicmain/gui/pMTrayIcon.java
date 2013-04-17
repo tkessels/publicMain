@@ -10,7 +10,7 @@ import org.images.Help;
 import org.publicmain.common.LogEngine;
 
 /**
- * Diese Methode stellt das Icon in der SystemTray mit Kontextmenü bereit, hier
+ * Diese Klasse stellt das Icon in der SystemTray mit Kontextmenü bereit, hier
  * können Benachrichtigungen und andere Einstellungen getätigt werden.
  * 
  * @author ATRM

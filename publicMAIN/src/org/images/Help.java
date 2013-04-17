@@ -1,14 +1,29 @@
 package org.images;
 
+import java.awt.Image;
+import java.net.URL;
+
 import javax.swing.ImageIcon;
-import javax.swing.plaf.metal.MetalFileChooserUI;
-import javax.swing.plaf.metal.MetalIconFactory;
 
 public class Help {
+	
 	public static ImageIcon getIcon(String filename) {
-		ImageIcon imageIcon = new ImageIcon(Help.class.getResource(filename));
-		if(imageIcon==null)imageIcon=new ImageIcon(Help.class.getResource("g4174.png"));
-		return imageIcon;
+		return getIcon(filename, 16);
+	}
+	
+	/**Return Icon from file in specified size
+	 * @param filename Image which should be resized and iconified
+	 * @param size Size of resulting Icon
+	 * @return Icon ready to use
+	 */
+	public static ImageIcon getIcon(String filename, int size) {
+		URL resource = Help.class.getResource(filename);
+		if(resource==null)resource=Help.class.getResource("g4174.png");
+		ImageIcon imageIcon = new ImageIcon(resource);
+		Image img = imageIcon.getImage();  
+		Image newimg = img.getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH);  
+		ImageIcon newIcon = new ImageIcon(newimg);  
+		return newIcon;
 	}
 
 }

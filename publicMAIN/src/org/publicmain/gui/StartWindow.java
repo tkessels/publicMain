@@ -44,6 +44,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	private JTextField statusTextField;
 	private JLabel backupserverIPLabel;
 	private JTextField backupserverIPTextField;
+	private MouseListener txtFieldML;
 	
 	private GridBagConstraints c;
 	private Insets set;
@@ -76,15 +77,10 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.	statusTextField			=	new JTextField();
 		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
 		this.	backupserverIPTextField=	new JTextField();
-
-		this.goButton.addActionListener(this);
-		this.pullButton.addActionListener(this);
-		this.nickNameTextField.addMouseListener(new MouseListener() {
+		this.txtFieldML = new MouseListener() {
 			public void mouseReleased(MouseEvent arg0) {
 			}
 			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 			public void mouseExited(MouseEvent arg0) {
 			}
@@ -94,39 +90,12 @@ public class StartWindow extends JFrame implements ActionListener{
 				nickNameTextField.setForeground(Color.BLACK);
 				nickNameTextField.setText("");
 			}
-		});
-		this.userNameTextField.addMouseListener(new MouseListener() {
-			public void mouseReleased(MouseEvent arg0) {
-			}
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			public void mouseExited(MouseEvent arg0) {
-			}
-			public void mouseEntered(MouseEvent arg0) {
-			}
-			public void mouseClicked(MouseEvent arg0) {
-				userNameTextField.setForeground(Color.BLACK);
-				userNameTextField.setText("");
-			}
-		});
-		this.backupserverIPTextField.addMouseListener(new MouseListener() {
-			public void mouseReleased(MouseEvent arg0) {
-			}
-			public void mousePressed(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			public void mouseExited(MouseEvent arg0) {
-			}
-			public void mouseEntered(MouseEvent arg0) {
-			}
-			public void mouseClicked(MouseEvent arg0) {
-				backupserverIPTextField.setForeground(Color.BLACK);
-				backupserverIPTextField.setText("");
-			}
-		});
+		};
+		this.goButton.addActionListener(this);
+		this.pullButton.addActionListener(this);
+		this.nickNameTextField.addMouseListener(txtFieldML);
+		this.userNameTextField.addMouseListener(txtFieldML);
+		this.backupserverIPTextField.addMouseListener(txtFieldML);
 		
 		this.setTitle("Welcome!");
 		this.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());

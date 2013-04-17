@@ -74,12 +74,12 @@ public class ContactList extends JWindow {
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.VERTICAL);
 		this.users.setVisibleRowCount(-1);
-		this.users.setCellRenderer(new MyListCellRenderer());
+		this.users.setCellRenderer(new UsersListCellRenderer());
 		
 		this.groups.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.groups.setLayoutOrientation(JList.VERTICAL);
 		this.groups.setVisibleRowCount(-1);
-//		this.groups.setCellRenderer(new MyListCellRenderer());
+		this.groups.setCellRenderer(new GroupsListCellRenderer());
 		
 		// Listener adden
 		this.users.addMouseListener(new myMouseAdapter());
@@ -290,34 +290,63 @@ public class ContactList extends JWindow {
 	}
 	
 	//Experimentel 
-	class MyListCellRenderer extends JLabel implements ListCellRenderer {
-	        public MyListCellRenderer() {
-	            setOpaque(true);
-	        }
-	        public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-	            
-					//die Anzeige des Alias in der UserList anpassen:
-					String tmpText = value.toString();
-					String[] cutText = tmpText.split("@", 2);
-					setText(cutText[0]);
-					Node tmp = (Node) value;
-					if (ChatEngine.getCE().is_ignored(tmp.getNodeID())){
-						setText(cutText[0] + " (ignored)");
-						setForeground(Color.RED);
-					}
-					else if (ChatEngine.getCE().getMyNodeID() == tmp
-							.getNodeID())
-						setForeground(new Color(255, 133, 18));
-					else
-						setForeground(Color.BLACK);
-					if (isSelected)
-						setBackground(new Color(25, 169, 241));
-					else
-						setBackground(Color.WHITE);
-					if (cellHasFocus)
-						setBackground(getBackground().darker());
-					return this;
-				
-	        }
-	    }
+	class UsersListCellRenderer extends JLabel implements ListCellRenderer {
+        public UsersListCellRenderer() {
+            setOpaque(true);
+        }
+        public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            
+			//die Anzeige des Alias in der Userliste anpassen:
+			String tmpText = value.toString();
+			String[] cutText = tmpText.split("@", 2);
+			setText(cutText[0]);
+			Node tmp = (Node) value;
+			if (ChatEngine.getCE().is_ignored(tmp.getNodeID())){
+				setText(cutText[0] + " (ignored)");
+				setForeground(Color.RED);
+			}
+			else if (ChatEngine.getCE().getMyNodeID() == tmp
+					.getNodeID())
+				setForeground(new Color(255, 133, 18));
+			else
+				setForeground(Color.BLACK);
+			
+			
+			if (isSelected)
+				setBackground(new Color(25, 169, 241));
+			else
+				setBackground(Color.WHITE);
+			if (cellHasFocus)
+				setBackground(getBackground().darker());
+			return this;
+			
+        }
+    }
+	
+	class GroupsListCellRenderer extends JLabel implements ListCellRenderer {
+		public GroupsListCellRenderer() {
+			setOpaque(true);
+		}
+		public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			String tmpText = value.toString();
+			setText(tmpText);
+			if( tmpText.equals("public")){
+				setForeground(new Color(255, 133, 18));
+			} else {
+				setForeground(Color.BLACK);
+			}
+			
+			
+			if (isSelected){
+				setBackground(new Color(25, 169, 241));
+			} else {
+				setBackground(Color.WHITE);
+			}
+			if (cellHasFocus) {
+				setBackground(getBackground().darker());
+			}
+			return this;
+		}
+		
+	}
 }

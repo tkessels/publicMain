@@ -56,8 +56,7 @@ import org.publicmain.sql.LocalDBConnection;
 
 public class GUI extends JFrame implements Observer, ChangeListener {
 
-	private final int GRP_NAME_LENGTH = Config.getConfig().getMaxGroupLength();
-	private final int PRIV_NAME_LENGTH = Config.getConfig().getMaxAliasLength();
+	private final int NAME_LENGTH = Config.getConfig().getMaxGroupLength();
 
 	// Deklarationen:
 	private ChatEngine ce;
@@ -281,7 +280,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public void addGrpCW(String grpName, boolean focus) {
 		// Gruppenname auf Konvention pr¸fen, ggf. ƒnderungen vornehmen.
-		String clean_group = sanatizeGroupname(grpName);
+		String clean_group = sanatizeNames(grpName);
 		// Hol ref. auf Gruppenfenster wenn existent
 		ChatWindow tmp_cw = getCW(clean_group);
 		// wenn ref. leer dann erstelle neues Gruppenfesnter
@@ -300,15 +299,15 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param grpName, der vom Benutzer eingegebene Gruppenname
 	 * @return, einen bereinigten String zur Verwendung als Gruppenname
 	 */
-	private String sanatizeGroupname(String grpName) {
+	private String sanatizeNames(String grpName) {
 		String clean_grpname = grpName;
-		if (clean_grpname.length() > GRP_NAME_LENGTH) {
-			clean_grpname = clean_grpname.substring(0, GRP_NAME_LENGTH);
-		}
 		clean_grpname = clean_grpname.trim();
-		clean_grpname = clean_grpname.replaceAll("[^a-zA-Z0-9\\-_]", "");
+		clean_grpname = clean_grpname.replaceAll("[^a-zA-Z‰¸ˆƒ‹÷ﬂ·È0-9\\-_]", "");
 		// grp_name = grp_name.replaceAll("[&#*?\\/@<>‰\\t\\n\\x0B\\f\\r]*", "");
 		clean_grpname = clean_grpname.toLowerCase();
+		if (clean_grpname.length() > NAME_LENGTH) {
+			clean_grpname = clean_grpname.substring(0, NAME_LENGTH);
+		}
 		return clean_grpname;
 	}
 	
@@ -380,6 +379,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return boolean
 	 */
 	public boolean changeAlias(String alias){
+		alias = sanatizeNames(alias);
 		if(ce.getNodeforAlias(alias)!=null){
 			info("Username already in use", null, 1);
 			return false;

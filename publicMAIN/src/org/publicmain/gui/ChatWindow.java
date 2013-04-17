@@ -449,6 +449,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					} else {
 						onlineState = true;
 						myTab.setOnline();
+						myTab.updateAlias();
 						eingabeFeld.setEnabled(true);
 						sendenBtn.setForeground(Color.BLACK);
 						sendenBtn.setEnabled(true);

@@ -707,7 +707,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	/**
 	 * ActionListener für Menu's
 	 * 
-	 * @author ABerthold
+	 * @author ATRM
 	 *
 	 */
 	class menuContoller implements ActionListener{
@@ -727,7 +727,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				break;
 			case "Help Contents":
 				//TODO: HelpContents HTML schreiben
-				new HelpContents();
+				if(HelpContents.getMe()==null) {
+					new HelpContents();
+				}
+				else {
+					HelpContents.getMe().showIt();
+				}
 				break;
 			case "checkout History":
 				new checkoutHistoryWindow();
@@ -773,6 +778,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		@Override
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
+			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
 			shutdown();
 			// Object[] eventCache =
 			// {"super"," liegt im Systemtray"};

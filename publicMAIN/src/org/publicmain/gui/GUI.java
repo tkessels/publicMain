@@ -112,7 +112,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.btnGrp 			= new ButtonGroup();
 		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		this.jTabbedPane 		= new JTabbedPane();
-		this.contactListBtn 	= new JToggleButton(Help.getIcon("UserListAusklappen.png"));
+		this.contactListBtn 	= new JToggleButton(Help.getIcon("g18025.png"));
 		this.contactListActive 	= false;
 		this.menuBar 			= new JMenuBar();
 		this.file	 			= new JMenu("File");
@@ -209,7 +209,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(!contactListActive){
 			
 			this.contactListBtn.setToolTipText("hide contacts");
-			this.contactListBtn.setIcon(Help.getIcon("g18025.png"));
+			this.contactListBtn.setIcon(Help.getIcon("g20051.png"));
 			this.contactListBtn.setSelected(true);
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible(true);
@@ -225,7 +225,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		if (contactListActive) {
 			this.contactListBtn.setToolTipText("show contacts");
-			this.contactListBtn.setIcon(Help.getIcon("g20051.png"));
+			this.contactListBtn.setIcon(Help.getIcon("g18025.png"));
 			this.contactListBtn.setSelected(false);
 			this.contactListWin.setVisible(false);
 			this.contactListActive = false;

@@ -52,6 +52,7 @@ public class Config {
 		sourceSettings.put("gui.max_alias_length","19");
 		sourceSettings.put("gui.name_pattern", ".*[^a-zA-Z0-9צהüײִÜßיב].*");		//"[a-z0-9\\-_]{2,}");
 		
+		sourceSettings.put("sql.local_db_createt", "0");
 		sourceSettings.put("sql.local_db_port","3306");
 		sourceSettings.put("sql.local_db_user","root");
 		sourceSettings.put("sql.local_db_password","");
@@ -120,6 +121,15 @@ public class Config {
 		return Integer.parseInt(settings.getProperty("ne.max_clients"));
 	}
 
+	public int getLocalDBCreatet(){
+		return Integer.parseInt(settings.getProperty("sql.local_db_createt"));
+	}
+	
+	public void setLocalDBCreatet(int createt){
+		settings.setProperty("sql.local_db_createt", String.valueOf(createt) );
+	}
+	
+	
 	public String getLocalDBUser() {
 		return settings.getProperty("sql.local_db_user");
 	}

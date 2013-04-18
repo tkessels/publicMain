@@ -145,30 +145,29 @@ public class ContactList extends JWindow {
 	class myMouseAdapter implements MouseListener {
 
 		public void mouseClicked(MouseEvent e) {
-			JList<String> source = (JList<String>) e.getSource();
+			JList source = (JList) e.getSource();
 			// Doppelklick:
 			if (e.getClickCount() == 2) {
-				int index = source.locationToIndex(e.getPoint());
-				if (index >= 0) {
-					Object o = source.getModel().getElementAt(index);
-					if (source.getModel().getClass().getSimpleName().startsWith("Group")) {
-						GUI.getGUI().addGrpCW(o.toString(), true);
-					}
-					if (source.getModel().getClass().getSimpleName().startsWith("User")) {
-						if (!(users.getSelectedValue().getUserID() == ChatEngine.getCE().getUserID())) {
-							GUI.getGUI().addPrivCW(((Node) o).getUserID(), true);
-						}
+				Object o = source.getSelectedValue();
+				if (source.getModel().getClass().getSimpleName().startsWith("Group")) {
+					GUI.getGUI().addGrpCW(o.toString(), true);
+				}
+				if (source.getModel().getClass().getSimpleName().startsWith("User")) {
+					if (!(users.getSelectedValue().getUserID() == ChatEngine.getCE().getUserID())) {
+						GUI.getGUI().addPrivCW(((Node) o).getUserID(), true);
 					}
 				}
 			}
 			// rechte Maustaste:
 			if ( e.getModifiersEx() == 256){
 				int index = source.locationToIndex(e.getPoint());
-				if(index >= 0){
+				if((index >= 0)&&(index<source.getModel().getSize())){
 					source.setSelectedIndex(index);
 					Object o = source.getModel().getElementAt(index);
-					if(source.getModel().getClass().getSimpleName().startsWith("User")){
-						PopupUser popupUsr = new PopupUser(o.toString(), new popupListener(o.toString()));
+//					if(source.getModel().getClass().getSimpleName().startsWith("User")){
+					if(o instanceof Node){
+						Node tmp = (Node)o;
+						PopupUser popupUsr = new PopupUser(tmp.getAlias(), new popupListener(tmp.getAlias()));
 						popupUsr.show(source, e.getX(), e.getY());
 					}
 					if(source.getModel().getClass().getSimpleName().startsWith("Group")){
@@ -202,12 +201,8 @@ public class ContactList extends JWindow {
 		private JMenuItem unignore;
 		private JMenuItem info;
 		private JMenuItem changeAlias;
-		private String user;
 		
 		public PopupUser(String user, ActionListener popupListener){
-			String[] cutText = user.split("@", 2);
-			user = cutText[0];
-			this.user = user;
 			this.whisper = new JMenuItem("whisper to " + user);
 			this.sendFile = new JMenuItem("send File to " + user);
 			this.ignore = new JMenuItem("ignore " + user);
@@ -230,9 +225,10 @@ public class ContactList extends JWindow {
 				this.add(ignore);
 				this.add(unignore);
 				this.add(new Separator());
+			} else {
+				this.add(changeAlias);
 			}
 			this.add(info);
-			this.add(changeAlias);
 		}
 	
 	}

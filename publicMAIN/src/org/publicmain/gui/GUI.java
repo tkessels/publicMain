@@ -575,7 +575,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public void info(String nachricht, Object reference, int typ) {
 		ChatWindow tmp = getCW(reference);
-		;
 		if (tmp == null) {
 			tmp = getActiveCW();
 		}
@@ -591,6 +590,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				textToTray(nachricht, MSGCode.TRAY_ERROR_TEXT);
 			}
 		}
+		
 	}
 	
 	/**

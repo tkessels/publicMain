@@ -138,12 +138,18 @@ public class pMTrayIcon {
 		
 		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
 			msgSender = ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias();
+			if(notifyPriv){
+				trayIcon.displayMessage(msgSender, (String)msg.getData(), TrayIcon.MessageType.NONE);
+			}
 		} else {
 			msgSender = msg.getGroup();
+			if (notifyGrp) {
+				trayIcon.displayMessage( msgSender,
+						ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias() + ": " + (String) msg.getData(),
+						TrayIcon.MessageType.NONE );
+			}
 		}
-		if(notifyGrp || notifyPriv){
-			trayIcon.displayMessage(msgSender, (String)msg.getData(), TrayIcon.MessageType.NONE);
-		}
+		
 	}
 
 	protected void recieveText(String text, MSGCode code) {

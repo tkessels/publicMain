@@ -56,7 +56,7 @@ public class HelpContents extends JDialog {
 	private DisplayMode dm;
 
 	/**
-	 * Konstruktor für das Help Content Frame
+	 * Konstruktor für den Help Content Dialog
 	 */
 	public HelpContents() {
 		
@@ -73,7 +73,6 @@ public class HelpContents extends JDialog {
 		this.sp = new JScrollPane(helpContentTxt,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		//this.htmlFile = new File(Help.class.getResource("helpcontent.html").getFile());
 		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		this.gd = ge.getDefaultScreenDevice();
 		this.dm = gd.getDisplayMode();
@@ -83,7 +82,6 @@ public class HelpContents extends JDialog {
 
 		try {
 			// Dateipfad in eine URL umwandeln
-			//fileURL = htmlFile.toURI().toURL();
 			fileURL = Help.class.getResource("helpcontent.html");
 			// Datei in JTextPane laden
 			helpContentTxt.setPage(fileURL);

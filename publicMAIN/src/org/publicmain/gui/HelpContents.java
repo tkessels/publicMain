@@ -3,15 +3,24 @@ package org.publicmain.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -19,91 +28,78 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.images.Help;
 
 /**
- * Diese Klasse stellt die Hilfeseiten Help/Help Content zur Verfügung.
- * TODO: Kommentar
+ * Diese Klasse stellt die Hilfeseiten Help/Help Content zur Verfügung. TODO:
+ * Kommentar
  * 
  * @author ATRM
  * 
  */
 
-public class HelpContents {
-	
-	private JDialog hcDialog;
-	private JTextField searchField;
-	private JButton searchButton;
-	private JPanel searchPanel;
+public class HelpContents extends JDialog {
+
+	private static HelpContents me; 
+
+	public static HelpContents getMe() {
+		return me;
+	}
+
 	private JTextPane helpContentTxt;
-	private HTMLEditorKit htmlKit;
-	private HTMLDocument htmlDoc;
+	private JScrollPane sp;
+	private File htmlFile;
+	private java.net.URL fileURL;
+	private GraphicsEnvironment ge;
+	private GraphicsDevice gd;
+	private DisplayMode dm;
 
 	/**
 	 * Konstruktor für das Help Content Frame
 	 */
 	public HelpContents() {
 		
-		this.hcDialog 		= new JDialog(GUI.getGUI(), "Help Content", false);
-		this.searchField 	= new JTextField("Search Keyword...");
-		this.searchButton 	= new JButton("Find");
-		this.searchPanel 	= new JPanel();
+		this.me=this;
+		this.setTitle("Help Content");
+		this.setModal(false);
+		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		this.setLayout(new BorderLayout());
+		this.setIconImage(Help.getIcon("helpContentsIcon.png").getImage());
+		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+
 		this.helpContentTxt = new JTextPane();
-		this.htmlKit 		= new HTMLEditorKit();
-		this.htmlDoc 		= new HTMLDocument();
+		this.sp = new JScrollPane(helpContentTxt,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		this.htmlFile = new File(getClass().getResource("helpcontent.html").getFile());
+		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		this.gd = ge.getDefaultScreenDevice();
+		this.dm = gd.getDisplayMode();
 
-		helpContentTxt.setBackground(new Color(229, 195, 0));
+		helpContentTxt.setBackground(new Color(25, 169, 241));
 		helpContentTxt.setEditable(false);
-		helpContentTxt.setEditorKit(htmlKit);
-		helpContentTxt.setDocument(htmlDoc);
 
-		searchPanel.setLayout(new BorderLayout());
-		
-		// hinzufügen
-		hcDialog.add(searchPanel, BorderLayout.NORTH);
-		searchPanel.add(searchField, BorderLayout.CENTER);
-		searchPanel.add(searchButton, BorderLayout.EAST);
-		hcDialog.add(helpContentTxt, BorderLayout.CENTER);
-
-		addIndex();
-//		addChapter();
-		
-		hcDialog.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
-		hcDialog.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
-		hcDialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		hcDialog.pack();
-		hcDialog.setLocation(GUI.getGUI().getLocation().x+GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
-		hcDialog.setVisible(true);
-	}
-
-	/**
-	 * TODO: Kommentar
-	 */
-	private void addIndex() {
 		try {
-			htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
-					"<h1>Index</h1><br>" + "<h2>Kapitel 1</h2><br>"
-							+ "<h3>Kapitel 2</h3><br>", 0, 0, null);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
+			// Dateipfad in eine URL umwandeln
+			fileURL = htmlFile.toURI().toURL();
+			// Datei in JTextPane laden
+			helpContentTxt.setPage(fileURL);
+		} catch (MalformedURLException e1) {
+			e1.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		this.add(sp, BorderLayout.CENTER);
+		this.pack();
+		
+		showIt();
 	}
-	
-	/**
-	 * TODO: Kommentar
-	 */
-	private void addChapter() {
-		try {
-			htmlKit.insertHTML(
-					htmlDoc,
-					htmlDoc.getLength(),
-					"<h2>Kapitel 1</h2><br>"
-							+ "hier steht witziger erklärungstext vom ersten kapitel<br>"
-							+ "<h3>Kapitel 2</h3><br>"
-							+ "hier steht witziger erklärungstext vom zweiten kapitel<br>", 0, 0, null);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+
+	public void showIt() {
+		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth() + this.getWidth() < dm.getWidth())) {
+			this.setLocation(GUI.getGUI().getLocation().x + GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
+		} else {
+			this.setLocationRelativeTo(null);
 		}
+		this.setVisible(true);
 	}
 }

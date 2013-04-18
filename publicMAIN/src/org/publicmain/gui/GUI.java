@@ -188,7 +188,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.ce.register_defaultMSGListener(this);
 
 		// GUI JFrame Einstellungen
-		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
+		this.setIconImage(Help.getIcon("pM_Logo2.png",64).getImage());
 		this.setMinimumSize(new Dimension(250, 250));
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -209,7 +209,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(!contactListActive){
 			
 			this.contactListBtn.setToolTipText("hide contacts");
-			this.contactListBtn.setIcon(Help.getIcon("UserListEinklappen.png"));
+			this.contactListBtn.setIcon(Help.getIcon("g18025.png"));
 			this.contactListBtn.setSelected(true);
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible(true);
@@ -225,7 +225,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		if (contactListActive) {
 			this.contactListBtn.setToolTipText("show contacts");
-			this.contactListBtn.setIcon(Help.getIcon("UserListAusklappen.png"));
+			this.contactListBtn.setIcon(Help.getIcon("g20051.png"));
 			this.contactListBtn.setSelected(false);
 			this.contactListWin.setVisible(false);
 			this.contactListActive = false;
@@ -386,6 +386,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			return false;
 		} else {
 			ce.setAlias(alias);
+			Config.getConfig().setAlias(alias);
+			Config.getConfig().write();
 			return true;
 		}
 	}
@@ -556,27 +558,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	/**
 	 * @param text
 	 */
-	protected void infoToTray(String text){
+	protected void textToTray(String text, MSGCode code){
 		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveInfo(text);
-		}
-	}
-	
-	/**
-	 * @param text
-	 */
-	protected void warnToTray(String text){
-		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveWarn(text);
-		}
-	}
-	
-	/**
-	 * @param text
-	 */
-	protected void errorToTray(String text){
-		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveError(text);
+			trayIcon.recieveText(text, code);
 		}
 	}
 	
@@ -598,13 +582,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if (tmp != null) {
 			if (typ == 0) {
 				tmp.info(nachricht);
-				infoToTray(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_INFO_TEXT);
 			} else if (typ == 1) {
 				tmp.warn(nachricht);
-				warnToTray(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_WARNING_TEXT);
 			} else {
 				tmp.error(nachricht);
-				errorToTray(nachricht);
+				textToTray(nachricht, MSGCode.TRAY_ERROR_TEXT);
 			}
 		}
 	}

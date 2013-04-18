@@ -44,7 +44,7 @@ public class pMTrayIcon {
         }
         
         this.popup = new PopupMenu();
-        this.trayIcon = new TrayIcon(Help.getIcon("pM16x16_new.png").getImage());
+        this.trayIcon = new TrayIcon(Help.getIcon("g26370.png",16).getImage());
         this.sysTray = SystemTray.getSystemTray();
         this.display = new MenuItem("Display");
         this.notifies = new Menu("Notify");
@@ -146,15 +146,13 @@ public class pMTrayIcon {
 		}
 	}
 
-	protected void recieveInfo(String text) {
-		trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
-	}
-	
-	protected void recieveWarn(String text) {
-		trayIcon.displayMessage("Incoming Warning", text, TrayIcon.MessageType.WARNING);
-	}
-	
-	protected void recieveError(String text) {
-		trayIcon.displayMessage("Incoming Error", text, TrayIcon.MessageType.ERROR);
+	protected void recieveText(String text, MSGCode code) {
+		if(code == MSGCode.TRAY_INFO_TEXT){
+			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
+		} else if(code == MSGCode.TRAY_WARNING_TEXT){
+			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.WARNING);
+		} else if(code == MSGCode.TRAY_ERROR_TEXT){
+			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.ERROR);
+		}
 	}
 }

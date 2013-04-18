@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class Config {
 	private static final String CONFIG_PATH=System.getenv("APPDATA")+File.separator;
-	private static final int MINVERSION=2;
+	private static final int MINVERSION=3;
 	private static Config me; 
 	private Properties settings;
 	
@@ -29,7 +29,7 @@ public class Config {
 		me=this;
 		Properties sourceSettings = new Properties();
 		
-		sourceSettings.put("config.version", "2");
+		sourceSettings.put("config.version", "3");
 		
 		sourceSettings.put("ne.multicast_group_ip", "230.223.223.223");
 		sourceSettings.put("ne.multicast_group_port", "6789");
@@ -38,7 +38,7 @@ public class Config {
 		sourceSettings.put("ne.root_claim_timeout", "200");
 		sourceSettings.put("ne.max_clients","5");
 		sourceSettings.put("ne.max_file_size","5000000");
-		sourceSettings.put("ne.file_transfer_timeout","12000");
+		sourceSettings.put("ne.file_transfer_timeout","120000");
 		sourceSettings.put("ne.file_transfer_info_interval","30000");
 		sourceSettings.put("ne.tree_build_time","1000");
 		

@@ -70,7 +70,7 @@ public class ChatEngine{
 
 		group_channels = new HashSet<GruppenKanal>();
 		private_channels = new HashSet<KnotenKanal>();
-		default_channel = new KnotenKanal(ne.getNodeID());
+		default_channel = new KnotenKanal(userID);
 		ignored = Collections.synchronizedSet(new HashSet<Long>());
 		inbox = new LinkedBlockingQueue<MSG>();
 
@@ -334,14 +334,14 @@ public class ChatEngine{
 	 * @param gruppen_name, zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel, long uid) {
-		long nid = ce.getNodeForUID(uid).getNodeID();
+		//long nid = ce.getNodeForUID(uid).getNodeID();
 		for (KnotenKanal cur : private_channels) {
-			if (cur.is(nid)) {
+			if (cur.is(uid)) {
 				cur.addObserver(chatPanel);
 				return;
 			}
 		}
-		KnotenKanal tmp = new KnotenKanal(nid);
+		KnotenKanal tmp = new KnotenKanal(uid);
 		tmp.addObserver(chatPanel);
 		private_channels.add(tmp);
 	}

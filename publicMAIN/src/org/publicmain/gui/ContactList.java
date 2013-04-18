@@ -60,7 +60,7 @@ public class ContactList extends JWindow {
 		this.usersScroller = new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		this.groupsScroller = new JScrollPane(groups, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.groupPanel = new JPanel(new BorderLayout());
-		this.createGrp = new JButton("create Group");
+		this.createGrp = new JButton("Create Group");
 		this.userPanel = new JPanel(new BorderLayout());
 		this.trenner = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
          
@@ -87,7 +87,6 @@ public class ContactList extends JWindow {
 		this.createGrp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO: hier nochmal überprüfen!!! und evtl trim und upper oder lowercase...
 				String tmpGrpName = null;
 				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, Help.getIcon("gruppe.png"), null, null);
 				if(tmpGrpName!=null && !tmpGrpName.equals("")){
@@ -202,21 +201,26 @@ public class ContactList extends JWindow {
 		private JMenuItem ignore;
 		private JMenuItem unignore;
 		private JMenuItem info;
+		private JMenuItem changeAlias;
 		private String user;
 		
 		public PopupUser(String user, ActionListener popupListener){
+			String[] cutText = user.split("@", 2);
+			user = cutText[0];
 			this.user = user;
 			this.whisper = new JMenuItem("whisper to " + user);
 			this.sendFile = new JMenuItem("send File to " + user);
 			this.ignore = new JMenuItem("ignore " + user);
 			this.unignore = new JMenuItem("unignore " + user);
 			this.info = new JMenuItem("info's about " + user);
+			this.changeAlias = new JMenuItem("change Alias");
 			
 			this.whisper.addActionListener(popupListener);
 			this.sendFile.addActionListener(popupListener);
 			this.ignore.addActionListener(popupListener);
 			this.unignore.addActionListener(popupListener);
 			this.info.addActionListener(popupListener);
+			this.changeAlias.addActionListener(popupListener);
 			
 			if (!(users.getSelectedValue().getUserID()==ChatEngine.getCE().getUserID())) {
 				this.add(whisper);
@@ -228,6 +232,7 @@ public class ContactList extends JWindow {
 				this.add(new Separator());
 			}
 			this.add(info);
+			this.add(changeAlias);
 		}
 	
 	}
@@ -285,6 +290,13 @@ public class ContactList extends JWindow {
 			}
 			else if(source.getText().startsWith("send")){
 				GUI.getGUI().sendFile(users.getSelectedValue().getUserID());
+			}
+			else if(source.getText().startsWith("change")){
+				String tmpAlias = null;
+				tmpAlias = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter new Alias", "Change Alias", JOptionPane.OK_CANCEL_OPTION, Help.getIcon("private.png"), null, null);
+				if(tmpAlias != null && !tmpAlias.equals("")){
+					GUI.getGUI().changeAlias(tmpAlias);
+				} 
 			}
 		}
 	}

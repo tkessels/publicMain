@@ -281,12 +281,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public void addGrpCW(String grpName, boolean focus) {
 		// Gruppenname auf Konvention prüfen, ggf. Änderungen vornehmen.
-		String clean_group = sanatizeNames(grpName);
+		grpName = sanatizeNames(grpName);
+		grpName = grpName.toLowerCase();
 		// Hol ref. auf Gruppenfenster wenn existent
-		ChatWindow tmp_cw = getCW(clean_group);
+		ChatWindow tmp_cw = getCW(grpName);
 		// wenn ref. leer dann erstelle neues Gruppenfesnter
 		if (tmp_cw == null) {
-			tmp_cw = createChat(clean_group);
+			tmp_cw = createChat(grpName);
 		}
 		// fokusiere das Gruppenfenster
 		if (focus) {
@@ -301,15 +302,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return, einen bereinigten String zur Verwendung als Gruppenname
 	 */
 	private String sanatizeNames(String grpName) {
-		String clean_grpname = grpName;
-		clean_grpname = clean_grpname.trim();
-		clean_grpname = clean_grpname.replaceAll(Config.getConfig().getNamePattern(), "");
-		// grp_name = grp_name.replaceAll("[&#*?\\/@<>ä\\t\\n\\x0B\\f\\r]*", "");
-		clean_grpname = clean_grpname.toLowerCase();
-		if (clean_grpname.length() > NAME_LENGTH) {
-			clean_grpname = clean_grpname.substring(0, NAME_LENGTH);
+		String clean_name = grpName;
+		clean_name = clean_name.trim();
+		clean_name = clean_name.replaceAll(Config.getConfig().getNamePattern(), "");
+		if (clean_name.length() > NAME_LENGTH) {
+			clean_name = clean_name.substring(0, NAME_LENGTH);
 		}
-		return clean_grpname;
+		return clean_name;
 	}
 	
 	/**

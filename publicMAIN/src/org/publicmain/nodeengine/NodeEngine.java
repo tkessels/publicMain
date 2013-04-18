@@ -88,7 +88,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	public NodeEngine(ChatEngine parent) throws IOException {
 		
 		allNodes = new HashSet<Node>();
-		connections = new ArrayList<ConnectionHandler>();
+		connections = Collections.synchronizedList(new ArrayList<ConnectionHandler>());
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
 		
 		nodeID=((long) (Math.random()*Long.MAX_VALUE));
@@ -862,7 +862,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
-//			LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB((HashSet<Node>) allNodes); //TODO:Hier richtig?
 		}
 	}
 	

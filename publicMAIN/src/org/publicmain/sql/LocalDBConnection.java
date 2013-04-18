@@ -12,10 +12,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -286,18 +286,19 @@ public class LocalDBConnection {
 		};
 		(new Thread(tmp)).start();
 	}
-	public void writeAllUsersAndNodesToLocDB(HashSet<Node> allNodes){
+	public void writeAllUsersAndNodesToLocDB(Collection<Node> allNodes){
 		if (dbStatus >= 2) {
 			Iterator<Node> it = allNodes.iterator();
 			while (it.hasNext()){
 				Node tmpNode = (Node) it.next();
-				String saveUserStmt = ("insert into " + usrTbl + " (userID, alias, username) VALUES (" + tmpNode.getUserID() + "," + tmpNode.getAlias() + "," + tmpNode.getUsername() + ")");
-				String saveNodeStmt = ("insert into " + nodeTbl + " (nodeID, hostname, t_user_userID, t_nodes_nodeID) VALUES (" + tmpNode.getNodeID() + "," + tmpNode.getHostname() + "," + tmpNode.getUserID() + /*TODO:"," +  +*/ ")");
+				String saveUserStmt = ("insert into " + usrTbl + " (userID, alias, username) VALUES ('" + tmpNode.getUserID() + "','" + tmpNode.getAlias() + "','" + tmpNode.getUsername() + "')ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username)");
+				System.out.println(saveUserStmt);
+				String saveNodeStmt = ("insert into " + nodeTbl + " (nodeID, hostname, t_user_userID, t_nodes_nodeID) VALUES ('" + tmpNode.getNodeID() + "','" + tmpNode.getHostname() + "','" + tmpNode.getUserID() + /*TODO:"," +  +*/ "')");
 				try {
 					stmt.execute(saveUserStmt);
-					stmt.execute(saveNodeStmt);
+//					stmt.execute(saveNodeStmt);
 					LogEngine.log(LocalDBConnection.this, "user" + tmpNode.getUserID() + " in DB-Tabelle " + usrTbl + " eingetragen.", LogEngine.INFO);
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ usrTbl + " or " + nodeTbl	 + " "+ e.getMessage(),LogEngine.ERROR);
 					connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
 					//hier falls während der schreibvorgänge die verbind verloren geht.

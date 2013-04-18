@@ -107,7 +107,7 @@ public class Node implements Serializable {
 	
 	@Override
 	public String toString() {
-		return alias+"@"+hostname;
+		return alias+"@"+userID+":"+nodeID;
 	}
 	
 	

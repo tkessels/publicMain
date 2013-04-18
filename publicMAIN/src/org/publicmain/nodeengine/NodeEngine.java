@@ -17,6 +17,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -133,7 +134,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	private Node getBestNode() {
 		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sich der Neue Verbinden darf.
 		Random x = new Random(nodeID);
-		return (Node) allNodes.toArray()[x.nextInt(allNodes.size())];
+		Node selected = (Node) allNodes.toArray()[x.nextInt(allNodes.size())];
+//		TreeNode tmp = getTree();
+//		if(tmp.getChildCount()<MAX_CLIENTS) selected = tmp.
+		return selected;
 //		return meinNode;
 	}
 
@@ -862,6 +866,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
+			LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB(Arrays.asList(data));
 		}
 	}
 	
@@ -873,6 +878,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.add(meinNode);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
+		LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB(data);
 	}
 	
 	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
@@ -966,7 +972,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		if(online&&(!alias.equals(meinNode.getAlias()))) {
 			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
 			updateAlias(alias,nodeID);
-//			LogEngine.log(this,"User has changed ALIAS to " + alias,LogEngine.INFO);
+			
 		}
 	}
 	
@@ -994,6 +1000,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
+					LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB(allNodes); //TODO: nur aktualisierung wegschreiben
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}
@@ -1021,7 +1028,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "_kick":
 			Node tmp = ce.getNodeforAlias(parameter);
 			if(tmp!=null)routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
-		
+			break;
 	
 		case "update":
 			GUI.getGUI().notifyGUI();
@@ -1051,6 +1058,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 		        return root;
 		    
+	}
+	
+	public long getUIDforNID(long nid){
+		
+		Node node = getNode(nid);
+		if (node!=null)return node.getUserID();
+		else return -1;
 	}
 	
 	public void showTree() {

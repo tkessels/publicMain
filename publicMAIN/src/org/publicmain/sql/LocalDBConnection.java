@@ -244,10 +244,10 @@ public class LocalDBConnection {
 		//Hier wird message in ne Blocking queue geschrieben
 		locDBInbox.add(m);
 		//TODO: Einbinden!
-//		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
-//			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
+		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
+			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
 //			 hier muss man doch was mit Syncornized machen wenn nachichten hier rein geschriebn und unten raus geholt werden...
-//		}
+		}
 	}
 	
 	public void writeMsgToDB() {
@@ -257,16 +257,19 @@ public class LocalDBConnection {
 					while (!locDBInbox.isEmpty() && dbStatus >=2) {
 							MSG m = locDBInbox.poll();
 							if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
+								long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
+								long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
 								String saveStmt = ("insert into "
 										+ msgLogTbl
 										+ " (msgID,timestamp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,data)"
 										+ " VALUES (" + m.getId() + ","
-										+ m.getTimestamp() + "," + m.getSender()
-										+ "," + m.getEmpfänger() + "," + "'"
+										+ m.getTimestamp() + "," + uid_sender
+										+ "," + uid_empfänger + "," + "'"
 										+ m.getTyp() + "'" + "," + "'"
 										+ m.getGroup() + "'" + "," + "'"
 										+ m.getData() + "'" + ")");
 								try {
+									System.out.println(saveStmt);
 									stmt.execute(saveStmt);
 									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " in DB-Tabelle " + msgLogTbl + " eingetragen.", LogEngine.INFO);
 								} catch (Exception e) {

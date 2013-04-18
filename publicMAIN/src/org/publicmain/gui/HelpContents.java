@@ -28,8 +28,11 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.images.Help;
 
 /**
- * Diese Klasse stellt die Hilfeseiten Help/Help Content zur Verfügung. TODO:
- * Kommentar
+ * Diese Klasse stellt die Hilfeseiten unter Help/Help im Menü zur Verfügung. Die
+ * Hilfeseiten werden über eine JTextPane mit einen HTML-Dokument erstellt. Die
+ * JTextPane stellt HTML 3.X und CSS 1 zur Verfügung um das Dokument zu formatieren,
+ * auf einen Verweis zu Hilfe-Seiten im Internet wurde zugunsten des Gesamtkonzeptes
+ * der Anwendung verzichtet. 
  * 
  * @author ATRM
  * 
@@ -47,6 +50,7 @@ public class HelpContents extends JDialog {
 	private JScrollPane sp;
 	private File htmlFile;
 	private java.net.URL fileURL;
+	// Zum ermitteln der aktuellen Bildschirmauflösung
 	private GraphicsEnvironment ge;
 	private GraphicsDevice gd;
 	private DisplayMode dm;
@@ -69,7 +73,7 @@ public class HelpContents extends JDialog {
 		this.sp = new JScrollPane(helpContentTxt,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		this.htmlFile = new File(getClass().getResource("helpcontent.html").getFile());
+		//this.htmlFile = new File(Help.class.getResource("helpcontent.html").getFile());
 		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		this.gd = ge.getDefaultScreenDevice();
 		this.dm = gd.getDisplayMode();
@@ -79,7 +83,8 @@ public class HelpContents extends JDialog {
 
 		try {
 			// Dateipfad in eine URL umwandeln
-			fileURL = htmlFile.toURI().toURL();
+			//fileURL = htmlFile.toURI().toURL();
+			fileURL = Help.class.getResource("helpcontent.html");
 			// Datei in JTextPane laden
 			helpContentTxt.setPage(fileURL);
 		} catch (MalformedURLException e1) {
@@ -94,6 +99,11 @@ public class HelpContents extends JDialog {
 		showIt();
 	}
 
+	/**
+	 * An dieser Stelle findet die Prüfung statt, ob die rechtsseitig neben dem Anwendungsfenster eingeblendete Hilfe
+	 * die aktuelle Auflösung überschreiten würde. Ist dies der Fall wird die Hilfe zentriert auf dem Bildschirm
+	 * angezeigt. Wenn die Bedingung nicht zutrifft, wird die Hilfe rechts neben dem Anwendungsfenster eingeblendet.
+	 */
 	public void showIt() {
 		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth() + this.getWidth() < dm.getWidth())) {
 			this.setLocation(GUI.getGUI().getLocation().x + GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);

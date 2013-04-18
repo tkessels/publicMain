@@ -121,6 +121,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		bos.flush();
 		zip.finish();
 		bos.close();
+		bis.close();
 		Object tmp_data[]=new Object[2];
 		tmp_data[0]=tmp_FR;
 		tmp_data[1]=bout.toByteArray();

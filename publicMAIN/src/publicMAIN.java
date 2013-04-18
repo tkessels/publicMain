@@ -16,6 +16,8 @@ import org.publicmain.sql.LocalDBConnection;
 public class publicMAIN {
 
 	/**
+	 * TODO: Kommentar
+	 * 
 	 * @param args
 	 * @throws IOException 
 	 */

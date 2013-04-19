@@ -866,7 +866,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
-			LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB(Arrays.asList(data));
+			LocalDBConnection.getDBConnection().writeAllUsersToLocDB(Arrays.asList(data));
 		}
 	}
 	
@@ -878,7 +878,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.add(meinNode);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
-		LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB(data);
+		LocalDBConnection.getDBConnection().writeAllUsersToLocDB(data);
 	}
 	
 	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
@@ -1000,7 +1000,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
-					LocalDBConnection.getDBConnection().writeAllUsersAndNodesToLocDB(allNodes); //TODO: nur aktualisierung wegschreiben
+					LocalDBConnection.getDBConnection().writeAllUsersToLocDB(allNodes); //TODO: nur aktualisierung wegschreiben
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}

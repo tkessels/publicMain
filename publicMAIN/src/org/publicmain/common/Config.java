@@ -11,221 +11,57 @@ import java.util.Properties;
 
 
 public class Config {
-	private static final String CONFIG_PATH=System.getenv("APPDATA")+File.separator;
-	private static final int MINVERSION=4;
-	private static Config me; 
-	private Properties settings;
+	private static final int CURRENTVERSION		=	4;
+	private static final int MINVERSION				=	4;
+	private static final String APPDATA=System.getenv("APPDATA")+File.separator+"publicMAIN"+File.separator;
+	private static final String JARLOCATION=Config.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+	private static final String	lock_file_name		= 	"pm.loc";
+	private static final String	system_conf_name	= 	"publicMAIN.cfg";
+	private static final String	user_conf_name		= 	"config.cfg"; 
+	private static File loc_file						=	new File(APPDATA,lock_file_name);
+	private static File system_conf					=	new File(new File(JARLOCATION).getParentFile(),system_conf_name);
+	private static File user_conf					=	new File(APPDATA,user_conf_name);
+	private static Config me;
 	
-	
-	public static synchronized Config getConfig() {
+	private ConfigData settings;
+
+	public static synchronized ConfigData getConfig() {
 		if (me==null) {
 			me = new Config();
 		}
-		return me;
+		return me.settings;
 	}
-
-	//private int state;
-	private Config() {
-		me=this;
-		Properties sourceSettings = new Properties();
-		
-		sourceSettings.put("config.version", "4");
-		
-		sourceSettings.put("ne.multicast_group_ip", "230.223.223.223");
-		sourceSettings.put("ne.multicast_group_port", "6789");
-		sourceSettings.put("ne.multicast_ttl",	"10");
-		sourceSettings.put("ne.discover_timeout", "200");
-		sourceSettings.put("ne.root_claim_timeout", "200");
-		sourceSettings.put("ne.max_clients","5");
-		sourceSettings.put("ne.max_file_size","5000000");
-		sourceSettings.put("ne.file_transfer_timeout","120000");
-		sourceSettings.put("ne.file_transfer_info_interval","30000");
-		sourceSettings.put("ne.tree_build_time","1000");
-		
-		sourceSettings.put("ch.ping_intervall","30000");
-		sourceSettings.put("ch.ping_enabled", "false");
-		
-		sourceSettings.put("ce.ping_enabled", "false");
-		sourceSettings.put("log.verbosity", "4");
-		
-		sourceSettings.put("gui.max_group_length","19");
-		sourceSettings.put("gui.max_alias_length","19");
-		sourceSettings.put("gui.name_pattern", ".*[^a-zA-Z0-9öäüÖÄÜßéá].*");		//"[a-z0-9\\-_]{2,}");
-		
-		sourceSettings.put("sql.local_db_createt", "0");
-		sourceSettings.put("sql.local_db_port","3306");
-		sourceSettings.put("sql.local_db_user","root");
-		sourceSettings.put("sql.local_db_password","");
-		sourceSettings.put("sql.local_db_databasename","db_publicMain");
-		// daten für externen DB-Backup-Server
-		sourceSettings.put("sql.backup_db_port","3306");					//TODO: inhalt anpassen
-		sourceSettings.put("sql.backup_db_user","root");					//TODO: inhalt anpassen
-		sourceSettings.put("sql.backup_db_password","");					//TODO: inhalt anpassen
-		sourceSettings.put("sql.backup_db_databasename","db_publicMain");	//TODO: inhalt anpassen
-		
-		
-//		this.settings = new Properties(sourceSettings);
-		this.settings = sourceSettings;
-		
-		
-		
-		try(FileInputStream in = new FileInputStream(CONFIG_PATH+"config.cfg")){
-			Properties read = new Properties();
-			read.load(in);
-			if(	read.getProperty("config.version")==null||(Integer.parseInt(read.getProperty("config.version")) <	MINVERSION)) {
-				LogEngine.log(this, "Config found but no longer compatible: generating",LogEngine.WARNING);
-				write();
-				
-			}
-			else settings=read;
-		} catch (FileNotFoundException e) {
-			write();
+	
+	public static synchronized boolean write() {
+		if (me==null) {
+			me = new Config();
+		}
+		me.getConfig().setCurrentVersion(CURRENTVERSION);
+		return me.savetoDisk();
+	}
+	
+	public static synchronized boolean writeSystemConfiguration() {
+		try(FileOutputStream fos = new FileOutputStream(system_conf)){
+			getSourceSettings().store(fos,"publicMAIN - SYSTEM - SETTINGS");
+			LogEngine.log(Config.class, "System configurations file written to " + system_conf, LogEngine.INFO);
+			return true;
 		} catch (IOException e) {
-			LogEngine.log(this, "default config could not be read. reason:"+e.getMessage(),LogEngine.WARNING);
-		}
-		
-		
-		
-		
-	}
-	
-	public void write(){
-		try {
-			settings.store(new FileOutputStream(CONFIG_PATH+"config.cfg"), "publicMAIN Config");
-		} catch (IOException e1) {
-			LogEngine.log(this, "Could not generate config.cfg. reason:"+e1.getMessage(), LogEngine.WARNING);
+			e.printStackTrace();
+			LogEngine.log(Config.class, "Could not write system settings: "+system_conf +" reason : "+e.getMessage(), LogEngine.WARNING);
+			return false;
 		}
 	}
 
-	public long getPingInterval() {
-		return Long.parseLong(settings.getProperty("ch.ping_intervall"));
-	}
-
-	public long getDiscoverTimeout() {
-		return Long.parseLong(settings.getProperty("ne.discover_timeout"));
-	}
-
-	public long getRootClaimTimeout() {
-		return Long.parseLong(settings.getProperty("ne.root_claim_timeout"));
-	}
-
-	public String getMCGroup() {
-		return settings.getProperty("ne.multicast_group_ip");
-	}
-
-	public int getMCPort() {
-		return Integer.parseInt(settings.getProperty("ne.multicast_group_port"));
-	}
-
-	public int getMaxConnections() {
-		return Integer.parseInt(settings.getProperty("ne.max_clients"));
-	}
-
-	public int getLocalDBCreatet(){
-		return Integer.parseInt(settings.getProperty("sql.local_db_createt"));
-	}
-	
-	public void setLocalDBCreatet(int createt){
-		settings.setProperty("sql.local_db_createt", String.valueOf(createt) );
-	}
 	
 	
-	public String getLocalDBUser() {
-		return settings.getProperty("sql.local_db_user");
-	}
-
-	public String getLocalDBPw() {
-		return settings.getProperty("sql.local_db_password");
-	}
-
-	public String getLocalDBPort() {
-		return settings.getProperty("sql.local_db_port");
-	}
-
-	public boolean getPingEnabled() {
-		return Boolean.parseBoolean("ce.ping_enabled");
-	}
-
-	public int getMaxGroupLength() {
-		return Integer.parseInt(settings.getProperty("gui.max_group_length"));
-	}
-	
-	public int getMaxAliasLength() {
-		return Integer.parseInt(settings.getProperty("gui.max_alias_length"));
-	}
-	
-	public String getNamePattern() {
-		return settings.getProperty("gui.name_pattern");
-	}
-
-	public int getMaxFileSize() {
-		return Integer.parseInt(settings.getProperty("ne.max_file_size")) ;
-	}
-	
-	public long getTreeBuildTime() {
-		return Long.parseLong(settings.getProperty("ne.tree_build_time"));
-	}
-
-	public Long getUserID() {
-		String uid=settings.getProperty("System.UserID");
-		return (uid!=null)?Long.parseLong(uid):null;
-	}
-	
-	public void setUserID(long userID) {
-		settings.setProperty("System.UserID", String.valueOf(userID) );
-	}
-	
-	public String getAlias() {
-		return settings.getProperty("System.alias");
-	}
-	
-	public void setAlias(String alias){
-		settings.setProperty("System.alias", alias);
-	}
-
-	public long getFileTransferTimeout() {
-		return Long.parseLong(settings.getProperty("ne.file_transfer_timeout"));
-	}
-	
-	public String getLocalDBDatabasename() {
-		return settings.getProperty("sql.local_db_databasename");
-	}
-	
-	public String getBackupDBChoosenUsername(){
-		return settings.getProperty("sql.backup_db_choosen_username");
-	}
-	
-	public void setBackupDBChoosenUsername(String usrName){
-		settings.setProperty("sql.backup_db_choosen_username", usrName);
-	}
-	
-	public int getBackupDBChoosenUserPassWordHash(){
-		String pwHash = settings.getProperty("sql.backup_db_choosen_user_password_hash");
-		return Integer.parseInt(pwHash);
-	}
-	
-	public void setBackupDBChoosenUserPassWord(String userPassWord){
-		settings.setProperty("sql.backup_db_choosen_user_password", userPassWord);
-	}
-	
-	public String getBackupDBChoosenIP(){
-		return settings.getProperty("sql.backup_db_choosen_ip");
-	}
-	
-	public void setBackupDBChoosenIP(String ip){
-		settings.setProperty("sql.backup_db_choosen_ip", ip);
-	}
-	
-	
-	/**Method tries to Lock a file <code>pmlockfile</code> in Users APPDATA folder. And returns result as boolen.
+	/**Method tries to Lock a file <code>pm.loc</code> in Users <code>APPDATA\publicMAIN</code> folder. And returns result as boolen.
 	 * It also adds a shutdown hook to the VM to remove Lock from File if Program exits.
 	 * @return <code>true</code> if File could be locked <code>false</code> if File has already been locked
 	 */
 	public static boolean getLock() {
-		final String lockFile = CONFIG_PATH +"pmlockfile.";
         try {
-            final File file = new File(lockFile);
-            final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            if(!loc_file.getParentFile().exists())loc_file.getParentFile().mkdirs();
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(loc_file, "rw");
             final FileLock fileLock = randomAccessFile.getChannel().tryLock();
             if (fileLock != null) {
                 Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -233,22 +69,124 @@ public class Config {
                         try {
                             fileLock.release();
                             randomAccessFile.close();
-                            file.delete();
+                            loc_file.delete();
                         } catch (Exception e) {
-                            LogEngine.log("ShutdownHook","Unable to remove lock file: " + lockFile, LogEngine.ERROR);
+                            LogEngine.log("ShutdownHook","Unable to remove lock file: " + loc_file, LogEngine.ERROR);
                         }
                     }
                 });
                 return true;
             }
         } catch (Exception e) {
-        	LogEngine.log("Config","Unable to create and/or lock file: " + lockFile, LogEngine.ERROR);
+        	LogEngine.log("Config","Unable to create and/or lock file: " + loc_file, LogEngine.ERROR);
         }
         return false;
     }
 
-	public long getFileTransferInfoInterval() {
-		return Long.parseLong(settings.getProperty("ne.file_transfer_info_interval"));
+	private Config() {
+		me=this;
+
+		System.out.println(loc_file.getParent() + " : " +loc_file.exists()+ ":" + loc_file);
+		System.out.println(system_conf.getParent() + " : " +system_conf.exists()+ ":" + system_conf);
+		System.out.println(user_conf.getParent() + " : " +user_conf.exists()+ ":" + user_conf);
+		
+		settings = new ConfigData(getSourceSettings());
+		LogEngine.log(this, "default settings loaded from source",LogEngine.INFO);
+		
+		//try to overload system-settings from Jars Location
+		if (system_conf.canRead()) {
+			try (FileInputStream in = new FileInputStream(system_conf)) {
+				ConfigData system = new ConfigData(settings);
+				system.load(in);
+				LogEngine.log(this, "system settings loaded from "+system_conf,LogEngine.INFO);
+				this.settings = system;
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				LogEngine.log(this, "error while loading system settings from "+system_conf,LogEngine.ERROR);
+			}
+		}
+		
+		ConfigData user = new ConfigData(settings);
+		//try to overload user-settings from AppData folder
+		if (user_conf.canRead()) {
+			try (FileInputStream in = new FileInputStream(user_conf)) {
+				user.load(in);
+				if(user.getCurrentVersion()<MINVERSION) {
+					settings.setUserID(user.getUserID());
+					settings.setAlias(user.getAlias());
+					LogEngine.log(this, "user settings outdated only userid and alias will be used from " + user_conf, LogEngine.INFO);
+				}
+				else settings=user;
+				LogEngine.log(this, "user settings loaded from " + user_conf, LogEngine.INFO);
+			} catch (IOException e) {
+				LogEngine.log(this, "default config could not be read. reason:" + e.getMessage(), LogEngine.WARNING);
+			}
+		}
+		
+		
+		
+		
+	}
+
+	
+	
+	private static ConfigData getSourceSettings() {
+		ConfigData tmp = new ConfigData();
+		
+		tmp.setCurrentVersion(CURRENTVERSION);
+
+		//Network parameters
+		tmp.setMCGroup("230.223.223.223");
+		tmp.setMCPort(6789);
+		tmp.setMCTTL(10);
+		tmp.setDiscoverTimeout(200);
+		tmp.setRootClaimTimeout(200);
+		tmp.setMaxConnections(5);
+		tmp.setTreeBuildTime(1000);
+		tmp.setPingInterval(30000);
+		tmp.setPingEnabled(false);
+		
+		//FileTransferParameters
+		tmp.setMaxFileSize(5000000);
+		tmp.setFileTransferTimeout(120000);
+		tmp.setFileTransferInfoInterval(30000);
+		
+		//usability settings
+		tmp.setLogVerbosity(4);
+		tmp.setMaxAliasLength(19);
+		tmp.setMaxGroupLength(19);
+		tmp.setNamePattern(".*[^a-zA-Z0-9öäüÖÄÜßéá].*");
+		
+		//local mySQL Database settings
+		tmp.setLocalDBCreatet(0);
+		tmp.setLocalDBDatabasename("db_publicMain");
+		tmp.setLocalDBPort("3306");
+		tmp.setLocalDBUser("root");
+		tmp.setLocalDBPw("");
+		
+		// daten für externen DB-Backup-Server
+		tmp.setBackupDBDatabasename("db_publicMain");
+		tmp.setBackupDBPort("3306");
+		tmp.setBackupDBUser("root");
+		tmp.setBackupDBPw("");
+//		
+//		
+		return tmp;
+	}
+
+
+	
+
+	private boolean savetoDisk(){
+		try(FileOutputStream fos = new FileOutputStream(user_conf)) 
+		{
+			settings.store(fos,"publicMAIN - USER - SETTINGS");
+			LogEngine.log(this, "User settings written to " + user_conf, LogEngine.WARNING);
+			return true;
+		} catch (IOException e1) {
+			LogEngine.log(this, "Could not write user settings: "+user_conf +" reason : "+e1.getMessage(), LogEngine.WARNING);
+		}
+		return false;
 	}
 
 

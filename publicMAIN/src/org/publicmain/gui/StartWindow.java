@@ -238,9 +238,9 @@ public class StartWindow extends JFrame implements ActionListener{
 						nickNameTextField.setForeground(Color.RED);
 						nickNameTextField.setText("Not allowed characters or nick to long!");
 					} else {
-						Config.getConfig().setAlias(choosenAlias);
 						Config.getConfig().setUserID(userID);
-						Config.getConfig().write();
+						Config.getConfig().setAlias(choosenAlias);
+						Config.write();
 						plsRunGUI = true;
 						synchronized (instanz) {
 							this.notifyAll();
@@ -280,7 +280,7 @@ public class StartWindow extends JFrame implements ActionListener{
 						Config.getConfig().setBackupDBChoosenUsername(choosenBackupDBUserName);
 						Config.getConfig().setBackupDBChoosenUserPassWord(String.valueOf(choosenBackupDBUserPwdHash));
 						Config.getConfig().setBackupDBChoosenIP(choosenBackupDBIP);
-						Config.getConfig().write();
+						Config.write();
 						plsRunGUI = true;
 						synchronized (instanz) {
 							this.notifyAll();

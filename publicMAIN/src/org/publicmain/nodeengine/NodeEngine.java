@@ -53,8 +53,9 @@ import org.publicmain.sql.LocalDBConnection;
 public class NodeEngine {
  private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout(); 			//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
  private final long ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout(); 			//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
- private final InetAddress group = InetAddress.getByName(Config.getConfig().getMCGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int multicast_port = Config.getConfig().getMCPort(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final InetAddress MULTICAST_GROUP = InetAddress.getByName(Config.getConfig().getMulticastGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
+ private final int MULTICAST_PORT = Config.getConfig().getMulticastPort(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int MULTICAST_TTL = Config.getConfig().getMulticastTTL(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = Config.getConfig().getMaxConnections();					//Maximale Anzahl anzunehmender Verbindungen
  private final int MAX_FILE_SIZE = Config.getConfig().getMaxFileSize();
 
@@ -98,10 +99,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		online = true;
 
 		server_socket = new ServerSocket(0);
-		multi_socket = new MulticastSocket(multicast_port);
-		multi_socket.joinGroup(group);
+		multi_socket = new MulticastSocket(MULTICAST_PORT);
+		multi_socket.joinGroup(MULTICAST_GROUP);
 		multi_socket.setLoopbackMode(true);
-		multi_socket.setTimeToLive(10);
+		multi_socket.setTimeToLive(MULTICAST_TTL);
 
 		meinNode = new Node();
 		allNodes.add(meinNode);
@@ -234,7 +235,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		byte[] buf = MSG.getBytes(nachricht);
 		try {
 			if (buf.length < 65000) {
-				multi_socket.send(new DatagramPacket(buf, buf.length, group, 6789));
+				multi_socket.send(new DatagramPacket(buf, buf.length, MULTICAST_GROUP, 6789));
 				LogEngine.log(this, "sende [MC]", nachricht);
 			}
 			else LogEngine.log(this, "MSG zu groß für UDP-Paket", LogEngine.ERROR);
@@ -250,7 +251,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			for (InetAddress x : newRoot.getSockets()) {
 				if (!meinNode.getSockets().contains(x)) {
 					DatagramPacket unicast = new DatagramPacket(data,
-							data.length, x, multicast_port);//über Unicast
+							data.length, x, MULTICAST_PORT);//über Unicast
 					try {
 						multi_socket.send(unicast);
 						LogEngine
@@ -1033,7 +1034,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "update":
 			GUI.getGUI().notifyGUI();
 			break;
-			
+		case "conf":
+			Config.writeSystemConfiguration();
+			break;
 		case "tree":
 			showTree();
 			break;

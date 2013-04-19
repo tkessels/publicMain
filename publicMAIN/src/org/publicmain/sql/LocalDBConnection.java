@@ -153,15 +153,11 @@ public class LocalDBConnection {
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		String read=null;
-		int i = 1;
 		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_db.sql").toURI())))){
 			while((read = in.readLine()) != null) {
 				while (!read.endsWith(";") && !read.endsWith("--")){
 					read = read + in.readLine();
-					System.out.println(i);
-					i++;
 				}
-				System.out.println(read);
 				stmt.execute(read);
 			}
 			dbStatus = 2;
@@ -195,7 +191,6 @@ public class LocalDBConnection {
 						StringBuffer saveMsgStmt = new StringBuffer();
 						StringBuffer saveGrpStmt = new StringBuffer();
 						MSG m = locDBInbox.poll();
-						System.out.println(m);
 						long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
 						long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
 							if (m.getTyp() == NachrichtenTyp.GROUP) {
@@ -270,7 +265,6 @@ public class LocalDBConnection {
 	}
 	
 	public synchronized void writeAllUsersToLocDB(Collection<Node> newAllNodes){
-		System.out.println("wurde aufgerufen");
 		Collection<Node> allNodes = newAllNodes;
 		StringBuffer saveUserStmt; 
 		if (dbStatus >= 2) {
@@ -283,7 +277,6 @@ public class LocalDBConnection {
 				saveUserStmt.append("'" + tmpNode.getAlias() + "',");
 				saveUserStmt.append("'" + tmpNode.getUsername() + "')");
 				try {
-					System.out.println(saveUserStmt.toString());
 					stmt.execute(saveUserStmt.toString());
 					LogEngine.log(LocalDBConnection.this, "user" + tmpNode.getUserID() + " in DB-Tabelle " + usrTbl + " eingetragen.", LogEngine.INFO);
 				} catch (SQLException e) {

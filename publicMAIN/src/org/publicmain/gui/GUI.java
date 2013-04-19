@@ -386,7 +386,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} else {
 			ce.setAlias(alias);
 			Config.getConfig().setAlias(alias);
-			Config.getConfig().write();
+			Config.write();
 			return true;
 		}
 	}

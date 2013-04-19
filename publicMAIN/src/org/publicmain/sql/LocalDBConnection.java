@@ -166,7 +166,7 @@ public class LocalDBConnection {
 			}
 			dbStatus = 2;
 			Config.getConfig().setLocalDBCreatet(1);
-			Config.getConfig().write();
+			Config.write();
 			LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -389,9 +389,5 @@ public class LocalDBConnection {
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
 		}
-		
-
 	}
-
 }
-

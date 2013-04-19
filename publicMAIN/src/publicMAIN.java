@@ -22,7 +22,7 @@ public class publicMAIN {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		if(Config.getConfig().getLock()){
+		if(Config.getLock()){
 			if(Config.getConfig().getUserID() == null){
 				//TODO: hier darauf warten bis nutzer daten eingegeben und "submit" gedrückt hat. also zum Beispiel ein boolean im Startwindwo überprüfen
 				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)

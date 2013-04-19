@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class Config {
 	private static final String CONFIG_PATH=System.getenv("APPDATA")+File.separator;
-	private static final int MINVERSION=3;
+	private static final int MINVERSION=4;
 	private static Config me; 
 	private Properties settings;
 	
@@ -29,7 +29,7 @@ public class Config {
 		me=this;
 		Properties sourceSettings = new Properties();
 		
-		sourceSettings.put("config.version", "3");
+		sourceSettings.put("config.version", "4");
 		
 		sourceSettings.put("ne.multicast_group_ip", "230.223.223.223");
 		sourceSettings.put("ne.multicast_group_port", "6789");

@@ -606,7 +606,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		final JDialog yesno_dialog=yesno_pane.createDialog(me, "Dateitransfer");
 		final JFileChooser fileChooser = new JFileChooser();
 		
-		new Thread(new Runnable() {
+		Thread timoutBot = new Thread(new Runnable() {
 			public void run() {
 				try {
 					Thread.sleep(timeout);
@@ -615,7 +615,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				yesno_dialog.dispose();
 				fileChooser.cancelSelection();
 			}
-		}).start();
+		});
+		if(fr.size>=Config.getConfig().getMaxFileSize())timoutBot.start();
 		
 		yesno_dialog.show();
 		Object  x = yesno_pane.getValue();

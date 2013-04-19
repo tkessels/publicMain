@@ -130,7 +130,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 	}
 
 	public void save(File datei) throws IOException{
-		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof Object[]&&((Object[])data).length==2&&((Object[])data)[0]instanceof File&&((Object[])data)[1]instanceof byte[]){
+		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof Object[]&&((Object[])data).length==2&&((Object[])data)[0]instanceof FileTransferData&&((Object[])data)[1]instanceof byte[]){
 			byte[] tmp_data=(byte[]) ((Object[])data)[1];
 //			System.out.println(tmp_data.length);
 

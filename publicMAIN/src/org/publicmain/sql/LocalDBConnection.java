@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -23,6 +24,7 @@ import javax.swing.JTextPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -157,10 +159,18 @@ public class LocalDBConnection {
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		String read=null;
+		int i = 1;
 		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_db.sql").toURI())))){
 			while((read = in.readLine()) != null) {
+				while (!read.endsWith(";") && !read.endsWith("--")){
+					read = read + in.readLine();
+					System.out.println(i);
+					i++;
+				}
+				System.out.println(read);
 				stmt.execute(read);
 			}
+			
 			dbStatus = 2;
 			Config.getConfig().setLocalDBCreatet(1);
 			Config.getConfig().write();
@@ -174,69 +184,6 @@ public class LocalDBConnection {
 		} catch (URISyntaxException e2) {
 			e2.printStackTrace();
 		}
-		
-//		try {
-//			this.stmt = con.createStatement();
-//			stmt.addBatch("create database if not exists " + dbName);
-//			stmt.addBatch("use " + dbName);
-//			// erstellen der Message Tabelle
-//			stmt.addBatch("create table if not exists "+ chatLogTbl + "(id INTEGER NOT NULL AUTO_INCREMENT," +		// hier autoincrement nutzen - kann ja mehrere mit der selben geben
-//																	"msgID INTEGER NOT NULL," +
-//																	"timestamp BIGINT NOT NULL," +
-//																	"sender BIGINT NOT NULL," +
-//																	"empfaenger BIGINT NOT NULL," +
-//																	"typ varchar(30) NOT NULL," +
-//																	"grp varchar(20) NOT NULL," +
-//																	"data varchar(200) NOT NULL," +
-//																	"primary key(id))" +
-//																	"engine = INNODB");
-//			// TODO Datentypen anpassen! 
-//			// erstellen der user-Tabelle
-//			stmt.addBatch("create table if not exists "+ usrTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
-//					"alias VARCHAR(20) NOT NULL," +														// hier auf 20 Zeichen begrenzt
-//					"primary key(id))" +
-//					"engine = INNODB");
-//			// erstellen der message-Tabelle was soll die machen? Verstehe ich nicht!??
-////						stmt.addBatch("create table if not exists "+ msgTbl + "(id BIGINT NOT NULL," +		// hier die USER-ID
-////								"alias VARCHAR(20)," +														// hier auf 20 Zeichen begrenzt
-////								"primary key(id))" +
-////								"engine = INNODB");
-//			// erstellen der node-Tabelle für ALLE nodes?
-//			stmt.addBatch("create table if not exists "+ nodeTbl + "(ip VARCHAR(15) NOT NULL," +// Als sting abspeichern? 192.168.100.200 -> 15  
-//					"hostname VARCHAR(20) NOT NULL," +											//TODO: wie lang max? 
-//					"nodeID BIGINT NOT NULL," +
-//					"primary key(nodeID))" +
-//					"engine = INNODB");	
-//			// erstellen der Gruppen-Tabelle
-//			stmt.addBatch("create table if not exists "+ groupTbl + "(groupID BIGINT NOT NULL," +			
-//					"name VARCHAR(20) NOT NULL," +													//TODO: wie lang max? 
-//					"password VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
-//					"groupOwner BIGINT NOT NULL," +
-//					"primary key(groupID))" +
-//					"engine = INNODB");	
-//			// erstellen der Config-Tabelle
-//			stmt.addBatch("create table if not exists "+ configTbl + "(nodeID BIGINT NOT NULL," +			
-//					"userID BIGINT NOT NULL," +														//TODO: wie lang max? 
-//					"layout VARCHAR(20) NOT NULL," +												//TODO: wie lang max?
-//					"remotDBSvrIP VARCHAR(15) NOT NULL," +											//TODO: Als sting abspeichern? 192.168.100.200 -> 15  
-//					"Alias VARCHAR(20) NOT NULL," +
-//					"primary key(nodeID,userID))" +
-//					"engine = INNODB");	
-//			// erstellen der EventTyp-Tabelle														//TODO: was macht das wo kommen daten her? Was wird genau gespeichert?!?
-//			stmt.addBatch("create table if not exists "+ eventTypeTbl + "(id BIGINT NOT NULL," +			
-//					"description VARCHAR(200) NOT NULL," +														//TODO: wie lang max? 
-//					"primary key(ID))" +
-//					"engine = INNODB");	
-//			// erstellen die Routing-Tabelle
-//			stmt.addBatch("create table if not exists "+ routingOverviewTbl + "(id BIGINT NOT NULL," +	//TODO: hier nochmal extrem nachdenken ;-)
-//					"primary key(id))" +
-//					"engine = INNODB");	
-//			stmt.executeBatch();
-//			dbStatus = 2;
-//			LogEngine.log(this, "createDbAndTables erstellt", LogEngine.INFO);
-//		} catch (SQLException e) {
-//			LogEngine.log(this, "createDbAndTables fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
-//		}
 	}
 	
 	public void saveMsg (MSG m){
@@ -254,22 +201,65 @@ public class LocalDBConnection {
 			public void run() {
 				if (dbStatus >= 2) {
 					while (!locDBInbox.isEmpty() && dbStatus >=2) {
-							MSG m = locDBInbox.poll();
+						StringBuffer saveMsgStmt = new StringBuffer();
+						StringBuffer saveGrpStmt = new StringBuffer();
+						MSG m = locDBInbox.poll();
+						System.out.println(m);
+						long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
+						long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
 							if (m.getTyp() == NachrichtenTyp.GROUP || m.getTyp() == NachrichtenTyp.PRIVATE) {
-								long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
-								long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
-								String saveStmt = ("insert into "
-										+ msgLogTbl
-										+ " (msgID,timestamp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,data)"
-										+ " VALUES (" + m.getId() + ","
-										+ m.getTimestamp() + "," + uid_sender
-										+ "," + uid_empfänger + "," + "'"
-										+ m.getTyp() + "'" + "," + "'"
-										+ m.getGroup() + "'" + "," + "'"
-										+ m.getData() + "'" + ")");
+								//fügt Gruppe hinzu
+								saveGrpStmt.append("CALL p_t_groups_saveGroups (");
+								saveGrpStmt.append("'" + m.getGroup() 	+ "',");
+								saveGrpStmt.append(ChatEngine.getCE().getUserID()+ ")");
+								//fügt Nachicht hinzu
+								saveMsgStmt.append("CALL p_t_messages_saveMessage (");
+								saveMsgStmt.append(m.getId() 			+ ",");
+								saveMsgStmt.append(m.getTimestamp() 	+ ",");
+								saveMsgStmt.append(uid_sender 			+ ",");
+								saveMsgStmt.append(uid_empfänger 		+ ",");
+								saveMsgStmt.append("'" + m.getTyp() 	+ "',");
+								saveMsgStmt.append("'" + m.getGroup() 	+ "',");
+								saveMsgStmt.append("'" + m.getData() 	+ "')");
+							}
+							if (m.getTyp() == NachrichtenTyp.PRIVATE){
+								//fügt Gruppe PRIVATE
+								saveGrpStmt.append("CALL p_t_groups_saveGroups (");
+								saveGrpStmt.append("'PRIVATE',");
+								saveGrpStmt.append(ChatEngine.getCE().getUserID()+ ")");
+								//fügt Nachicht hinzu
+								saveMsgStmt.append("CALL p_t_messages_saveMessage (");
+								saveMsgStmt.append(m.getId() 			+ ",");
+								saveMsgStmt.append(m.getTimestamp() 	+ ",");
+								saveMsgStmt.append(uid_sender 			+ ",");
+								saveMsgStmt.append(uid_empfänger 		+ ",");
+								saveMsgStmt.append("'" + m.getTyp() 	+ "',");
+								saveMsgStmt.append("'PRIVATE',");
+								saveMsgStmt.append("'" + m.getData() 	+ "')");
+							}	
+							if (m.getTyp() == NachrichtenTyp.SYSTEM){
+								//fügt Gruppe PRIVATE
+								saveGrpStmt.append("CALL p_t_groups_saveGroups (");
+								saveGrpStmt.append("'SYSTEM',");
+								saveGrpStmt.append(ChatEngine.getCE().getUserID()+ ")");
+								//fügt Nachicht hinzu
+								saveMsgStmt.append("CALL p_t_messages_saveMessage (");
+								saveMsgStmt.append(m.getId() 			+ ",");
+								saveMsgStmt.append(m.getTimestamp() 	+ ",");
+								saveMsgStmt.append(uid_sender 			+ ",");
+								saveMsgStmt.append(uid_empfänger 		+ ",");
+								saveMsgStmt.append("'" + m.getCode() 	+ "',");
+								saveMsgStmt.append("'PRIVATE',");
+								saveMsgStmt.append("'" + m.getData() 	+ "')");
+							}
+							if (saveMsgStmt.length()> 0 && saveGrpStmt.length() > 0){
 								try {
-									System.out.println(saveStmt);
-									stmt.execute(saveStmt);
+									System.out.println(saveGrpStmt.length());
+									System.out.println(saveGrpStmt.toString());
+									System.out.println(saveMsgStmt.length());
+									System.out.println(saveMsgStmt.toString());
+									stmt.execute(saveGrpStmt.toString());
+									stmt.execute(saveMsgStmt.toString());
 									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " in DB-Tabelle " + msgLogTbl + " eingetragen.", LogEngine.INFO);
 								} catch (Exception e) {
 									LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ msgLogTbl + " "+ e.getMessage(),LogEngine.ERROR);
@@ -277,8 +267,10 @@ public class LocalDBConnection {
 									dbStatus = 0;
 									connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
 									//hier falls während der schreibvorgänge die verbind verloren geht.
+								
 								}
 							}
+							
 					}
 				} else {
 					LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ msgLogTbl, LogEngine.ERROR);
@@ -288,7 +280,8 @@ public class LocalDBConnection {
 		};
 		(new Thread(tmp)).start();
 	}
-	public void writeAllUsersAndNodesToLocDB(Collection<Node> allNodes){
+	public void writeAllUsersAndNodesToLocDB(Collection<Node> newAllNodes){
+		Collection<Node> allNodes = newAllNodes;
 		if (dbStatus >= 2) {
 			Iterator<Node> it = allNodes.iterator();
 			while (it.hasNext()){
@@ -309,42 +302,12 @@ public class LocalDBConnection {
 		} else {
 			LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ usrTbl	+" or " +nodeTbl, LogEngine.ERROR);
 		}
-		
 	}
 	
+	public void writeRoutingTable_to_t_nodes(Map routingTable){
+		
+	}
 	public void deleteAllMsgs () {
-//		if (isDBConnected) {
-//			int eingabe = JOptionPane.showConfirmDialog(null,
-//					"Yout´re about to delete your ChatLog!\n"
-//							+ "Are you really shore that you want to do it?",
-//					"Delete confirmation", JOptionPane.YES_NO_OPTION);
-//			if (eingabe == 1) {
-//				// no, he´s not shore!
-//
-//			} else if (eingabe == 0) {
-//				askForConnectionRetry = true;
-//				connectToLocDBServer();
-//
-//				try {
-//					this.stmt = con.createStatement();
-//					stmt.addBatch("DROP TABLE IF EXISTS " + chatLogTbl);
-//					stmt.executeBatch();
-//					createDbAndTables();
-//
-//				} catch (SQLException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}else {
-//			askForConnectionRetry = true;
-//			if (connectToLocDBServer()) {
-//				isDBConnected = true;
-//				deleteAllMsgs();
-//			} else {
-//				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
-//			}
-//		}
 	}
 	
 	public void searchInHistory (JTextPane historyContentTxt, String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){

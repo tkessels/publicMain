@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.nodeengine.NodeEngine;
 
@@ -16,8 +18,8 @@ import org.publicmain.nodeengine.NodeEngine;
  * 
  */
 
-public class Node implements Serializable {
-	private static final long	serialVersionUID	= 23132123131L;
+public class Node extends DefaultMutableTreeNode implements Serializable {
+	private static final long	serialVersionUID	= 23132123133L;
 //	private static Node me;
 	private final long nodeID;
 	private final long userID;
@@ -107,7 +109,7 @@ public class Node implements Serializable {
 	
 	@Override
 	public String toString() {
-		return alias+"@"+userID+":"+nodeID;
+		return alias+"@"+hostname;
 	}
 	
 	
@@ -154,6 +156,12 @@ public class Node implements Serializable {
 		int index =0;
 		for (InetAddress soc : sockets)rück.put("ip_"+(index++),soc.getHostAddress());
 		return rück;
+	}
+	
+	
+	@Override
+	public Object clone() {
+		return new Node();
 	}
 	
 

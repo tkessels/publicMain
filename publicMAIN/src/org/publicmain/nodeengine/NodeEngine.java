@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -86,6 +87,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
  private Thread rootMe	;																			//Thread der nach einem Delay Antrag auf RootMode stellt wird mit einem Discover gestartet
  private Thread rootClaimProcessor;												 				//Thread zum Sammeln und Auswerten von Root_Announces (Ansprüche auf Rootmode) wird beim empfang/versand eines RootAnnounce getstatet.
  
+ private BestNodeStrategy myStrategy;
+ 
 
 	public NodeEngine(ChatEngine parent) throws IOException {
 		
@@ -106,11 +109,14 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 		meinNode = new Node();
 		allNodes.add(meinNode);
+		
+		myStrategy=new RandomStrategy(nodeID);
 
-		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
 
 		connectionsAcceptBot.start();
 		multicastRecieverBot.start();
+
+		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
 
 		discover();
 		
@@ -133,13 +139,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	
 	
 	private Node getBestNode() {
-		// TODO Intelligente Auswahl des am besten geeigneten Knoten mit dem sich der Neue Verbinden darf.
-		Random x = new Random(nodeID);
-		Node selected = (Node) allNodes.toArray()[x.nextInt(allNodes.size())];
-//		TreeNode tmp = getTree();
-//		if(tmp.getChildCount()<MAX_CLIENTS) selected = tmp.
-		return selected;
-//		return meinNode;
+		return myStrategy.getBestNode(getTree());
 	}
 
 	/**
@@ -1030,7 +1030,20 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			Node tmp = ce.getNodeforAlias(parameter);
 			if(tmp!=null)routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
 			break;
-	
+		case "maxcon":
+			Config.getConfig().setMaxConnections(Integer.parseInt(parameter));
+			break;
+		case "bestnode":
+			long time=System.currentTimeMillis();
+			GUI.getGUI().info("Strategie:" +myStrategy.getClass().getSimpleName(), null, 0);
+			GUI.getGUI().info(getBestNode().toString(), null, 0);
+			GUI.getGUI().info("took "+ (System.currentTimeMillis()-time) +" ms to evaluate"  , null, 0);
+			break;
+		case "strategy":
+			if(parameter.equals("random")) myStrategy=new RandomStrategy(nodeID);
+			else if(parameter.equals("breadth")) myStrategy=new BreadthFirstStrategy();
+			else GUI.getGUI().info("unknown Strategy"  , null, 1); 
+			break;
 		case "update":
 			GUI.getGUI().notifyGUI();
 			break;
@@ -1047,8 +1060,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		
 	}
 	
-	public DefaultMutableTreeNode getTree() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode( meinNode );
+	public Node getTree() {
+		Node root = (Node) meinNode.clone();
 		        // Zuerst werden alle Knoten hergestellt...
 		for (final ConnectionHandler con : connections) {
 			Runnable tmp = new Runnable() {
@@ -1057,7 +1070,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				}
 			};
 			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.TREE_DATA, null, null, true, Config.getConfig().getTreeBuildTime(), tmp);
-			if(polled_tree!=null) root.add((MutableTreeNode) polled_tree.getData());
+			if(polled_tree!=null) root.add((Node) polled_tree.getData());
 		}
 		        return root;
 		    

@@ -266,6 +266,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 	public void sendtcp(MSG nachricht) {
 		if (hasParent()) 		sendroot(nachricht); 
+		//FIXME Concurrent Modification Exception beim disconnecten
 		if (hasChildren()) 	for (ConnectionHandler x : connections) x.send(nachricht);
 	}
 
@@ -1042,6 +1043,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "strategy":
 			if(parameter.equals("random")) myStrategy=new RandomStrategy(nodeID);
 			else if(parameter.equals("breadth")) myStrategy=new BreadthFirstStrategy();
+			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==3) {
+				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]));
+			}
 			else GUI.getGUI().info("unknown Strategy"  , null, 1); 
 			break;
 		case "update":

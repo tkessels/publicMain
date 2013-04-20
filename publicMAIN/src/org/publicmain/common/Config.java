@@ -11,8 +11,8 @@ import java.util.Properties;
 
 
 public class Config {
-	private static final int CURRENTVERSION		=	4;
-	private static final int MINVERSION				=	4;
+	private static final int CURRENTVERSION		=	5;
+	private static final int MINVERSION				=	5;
 	private static final String APPDATA=System.getenv("APPDATA")+File.separator+"publicMAIN"+File.separator;
 	private static final String JARLOCATION=Config.class.getProtectionDomain().getCodeSource().getLocation().getFile();
 	private static final String	lock_file_name		= 	"pm.loc";
@@ -158,7 +158,7 @@ public class Config {
 		tmp.setNamePattern(".*[^a-zA-Z0-9צהüײִÜßיב].*");
 		
 		//local mySQL Database settings
-		tmp.setLocalDBCreatet(0);
+		tmp.setLocalDBVersion(0);
 		tmp.setLocalDBDatabasename("db_publicMain");
 		tmp.setLocalDBPort("3306");
 		tmp.setLocalDBUser("root");

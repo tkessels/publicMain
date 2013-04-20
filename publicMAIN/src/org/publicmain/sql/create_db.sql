@@ -1,13 +1,17 @@
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
 DROP SCHEMA IF EXISTS `db_publicmain` ;
 CREATE SCHEMA IF NOT EXISTS `db_publicmain` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
 USE `db_publicmain` ;
 
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_user`
+-- Table `db_publicmain`.`t_users`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_publicmain`.`t_user` ;
+DROP TABLE IF EXISTS `db_publicmain`.`t_users` ;
 
-CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_user` (
+CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_users` (
   `userID` BIGINT(20) NOT NULL ,
   `alias` VARCHAR(45) NOT NULL ,
   `username` VARCHAR(45) NOT NULL ,
@@ -26,7 +30,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_groups` (
   PRIMARY KEY (`name`) ,
   CONSTRAINT `fk_t_groups_t_user1`
     FOREIGN KEY (`t_user_userID` )
-    REFERENCES `db_publicmain`.`t_user` (`userID` )
+    REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -61,12 +65,12 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
   PRIMARY KEY (`msgID`, `timestmp`, `t_user_userID_sender`) ,
   CONSTRAINT `fk_t_messages_t_user1`
     FOREIGN KEY (`t_user_userID_sender` )
-    REFERENCES `db_publicmain`.`t_user` (`userID` )
+    REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_t_messages_t_user2`
     FOREIGN KEY (`t_user_userID_empfaenger` )
-    REFERENCES `db_publicmain`.`t_user` (`userID` )
+    REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_t_messages_t_groups1`
@@ -97,6 +101,7 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_settings` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
   `ProfilID` VARCHAR(45) NOT NULL ,
+  `t_user_userID` BIGINT(20) NOT NULL ,
   `SystemAlias` VARCHAR(20) NULL ,
   `GuiMaxAliasLength` INT NULL ,
   `GuiNamePattern` VARCHAR(45) NULL ,
@@ -126,11 +131,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
   `SqlBackupDbChoosenUsername` VARCHAR(45) NULL ,
   `SqlBackupDbChoosenUserPasswordHash` INT NULL ,
   `SqlBackupDbChoosenIP` VARCHAR(15) NULL ,
-  `t_user_userID` BIGINT(20) NOT NULL ,
   PRIMARY KEY (`ProfilID`) ,
   CONSTRAINT `fk_t_settings_t_user1`
     FOREIGN KEY (`t_user_userID` )
-    REFERENCES `db_publicmain`.`t_user` (`userID` )
+    REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -151,7 +155,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_nodes` (
   PRIMARY KEY (`nodeID`) ,
   CONSTRAINT `fk_t_nodes_t_user1`
     FOREIGN KEY (`t_user_userID` )
-    REFERENCES `db_publicmain`.`t_user` (`userID` )
+    REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_t_nodes_t_nodes1`
@@ -166,6 +170,11 @@ CREATE INDEX `fk_t_nodes_t_user1_idx` ON `db_publicmain`.`t_nodes` (`t_user_user
 CREATE INDEX `fk_t_nodes_t_nodes1_idx` ON `db_publicmain`.`t_nodes` (`t_nodes_nodeID` ASC) ;
 
 USE `db_publicmain` ;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 -- -----------------------------------------------------
 -- Data for table `db_publicmain`.`t_msgType`

@@ -627,7 +627,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				ce.put(paket);
 				break;
 			case SYSTEM:
-				LocalDBConnection.getDBConnection().saveMsg(paket);
+				LocalDBConnection.getDBConnection().writeMsgToLocDB(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
 					allnodes_add((Node) paket.getData());

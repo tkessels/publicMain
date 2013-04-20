@@ -136,6 +136,7 @@ public class LocalDBConnection {
 			}
 		}
 		if (dbStatus == 1 && Config.getConfig().getLocalDBCreatet() == 0) {
+			System.out.println("hier");
 			createDbAndTables();
 		}
 		if (Config.getConfig().getLocalDBCreatet() == 1 && dbStatus == 1) {
@@ -160,6 +161,9 @@ public class LocalDBConnection {
 				}
 				stmt.execute(read);
 			}
+			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (name, t_user_userID) values (newname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
+			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_name VARCHAR(20), IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_name, newt_groups_name, newtxt); END;");
+			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newalias VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, alias, username)	values (newuserID,newalias,newusername) ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username); END;");
 			dbStatus = 2;
 			Config.getConfig().setLocalDBCreatet(1);
 			Config.write();

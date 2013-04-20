@@ -167,7 +167,6 @@ CREATE INDEX `fk_t_nodes_t_nodes1_idx` ON `db_publicmain`.`t_nodes` (`t_nodes_no
 
 USE `db_publicmain` ;
 
-
 -- -----------------------------------------------------
 -- Data for table `db_publicmain`.`t_msgType`
 -- -----------------------------------------------------

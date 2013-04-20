@@ -43,8 +43,8 @@ public class ConfigData extends Properties {
 		return Long.parseLong(this.getProperty("ne.file_transfer_timeout"));
 	}
 
-	public int getLocalDBCreatet(){
-		return Integer.parseInt(this.getProperty("sql.local_db_createt"));
+	public int getLocalDBVersion(){
+		return Integer.parseInt(this.getProperty("sql.local_db_version"));
 	}
 	
 	public String getLocalDBDatabasename() {
@@ -132,8 +132,8 @@ public class ConfigData extends Properties {
 		this.setProperty("sql.backup_db_choosen_user_password", userPassWord);
 	}
 	
-	public void setLocalDBCreatet(int createt){
-		this.setProperty("sql.local_db_createt", String.valueOf(createt) );
+	public void setLocalDBVersion(int version){
+		this.setProperty("sql.local_db_version", String.valueOf(version) );
 	}
 	
 	public void setCurrentVersion(int version) {

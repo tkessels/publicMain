@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -29,6 +30,7 @@ import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
+import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
 
 import com.mysql.jdbc.PreparedStatement;
@@ -66,7 +68,13 @@ public class LocalDBConnection {
 	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=DB und Tabellen angelegt 3=mit db verbunden
 	private int maxVersuche;
 	private long warteZeitInSec;
+	private Collection<Node> allNodes;
+	private HashSet<String> groupsSet;
+	private boolean writtenStandardGroups;
+	private boolean writtenStandardUser;
 	private Thread connectToDBThread;
+	private Thread hardWorkingThread;
+	private int dbVersion;
 	//--------neue Sachen ende------------
 	
 	// verbindungssachen
@@ -93,16 +101,12 @@ public class LocalDBConnection {
 		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=???
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
+		this.writtenStandardGroups = false;
+		this.writtenStandardUser = false;
+		this.connectToDBThread = new Thread(new connectToLocDBServer());
+		this.hardWorkingThread = new Thread(new writeEverythingToLocDB());
+		this.dbVersion = 2;
 		//--------neue Sachen ende------------
-		
-		
-		
-		Runnable tmp = new Runnable(){
-			public void run() {
-				connectToLocDBServer(); 
-				}
-		};
-		this.connectToDBThread = new Thread(tmp);
 		connectToDBThread.start();
 	}
 	public static LocalDBConnection getDBConnection() {
@@ -112,42 +116,43 @@ public class LocalDBConnection {
 		return me;
 	}
 
-	private void connectToLocDBServer() { // wird nur vom Construktor aufgerufen
-		int versuche = 0;
+	private class connectToLocDBServer implements Runnable { // wird nur vom Construktor aufgerufen
 
-		while ((versuche < maxVersuche) && (dbStatus == 0)) { // hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
-			try {
-				con = DriverManager.getConnection(url, user, passwd);
-				stmt = con.createStatement();
-				LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
-				dbStatus = 1;
-				versuche = 0;
-			} catch (SQLException e) {
-				LogEngine.log(
-						this,
-						"DB-Verbindungsaufbau fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
+		public void run() {
+			int versuche = 0;
+			while ((versuche < maxVersuche) && (dbStatus == 0)) { // hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
 				try {
-					Thread.sleep(warteZeitInSec * 1000);
-				} catch (InterruptedException e1) {
-					LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+					con = DriverManager.getConnection(url, user, passwd);
+					stmt = con.createStatement();
+					LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
+					dbStatus = 1;
+					versuche = 0;
+				} catch (SQLException e) {
+					LogEngine.log(
+							this,
+							"DB-Verbindungsaufbau fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
+					try {
+						Thread.sleep(warteZeitInSec * 1000);
+					} catch (InterruptedException e1) {
+						LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+					}
+					versuche++;
+					dbStatus = 0;
 				}
-				versuche++;
-				dbStatus = 0;
 			}
-		}
-		if (dbStatus == 1 && Config.getConfig().getLocalDBCreatet() == 0) {
-			System.out.println("hier");
-			createDbAndTables();
-		}
-		if (Config.getConfig().getLocalDBCreatet() == 1 && dbStatus == 1) {
-			dbStatus = 2;
-		}
-		if (dbStatus == 2) {
 			try {
-				stmt.execute("use " + dbName);
-				dbStatus = 3;
-			} catch (SQLException e) {
-				LogEngine.log(this, "fehler bei verbinden mit " + dbName, LogEngine.ERROR);
+				stmt.executeQuery("use " + dbName);
+				if(Config.getConfig().getLocalDBVersion() < dbVersion){
+					createDbAndTables();
+					run();
+				} else {
+					dbStatus = 3;
+					LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+					hardWorkingThread.start(); 
+				}
+			} catch (SQLException e1) {
+				createDbAndTables();
+				run();
 			}
 		}
 	}
@@ -165,7 +170,7 @@ public class LocalDBConnection {
 			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_name VARCHAR(20), IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_name, newt_groups_name, newtxt); END;");
 			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newalias VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, alias, username)	values (newuserID,newalias,newusername) ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username); END;");
 			dbStatus = 2;
-			Config.getConfig().setLocalDBCreatet(1);
+			Config.getConfig().setLocalDBVersion(dbVersion);
 			Config.write();
 			LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
 		} catch (FileNotFoundException e) {
@@ -178,101 +183,28 @@ public class LocalDBConnection {
 			e2.printStackTrace();
 		}
 	}
-
-	public synchronized void saveMsg (MSG m){
-		//Hier wird message in ne Blocking queue geschrieben
-		locDBInbox.add(m);
-		if (locDBInbox.size() >= 10 && dbStatus >= 2){	//Sobald 10 nachichten drin sind wird in DB geschrieben!!!
-			writeMsgToDB(); //was ist wenn die methode schon aufgerufen ist und der Threat dadrin schon läuf???
-		}
-	}
-	
-	public void writeMsgToDB() {
-		Runnable tmp = new Runnable() {
-			public void run() {
-				if (dbStatus >= 2) {
-					while (!locDBInbox.isEmpty() && dbStatus >=2) {
-						StringBuffer saveMsgStmt = new StringBuffer();
-						StringBuffer saveGrpStmt = new StringBuffer();
-						MSG m = locDBInbox.poll();
-						long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
-						long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
-							if (m.getTyp() == NachrichtenTyp.GROUP) {
-								//fügt Gruppe hinzu
-								saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-								saveGrpStmt.append("'" + m.getGroup() 	+ "',");
-								saveGrpStmt.append(ChatEngine.getCE().getUserID()+ ")");
-								//fügt Nachicht hinzu
-								saveMsgStmt.append("CALL p_t_messages_saveMessage(");
-								saveMsgStmt.append(m.getId() 			+ ",");
-								saveMsgStmt.append(m.getTimestamp() 	+ ",");
-								saveMsgStmt.append(uid_sender 			+ ",");
-								saveMsgStmt.append(uid_empfänger 		+ ",");
-								saveMsgStmt.append("'" + m.getTyp() 	+ "',");
-								saveMsgStmt.append("'" + m.getGroup() 	+ "',");
-								saveMsgStmt.append("'" + m.getData() 	+ "')");
-							}
-							if (m.getTyp() == NachrichtenTyp.PRIVATE){
-								//fügt Gruppe PRIVATE
-								saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-								saveGrpStmt.append("'PRIVATE',");
-								saveGrpStmt.append(ChatEngine.getCE().getUserID()+ ")");
-								//fügt Nachicht hinzu
-								saveMsgStmt.append("CALL p_t_messages_saveMessage(");
-								saveMsgStmt.append(m.getId() 			+ ",");
-								saveMsgStmt.append(m.getTimestamp() 	+ ",");
-								saveMsgStmt.append(uid_sender 			+ ",");
-								saveMsgStmt.append(uid_empfänger 		+ ",");
-								saveMsgStmt.append("'" + m.getTyp() 	+ "',");
-								saveMsgStmt.append("'PRIVATE',");
-								saveMsgStmt.append("'" + m.getData() 	+ "')");
-							}	
-							if (m.getTyp() == NachrichtenTyp.SYSTEM){
-								//fügt Gruppe PRIVATE
-								saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-								saveGrpStmt.append("'SYSTEM',");
-								saveGrpStmt.append(ChatEngine.getCE().getUserID()+ ")");
-								//fügt Nachicht hinzu
-								saveMsgStmt.append("CALL p_t_messages_saveMessage(");
-								saveMsgStmt.append(m.getId() 			+ ",");
-								saveMsgStmt.append(m.getTimestamp() 	+ ",");
-								saveMsgStmt.append(uid_sender 			+ ",");
-								saveMsgStmt.append(uid_empfänger 		+ ",");
-								saveMsgStmt.append("'" + m.getCode() 	+ "',");
-								saveMsgStmt.append("'SYSTEM',");
-								saveMsgStmt.append("'" + m.getData() 	+ "')");
-							}
-							if (saveMsgStmt.length()> 0 && saveGrpStmt.length() > 0){
-								try {
-									stmt.execute(saveGrpStmt.toString());
-//									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_groups_saveGroups aufgerufen", LogEngine.INFO);
-									stmt.execute(saveMsgStmt.toString());
-//									LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_messages_saveMessage aufgerufen", LogEngine.INFO);
-								} catch (Exception e) {
-									LogEngine.log(LocalDBConnection.this,"Fehler beim aufruf von  : p_t_groups_saveGroups oder p_t_messages_saveMessage "+ e.getMessage(),LogEngine.ERROR);
-									locDBInbox.add(m);	//TODO: Schreibt nachicht, die rausgenommen wurde, bei der es einen Fehler beim abspeichern gab wieder zurück in Queue! Wie schafft man das, dass es an die richtige stelle geschrieben wird
-									dbStatus = 0;
-									connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
-									//hier falls während der schreibvorgänge die verbind verloren geht.
-								
-								}
-							}
-							
-					}
-				} else {
-					LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ msgLogTbl, LogEngine.ERROR);
-				}
-				
-			}
-		};
-		(new Thread(tmp)).start();
-	}
 	
 	public synchronized void writeAllUsersToLocDB(Collection<Node> newAllNodes){
-		Collection<Node> allNodes = newAllNodes;
-		StringBuffer saveUserStmt; 
-		if (dbStatus >= 2) {
-			Iterator<Node> it = allNodes.iterator();
+		allNodes = newAllNodes;
+	}
+	
+	private void executeWritingUsers(){
+		if(!writtenStandardUser){
+			try {
+				stmt.execute("CALL p_t_user_saveUsers(" + ChatEngine.getCE().getUserID() + ",'" + ChatEngine.getCE().getAlias() + "','" + NodeEngine.getNE().getNode(NodeEngine.getNE().getNodeID()).getUsername() + "')");
+				stmt.execute("CALL p_t_user_saveUsers(-1, 'standardPublicUser', 'standardPublicUser')");
+				} catch (SQLException e) {
+				LogEngine.log(this, "Fehler beim Schreiben der StandardUser in 'executeWritingUsers" + e.getMessage(), LogEngine.ERROR);
+			}
+			writtenStandardUser = true;
+		}
+		
+		
+		if (allNodes != null){
+			System.out.println("drin");
+			Collection<Node> tmpAllNodes = allNodes;
+			StringBuffer saveUserStmt; 
+			Iterator<Node> it = tmpAllNodes.iterator();
 			while (it.hasNext()){
 				Node tmpNode = (Node) it.next();
 				saveUserStmt = new StringBuffer();
@@ -285,15 +217,130 @@ public class LocalDBConnection {
 					LogEngine.log(LocalDBConnection.this, "user" + tmpNode.getUserID() + " in DB-Tabelle " + usrTbl + " eingetragen.", LogEngine.INFO);
 				} catch (SQLException e) {
 					LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ usrTbl + " or " + nodeTbl	 + " "+ e.getMessage(),LogEngine.ERROR);
-					connectToLocDBServer();	//DB-Connection wird also nur versucht wieder aufzubauen wenn sie kurz nach programmstart schonmal bestand - sonnst kommt man hier garnicht rein.
 					//hier falls während der schreibvorgänge die verbind verloren geht.
 				}
 			}
+			allNodes = null;
 		} else {
-			LogEngine.log(LocalDBConnection.this,"DB nicht bereit zu schreiben"+ usrTbl	+" or " +nodeTbl, LogEngine.ERROR);
 		}
 	}
 	
+	public synchronized void writeAllGroupsToLocDB(HashSet<String> newGroupsSet){
+		groupsSet = newGroupsSet;
+	}
+	
+	private void executeWriteAllGroupsToLocDB(){
+		if(!writtenStandardGroups){
+			try {
+				stmt.execute("call p_t_groups_saveGroups('SYSTEM'," + ChatEngine.getCE().getUserID() +")");
+				stmt.execute("call p_t_groups_saveGroups('PRIVATE',"+ ChatEngine.getCE().getUserID() +")");
+				stmt.execute("call p_t_groups_saveGroups('public',"+ ChatEngine.getCE().getUserID() +")");
+			} catch (SQLException e) {
+				LogEngine.log(this, "Fehler beim Schreiben der StandardGruppen in 'executeWriteAllGroupsToLocDB " + e.getMessage(), LogEngine.ERROR);
+			}
+			writtenStandardGroups = true;
+		}
+		
+		if (groupsSet != null){
+			HashSet<String> tmpGroupsSet = groupsSet;
+			groupsSet.clear();
+			StringBuffer saveGroupsStmt; 
+			Iterator<String> it = tmpGroupsSet.iterator();
+			while(it.hasNext()){
+				String tmpGrpStr = it.next();
+				saveGroupsStmt = new StringBuffer();
+				saveGroupsStmt.append("p_t_groups_saveGroups(");
+				saveGroupsStmt.append("'" + tmpGrpStr + "',");
+				saveGroupsStmt.append(ChatEngine.getCE().getUserID()+ ")");
+				try {
+					
+					stmt.execute(saveGroupsStmt.toString());
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public synchronized void writeMsgToLocDB (MSG m){
+		//Hier wird message in ne Blocking queue geschrieben
+		locDBInbox.add(m);
+		System.out.println("in der write");
+	}
+	
+	private void executeWriteMsgToDB() {
+		BlockingQueue<MSG> tmpLocDBInbox = locDBInbox;
+		locDBInbox.clear();
+		while (!tmpLocDBInbox.isEmpty() && dbStatus >= 3) {
+			System.out.println("in der while!");
+			StringBuffer saveMsgStmt = new StringBuffer();
+			StringBuffer saveGrpStmt = new StringBuffer();
+			MSG m = tmpLocDBInbox.poll();
+			System.out.println(m.toString());
+			long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
+			long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
+			if (m.getTyp() == NachrichtenTyp.GROUP) {
+				// fügt Gruppe hinzu
+//				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
+//				saveGrpStmt.append("'" + m.getGroup() + "',");
+//				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
+				// fügt Nachicht hinzu
+				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
+				saveMsgStmt.append(m.getId() + ",");
+				saveMsgStmt.append(m.getTimestamp() + ",");
+				saveMsgStmt.append(uid_sender + ",");
+				saveMsgStmt.append(uid_empfänger + ",");
+				saveMsgStmt.append("'" + m.getTyp() + "',");
+				saveMsgStmt.append("'" + m.getGroup() + "',");
+				saveMsgStmt.append("'" + m.getData() + "')");
+				System.out.println("in Group");
+			}
+			if (m.getTyp() == NachrichtenTyp.PRIVATE) {
+				// fügt Gruppe PRIVATE
+//				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
+//				saveGrpStmt.append("'PRIVATE',");
+//				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
+				// fügt Nachicht hinzu
+				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
+				saveMsgStmt.append(m.getId() + ",");
+				saveMsgStmt.append(m.getTimestamp() + ",");
+				saveMsgStmt.append(uid_sender + ",");
+				saveMsgStmt.append(uid_empfänger + ",");
+				saveMsgStmt.append("'" + m.getTyp() + "',");
+				saveMsgStmt.append("'PRIVATE',");
+				saveMsgStmt.append("'" + m.getData() + "')");
+			}
+			if (m.getTyp() == NachrichtenTyp.SYSTEM) {
+				// fügt Gruppe PRIVATE
+//				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
+//				saveGrpStmt.append("'SYSTEM',");
+//				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
+				// fügt Nachicht hinzu
+				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
+				saveMsgStmt.append(m.getId() + ",");
+				saveMsgStmt.append(m.getTimestamp() + ",");
+				saveMsgStmt.append(uid_sender + ",");
+				saveMsgStmt.append(uid_empfänger + ",");
+				saveMsgStmt.append("'" + m.getCode() + "',");
+				saveMsgStmt.append("'SYSTEM',");
+				saveMsgStmt.append("'" + m.getData() + "')");
+			}
+			if (saveMsgStmt.length()> 0){ //&& saveGrpStmt.length() > 0){
+				try {
+//					stmt.execute(saveGrpStmt.toString());
+//					LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_groups_saveGroups aufgerufen", LogEngine.INFO);
+					stmt.execute(saveMsgStmt.toString());
+//					LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_messages_saveMessage aufgerufen", LogEngine.INFO);
+				} catch (Exception e) {
+					LogEngine.log(LocalDBConnection.this,"Fehler beim aufruf von  : p_t_groups_saveGroups oder p_t_messages_saveMessage "+ e.getMessage(),LogEngine.ERROR);
+					locDBInbox.add(m);	//TODO: Schreibt nachicht, die rausgenommen wurde, bei der es einen Fehler beim abspeichern gab wieder zurück in Queue! Wie schafft man das, dass es an die richtige stelle geschrieben wird
+					dbStatus = 0;
+					//hier falls während der schreibvorgänge die verbind verloren geht.
+				}
+			}
+		}
+	}
+
 	public synchronized void writeRoutingTable_to_t_nodes(Map routingTable){
 		
 	}
@@ -386,5 +433,23 @@ public class LocalDBConnection {
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
 		}
+	}
+	
+	private final class writeEverythingToLocDB implements Runnable{
+
+		public void run() {
+			while (dbStatus >= 3){
+				executeWritingUsers();
+				executeWriteAllGroupsToLocDB();
+				executeWriteMsgToDB();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			System.out.println("draußen");
+		}
+		
 	}
 }

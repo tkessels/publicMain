@@ -395,7 +395,7 @@ public class ChatEngine{
 	public void put(MSG nachricht) {
 		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
-			LocalDBConnection.getDBConnection().saveMsg(nachricht);
+			LocalDBConnection.getDBConnection().writeMsgToLocDB(nachricht);
 		}
 	}
 

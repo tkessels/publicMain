@@ -740,7 +740,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				break;
 			case "Settings":
 				// TODO: hier noch eine vernünfige variante der Implementierung
-				SettingsWindow.getRegistrationWindow();
+				SettingsWindow.getSettingsWindow();
 				break;
 
 			case "Push History":

@@ -4,18 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
-import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -24,9 +22,10 @@ import javax.swing.JTextField;
 import org.publicmain.sql.BackupDBConnection;
 import org.resources.Help;
 
-public class SettingsWindow extends JFrame{
+public class SettingsWindow extends JDialog{
 	
 	private static SettingsWindow me;
+	
 	private BackupDBConnection bdb;
 	private JLabel wellcomeLogo;
 	private JLabel wellcomeLabel1;
@@ -51,8 +50,7 @@ public class SettingsWindow extends JFrame{
 	
 	private JButton cancelButton;
 	private JButton applyButton;
-	private JPanel button1Panel;
-	private JPanel button2Panel;
+	private JPanel buttonPanel;
 	
 	private GraphicsEnvironment ge;
 	private GraphicsDevice gd;
@@ -61,8 +59,9 @@ public class SettingsWindow extends JFrame{
 	private GridBagConstraints c;
 	private Insets set;
 	
-	private SettingsWindow() {
-		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png",307,78));
+	public SettingsWindow() {
+		this.me = this;
+		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png",200,45));
 		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
@@ -85,15 +84,11 @@ public class SettingsWindow extends JFrame{
 		
 		this.cancelButton			=	new JButton("Cancel");
 		this.applyButton			=	new JButton("Apply");
-		this.button1Panel			=	new JPanel();
-		this.button2Panel			=	new JPanel(new BorderLayout());
+		this.buttonPanel			=	new JPanel(new BorderLayout());
 		
-		this.button1Panel.add(applyButton);
-		this.button1Panel.add(cancelButton);
-		this.button1Panel.setBackground(Color.WHITE);
-		
-		this.button2Panel.add(button1Panel, BorderLayout.EAST);
-		this.button2Panel.setBackground(Color.WHITE);
+		this.buttonPanel.add(applyButton);
+		this.buttonPanel.add(cancelButton, BorderLayout.EAST);
+		this.buttonPanel.setBackground(Color.WHITE);
 		
 		this.applyButton.addActionListener(new SettingsWindowButtonController());
 		this.cancelButton.addActionListener(new SettingsWindowButtonController());
@@ -104,10 +99,6 @@ public class SettingsWindow extends JFrame{
 		
 		this.c 						= new GridBagConstraints();
 		this.set 					= new Insets(5, 5, 5, 5);
-		
-		this.setTitle("Settings");
-		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
-		this.getContentPane().setBackground(Color.WHITE);
 		
 		statusTextField.setBackground(new Color(229, 195, 0));
 		statusTextField.setEditable(false);
@@ -193,8 +184,15 @@ public class SettingsWindow extends JFrame{
 		c.gridy 	= 12;
 		c.gridwidth = 1;
 		c.gridx 	= 1;
-		this.add(button2Panel, c);	
+		this.add(buttonPanel, c);	
 		
+		this.setTitle("Settings");
+		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
+		this.getContentPane().setBackground(Color.WHITE);
+		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setModal(false);
+		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.pack();
 		this.setResizable(false);
 		
@@ -210,7 +208,7 @@ public class SettingsWindow extends JFrame{
 		this.setVisible(true);
 	}
 	
-	public static SettingsWindow getSettingsWindow(){
+	public static SettingsWindow getMe(){
 		if (me == null) {
 			me = new SettingsWindow();
 			return me;
@@ -229,11 +227,12 @@ public class SettingsWindow extends JFrame{
 			JButton source = (JButton) evt.getSource();
 			switch (source.getText()) {
 
-			case "Apply Changes":
+			case "Apply":
 				//TODO Hier wie gewünscht das Übernehmen der Änderungen initiieren 
 				break;
-			case "Register":
-				bdb.createNewUser(statusTextField, backupserverIPTextField, userNameTextField, passWordTextField);
+			case "Cancel":
+				//TODO: Cancel dinger tun
+//				bdb.createNewUser(statusTextField, backupserverIPTextField, userNameTextField, passWordTextField);
 				break;
 			}
 		}

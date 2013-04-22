@@ -578,13 +578,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if (tmp != null) {
 			if (typ == 0) {
 				tmp.info(nachricht);
-				textToTray(nachricht, MSGCode.TRAY_INFO_TEXT);
+				textToTray(nachricht, MSGCode.CW_INFO_TEXT);
 			} else if (typ == 1) {
 				tmp.warn(nachricht);
-				textToTray(nachricht, MSGCode.TRAY_WARNING_TEXT);
+				textToTray(nachricht, MSGCode.CW_WARNING_TEXT);
 			} else {
 				tmp.error(nachricht);
-				textToTray(nachricht, MSGCode.TRAY_ERROR_TEXT);
+				textToTray(nachricht, MSGCode.CW_ERROR_TEXT);
 			}
 		}
 		
@@ -739,8 +739,15 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
-				// TODO: hier noch eine vernünfige variante der Implementierung
-				SettingsWindow.getSettingsWindow();
+				new Thread(new Runnable() {
+					public void run() {
+						if (SettingsWindow.getMe() == null) {
+							new SettingsWindow();
+						} else {
+							SettingsWindow.getMe().showIt();
+						}
+					}
+				}).start();
 				break;
 
 			case "Push History":

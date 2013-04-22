@@ -42,10 +42,6 @@ public class HelpContents extends JDialog {
 
 	private static HelpContents me; 
 
-	public static HelpContents getMe() {
-		return me;
-	}
-
 	private JTextPane helpContentTxt;
 	private JScrollPane sp;
 	private File htmlFile;
@@ -61,14 +57,15 @@ public class HelpContents extends JDialog {
 	public HelpContents() {
 		
 		this.me=this;
-		this.setTitle("Help Content");
+		
+		this.setTitle("Help");
 		this.setModal(false);
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setLayout(new BorderLayout());
 		this.setIconImage(Help.getIcon("helpContentsIcon.png").getImage());
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
-
+		
 		this.helpContentTxt = new JTextPane();
 		this.sp = new JScrollPane(helpContentTxt,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -92,6 +89,7 @@ public class HelpContents extends JDialog {
 		}
 
 		this.add(sp, BorderLayout.CENTER);
+				
 		this.pack();
 		
 		showIt();
@@ -109,5 +107,9 @@ public class HelpContents extends JDialog {
 			this.setLocationRelativeTo(null);
 		}
 		this.setVisible(true);
+	}
+	
+	public static HelpContents getMe() {
+		return me;
 	}
 }

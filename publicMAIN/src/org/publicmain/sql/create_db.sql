@@ -59,8 +59,8 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
   `msgID` INT(11) NOT NULL ,
   `txt` VARCHAR(200) NOT NULL ,
   `t_user_userID_sender` BIGINT(20) NOT NULL ,
-  `t_user_userID_empfaenger` BIGINT(20) NOT NULL ,
-  `t_groups_name` VARCHAR(20) NOT NULL ,
+  `t_user_userID_empfaenger` BIGINT(20) NULL ,
+  `t_groups_name` VARCHAR(20) NULL ,
   `t_msgType_name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`msgID`, `timestmp`, `t_user_userID_sender`) ,
   CONSTRAINT `fk_t_messages_t_user1`

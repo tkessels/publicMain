@@ -13,6 +13,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,6 +77,7 @@ public class LocalDBConnection {
 	private Thread hardWorkingThread;
 	private int dbVersion;
 	//--------neue Sachen ende------------
+	private int allNodes_hash ;
 	
 	// verbindungssachen
 	private static LocalDBConnection me;
@@ -95,6 +97,8 @@ public class LocalDBConnection {
 		this.routingOverviewTbl		= "t_routingOverView";
 		this.cal					= Calendar.getInstance();
 		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+		this.allNodes				= Collections.synchronizedSet(new HashSet<Node>());
+		this.allNodes_hash 			= allNodes.hashCode();
 
 		//--------neue Sachen------------
 		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
@@ -128,9 +132,7 @@ public class LocalDBConnection {
 					dbStatus = 1;
 					versuche = 0;
 				} catch (SQLException e) {
-					LogEngine.log(
-							this,
-							"DB-Verbindungsaufbau fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
+					LogEngine.log(this,	"DB-Verbindungsaufbau fehlgeschlagen: "+ e.getMessage(), LogEngine.ERROR);
 					try {
 						Thread.sleep(warteZeitInSec * 1000);
 					} catch (InterruptedException e1) {
@@ -140,19 +142,22 @@ public class LocalDBConnection {
 					dbStatus = 0;
 				}
 			}
-			try {
-				stmt.executeQuery("use " + dbName);
-				if(Config.getConfig().getLocalDBVersion() < dbVersion){
+			if(dbStatus == 1){
+				try {
+					stmt.executeQuery("use " + dbName);
+					//TODO: Tabelle mit version hinzufügen und prüfen
+					if(Config.getConfig().getLocalDBVersion() < dbVersion){
+						createDbAndTables();
+						run();
+					} else {
+						dbStatus = 3;
+						LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+						hardWorkingThread.start(); 
+					}
+				} catch (SQLException e1) {
 					createDbAndTables();
 					run();
-				} else {
-					dbStatus = 3;
-					LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
-					hardWorkingThread.start(); 
 				}
-			} catch (SQLException e1) {
-				createDbAndTables();
-				run();
 			}
 		}
 	}
@@ -166,9 +171,10 @@ public class LocalDBConnection {
 				}
 				stmt.execute(read);
 			}
-			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (name, t_user_userID) values (newname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
-			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_name VARCHAR(20), IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_name, newt_groups_name, newtxt); END;");
-			stmt.execute("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newalias VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, alias, username)	values (newuserID,newalias,newusername) ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username); END;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (name, t_user_userID) values (newname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_name VARCHAR(20), IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_name, newt_groups_name, newtxt); END;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newalias VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, alias, username)	values (newuserID,newalias,newusername) ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username); END;");
+			stmt.executeBatch();
 			dbStatus = 2;
 			Config.getConfig().setLocalDBVersion(dbVersion);
 			Config.write();
@@ -185,13 +191,14 @@ public class LocalDBConnection {
 	}
 	
 	public synchronized void writeAllUsersToLocDB(Collection<Node> newAllNodes){
-		allNodes = newAllNodes;
+		allNodes.addAll(newAllNodes);
 	}
 	
 	private void executeWritingUsers(){
 		if(!writtenStandardUser){
 			try {
 				stmt.execute("CALL p_t_user_saveUsers(" + ChatEngine.getCE().getUserID() + ",'" + ChatEngine.getCE().getAlias() + "','" + NodeEngine.getNE().getNode(NodeEngine.getNE().getNodeID()).getUsername() + "')");
+				//TODO: Private Nachrichten haben als Empfänger UID NULL
 				stmt.execute("CALL p_t_user_saveUsers(-1, 'standardPublicUser', 'standardPublicUser')");
 				} catch (SQLException e) {
 				LogEngine.log(this, "Fehler beim Schreiben der StandardUser in 'executeWritingUsers" + e.getMessage(), LogEngine.ERROR);
@@ -200,7 +207,7 @@ public class LocalDBConnection {
 		}
 		
 		
-		if (allNodes != null){
+		if (allNodes_hash != allNodes.hashCode()){
 			System.out.println("drin");
 			Collection<Node> tmpAllNodes = allNodes;
 			StringBuffer saveUserStmt; 
@@ -220,7 +227,7 @@ public class LocalDBConnection {
 					//hier falls während der schreibvorgänge die verbind verloren geht.
 				}
 			}
-			allNodes = null;
+			allNodes_hash = allNodes.hashCode();
 		} else {
 		}
 	}

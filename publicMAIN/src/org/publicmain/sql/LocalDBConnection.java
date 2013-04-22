@@ -29,6 +29,7 @@ import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
@@ -71,7 +72,6 @@ public class LocalDBConnection {
 	private long warteZeitInSec;
 	private Collection<Node> allNodes;
 	private HashSet<String> groupsSet;
-	private boolean writtenStandardGroups;
 	private boolean writtenStandardUser;
 	private Thread connectToDBThread;
 	private Thread hardWorkingThread;
@@ -105,7 +105,6 @@ public class LocalDBConnection {
 		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=???
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
-		this.writtenStandardGroups = false;
 		this.writtenStandardUser = false;
 		this.connectToDBThread = new Thread(new connectToLocDBServer());
 		this.hardWorkingThread = new Thread(new writeEverythingToLocDB());
@@ -171,9 +170,17 @@ public class LocalDBConnection {
 				}
 				stmt.execute(read);
 			}
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (name, t_user_userID) values (newname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
+			//TODO: durch änderungen in der db muss hier noch angepasst werden.
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newgroupname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (groupname, t_user_userID) values (newgroupname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
 			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_name VARCHAR(20), IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_name, newt_groups_name, newtxt); END;");
 			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newalias VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, alias, username)	values (newuserID,newalias,newusername) ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username); END;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType(ID,name,description)  VALUES (newID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
+			
+			//Hier wird die Tabelle t_msgType automatisch befüllt!
+			for (MSGCode c : MSGCode.values()){
+				stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
+			}
+			
 			stmt.executeBatch();
 			dbStatus = 2;
 			Config.getConfig().setLocalDBVersion(dbVersion);
@@ -208,7 +215,6 @@ public class LocalDBConnection {
 		
 		
 		if (allNodes_hash != allNodes.hashCode()){
-			System.out.println("drin");
 			Collection<Node> tmpAllNodes = allNodes;
 			StringBuffer saveUserStmt; 
 			Iterator<Node> it = tmpAllNodes.iterator();
@@ -237,17 +243,6 @@ public class LocalDBConnection {
 	}
 	
 	private void executeWriteAllGroupsToLocDB(){
-		if(!writtenStandardGroups){
-			try {
-				stmt.execute("call p_t_groups_saveGroups('SYSTEM'," + ChatEngine.getCE().getUserID() +")");
-				stmt.execute("call p_t_groups_saveGroups('PRIVATE',"+ ChatEngine.getCE().getUserID() +")");
-				stmt.execute("call p_t_groups_saveGroups('public',"+ ChatEngine.getCE().getUserID() +")");
-			} catch (SQLException e) {
-				LogEngine.log(this, "Fehler beim Schreiben der StandardGruppen in 'executeWriteAllGroupsToLocDB " + e.getMessage(), LogEngine.ERROR);
-			}
-			writtenStandardGroups = true;
-		}
-		
 		if (groupsSet != null){
 			HashSet<String> tmpGroupsSet = groupsSet;
 			groupsSet.clear();
@@ -272,18 +267,15 @@ public class LocalDBConnection {
 	public synchronized void writeMsgToLocDB (MSG m){
 		//Hier wird message in ne Blocking queue geschrieben
 		locDBInbox.add(m);
-		System.out.println("in der write");
 	}
 	
 	private void executeWriteMsgToDB() {
 		BlockingQueue<MSG> tmpLocDBInbox = locDBInbox;
 		locDBInbox.clear();
 		while (!tmpLocDBInbox.isEmpty() && dbStatus >= 3) {
-			System.out.println("in der while!");
 			StringBuffer saveMsgStmt = new StringBuffer();
 			StringBuffer saveGrpStmt = new StringBuffer();
 			MSG m = tmpLocDBInbox.poll();
-			System.out.println(m.toString());
 			long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
 			long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
 			if (m.getTyp() == NachrichtenTyp.GROUP) {
@@ -300,13 +292,8 @@ public class LocalDBConnection {
 				saveMsgStmt.append("'" + m.getTyp() + "',");
 				saveMsgStmt.append("'" + m.getGroup() + "',");
 				saveMsgStmt.append("'" + m.getData() + "')");
-				System.out.println("in Group");
 			}
 			if (m.getTyp() == NachrichtenTyp.PRIVATE) {
-				// fügt Gruppe PRIVATE
-//				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-//				saveGrpStmt.append("'PRIVATE',");
-//				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
 				// fügt Nachicht hinzu
 				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
 				saveMsgStmt.append(m.getId() + ",");
@@ -318,10 +305,6 @@ public class LocalDBConnection {
 				saveMsgStmt.append("'" + m.getData() + "')");
 			}
 			if (m.getTyp() == NachrichtenTyp.SYSTEM) {
-				// fügt Gruppe PRIVATE
-//				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-//				saveGrpStmt.append("'SYSTEM',");
-//				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
 				// fügt Nachicht hinzu
 				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
 				saveMsgStmt.append(m.getId() + ",");
@@ -455,7 +438,6 @@ public class LocalDBConnection {
 					e.printStackTrace();
 				}
 			}
-			System.out.println("draußen");
 		}
 		
 	}

@@ -382,10 +382,15 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			info("Username already in use", null, 1);
 			return false;
 		} else {
-			ce.setAlias(alias);
-			Config.getConfig().setAlias(alias);
-			Config.write();
-			return true;
+			if(alias.equals("")){
+				JOptionPane.showMessageDialog(me, "Username contains illegal charakters\nFor details checkout: Help -> Username", "Illegal Username", JOptionPane.ERROR_MESSAGE);
+				return false;
+			} else {
+				ce.setAlias(alias);
+				Config.getConfig().setAlias(alias);
+				Config.write();
+				return true;
+			}
 		}
 	}
 	

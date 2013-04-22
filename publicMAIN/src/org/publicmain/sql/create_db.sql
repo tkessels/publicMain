@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_users` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_users` (
   `userID` BIGINT(20) NOT NULL ,
-  `alias` VARCHAR(45) NOT NULL ,
+  `displayname` VARCHAR(45) NOT NULL ,
   `username` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`userID`) )
 ENGINE = InnoDB;
@@ -25,9 +25,9 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `db_publicmain`.`t_groups` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_groups` (
-  `name` VARCHAR(20) NOT NULL ,
+  `groupname` VARCHAR(20) NOT NULL ,
   `t_user_userID` BIGINT(20) NOT NULL ,
-  PRIMARY KEY (`name`) ,
+  PRIMARY KEY (`groupname`) ,
   CONSTRAINT `fk_t_groups_t_user1`
     FOREIGN KEY (`t_user_userID` )
     REFERENCES `db_publicmain`.`t_users` (`userID` )
@@ -44,8 +44,10 @@ CREATE INDEX `fk_t_groups_t_user1_idx` ON `db_publicmain`.`t_groups` (`t_user_us
 DROP TABLE IF EXISTS `db_publicmain`.`t_msgType` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_msgType` (
+  `ID` INT NOT NULL ,
   `name` VARCHAR(45) NOT NULL ,
-  PRIMARY KEY (`name`) )
+  `description` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`ID`) )
 ENGINE = InnoDB;
 
 
@@ -61,7 +63,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
   `t_user_userID_sender` BIGINT(20) NOT NULL ,
   `t_user_userID_empfaenger` BIGINT(20) NULL ,
   `t_groups_name` VARCHAR(20) NULL ,
-  `t_msgType_name` VARCHAR(45) NOT NULL ,
+  `t_msgType_ID` INT NOT NULL ,
   PRIMARY KEY (`msgID`, `timestmp`, `t_user_userID_sender`) ,
   CONSTRAINT `fk_t_messages_t_user1`
     FOREIGN KEY (`t_user_userID_sender` )
@@ -75,12 +77,12 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_t_messages_t_groups1`
     FOREIGN KEY (`t_groups_name` )
-    REFERENCES `db_publicmain`.`t_groups` (`name` )
+    REFERENCES `db_publicmain`.`t_groups` (`groupname` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_t_messages_t_msgType1`
-    FOREIGN KEY (`t_msgType_name` )
-    REFERENCES `db_publicmain`.`t_msgType` (`name` )
+    FOREIGN KEY (`t_msgType_ID` )
+    REFERENCES `db_publicmain`.`t_msgType` (`ID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -91,7 +93,7 @@ CREATE INDEX `fk_t_messages_t_user2_idx` ON `db_publicmain`.`t_messages` (`t_use
 
 CREATE INDEX `fk_t_messages_t_groups1_idx` ON `db_publicmain`.`t_messages` (`t_groups_name` ASC) ;
 
-CREATE INDEX `fk_t_messages_t_msgType1_idx` ON `db_publicmain`.`t_messages` (`t_msgType_name` ASC) ;
+CREATE INDEX `fk_t_messages_t_msgType1_idx` ON `db_publicmain`.`t_messages` (`t_msgType_ID` ASC) ;
 
 
 -- -----------------------------------------------------
@@ -102,7 +104,6 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_settings` ;
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
   `ProfilID` VARCHAR(45) NOT NULL ,
   `t_user_userID` BIGINT(20) NOT NULL ,
-  `SystemAlias` VARCHAR(20) NULL ,
   `GuiMaxAliasLength` INT NULL ,
   `GuiNamePattern` VARCHAR(45) NULL ,
   `GuiMaxGroupLength` INT NULL ,
@@ -149,7 +150,7 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_nodes` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_nodes` (
   `nodeID` BIGINT(20) NOT NULL ,
-  `hostname` VARCHAR(45) NOT NULL ,
+  `computername` VARCHAR(45) NOT NULL ,
   `t_user_userID` BIGINT(20) NULL ,
   `t_nodes_nodeID` BIGINT(20) NULL ,
   PRIMARY KEY (`nodeID`) ,
@@ -175,51 +176,3 @@ USE `db_publicmain` ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
--- -----------------------------------------------------
--- Data for table `db_publicmain`.`t_msgType`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `db_publicmain`;
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('PRIVATE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('NODE_UPDATE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('ALIAS_UPDATE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('NODE_LOOKUP');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('ECHO_REQUEST');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('ECHO_RESPONSE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('PATH_PING_REQUEST');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('PATH_PING_RESPONSE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('ROOT_DISCOVERY');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('ROOT_REPLY');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('ROOT_ANNOUNCE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('POLL_CHILDNODES');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('REPORT_CHILDNODES');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('POLL_ALLNODES');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('REPORT_ALLNODES');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('TREE_DATA_POLL');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('TREE_DATA');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('NODE_SHUTDOWN');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CHILD_SHUTDOWN');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP_POLL');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP_REPLY');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP_JOIN');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP_LEAVE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP_EMPTY');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GROUP_ANNOUNCE');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('FILE_REQUEST');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('FILE_REPLY');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('FILE_RECIEVED');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('FILE_TCP_REQUEST');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('FILE_TCP_REPLY');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('FILE_TCP_ABORT');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CMD_SHUTDOWN');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CMD_RESTART');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CMD_RECONNECT');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CW_INFO_TEXT');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CW_WARNING_TEXT');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CW_ERROR_TEXT');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('CW_FILE_REQUEST');
-INSERT INTO `db_publicmain`.`t_msgType` (`name`) VALUES ('GUI_INFORM');
-
-COMMIT;

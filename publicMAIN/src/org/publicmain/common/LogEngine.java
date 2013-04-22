@@ -62,6 +62,7 @@ public class LogEngine {
 	}
 	
 	private static String msg2String(MSG x){
+		if(x==null) return "null";
 		return "MSG{"+x.getTyp()+"("+((x.getCode()!=null)?x.getCode():"")+((x.getGroup()!=null)?x.getGroup():"")+")"+ "\t:"+Math.abs(x.getSender()%10000)+"("+x.getId()+")"+">"+Math.abs(x.getEmpfänger()%10000)+"["+x.getData()+"]}";
 	}
 	

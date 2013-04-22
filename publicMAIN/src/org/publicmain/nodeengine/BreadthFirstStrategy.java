@@ -12,9 +12,9 @@ import org.publicmain.common.Node;
 
 public class BreadthFirstStrategy implements BestNodeStrategy {
 
-	public Node getBestNode(Node root) {
+	public Node getBestNode() {
 
-		Node tmp = root;
+		Node tmp = NodeEngine.getNE().getTree();
 		int level = tmp.getLevel();
 
 		//cache for candidates
@@ -47,7 +47,7 @@ public class BreadthFirstStrategy implements BestNodeStrategy {
 		return tmp;
 	}
 
-	Node getMinNode(Collection<Node> selection) {
+	private Node getMinNode(Collection<Node> selection) {
 		Node theone = null;
 		//pick the one with the least amount of childs
 		for (Node node : selection) {

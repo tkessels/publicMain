@@ -13,14 +13,16 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 	public static final int LINEAR =0;
 	public static final int QUADRATIC =1;
 	private double ratio;
-	private int typ;
+	private int scale_connections;
+	private int scale_root_distance;
 
-	public WeightedDistanceStrategy(double ratio,int typ) {
+	public WeightedDistanceStrategy(double ratio,int scale_connections,int scale_root_distance) {
 		this.ratio=ratio;
-		this.typ =typ;
+		this.scale_connections =scale_connections;
 	}
 
-	public Node getBestNode(Node root) {
+	public Node getBestNode() {
+		Node root = NodeEngine.getNE().getTree();
 		List<Node> allnodes = returnAllNodes(root);
 		List<ScoreEntry> scores = new ArrayList<ScoreEntry>();
 		int depth=root.getDepth();
@@ -28,10 +30,8 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 			scores.add(new ScoreEntry(cur, getScore(cur, depth)));
 		}
 		Collections.sort(scores, new Comparator<ScoreEntry>() {
-			@Override
 			public int compare(ScoreEntry o1, ScoreEntry o2) {
 				return o1.score.compareTo(o2.score);
-		
 			}
 		});			
 		System.out.println(scores);
@@ -44,8 +44,8 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 		double maxcon =Config.getConfig().getMaxConnections();
 		double con = node.getChildCount();
 		con = (con>maxcon)?maxcon:con;
-		double conval=(typ==0)?con/maxcon:Math.pow(con, 2)/Math.pow(maxcon,2);
-		double rootval=(typ==0)?(node.getLevel()/(double)depth):(Math.pow(node.getLevel(),2)/Math.pow((double)depth,2));
+		double conval=(scale_connections==LINEAR)?con/maxcon:Math.pow(con, 2)/Math.pow(maxcon,2);
+		double rootval=(scale_root_distance==LINEAR)?(node.getLevel()/(double)depth):(Math.pow(node.getLevel(),2)/Math.pow((double)depth,2));
 		return (conval*(1-ratio))+(rootval*ratio);
 	}
 	

@@ -42,10 +42,6 @@ public class HelpContents extends JDialog {
 
 	private static HelpContents me; 
 
-	public static HelpContents getMe() {
-		return me;
-	}
-
 	private JTextPane helpContentTxt;
 	private JScrollPane sp;
 	private File htmlFile;
@@ -61,14 +57,15 @@ public class HelpContents extends JDialog {
 	public HelpContents() {
 		
 		this.me=this;
-		this.setTitle("Help Content");
+		
+		this.setTitle("Help");
 		this.setModal(false);
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setLayout(new BorderLayout());
 		this.setIconImage(Help.getIcon("helpContentsIcon.png").getImage());
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
-
+		
 		this.helpContentTxt = new JTextPane();
 		this.sp = new JScrollPane(helpContentTxt,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -80,21 +77,23 @@ public class HelpContents extends JDialog {
 		helpContentTxt.setBackground(new Color(25, 169, 241));
 		helpContentTxt.setEditable(false);
 
-		try {
-			// Dateipfad in eine URL umwandeln
-			fileURL = Help.class.getResource("helpcontent.html");
-			// Datei in JTextPane laden
-			helpContentTxt.setPage(fileURL);
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		this.add(sp, BorderLayout.CENTER);
-		this.pack();
-		
-		showIt();
+		new Thread (new Runnable() {
+			public void run() {
+				try {
+					// Dateipfad in eine URL umwandeln
+					fileURL = Help.class.getResource("helpcontent.html");
+					// Datei in JTextPane laden
+					helpContentTxt.setPage(fileURL);
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		me.add(sp, BorderLayout.CENTER);
+				
+		me.pack();
+		me.showIt();
+			}}).start();
 	}
 
 	/**
@@ -109,5 +108,9 @@ public class HelpContents extends JDialog {
 			this.setLocationRelativeTo(null);
 		}
 		this.setVisible(true);
+	}
+	
+	public static HelpContents getMe() {
+		return me;
 	}
 }

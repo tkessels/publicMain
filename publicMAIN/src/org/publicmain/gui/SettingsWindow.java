@@ -1,28 +1,32 @@
 package org.publicmain.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import org.publicmain.sql.BackupDBConnection;
 import org.resources.Help;
 
-public class registrationWindow {
+public class SettingsWindow extends JDialog{
 	
-	private static registrationWindow me;
+	private static SettingsWindow me;
+	
 	private BackupDBConnection bdb;
-	private JFrame registrationWindowFrame;
 	private JLabel wellcomeLogo;
 	private JLabel wellcomeLabel1;
 	private JLabel nickNameLabel;
@@ -44,15 +48,20 @@ public class registrationWindow {
 	
 	private JTextField statusTextField;
 	
-	private JButton backButton;
-	private JButton submitButton;
+	private JButton cancelButton;
+	private JButton applyButton;
+	private JPanel buttonPanel;
+	
+	private GraphicsEnvironment ge;
+	private GraphicsDevice gd;
+	private DisplayMode dm;
 	
 	private GridBagConstraints c;
 	private Insets set;
 	
-	private registrationWindow() {
-		this.registrationWindowFrame=	new JFrame();
-		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png"));
+	public SettingsWindow() {
+		this.me = this;
+		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png",200,45));
 		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();
@@ -68,29 +77,33 @@ public class registrationWindow {
 		this.eMailTextField 		=	new JTextField();
 		this.birthDayLabel			=	new JLabel("Birthday");
 		this.birthDayTextField 		=	new JTextField();
-		this.backupserverIPLabel	=	new JLabel("IP of your Backupserver");
+		this.backupserverIPLabel	=	new JLabel("Backupserver IP");
 		this.backupserverIPTextField=	new JTextField();
 		
 		this.statusTextField		=	new JTextField();
 		
-		this.backButton				=	new JButton("Apply Changes");
-		this.submitButton			=	new JButton("Register");
+		this.cancelButton			=	new JButton("Cancel");
+		this.applyButton			=	new JButton("Apply");
+		this.buttonPanel			=	new JPanel(new BorderLayout());
 		
-		this.submitButton.addActionListener(new registrationWindowButtonController());
-		this.backButton.addActionListener(new registrationWindowButtonController());
+		this.buttonPanel.add(applyButton);
+		this.buttonPanel.add(cancelButton, BorderLayout.EAST);
+		this.buttonPanel.setBackground(Color.WHITE);
+		
+		this.applyButton.addActionListener(new SettingsWindowButtonController());
+		this.cancelButton.addActionListener(new SettingsWindowButtonController());
+		
+		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		this.gd = ge.getDefaultScreenDevice();
+		this.dm = gd.getDisplayMode();
 		
 		this.c 						= new GridBagConstraints();
 		this.set 					= new Insets(5, 5, 5, 5);
 		
-		registrationWindowFrame.setTitle("Registration");
-		registrationWindowFrame.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
-		registrationWindowFrame.getContentPane().setBackground(Color.WHITE);
-		registrationWindowFrame.setMinimumSize(new Dimension(200, 180));
-		
 		statusTextField.setBackground(new Color(229, 195, 0));
 		statusTextField.setEditable(false);
 
-		registrationWindowFrame.setLayout(new GridBagLayout());
+		this.setLayout(new GridBagLayout());
 		c.insets 	= set;
 		c.fill 		= GridBagConstraints.HORIZONTAL;
 		c.anchor	= GridBagConstraints.LINE_START;
@@ -99,100 +112,114 @@ public class registrationWindow {
 		c.gridx 	= 0;
 		c.gridy 	= 0;
 		c.gridwidth = 2;
-		registrationWindowFrame.add(wellcomeLogo ,c);
+		this.add(wellcomeLogo ,c);
 		
 		c.gridy 	= 1;
 		c.gridwidth = 2;
-		registrationWindowFrame.add(wellcomeLabel1, c);
+		this.add(wellcomeLabel1, c);
 		
 		c.gridy 	= 2;
 		c.gridwidth = 1;
-		registrationWindowFrame.add(nickNameLabel, c);
+		this.add(nickNameLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(nickNameTextField, c);
+		this.add(nickNameTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 3;
-		registrationWindowFrame.add(userNameLabel, c);
+		this.add(userNameLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(userNameTextField, c);
+		this.add(userNameTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 5;
-		registrationWindowFrame.add(passWordLabel, c);
+		this.add(passWordLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(passWordTextField, c);
+		this.add(passWordTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 6;
-		registrationWindowFrame.add(firstNameLabel, c);
+		this.add(firstNameLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(firstNameTextField, c);
+		this.add(firstNameTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 7;
-		registrationWindowFrame.add(lastNameLabel, c);
+		this.add(lastNameLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(lastNameTextField, c);
+		this.add(lastNameTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 8;
-		registrationWindowFrame.add(eMailLabel, c);
+		this.add(eMailLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(eMailTextField, c);
+		this.add(eMailTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 9;
-		registrationWindowFrame.add(birthDayLabel, c);
+		this.add(birthDayLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(birthDayTextField, c);
+		this.add(birthDayTextField, c);
 		
 		
 		
 		c.gridx 	= 0;
 		c.gridy 	= 10;
-		registrationWindowFrame.add(backupserverIPLabel, c);
+		this.add(backupserverIPLabel, c);
 		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(backupserverIPTextField, c);
+		this.add(backupserverIPTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 11;
 		c.gridwidth = 2;
-		registrationWindowFrame.add(statusTextField, c);
+		this.add(statusTextField, c);
 		
 		c.gridy 	= 12;
 		c.gridwidth = 1;
-		registrationWindowFrame.add(backButton, c);	
-		
 		c.gridx 	= 1;
-		registrationWindowFrame.add(submitButton, c);
+		this.add(buttonPanel, c);	
 		
-		registrationWindowFrame.pack();
-		registrationWindowFrame.setResizable(false);
-		registrationWindowFrame.setLocationRelativeTo(GUI.getGUI());
-		registrationWindowFrame.setVisible(true);
+		this.setTitle("Settings");
+		this.setModal(false);
+		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
+		this.getContentPane().setBackground(Color.WHITE);
+		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+//		this.setResizable(false);
+		this.pack();
+		
+		this.showIt();
 	}
 	
-	public static registrationWindow getRegistrationWindow(){
+	public void showIt() {
+		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth() + this.getWidth() < dm.getWidth())) {
+			this.setLocation(GUI.getGUI().getLocation().x + GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
+		} else {
+			this.setLocationRelativeTo(null);
+		}
+		this.setVisible(true);
+	}
+	
+	public static SettingsWindow getMe(){
 		if (me == null) {
-			me = new registrationWindow();
+			me = new SettingsWindow();
 			return me;
 		} else {
 			return me;
 		}
 	}
 
-	class registrationWindowButtonController implements ActionListener {
+	class SettingsWindowButtonController implements ActionListener {
 
-		public registrationWindowButtonController() {
+		public SettingsWindowButtonController() {
 		}
 
 		public void actionPerformed(ActionEvent evt) {
@@ -200,11 +227,12 @@ public class registrationWindow {
 			JButton source = (JButton) evt.getSource();
 			switch (source.getText()) {
 
-			case "Apply Changes":
-				//TODO Hier wie gewünscht das Übernehmen die Änderungen initiieren 
+			case "Apply":
+				//TODO Hier wie gewünscht das Übernehmen der Änderungen initiieren 
 				break;
-			case "Register":
-				bdb.createNewUser(statusTextField, backupserverIPTextField, userNameTextField, passWordTextField);
+			case "Cancel":
+				//TODO: Cancel dinger tun
+//				bdb.createNewUser(statusTextField, backupserverIPTextField, userNameTextField, passWordTextField);
 				break;
 			}
 		}

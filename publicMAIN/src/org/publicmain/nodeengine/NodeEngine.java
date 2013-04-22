@@ -139,7 +139,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	
 	
 	private Node getBestNode() {
-		return myStrategy.getBestNode(getTree());
+		return myStrategy.getBestNode();
 	}
 
 	/**
@@ -978,6 +978,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 	
+	public void pathPing(){
+		for (Node cur : getNodes()) {
+			GUI.getGUI().info(cur.toString() + ":" +pathPing(cur), null, 0);
+			
+		}
+	}
+	
 	public long pathPing(Node remote) {
 		if (remote.equals(meinNode))return 0;
 		else {
@@ -1026,6 +1033,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "nup":
 			sendtcp(new MSG(meinNode, MSGCode.NODE_UPDATE));
 			break;
+		case "pingall":
+			pathPing();
+			break;
 			
 		case "_kick":
 			Node tmp = ce.getNodeforAlias(parameter);
@@ -1043,8 +1053,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "strategy":
 			if(parameter.equals("random")) myStrategy=new RandomStrategy(nodeID);
 			else if(parameter.equals("breadth")) myStrategy=new BreadthFirstStrategy();
-			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==3) {
-				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]));
+			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==4) {
+				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]), Integer.parseInt(parameter.split(" ")[3]));
 			}
 			else GUI.getGUI().info("unknown Strategy"  , null, 1); 
 			break;

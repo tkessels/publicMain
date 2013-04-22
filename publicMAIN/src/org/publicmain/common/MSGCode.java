@@ -51,15 +51,10 @@ public enum MSGCode {
 	CW_INFO_TEXT("beschreibungEinfügen"),
 	CW_WARNING_TEXT("beschreibungEinfügen"),
 	CW_ERROR_TEXT("beschreibungEinfügen"),
-	CW_FILE_REQUEST("beschreibungEinfügen"),
-	
-	TRAY_INFO_TEXT("beschreibungEinfügen"),
-	TRAY_WARNING_TEXT("beschreibungEinfügen"),
-	TRAY_ERROR_TEXT("beschreibungEinfügen"),
 	
 	GUI_INFORM("beschreibungEinfügen");
 	
-	private String description;
+private String description;
 	
 	private MSGCode(String description) {
         this.description = description;
@@ -67,4 +62,5 @@ public enum MSGCode {
 	public String getDescription() {
         return description;
     }
+	
 }

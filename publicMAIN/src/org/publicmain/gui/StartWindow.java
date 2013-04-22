@@ -55,7 +55,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	private StartWindow() {
 		
 		instanz =this;
-		this.welcomeLogo				= 	new JLabel(new ImageIcon(Help.class.getResource("textlogo.png")));
+		this.welcomeLogo				= 	new JLabel(Help.getIcon("textlogo.png",307,78));
 		this.welcomeLabel1				=	new JLabel("Enter your Nick an push \"GO\" if you just want to chat.");
 		this.nickNameLabel				=	new JLabel("Nickname");
 		this.nickNameTextField			=	new JTextField();
@@ -104,7 +104,7 @@ public class StartWindow extends JFrame implements ActionListener{
 
 		
 		this.setTitle("Welcome!");
-		this.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(200, 180));
 		

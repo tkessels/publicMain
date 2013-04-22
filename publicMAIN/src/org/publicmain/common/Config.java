@@ -156,6 +156,8 @@ public class Config {
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
 		tmp.setNamePattern(".*[^a-zA-Z0-9צהüײִÜßיב].*");
+		tmp.setNotifyGroup(false);
+		tmp.setNotifyPrivate(false);
 		
 		//local mySQL Database settings
 		tmp.setLocalDBVersion(0);

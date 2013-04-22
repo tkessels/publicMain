@@ -13,8 +13,8 @@ public class RandomStrategy implements BestNodeStrategy {
 		gen= new Random(seed);
 	}
 
-	public Node getBestNode(Node root) {
-		List<Node> tmp=returnAllNodes(root);
+	public Node getBestNode() {
+		List<Node> tmp=new ArrayList<>(NodeEngine.getNE().getNodes());
 		return tmp.get(gen.nextInt(tmp.size()));
 	}
 	
@@ -32,5 +32,4 @@ public class RandomStrategy implements BestNodeStrategy {
 			    }
 			}
 		}
-
 }

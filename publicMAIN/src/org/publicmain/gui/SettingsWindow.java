@@ -100,15 +100,15 @@ public class SettingsWindow extends JDialog{
 		this.c 						= new GridBagConstraints();
 		this.set 					= new Insets(5, 5, 5, 5);
 		
-		statusTextField.setBackground(new Color(229, 195, 0));
-		statusTextField.setEditable(false);
+		this.statusTextField.setBackground(new Color(229, 195, 0));
+		this.statusTextField.setEditable(false);
 
 		this.setLayout(new GridBagLayout());
 		c.insets 	= set;
 		c.fill 		= GridBagConstraints.HORIZONTAL;
 		c.anchor	= GridBagConstraints.LINE_START;
 		
-		// hinzufügen der Komponenten zum startWindowFrame
+		// hinzufügen der Komponenten:
 		c.gridx 	= 0;
 		c.gridy 	= 0;
 		c.gridwidth = 2;
@@ -193,7 +193,6 @@ public class SettingsWindow extends JDialog{
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
-//		this.setResizable(false);
 		this.pack();
 		
 		this.showIt();
@@ -209,12 +208,7 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	public static SettingsWindow getMe(){
-		if (me == null) {
-			me = new SettingsWindow();
-			return me;
-		} else {
-			return me;
-		}
+		return me;
 	}
 
 	class SettingsWindowButtonController implements ActionListener {

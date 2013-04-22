@@ -139,7 +139,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	
 	
 	private Node getBestNode() {
-		return myStrategy.getBestNode(getTree());
+		return myStrategy.getBestNode();
 	}
 
 	/**
@@ -1043,8 +1043,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "strategy":
 			if(parameter.equals("random")) myStrategy=new RandomStrategy(nodeID);
 			else if(parameter.equals("breadth")) myStrategy=new BreadthFirstStrategy();
-			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==3) {
-				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]));
+			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==4) {
+				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]), Integer.parseInt(parameter.split(" ")[3]));
 			}
 			else GUI.getGUI().info("unknown Strategy"  , null, 1); 
 			break;

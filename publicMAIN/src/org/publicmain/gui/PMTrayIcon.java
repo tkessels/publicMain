@@ -153,11 +153,11 @@ public class PMTrayIcon {
 	}
 
 	protected void recieveText(String text, MSGCode code) {
-		if(code == MSGCode.TRAY_INFO_TEXT){
+		if(code == MSGCode.CW_INFO_TEXT){
 			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
-		} else if(code == MSGCode.TRAY_WARNING_TEXT){
+		} else if(code == MSGCode.CW_WARNING_TEXT){
 			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.WARNING);
-		} else if(code == MSGCode.TRAY_ERROR_TEXT){
+		} else if(code == MSGCode.CW_ERROR_TEXT){
 			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.ERROR);
 		}
 	}

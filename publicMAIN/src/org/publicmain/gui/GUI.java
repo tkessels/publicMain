@@ -725,29 +725,21 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				new AboutPublicMAIN(me, "About publicMAIN", true);
 				break;
 			case "Help Contents":
-				new Thread(new Runnable() {
-					public void run() {
-						if (HelpContents.getMe() == null) {
-							new HelpContents();
-						} else {
-							HelpContents.getMe().showIt();
-						}
-					}
-				}).start();
+				if (HelpContents.getMe() == null) {
+					new HelpContents();
+				} else {
+					HelpContents.getMe().showIt();
+				}
 				break;
 			case "History":
 				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
-				new Thread(new Runnable() {
-					public void run() {
-						if (SettingsWindow.getMe() == null) {
-							new SettingsWindow();
-						} else {
-							SettingsWindow.getMe().showIt();
-						}
-					}
-				}).start();
+				if (SettingsWindow.getMe() == null) {
+					new SettingsWindow();
+				} else {
+					SettingsWindow.getMe().showIt();
+				}
 				break;
 
 			case "Push History":

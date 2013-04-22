@@ -77,22 +77,23 @@ public class HelpContents extends JDialog {
 		helpContentTxt.setBackground(new Color(25, 169, 241));
 		helpContentTxt.setEditable(false);
 
-		try {
-			// Dateipfad in eine URL umwandeln
-			fileURL = Help.class.getResource("helpcontent.html");
-			// Datei in JTextPane laden
-			helpContentTxt.setPage(fileURL);
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		this.add(sp, BorderLayout.CENTER);
+		new Thread (new Runnable() {
+			public void run() {
+				try {
+					// Dateipfad in eine URL umwandeln
+					fileURL = Help.class.getResource("helpcontent.html");
+					// Datei in JTextPane laden
+					helpContentTxt.setPage(fileURL);
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+		me.add(sp, BorderLayout.CENTER);
 				
-		this.pack();
-		
-		showIt();
+		me.pack();
+		me.showIt();
+			}}).start();
 	}
 
 	/**

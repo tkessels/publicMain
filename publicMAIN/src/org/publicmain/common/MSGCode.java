@@ -1,62 +1,70 @@
 package org.publicmain.common;
 
 public enum MSGCode {
-	NODE_UPDATE,
-	ALIAS_UPDATE,
+	NODE_UPDATE("beschreibungEinfügen"),
+	ALIAS_UPDATE("beschreibungEinfügen"),
 	
-	NODE_LOOKUP,
+	NODE_LOOKUP("beschreibungEinfügen"),
 	
-	ECHO_REQUEST,
-	ECHO_RESPONSE,
+	ECHO_REQUEST("beschreibungEinfügen"),
+	ECHO_RESPONSE("beschreibungEinfügen"),
 	
-	PATH_PING_REQUEST,
-	PATH_PING_RESPONSE,
+	PATH_PING_REQUEST("beschreibungEinfügen"),
+	PATH_PING_RESPONSE("beschreibungEinfügen"),
 	
 	
-	ROOT_DISCOVERY,
-	ROOT_REPLY,
-	ROOT_ANNOUNCE,
+	ROOT_DISCOVERY("beschreibungEinfügen"),
+	ROOT_REPLY("beschreibungEinfügen"),
+	ROOT_ANNOUNCE("beschreibungEinfügen"),
 	
-	POLL_CHILDNODES,
-	REPORT_CHILDNODES,
+	POLL_CHILDNODES("beschreibungEinfügen"),
+	REPORT_CHILDNODES("beschreibungEinfügen"),
 	
-	POLL_ALLNODES,
-	REPORT_ALLNODES,
+	POLL_ALLNODES("beschreibungEinfügen"),
+	REPORT_ALLNODES("beschreibungEinfügen"),
 	
-	TREE_DATA_POLL,
-	TREE_DATA,
+	TREE_DATA_POLL("beschreibungEinfügen"),
+	TREE_DATA("beschreibungEinfügen"),
 	
-	NODE_SHUTDOWN,
-	CHILD_SHUTDOWN,
+	NODE_SHUTDOWN("beschreibungEinfügen"),
+	CHILD_SHUTDOWN("beschreibungEinfügen"),
 	
-	GROUP_POLL,
-	GROUP_REPLY,
+	GROUP_POLL("beschreibungEinfügen"),
+	GROUP_REPLY("beschreibungEinfügen"),
 	
-	GROUP_JOIN,
-	GROUP_LEAVE,
-	GROUP_EMPTY,
-	GROUP_ANNOUNCE,
+	GROUP_JOIN("beschreibungEinfügen"),
+	GROUP_LEAVE("beschreibungEinfügen"),
+	GROUP_EMPTY("beschreibungEinfügen"),
+	GROUP_ANNOUNCE("beschreibungEinfügen"),
 	
-	FILE_REQUEST,
-	FILE_REPLY,
-	FILE_RECIEVED,
-	FILE_TCP_REQUEST,
-	FILE_TCP_REPLY,
-	FILE_TCP_ABORT,
+	FILE_REQUEST("beschreibungEinfügen"),
+	FILE_REPLY("beschreibungEinfügen"),
+	FILE_RECIEVED("beschreibungEinfügen"),
+	FILE_TCP_REQUEST("beschreibungEinfügen"),
+	FILE_TCP_REPLY("beschreibungEinfügen"),
+	FILE_TCP_ABORT("beschreibungEinfügen"),
 	
-	CMD_SHUTDOWN,
-	CMD_RESTART,
-	CMD_RECONNECT,
+	CMD_SHUTDOWN("beschreibungEinfügen"),
+	CMD_RESTART("beschreibungEinfügen"),
+	CMD_RECONNECT("beschreibungEinfügen"),
 
-	CW_INFO_TEXT,
-	CW_WARNING_TEXT,
-	CW_ERROR_TEXT,
-	CW_FILE_REQUEST,
+	CW_INFO_TEXT("beschreibungEinfügen"),
+	CW_WARNING_TEXT("beschreibungEinfügen"),
+	CW_ERROR_TEXT("beschreibungEinfügen"),
+	CW_FILE_REQUEST("beschreibungEinfügen"),
 	
-	TRAY_INFO_TEXT,
-	TRAY_WARNING_TEXT,
-	TRAY_ERROR_TEXT,
+	TRAY_INFO_TEXT("beschreibungEinfügen"),
+	TRAY_WARNING_TEXT("beschreibungEinfügen"),
+	TRAY_ERROR_TEXT("beschreibungEinfügen"),
 	
-	GUI_INFORM;
+	GUI_INFORM("beschreibungEinfügen");
 	
+	private String description;
+	
+	private MSGCode(String description) {
+        this.description = description;
+    }
+	public String getDescription() {
+        return description;
+    }
 }

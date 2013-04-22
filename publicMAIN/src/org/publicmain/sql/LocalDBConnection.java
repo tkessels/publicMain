@@ -102,13 +102,13 @@ public class LocalDBConnection {
 
 		//--------neue Sachen------------
 		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
-		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=???
+		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=use db_publicmain erfolgreich / hardWorkingThread läuft
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
 		this.writtenStandardUser = false;
 		this.connectToDBThread = new Thread(new connectToLocDBServer());
 		this.hardWorkingThread = new Thread(new writeEverythingToLocDB());
-		this.dbVersion = 2;
+		this.dbVersion = 3;
 		//--------neue Sachen ende------------
 		connectToDBThread.start();
 	}
@@ -141,7 +141,7 @@ public class LocalDBConnection {
 					dbStatus = 0;
 				}
 			}
-			if(dbStatus == 1){
+			if(dbStatus >= 1){
 				try {
 					stmt.executeQuery("use " + dbName);
 					//TODO: Tabelle mit version hinzufügen und prüfen
@@ -150,8 +150,8 @@ public class LocalDBConnection {
 						run();
 					} else {
 						dbStatus = 3;
+						hardWorkingThread.start();
 						LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
-						hardWorkingThread.start(); 
 					}
 				} catch (SQLException e1) {
 					createDbAndTables();
@@ -172,8 +172,8 @@ public class LocalDBConnection {
 			}
 			//TODO: durch änderungen in der db muss hier noch angepasst werden.
 			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newgroupname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (groupname, t_user_userID) values (newgroupname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_name VARCHAR(20), IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_name,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_name, newt_groups_name, newtxt); END;");
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newalias VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, alias, username)	values (newuserID,newalias,newusername) ON DUPLICATE KEY UPDATE alias=VALUES(alias),username=VALUES(username); END;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_ID INT, IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_ID,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_ID, newt_groups_name, newtxt); END;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newdisplayname VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, displayname, username)	values (newuserID,newdisplayname,newusername) ON DUPLICATE KEY UPDATE displayname=VALUES(displayname),username=VALUES(username); END;");
 			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType(ID,name,description)  VALUES (newID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
 			
 			//Hier wird die Tabelle t_msgType automatisch befüllt!
@@ -185,7 +185,6 @@ public class LocalDBConnection {
 			dbStatus = 2;
 			Config.getConfig().setLocalDBVersion(dbVersion);
 			Config.write();
-			LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e1) {
@@ -205,8 +204,6 @@ public class LocalDBConnection {
 		if(!writtenStandardUser){
 			try {
 				stmt.execute("CALL p_t_user_saveUsers(" + ChatEngine.getCE().getUserID() + ",'" + ChatEngine.getCE().getAlias() + "','" + NodeEngine.getNE().getNode(NodeEngine.getNE().getNodeID()).getUsername() + "')");
-				//TODO: Private Nachrichten haben als Empfänger UID NULL
-				stmt.execute("CALL p_t_user_saveUsers(-1, 'standardPublicUser', 'standardPublicUser')");
 				} catch (SQLException e) {
 				LogEngine.log(this, "Fehler beim Schreiben der StandardUser in 'executeWritingUsers" + e.getMessage(), LogEngine.ERROR);
 			}
@@ -273,6 +270,7 @@ public class LocalDBConnection {
 		BlockingQueue<MSG> tmpLocDBInbox = locDBInbox;
 		locDBInbox.clear();
 		while (!tmpLocDBInbox.isEmpty() && dbStatus >= 3) {
+			System.out.println("jetzt hier");
 			StringBuffer saveMsgStmt = new StringBuffer();
 			StringBuffer saveGrpStmt = new StringBuffer();
 			MSG m = tmpLocDBInbox.poll();
@@ -301,7 +299,7 @@ public class LocalDBConnection {
 				saveMsgStmt.append(uid_sender + ",");
 				saveMsgStmt.append(uid_empfänger + ",");
 				saveMsgStmt.append("'" + m.getTyp() + "',");
-				saveMsgStmt.append("'PRIVATE',");
+				saveMsgStmt.append("'',");
 				saveMsgStmt.append("'" + m.getData() + "')");
 			}
 			if (m.getTyp() == NachrichtenTyp.SYSTEM) {
@@ -312,7 +310,7 @@ public class LocalDBConnection {
 				saveMsgStmt.append(uid_sender + ",");
 				saveMsgStmt.append(uid_empfänger + ",");
 				saveMsgStmt.append("'" + m.getCode() + "',");
-				saveMsgStmt.append("'SYSTEM',");
+				saveMsgStmt.append("'',");
 				saveMsgStmt.append("'" + m.getData() + "')");
 			}
 			if (saveMsgStmt.length()> 0){ //&& saveGrpStmt.length() > 0){

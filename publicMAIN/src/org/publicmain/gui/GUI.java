@@ -793,6 +793,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
 			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
+			if(SettingsWindow.getMe()!=null)SettingsWindow.getMe().dispose();
 			shutdown();
 			// Object[] eventCache =
 			// {"super"," liegt im Systemtray"};

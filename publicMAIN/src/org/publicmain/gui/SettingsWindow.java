@@ -187,14 +187,14 @@ public class SettingsWindow extends JDialog{
 		this.add(buttonPanel, c);	
 		
 		this.setTitle("Settings");
+		this.setModal(false);
+		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
-		this.setModal(false);
-		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+//		this.setResizable(false);
 		this.pack();
-		this.setResizable(false);
 		
 		this.showIt();
 	}

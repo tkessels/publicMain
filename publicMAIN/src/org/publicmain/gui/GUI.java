@@ -158,12 +158,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		 */
 		this.options.add(history);
 		this.options.add(backupServer);
+		this.file.add(settings);
 		this.file.add(exit);
 		this.help.add(helpContent);
 		this.help.add(about);
 		this.backupServer.add(pushHistory);
 		this.backupServer.add(pullHistory);
-		this.backupServer.add(settings);
 		this.menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.LINE_AXIS));
 		this.menuBar.add(contactListBtn);
 		this.menuBar.add(file);
@@ -718,32 +718,40 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			
 			JMenuItem source = (JMenuItem)e.getSource();
 			
-			switch(source.getText()){
-			
+			switch (source.getText()) {
+
 			case "Exit":
 				shutdown();
 				break;
-			case "About pMAIN":
+			case "About":
 				new AboutPublicMAIN(me, "About publicMAIN", true);
 				break;
 			case "Help Contents":
-				//TODO: HelpContents HTML schreiben
-				if(HelpContents.getMe()==null) {
-					new HelpContents();
-				}
-				else {
-					HelpContents.getMe().showIt();
-				}
+				new Thread(new Runnable() {
+					public void run() {
+						if (HelpContents.getMe() == null) {
+							new HelpContents();
+						} else {
+							HelpContents.getMe().showIt();
+						}
+					}
+				}).start();
 				break;
-			case "checkout History":
+			case "History":
 				new checkoutHistoryWindow();
 				break;
-			case "Backup-Server Settings":
-				//TODO: hier noch eine vernünfige variante der Implementierung
+			case "Settings":
+				// TODO: hier noch eine vernünfige variante der Implementierung
 				registrationWindow.getRegistrationWindow();
 				break;
+
+			case "Push History":
+				// TODO: Daten auf den DB-Server schieben
+				break;
+			case "Pull History":
+				// TODO: Daten vom DB-Server holen
+				break;
 			}
-			
 		}
 		
 	}

@@ -163,7 +163,8 @@ public class ChatEngine{
 	public void send_private(long uid, String text) {
 		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(), text);
 		put(tmp);
-		ne.sendtcp(tmp);
+		//ne.sendtcp(tmp);
+		ne.routesend(tmp);
 	}
 
 	/**
@@ -176,7 +177,8 @@ public class ChatEngine{
 	public void send_group(String group, String text) {
 		MSG tmp = new MSG(group, text);
 		put(tmp);
-		ne.sendtcp(tmp);
+		//ne.sendtcp(tmp);
+		ne.groupRouteSend(tmp, null);
 	}
 	
 	/**

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.ImageIcon;
@@ -93,7 +94,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	public NodeEngine(ChatEngine parent) throws IOException {
 		
 		allNodes = new HashSet<Node>();
-		connections = Collections.synchronizedList(new ArrayList<ConnectionHandler>());
+		connections = new CopyOnWriteArrayList<ConnectionHandler>();
+		
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
 		
 		nodeID=((long) (Math.random()*Long.MAX_VALUE));
@@ -110,7 +112,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		meinNode = new Node();
 		allNodes.add(meinNode);
 		
-		myStrategy=new RandomStrategy(nodeID);
+		myStrategy=new WeightedDistanceStrategy(1, 0, 0);
 
 
 		connectionsAcceptBot.start();
@@ -622,7 +624,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				ce.put(paket);
 				break;
 			case GROUP:
-				//sendtcpexcept(paket, quelle);
+//				sendtcpexcept(paket, quelle);
 				groupRouteSend(paket,quelle);
 				ce.put(paket);
 				break;
@@ -799,7 +801,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 	
-	private void groupRouteSend(MSG paket,ConnectionHandler quelle) {
+	public void groupRouteSend(MSG paket,ConnectionHandler quelle) {
 		String gruppe = paket.getGroup();
 		for (ConnectionHandler con : connections) {
 			if((quelle!=con)&&con.getGroups().contains(gruppe)) {

@@ -103,8 +103,9 @@ public class ChatEngine{
 	 */
 	public Node getNodeforAlias(String alias) {
 		Set<Node> tmp = new HashSet<Node>();
+		alias = alias.toLowerCase();
 		for (Node x : getUsers()) {
-			if (x.getAlias().equals(alias)) {
+			if (x.getAlias().toLowerCase().startsWith(alias)) {
 				tmp.add(x);
 			}
 		}

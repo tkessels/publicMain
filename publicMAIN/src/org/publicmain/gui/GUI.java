@@ -279,7 +279,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public void addGrpCW(String grpName, boolean focus) {
 		// Gruppenname auf Konvention prüfen, ggf. Änderungen vornehmen.
-		grpName = sanatizeNames(grpName);
+		grpName = sanatizeName(grpName);
 		grpName = grpName.toLowerCase();
 		// Hol ref. auf Gruppenfenster wenn existent
 		ChatWindow tmp_cw = getCW(grpName);
@@ -299,8 +299,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param grpName, der vom Benutzer eingegebene Gruppenname
 	 * @return, einen bereinigten String zur Verwendung als Gruppenname
 	 */
-	private String sanatizeNames(String grpName) {
-		String clean_name = grpName;
+	private String sanatizeName(String name) {
+		String clean_name = name;
 		clean_name = clean_name.trim();
 		clean_name = clean_name.replaceAll(Config.getConfig().getNamePattern(), "");
 		if (clean_name.length() > NAME_LENGTH) {
@@ -377,20 +377,24 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return boolean
 	 */
 	public boolean changeAlias(String alias){
-		alias = sanatizeNames(alias);
-		if(ce.getNodeforAlias(alias)!=null){
+		alias = sanatizeName(alias);
+		boolean aliasExists = false;
+		for(Node x : ce.getUsers()){
+			if(x.getAlias().equals(alias)){
+				aliasExists = true;
+			}
+		}
+		if(alias.equals("")){
+			info("Illegal Username! Allowed Charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á", getActiveCW(), 1);
+			return false;
+		} else if(aliasExists) {
 			info("Username already in use", null, 1);
 			return false;
 		} else {
-			if(alias.equals("")){
-				JOptionPane.showMessageDialog(me, "Username contains illegal charakters\nFor details checkout: Help -> Username", "Illegal Username", JOptionPane.ERROR_MESSAGE);
-				return false;
-			} else {
-				ce.setAlias(alias);
-				Config.getConfig().setAlias(alias);
-				Config.write();
-				return true;
-			}
+			ce.setAlias(alias);
+			Config.getConfig().setAlias(alias);
+			Config.write();
+			return true;
 		}
 	}
 	

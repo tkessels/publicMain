@@ -40,8 +40,8 @@ public class publicMAIN {
 			
 		}
 		else{
-			JOptionPane.showMessageDialog(null, "publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft", "publicMAIN", JOptionPane.ERROR_MESSAGE, Help.getIcon("pM_Logo2.png",48) );
-			LogEngine.log("publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft", LogEngine.ERROR);
+			JOptionPane.showMessageDialog(null, "Could not start publicMAIN\nAn instance is already running!", "publicMAIN", JOptionPane.ERROR_MESSAGE, Help.getIcon("pM_Logo2.png",48) );
+			LogEngine.log("Could not start publicMAIN An instance is already running!", LogEngine.ERROR);
 		}
 		
 	}

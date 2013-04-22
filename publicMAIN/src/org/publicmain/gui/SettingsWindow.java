@@ -18,9 +18,9 @@ import javax.swing.JTextField;
 import org.publicmain.sql.BackupDBConnection;
 import org.resources.Help;
 
-public class registrationWindow {
+public class SettingsWindow {
 	
-	private static registrationWindow me;
+	private static SettingsWindow me;
 	private BackupDBConnection bdb;
 	private JFrame registrationWindowFrame;
 	private JLabel wellcomeLogo;
@@ -50,7 +50,7 @@ public class registrationWindow {
 	private GridBagConstraints c;
 	private Insets set;
 	
-	private registrationWindow() {
+	private SettingsWindow() {
 		this.registrationWindowFrame=	new JFrame();
 		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png"));
 		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
@@ -181,9 +181,9 @@ public class registrationWindow {
 		registrationWindowFrame.setVisible(true);
 	}
 	
-	public static registrationWindow getRegistrationWindow(){
+	public static SettingsWindow getRegistrationWindow(){
 		if (me == null) {
-			me = new registrationWindow();
+			me = new SettingsWindow();
 			return me;
 		} else {
 			return me;

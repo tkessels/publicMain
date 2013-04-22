@@ -21,7 +21,7 @@ import org.resources.Help;
  * 
  */
 
-public class pMTrayIcon {
+public class PMTrayIcon {
     
 	private TrayIcon trayIcon;
 	private SystemTray sysTray;
@@ -36,7 +36,7 @@ public class pMTrayIcon {
 	private boolean notifyGrp;
 	
 	
-    public pMTrayIcon() {
+    public PMTrayIcon() {
         // Prüfung ob Systemtray unterstützt:
         if (!SystemTray.isSupported()) {
             LogEngine.log(this, "SystemTray is not supported", LogEngine.ERROR);

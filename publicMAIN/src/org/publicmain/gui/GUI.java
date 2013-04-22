@@ -81,7 +81,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private JToggleButton contactListBtn;
 	private boolean contactListActive;
 	private ContactList contactListWin;
-	private pMTrayIcon trayIcon;
+	private PMTrayIcon trayIcon;
 	private LocalDBConnection locDBCon;
 
 	/**
@@ -121,7 +121,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.pullHistory		= new JMenuItem("Pull History");
 		this.settings 			= new JMenuItem("Settings");
 		this.localHistory		= new JMenuItem("Local");
-		this.trayIcon 			= new pMTrayIcon();
+		this.trayIcon 			= new PMTrayIcon();
 		
 		/**
 		 * Erstellen erforderlicher Controller und Listener
@@ -736,11 +736,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}).start();
 				break;
 			case "History":
-				new checkoutHistoryWindow();
+				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
 				// TODO: hier noch eine vernünfige variante der Implementierung
-				registrationWindow.getRegistrationWindow();
+				SettingsWindow.getRegistrationWindow();
 				break;
 
 			case "Push History":

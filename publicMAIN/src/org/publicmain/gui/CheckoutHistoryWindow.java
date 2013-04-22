@@ -38,7 +38,7 @@ import org.resources.Help;
 // TODO Auswahlmöglichkeiten für Datum(DropdownKalender implementierbar?)von-bis, Uhrzeit(Dropdown)von-bis, Gesprächspartner/-Gruppe Name, public/private
 // TODO nicht ausgewählte Felder werden nicht beachtet!
 // TODO Anzeigebereich bestenfalls HTML-Formatiert
-public class checkoutHistoryWindow {
+public class CheckoutHistoryWindow {
 	private LocalDBConnection db;
 	private JFrame historyFrame;
 	private JPanel searchPanel;
@@ -64,7 +64,7 @@ public class checkoutHistoryWindow {
 	private ArrayList<String> timeArray = new ArrayList<>();
 	private SimpleDateFormat timeDateFormat;
 
-	public checkoutHistoryWindow() {
+	public CheckoutHistoryWindow() {
 
 		this.db 							= db.getDBConnection();
 		this.historyFrame					= new JFrame("checkout History");

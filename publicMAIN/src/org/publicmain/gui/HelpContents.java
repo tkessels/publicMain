@@ -63,8 +63,8 @@ public class HelpContents extends JDialog {
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setLayout(new BorderLayout());
 		this.setIconImage(Help.getIcon("helpContentsIcon.png").getImage());
-		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
-		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setMinimumSize(new Dimension(300, GUI.getGUI().getHeight()));
+		this.setPreferredSize(new Dimension(300, GUI.getGUI().getHeight()));
 		
 		this.helpContentTxt = new JTextPane();
 		this.sp = new JScrollPane(helpContentTxt,
@@ -74,7 +74,7 @@ public class HelpContents extends JDialog {
 		this.gd = ge.getDefaultScreenDevice();
 		this.dm = gd.getDisplayMode();
 
-		helpContentTxt.setBackground(new Color(25, 169, 241));
+		helpContentTxt.setBackground(new Color(255, 255, 255));
 		helpContentTxt.setEditable(false);
 
 		new Thread (new Runnable() {

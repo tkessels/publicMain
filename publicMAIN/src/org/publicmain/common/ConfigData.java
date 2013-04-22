@@ -252,5 +252,20 @@ public class ConfigData extends Properties {
 		this.setProperty("sql.backup_db_password",user_password);		
 	}
 	
+	public void setNotifyGroup(boolean group_notify){
+		this.setProperty("gui.tray_notify_group", String.valueOf(group_notify));
+		
+	}
+	public void setNotifyPrivate(boolean private_notify){
+		this.setProperty("gui.tray_notify_private", String.valueOf(private_notify));
+	}
+	
+	public boolean getNotifyGroup(){
+		return Boolean.parseBoolean(this.getProperty("gui.tray_notify_group"));
+	}
+	public boolean getNotifyPrivate(){
+		return Boolean.parseBoolean(this.getProperty("gui.tray_notify_private"));
+	}
+	
 	
 }

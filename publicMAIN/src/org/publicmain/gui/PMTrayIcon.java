@@ -7,6 +7,7 @@ import javax.swing.*;
 
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -32,8 +33,10 @@ public class PMTrayIcon {
 	private CheckboxMenuItem notifyPrivMsg;
 	private CheckboxMenuItem notifyGroupMsg;
 	private CheckboxMenuItem sync;
-	private boolean notifyPriv;
-	private boolean notifyGrp;
+	//private boolean notifyPriv = Config.getConfig().getNotifyPrivate();
+	//private boolean notifyGrp = Config.getConfig().getNotifyGroup();
+	//this.notifyPriv 
+	//this.notifyGrp 
 	
 	
     public PMTrayIcon() {
@@ -48,10 +51,8 @@ public class PMTrayIcon {
         this.sysTray = SystemTray.getSystemTray();
         this.display = new MenuItem("Display");
         this.notifies = new Menu("Notify");
-        this.notifyPrivMsg = new CheckboxMenuItem("Private Messages");
-        this.notifyGroupMsg = new CheckboxMenuItem("Group Messages");
-        this.notifyPriv = false;
-        this.notifyGrp = false;
+        this.notifyPrivMsg = new CheckboxMenuItem("Private Messages",Config.getConfig().getNotifyPrivate());
+        this.notifyGroupMsg = new CheckboxMenuItem("Group Messages",Config.getConfig().getNotifyGroup());
         this.sync = new CheckboxMenuItem("Synchronize");
         
         this.exit = new MenuItem("Exit");
@@ -106,10 +107,15 @@ public class PMTrayIcon {
 				 CheckboxMenuItem item = (CheckboxMenuItem)e.getSource();
 	                switch (item.getLabel()){
 		                case "Private Messages" :
-		                	notifyPriv = item.getState();
+		                	Config.getConfig().setNotifyPrivate(item.getState());
+		                	Config.write();
+		                	
+//		                	notifyPriv = item.getState();
 		                	break;
 		                case "Group Messages" :
-		                	notifyGrp = item.getState();
+		                	Config.getConfig().setNotifyGroup(item.getState());
+		                	Config.write();
+//		                	notifyGrp = item.getState();
 		                	break;
 	                	default :
 	                		trayIcon.displayMessage("Sun TrayIcon Demo", "Martin", TrayIcon.MessageType.NONE);
@@ -138,12 +144,12 @@ public class PMTrayIcon {
 		
 		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
 			msgSender = ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias();
-			if(notifyPriv){
+			if(Config.getConfig().getNotifyPrivate()){
 				trayIcon.displayMessage(msgSender, (String)msg.getData(), TrayIcon.MessageType.NONE);
 			}
 		} else {
 			msgSender = msg.getGroup();
-			if (notifyGrp) {
+			if (Config.getConfig().getNotifyGroup()) {
 				trayIcon.displayMessage( msgSender,
 						ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias() + ": " + (String) msg.getData(),
 						TrayIcon.MessageType.NONE );

@@ -29,9 +29,9 @@ import javax.swing.JWindow;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
-import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Node;
+import org.resources.Help;
 
 /**
  * @author ATRM

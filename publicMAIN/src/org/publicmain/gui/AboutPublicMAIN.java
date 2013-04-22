@@ -9,7 +9,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 
-import org.images.Help;
+import org.resources.Help;
 
 /**
  * @author ATRM

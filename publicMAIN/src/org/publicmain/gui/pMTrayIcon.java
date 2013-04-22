@@ -5,13 +5,13 @@ import java.awt.event.*;
 import java.net.URL;
 import javax.swing.*;
 
-import org.images.Help;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
+import org.resources.Help;
 
 /**
  * Diese Klasse stellt das Icon in der SystemTray mit Kontextmenü bereit, hier

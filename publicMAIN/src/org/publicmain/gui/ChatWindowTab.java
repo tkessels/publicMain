@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.images.Help;
+import org.resources.Help;
 
 /**
  * @author ABerthold

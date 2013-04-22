@@ -25,7 +25,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.images.Help;
+import org.resources.Help;
 
 /**
  * Diese Klasse stellt die Hilfeseiten unter Help/Help im Menü zur Verfügung. Die

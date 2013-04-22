@@ -38,7 +38,6 @@ import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.images.Help;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.chatengine.KnotenKanal;
 import org.publicmain.common.Config;
@@ -48,6 +47,7 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 import org.publicmain.sql.LocalDBConnection;
+import org.resources.Help;
 
 
 /**

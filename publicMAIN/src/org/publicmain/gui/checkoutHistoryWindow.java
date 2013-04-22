@@ -25,9 +25,9 @@ import javax.swing.JTextPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-import org.images.Help;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.sql.LocalDBConnection;
+import org.resources.Help;
 
 
 /**

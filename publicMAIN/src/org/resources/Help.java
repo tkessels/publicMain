@@ -1,4 +1,4 @@
-package org.images;
+package org.resources;
 
 import java.awt.Image;
 import java.net.URL;

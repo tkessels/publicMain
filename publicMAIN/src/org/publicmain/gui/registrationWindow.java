@@ -15,8 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.images.Help;
 import org.publicmain.sql.BackupDBConnection;
+import org.resources.Help;
 
 public class registrationWindow {
 	

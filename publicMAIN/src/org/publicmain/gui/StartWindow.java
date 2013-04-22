@@ -21,9 +21,9 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.images.Help;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
+import org.resources.Help;
 
 public class StartWindow extends JFrame implements ActionListener{
 

@@ -66,18 +66,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private static GUI me;
 	private List<ChatWindow> chatList;
 	private JMenuBar menuBar;
-	private JMenu file;
-	private JMenu options;
+	private JMenu pMAIN;
+	private JMenu history;
 	private JMenu help;
 	private JMenu backupServer;
 	private JMenuItem pullHistory;
 	private JMenuItem pushHistory;
 	private JMenuItem settings;
-	private JMenuItem history;
+	private JMenuItem localHistory;
 	private JMenuItem about;
 	private JMenuItem helpContent;
 	private JMenuItem exit;
-	private ButtonGroup btnGrp;
 	private JTabbedPane jTabbedPane;
 	private JToggleButton contactListBtn;
 	private boolean contactListActive;
@@ -109,20 +108,19 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// TODO: evtl. noch anderes Icon wählen
 		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
 		this.exit				= new JMenuItem("Exit");
-		this.btnGrp 			= new ButtonGroup();
 		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		this.jTabbedPane 		= new JTabbedPane();
 		this.contactListBtn 	= new JToggleButton(Help.getIcon("g18025.png"));
 		this.contactListActive 	= false;
 		this.menuBar 			= new JMenuBar();
-		this.file	 			= new JMenu("File");
-		this.options 			= new JMenu("Options");
+		this.pMAIN	 			= new JMenu("pMAIN");
+		this.history 			= new JMenu("History");
 		this.help	 			= new JMenu("Help");
 		this.backupServer		= new JMenu("Backup-Server");
 		this.pushHistory		= new JMenuItem("Push History");
 		this.pullHistory		= new JMenuItem("Pull History");
 		this.settings 			= new JMenuItem("Settings");
-		this.history			= new JMenuItem("History");
+		this.localHistory		= new JMenuItem("Local");
 		this.trayIcon 			= new pMTrayIcon();
 		
 		/**
@@ -133,7 +131,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.exit.addActionListener(new menuContoller());			
 		this.about.addActionListener(new menuContoller());
 		this.helpContent.addActionListener(new menuContoller());
-		this.history.addActionListener(new menuContoller());
+		this.localHistory.addActionListener(new menuContoller());
 		this.settings.addActionListener(new menuContoller());
 		
 		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
@@ -156,18 +154,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		/**
 		 * Menü-Komponenten hinzufügen
 		 */
-		this.options.add(history);
-		this.options.add(backupServer);
-		this.file.add(settings);
-		this.file.add(exit);
+		this.history.add(localHistory);
+		this.history.add(backupServer);
+		this.pMAIN.add(settings);
+		this.pMAIN.add(exit);
 		this.help.add(helpContent);
 		this.help.add(about);
 		this.backupServer.add(pushHistory);
 		this.backupServer.add(pullHistory);
 		this.menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.LINE_AXIS));
 		this.menuBar.add(contactListBtn);
-		this.menuBar.add(file);
-		this.menuBar.add(options);
+		this.menuBar.add(pMAIN);
+		this.menuBar.add(history);
 		this.menuBar.add(help);
 
 		// Einkommentieren wenn Logo gewünscht:

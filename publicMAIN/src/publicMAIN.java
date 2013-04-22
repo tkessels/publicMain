@@ -7,6 +7,7 @@ import org.publicmain.common.LogEngine;
 import org.publicmain.gui.GUI;
 import org.publicmain.gui.StartWindow;
 import org.publicmain.sql.LocalDBConnection;
+import org.resources.Help;
 
 /**
  * @author ATRM
@@ -39,7 +40,7 @@ public class publicMAIN {
 			
 		}
 		else{
-			JOptionPane.showMessageDialog(null, "publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft");
+			JOptionPane.showMessageDialog(null, "publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft", "publicMAIN", JOptionPane.ERROR_MESSAGE, Help.getIcon("pM_Logo2.png",48) );
 			LogEngine.log("publicMAIN konnte nicht gestartet werden weil bereits eine Instanz der Software läuft", LogEngine.ERROR);
 		}
 		

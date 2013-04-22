@@ -52,7 +52,7 @@ public class SettingsWindow {
 	
 	private SettingsWindow() {
 		this.registrationWindowFrame=	new JFrame();
-		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png",200,40));
+		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png",307,78));
 		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
 		this.nickNameLabel			=	new JLabel("Nickname");
 		this.nickNameTextField		=	new JTextField();

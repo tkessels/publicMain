@@ -978,6 +978,13 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 	
+	public void pathPing(){
+		for (Node cur : getNodes()) {
+			GUI.getGUI().info(cur.toString() + ":" +pathPing(cur), null, 0);
+			
+		}
+	}
+	
 	public long pathPing(Node remote) {
 		if (remote.equals(meinNode))return 0;
 		else {
@@ -1025,6 +1032,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			break;
 		case "nup":
 			sendtcp(new MSG(meinNode, MSGCode.NODE_UPDATE));
+			break;
+		case "pingall":
+			pathPing();
 			break;
 			
 		case "_kick":

@@ -66,7 +66,7 @@ public class CheckoutHistoryWindow {
 
 	public CheckoutHistoryWindow() {
 
-		this.db 							= db.getDBConnection();
+//		this.db 							= db.getDBConnection();
 		this.historyFrame					= new JFrame("checkout History");
 		this.searchPanel 					= new JPanel();
 		this.msgTyp 						= new JLabel("Typ");

@@ -108,7 +108,7 @@ public class LocalDBConnection {
 		this.writtenStandardUser = false;
 		this.connectToDBThread = new Thread(new connectToLocDBServer());
 		this.hardWorkingThread = new Thread(new writeEverythingToLocDB());
-		this.dbVersion = 3;
+		this.dbVersion = 89;
 		//--------neue Sachen ende------------
 		connectToDBThread.start();
 	}
@@ -145,7 +145,7 @@ public class LocalDBConnection {
 				try {
 					stmt.executeQuery("use " + dbName);
 					//TODO: Tabelle mit version hinzufügen und prüfen
-					if(Config.getConfig().getLocalDBVersion() < dbVersion){
+					if(Config.getConfig().getLocalDBVersion() != dbVersion){
 						createDbAndTables();
 						run();
 					} else {
@@ -171,12 +171,24 @@ public class LocalDBConnection {
 				stmt.execute(read);
 			}
 			//TODO: durch änderungen in der db muss hier noch angepasst werden.
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newgroupname VARCHAR(20),IN newt_user_userID BIGINT(20)) BEGIN insert into t_groups (groupname, t_user_userID) values (newgroupname,newt_user_userID) ON DUPLICATE KEY UPDATE t_user_userID=VALUES(t_user_userID); END");
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveMessage` (IN newmsgID INT(11), IN newtimestmp BIGINT(20), IN newt_user_userID_sender BIGINT(20), IN newt_user_userID_empfaenger BIGINT(20), IN newt_msgType_ID INT, IN newt_groups_name VARCHAR(20), IN newtxt VARCHAR(200)) BEGIN	INSERT INTO t_messages (msgID,timestmp,t_user_userID_sender,t_user_userID_empfaenger,t_msgType_ID,t_groups_name,txt) VALUES (newmsgID, newtimestmp, newt_user_userID_sender, newt_user_userID_empfaenger, newt_msgType_ID, newt_groups_name, newtxt); END;");
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newuserID BIGINT(20),IN newdisplayname VARCHAR(45),IN newusername VARCHAR(45)) BEGIN insert into t_users (userID, displayname, username)	values (newuserID,newdisplayname,newusername) ON DUPLICATE KEY UPDATE displayname=VALUES(displayname),username=VALUES(username); END;");
-			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType(ID,name,description)  VALUES (newID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_messages_savePrivateMessage`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_savePrivateMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newFk_t_users_userID_empfaenger BIGINT(20), IN newTxt VARCHAR(200)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender,fk_t_users_userID_empfaenger,txt) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newFk_t_users_userID_empfaenger, newTxt); END;");
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_messages_saveGroupMessage`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveGroupMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20),IN newFk_t_groups_groupName VARCHAR(20), IN newTxt VARCHAR(200)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender,fk_t_groups_groupName,txt) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newFk_t_groups_groupName, newTxt); END;");
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_messages_saveSystemMessage`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveSystemMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newFk_t_users_userID_empfaenger BIGINT(20),IN newFk_t_msgType_ID INT, IN newTxt VARCHAR(200)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender,fk_t_users_userID_empfaenger,fk_t_msgType_ID,txt) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newFk_t_users_userID_empfaenger, newFk_t_msgType_ID, newTxt); END;");
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_groups_saveGroups`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newGroupName VARCHAR(20),IN newFk_t_users_userID BIGINT(20)) BEGIN insert into t_groups (groupName, fk_t_users_userID) values (newGroupName,newFk_t_users_userID) ON DUPLICATE KEY UPDATE fk_t_users_userID=VALUES(fk_t_users_userID); END;");
+			
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_user_saveUsers`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45)) BEGIN insert into t_users (userID, displayName, userName) values (newUserID,newDisplayName,newUserName) ON DUPLICATE KEY UPDATE displayName=VALUES(displayName),userName=VALUES(userName); END;");
+			
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_msgType`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
 			
 			//Hier wird die Tabelle t_msgType automatisch befüllt!
+			
+			
 			for (MSGCode c : MSGCode.values()){
 				stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
 			}
@@ -267,58 +279,59 @@ public class LocalDBConnection {
 	}
 	
 	private void executeWriteMsgToDB() {
-		BlockingQueue<MSG> tmpLocDBInbox = locDBInbox;
-		locDBInbox.clear();
-		while (!tmpLocDBInbox.isEmpty() && dbStatus >= 3) {
-			System.out.println("jetzt hier");
+		while (!locDBInbox.isEmpty() && dbStatus >= 3) {
 			StringBuffer saveMsgStmt = new StringBuffer();
-			StringBuffer saveGrpStmt = new StringBuffer();
-			MSG m = tmpLocDBInbox.poll();
+			StringBuffer saveGrpStmt = null;
+			MSG m = locDBInbox.poll();
 			long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
 			long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
 			if (m.getTyp() == NachrichtenTyp.GROUP) {
 				// fügt Gruppe hinzu
-//				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-//				saveGrpStmt.append("'" + m.getGroup() + "',");
-//				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
+				saveGrpStmt = new StringBuffer();
+				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
+				saveGrpStmt.append("'" + m.getGroup() + "',");
+				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
 				// fügt Nachicht hinzu
-				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
+				saveMsgStmt.append("CALL p_t_messages_saveGroupMessage(");
 				saveMsgStmt.append(m.getId() + ",");
 				saveMsgStmt.append(m.getTimestamp() + ",");
 				saveMsgStmt.append(uid_sender + ",");
-				saveMsgStmt.append(uid_empfänger + ",");
-				saveMsgStmt.append("'" + m.getTyp() + "',");
 				saveMsgStmt.append("'" + m.getGroup() + "',");
 				saveMsgStmt.append("'" + m.getData() + "')");
 			}
 			if (m.getTyp() == NachrichtenTyp.PRIVATE) {
 				// fügt Nachicht hinzu
-				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
+				saveMsgStmt.append("CALL p_t_messages_savePrivateMessage(");
 				saveMsgStmt.append(m.getId() + ",");
 				saveMsgStmt.append(m.getTimestamp() + ",");
 				saveMsgStmt.append(uid_sender + ",");
-				saveMsgStmt.append(uid_empfänger + ",");
-				saveMsgStmt.append("'" + m.getTyp() + "',");
-				saveMsgStmt.append("'',");
+				saveMsgStmt.append(uid_empfänger+ ",");
 				saveMsgStmt.append("'" + m.getData() + "')");
 			}
 			if (m.getTyp() == NachrichtenTyp.SYSTEM) {
+				String toWriteUID_empfänger = String.valueOf(uid_empfänger);
+				if(uid_empfänger == -1){
+					toWriteUID_empfänger = "null";
+				}
 				// fügt Nachicht hinzu
-				saveMsgStmt.append("CALL p_t_messages_saveMessage(");
+				saveMsgStmt.append("CALL p_t_messages_saveSystemMessage(");
 				saveMsgStmt.append(m.getId() + ",");
 				saveMsgStmt.append(m.getTimestamp() + ",");
 				saveMsgStmt.append(uid_sender + ",");
-				saveMsgStmt.append(uid_empfänger + ",");
-				saveMsgStmt.append("'" + m.getCode() + "',");
-				saveMsgStmt.append("'',");
+				saveMsgStmt.append(toWriteUID_empfänger + ",");
+				saveMsgStmt.append("'" + m.getCode().ordinal() + "',");
 				saveMsgStmt.append("'" + m.getData() + "')");
 			}
 			if (saveMsgStmt.length()> 0){ //&& saveGrpStmt.length() > 0){
 				try {
-//					stmt.execute(saveGrpStmt.toString());
-//					LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_groups_saveGroups aufgerufen", LogEngine.INFO);
+					if (saveGrpStmt != null){
+						stmt.execute(saveGrpStmt.toString());
+						LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_groups_saveGroups aufgerufen", LogEngine.INFO);
+					}
+					System.out.println(saveMsgStmt.toString());
 					stmt.execute(saveMsgStmt.toString());
 //					LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_messages_saveMessage aufgerufen", LogEngine.INFO);
+					locDBInbox.clear();
 				} catch (Exception e) {
 					LogEngine.log(LocalDBConnection.this,"Fehler beim aufruf von  : p_t_groups_saveGroups oder p_t_messages_saveMessage "+ e.getMessage(),LogEngine.ERROR);
 					locDBInbox.add(m);	//TODO: Schreibt nachicht, die rausgenommen wurde, bei der es einen Fehler beim abspeichern gab wieder zurück in Queue! Wie schafft man das, dass es an die richtige stelle geschrieben wird

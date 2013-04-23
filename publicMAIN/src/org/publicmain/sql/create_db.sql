@@ -13,8 +13,8 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_users` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_users` (
   `userID` BIGINT(20) NOT NULL ,
-  `displayname` VARCHAR(45) NOT NULL ,
-  `username` VARCHAR(45) NOT NULL ,
+  `displayName` VARCHAR(45) NOT NULL ,
+  `userName` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`userID`) )
 ENGINE = InnoDB;
 
@@ -25,17 +25,16 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `db_publicmain`.`t_groups` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_groups` (
-  `groupname` VARCHAR(20) NOT NULL ,
-  `t_user_userID` BIGINT(20) NOT NULL ,
-  PRIMARY KEY (`groupname`) ,
-  CONSTRAINT `fk_t_groups_t_user1`
-    FOREIGN KEY (`t_user_userID` )
+  `groupName` VARCHAR(20) NOT NULL ,
+  `fk_t_users_userID` BIGINT(20) NOT NULL ,
+  INDEX `fk_t_groups_t_user1_idx` (`fk_t_users_userID` ASC) ,
+  PRIMARY KEY (`groupName`) ,
+  CONSTRAINT `fk_t_users_userID`
+    FOREIGN KEY (`fk_t_users_userID` )
     REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
-
-CREATE INDEX `fk_t_groups_t_user1_idx` ON `db_publicmain`.`t_groups` (`t_user_userID` ASC) ;
 
 
 -- -----------------------------------------------------
@@ -44,10 +43,10 @@ CREATE INDEX `fk_t_groups_t_user1_idx` ON `db_publicmain`.`t_groups` (`t_user_us
 DROP TABLE IF EXISTS `db_publicmain`.`t_msgType` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_msgType` (
-  `ID` INT NOT NULL ,
+  `msgTypeID` INT NOT NULL ,
   `name` VARCHAR(45) NOT NULL ,
   `description` VARCHAR(45) NOT NULL ,
-  PRIMARY KEY (`ID`) )
+  PRIMARY KEY (`msgTypeID`) )
 ENGINE = InnoDB;
 
 
@@ -57,43 +56,39 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `db_publicmain`.`t_messages` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
-  `timestmp` BIGINT(20) NOT NULL ,
   `msgID` INT(11) NOT NULL ,
+  `timestmp` BIGINT(20) NOT NULL ,
+  `fk_t_users_userID_sender` BIGINT(20) NOT NULL ,
   `txt` VARCHAR(200) NOT NULL ,
-  `t_user_userID_sender` BIGINT(20) NOT NULL ,
-  `t_user_userID_empfaenger` BIGINT(20) NULL ,
-  `t_groups_name` VARCHAR(20) NULL ,
-  `t_msgType_ID` INT NOT NULL ,
-  PRIMARY KEY (`msgID`, `timestmp`, `t_user_userID_sender`) ,
-  CONSTRAINT `fk_t_messages_t_user1`
-    FOREIGN KEY (`t_user_userID_sender` )
+  `fk_t_users_userID_empfaenger` BIGINT(20) NULL ,
+  `fk_t_groups_groupName` VARCHAR(20) NULL ,
+  `fk_t_msgType_ID` INT NOT NULL ,
+  PRIMARY KEY (`msgID`, `timestmp`, `fk_t_users_userID_sender`) ,
+  INDEX `fk_t_messages_t_user1_idx` (`fk_t_users_userID_sender` ASC) ,
+  INDEX `fk_t_messages_t_user2_idx` (`fk_t_users_userID_empfaenger` ASC) ,
+  INDEX `fk_t_msgType_ID` (`fk_t_msgType_ID` ASC) ,
+  INDEX `fk_t_groups_groupName_idx` (`fk_t_groups_groupName` ASC) ,
+  CONSTRAINT `fk_t_user_userID_sender`
+    FOREIGN KEY (`fk_t_users_userID_sender` )
     REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_t_messages_t_user2`
-    FOREIGN KEY (`t_user_userID_empfaenger` )
+  CONSTRAINT `fk_t_user_userID_empfaenger`
+    FOREIGN KEY (`fk_t_users_userID_empfaenger` )
     REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_t_messages_t_groups1`
-    FOREIGN KEY (`t_groups_name` )
-    REFERENCES `db_publicmain`.`t_groups` (`groupname` )
+  CONSTRAINT `fk_t_groups_groupName`
+    FOREIGN KEY (`fk_t_groups_groupName` )
+    REFERENCES `db_publicmain`.`t_groups` (`groupName` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_t_messages_t_msgType1`
-    FOREIGN KEY (`t_msgType_ID` )
-    REFERENCES `db_publicmain`.`t_msgType` (`ID` )
+  CONSTRAINT `fk_t_msgType_ID`
+    FOREIGN KEY (`fk_t_msgType_ID` )
+    REFERENCES `db_publicmain`.`t_msgType` (`msgTypeID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
-
-CREATE INDEX `fk_t_messages_t_user1_idx` ON `db_publicmain`.`t_messages` (`t_user_userID_sender` ASC) ;
-
-CREATE INDEX `fk_t_messages_t_user2_idx` ON `db_publicmain`.`t_messages` (`t_user_userID_empfaenger` ASC) ;
-
-CREATE INDEX `fk_t_messages_t_groups1_idx` ON `db_publicmain`.`t_messages` (`t_groups_name` ASC) ;
-
-CREATE INDEX `fk_t_messages_t_msgType1_idx` ON `db_publicmain`.`t_messages` (`t_msgType_ID` ASC) ;
 
 
 -- -----------------------------------------------------
@@ -102,45 +97,44 @@ CREATE INDEX `fk_t_messages_t_msgType1_idx` ON `db_publicmain`.`t_messages` (`t_
 DROP TABLE IF EXISTS `db_publicmain`.`t_settings` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
-  `ProfilID` VARCHAR(45) NOT NULL ,
-  `t_user_userID` BIGINT(20) NOT NULL ,
-  `GuiMaxAliasLength` INT NULL ,
-  `GuiNamePattern` VARCHAR(45) NULL ,
-  `GuiMaxGroupLength` INT NULL ,
-  `CePingEnabled` TINYINT(1) NULL ,
-  `ChPingIntervall` INT NULL ,
-  `ChPingEnabled` TINYINT(1) NULL ,
-  `NeMaxClients` INT NULL ,
-  `NeMaxFileSize` BIGINT NULL ,
-  `NeDiscoverTimeout` SMALLINT NULL ,
-  `NeMulticastGroupIp` VARCHAR(15) NULL ,
-  `NeMulticastGroupPort` SMALLINT NULL ,
-  `NeFileTransferTimeout` INT NULL ,
-  `NeMulticastTTL` TINYINT NULL ,
-  `NeTreeBuildTime` SMALLINT NULL ,
-  `LogVerbosity` TINYINT NULL ,
-  `NeRootClaimTimeout` SMALLINT NULL ,
-  `SqlLocalDbCreatet` TINYINT NULL ,
-  `SqlLocalDbDatabasename` VARCHAR(45) NULL ,
-  `SqlLocalDbPassword` VARCHAR(45) NULL ,
-  `SqlLocalDbPort` SMALLINT NULL ,
-  `SqlBackupDbPort` SMALLINT NULL ,
-  `SqlLocalDbUser` VARCHAR(45) NULL ,
-  `SqlBackupDbUser` VARCHAR(45) NULL ,
-  `SqlBackupDbDatabasename` VARCHAR(45) NULL ,
-  `SqlBackupDbPassword` VARCHAR(45) NULL ,
-  `SqlBackupDbChoosenUsername` VARCHAR(45) NULL ,
-  `SqlBackupDbChoosenUserPasswordHash` INT NULL ,
-  `SqlBackupDbChoosenIP` VARCHAR(15) NULL ,
-  PRIMARY KEY (`ProfilID`) ,
-  CONSTRAINT `fk_t_settings_t_user1`
-    FOREIGN KEY (`t_user_userID` )
+  `profilID` VARCHAR(45) NOT NULL ,
+  `fk_t_users_userID_3` BIGINT(20) NOT NULL ,
+  `guiMaxDisplayNameLength` INT NULL ,
+  `guiNamePattern` VARCHAR(45) NULL ,
+  `guiMaxGroupLength` INT NULL ,
+  `cePingEnabled` TINYINT(1) NULL ,
+  `chPingIntervall` INT NULL ,
+  `chPingEnabled` TINYINT(1) NULL ,
+  `neMaxClients` INT NULL ,
+  `neMaxFileSize` BIGINT NULL ,
+  `neDiscoverTimeout` SMALLINT NULL ,
+  `neMulticastGroupIp` VARCHAR(15) NULL ,
+  `neMulticastGroupPort` SMALLINT NULL ,
+  `neFileTransferTimeout` INT NULL ,
+  `neMulticastTTL` TINYINT NULL ,
+  `neTreeBuildTime` SMALLINT NULL ,
+  `logVerbosity` TINYINT NULL ,
+  `neRootClaimTimeout` SMALLINT NULL ,
+  `sqlLocalDbVersion` TINYINT NULL ,
+  `sqlLocalDbDatabasename` VARCHAR(45) NULL ,
+  `sqlLocalDbPassword` VARCHAR(45) NULL ,
+  `sqlLocalDbPort` SMALLINT NULL ,
+  `sqlBackupDbPort` SMALLINT NULL ,
+  `sqlLocalDbUser` VARCHAR(45) NULL ,
+  `sqlBackupDbUser` VARCHAR(45) NULL ,
+  `sqlBackupDbDatabasename` VARCHAR(45) NULL ,
+  `sqlBackupDbPassword` VARCHAR(45) NULL ,
+  `sqlBackupDbChoosenUsername` VARCHAR(45) NULL ,
+  `sqlBackupDbChoosenUserPasswordHash` INT NULL ,
+  `sqlBackupDbChoosenIP` VARCHAR(15) NULL ,
+  PRIMARY KEY (`profilID`) ,
+  INDEX `fk_t_settings_t_user1_idx` (`fk_t_users_userID_3` ASC) ,
+  CONSTRAINT `fk_t_users_userID_3`
+    FOREIGN KEY (`fk_t_users_userID_3` )
     REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
-
-CREATE INDEX `fk_t_settings_t_user1_idx` ON `db_publicmain`.`t_settings` (`t_user_userID` ASC) ;
 
 
 -- -----------------------------------------------------
@@ -150,25 +144,23 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_nodes` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_nodes` (
   `nodeID` BIGINT(20) NOT NULL ,
-  `computername` VARCHAR(45) NOT NULL ,
-  `t_user_userID` BIGINT(20) NULL ,
-  `t_nodes_nodeID` BIGINT(20) NULL ,
+  `computerName` VARCHAR(45) NOT NULL ,
+  `fk_t_users_userID_2` BIGINT(20) NULL ,
+  `fk_t_nodes_nodeID` BIGINT(20) NULL ,
   PRIMARY KEY (`nodeID`) ,
-  CONSTRAINT `fk_t_nodes_t_user1`
-    FOREIGN KEY (`t_user_userID` )
+  INDEX `fk_t_nodes_t_user1_idx` (`fk_t_users_userID_2` ASC) ,
+  INDEX `fk_t_nodes_t_nodes1_idx` (`fk_t_nodes_nodeID` ASC) ,
+  CONSTRAINT `fk_t_users_userID_2`
+    FOREIGN KEY (`fk_t_users_userID_2` )
     REFERENCES `db_publicmain`.`t_users` (`userID` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_t_nodes_t_nodes1`
-    FOREIGN KEY (`t_nodes_nodeID` )
+  CONSTRAINT `fk_t_nodes_nodeID`
+    FOREIGN KEY (`fk_t_nodes_nodeID` )
     REFERENCES `db_publicmain`.`t_nodes` (`nodeID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
-
-CREATE INDEX `fk_t_nodes_t_user1_idx` ON `db_publicmain`.`t_nodes` (`t_user_userID` ASC) ;
-
-CREATE INDEX `fk_t_nodes_t_nodes1_idx` ON `db_publicmain`.`t_nodes` (`t_nodes_nodeID` ASC) ;
 
 USE `db_publicmain` ;
 

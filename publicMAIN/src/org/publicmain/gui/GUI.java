@@ -396,7 +396,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	
 	/**
 	 * Diese Methode setzt den Alias auf den übergebenen String und schreibt diesen
-	 * in die Config
+	 * in die Config, falls Alias ungültig wird eine entsprechende Fehlermeldung ausgegeben.
 	 * 
 	 * @param alias
 	 * @return boolean

@@ -744,11 +744,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
-				if (SettingsWindow.getMe() == null) {
-					new SettingsWindow();
-				} else {
-					SettingsWindow.getMe().showIt();
-				}
+				SettingsWindow.showthis();
 				break;
 
 			case "Push History":
@@ -794,7 +790,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
 			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
-			if(SettingsWindow.getMe()!=null)SettingsWindow.getMe().dispose();
+			SettingsWindow.closethis();
 			shutdown();
 			// Object[] eventCache =
 			// {"super"," liegt im Systemtray"};

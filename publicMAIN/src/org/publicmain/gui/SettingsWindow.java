@@ -207,9 +207,19 @@ public class SettingsWindow extends JDialog{
 		this.setVisible(true);
 	}
 	
-	public static SettingsWindow getMe(){
-		return me;
+	public static void closethis(){
+		if(me!=null)me.dispose();
 	}
+
+	public static void showthis(){
+		if(me==null) new SettingsWindow();
+		me.showIt();
+	}
+	
+/*	public static SettingsWindow getMe(){
+		if(me==null) new SettingsWindow();
+		return me;
+	}*/
 
 	class SettingsWindowButtonController implements ActionListener {
 

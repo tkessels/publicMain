@@ -596,7 +596,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					updateAlias((String) paket.getData(), paket.getSender());
 					break;
 				case CMD_RECONNECT:
-					if((((Long)paket.getData())==nodeID)&&root_connection!=null)root_connection.close();
+					long payload = (Long)paket.getData();
+					if((payload==nodeID)||(payload==-1337)) {
+						if (root_connection!=null)root_connection.close();
+					}
+					
 					break;
 				default:
 					LogEngine.log(this, "handling [MC]:undefined", paket);
@@ -807,8 +811,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			if((quelle!=con)&&con.getGroups().contains(gruppe)) {
 				con.send(paket);
 			}
-			if(hasParent()&&(root_connection!=quelle))sendroot(paket);
 		}
+		if(hasParent()&&(root_connection!=quelle))sendroot(paket);
 	}
 
 	private boolean updateMyGroups() {
@@ -1023,10 +1027,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	public void debug(String command, String parameter) {
 		switch (command) {
 		case "gc":
-			Runtime r = Runtime.getRuntime();
-			r.gc();
-			break;
-		case "gc2":
 			System.gc();
 			break;
 		case "poll":
@@ -1038,7 +1038,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "pingall":
 			pathPing();
 			break;
-			
 		case "_kick":
 			Node tmp = ce.getNodeforAlias(parameter);
 			if(tmp!=null)routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
@@ -1048,7 +1047,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			break;
 		case "bestnode":
 			long time=System.currentTimeMillis();
-			GUI.getGUI().info("Strategie:" +myStrategy.getClass().getSimpleName(), null, 0);
+			GUI.getGUI().info("Strategie:" +myStrategy.getClass().getSimpleName() + " MaxConnections:" + Config.getConfig().getMaxConnections(), null, 0);
 			GUI.getGUI().info(getBestNode().toString(), null, 0);
 			GUI.getGUI().info("took "+ (System.currentTimeMillis()-time) +" ms to evaluate"  , null, 0);
 			break;
@@ -1058,7 +1057,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==4) {
 				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]), Integer.parseInt(parameter.split(" ")[3]));
 			}
-			else GUI.getGUI().info("unknown Strategy"  , null, 1); 
+			else GUI.getGUI().info("unknown Strategy [random, breadth, weighted 0.5 0 1]"  , null, 1); 
 			break;
 		case "update":
 			GUI.getGUI().notifyGUI();
@@ -1068,6 +1067,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			break;
 		case "tree":
 			showTree();
+			break;
+		case "reconnect_all":
+			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
 			break;
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);

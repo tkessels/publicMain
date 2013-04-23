@@ -59,6 +59,7 @@ public class ConnectionHandler {
 
 		LogEngine.log(this, "Verbunden");
 		me = this;
+		
 		pakets_rein_hol_bot.start();
 
 	}

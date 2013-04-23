@@ -58,7 +58,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.welcomeLogo				= 	new JLabel(Help.getIcon("textlogo.png",307,78));
 		this.welcomeLabel1				=	new JLabel("Enter your Nick an push \"GO\" if you just want to chat.");
 		this.nickNameLabel				=	new JLabel("Nickname");
-		this.nickNameTextField			=	new JTextField();
+		this.nickNameTextField			=	new JTextField(System.getProperty("user.name"));
 
 		this.goButton					=	new JButton("GO");
 		this.pullButton					=	new JButton("PULL from Backup");
@@ -234,7 +234,7 @@ public class StartWindow extends JFrame implements ActionListener{
 			
 			switch(evt.getActionCommand()){
 				case "GO":
-					if (choosenAlias.equals("") || nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
+					if (choosenAlias.equals("") || !nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
 						nickNameTextField.setForeground(Color.RED);
 						nickNameTextField.setText("Not allowed characters or nick to long!");
 					} else {

@@ -70,6 +70,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>unignore this user</td></tr>" +
 			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>display information about user</td></tr>" +
 			"<tr><td>/alias</td><td colspan='2'>&lt;username&gt;</td><td>change username</td></tr>" +
+			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td></td>join group</tr>" +
 			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>message to group</tr>" +
 			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>whisper to user</tr>" +
 			"</table><br>";
@@ -283,10 +284,15 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						warn(tmp[1] + " wurde nicht gefunden!");
 					}
 				}
-				else if (eingabe.startsWith("/g ")	&& (tmp = eingabe.split(" ", 3)).length == 3) {
-					this.gui.groupSend(tmp[1], tmp[2]);
-				}
-				else {
+				else if (eingabe.startsWith("/g ")) {
+					if ((tmp = eingabe.split(" ", 3)).length == 2) {
+						this.gui.addGrpCW(tmp[1], true);
+					} else if ((tmp = eingabe.split(" ", 3)).length == 3){
+						this.gui.groupSend(tmp[1], tmp[2]);
+					} else {
+						error("Befehl nicht gültig oder vollständig...");
+					}
+				} else {
 					error("Befehl nicht gültig oder vollständig...");
 				}
 			}

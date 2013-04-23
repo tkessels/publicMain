@@ -30,6 +30,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.Config;
 import org.publicmain.common.Node;
 import org.resources.Help;
 
@@ -89,10 +90,12 @@ public class ContactList extends JWindow {
 			public void actionPerformed(ActionEvent e) {
 				String tmpGrpName = null;
 				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, Help.getIcon("gruppe.png"), null, null);
-				if(tmpGrpName!=null && !tmpGrpName.equals("")){
+				if(tmpGrpName!=null && GUI.getGUI().checkName(tmpGrpName,0)){
+					tmpGrpName = GUI.getGUI().confName(tmpGrpName, true);
 					GUI.getGUI().addGrpCW(tmpGrpName, true);
-				} 
-				
+				} else {
+					GUI.getGUI().info("Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2);
+				}
 			}
 		});
 		
@@ -130,11 +133,14 @@ public class ContactList extends JWindow {
 		});
 	}
 	
-	public boolean nameExists(String name){
-		return (((UserListModel)users.getModel()).contains(name) || ((GroupListModel)groups.getModel()).contains(name));
+	public boolean groupExists(String name){
+		return ((GroupListModel)groups.getModel()).contains(name);
 	}
 
-
+	public boolean aliasExists(String alias) {
+		return ((UserListModel)users.getModel()).contains(alias);
+	}
+	
 	@Override
 	public void repaint() {
 		Rectangle tmp=parent.getBounds();

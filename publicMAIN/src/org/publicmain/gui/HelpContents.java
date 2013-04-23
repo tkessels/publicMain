@@ -21,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -38,7 +40,7 @@ import org.resources.Help;
  * 
  */
 
-public class HelpContents extends JDialog {
+public class HelpContents extends JDialog implements HyperlinkListener{
 
 	private static HelpContents me; 
 
@@ -67,6 +69,7 @@ public class HelpContents extends JDialog {
 		this.setPreferredSize(new Dimension(300, GUI.getGUI().getHeight()));
 		
 		this.helpContentTxt = new JTextPane();
+		this.helpContentTxt.addHyperlinkListener(this);
 		this.sp = new JScrollPane(helpContentTxt,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -112,5 +115,12 @@ public class HelpContents extends JDialog {
 	
 	public static HelpContents getMe() {
 		return me;
+	}
+
+	@Override
+	public void hyperlinkUpdate(HyperlinkEvent arg0) {
+		System.out.println(arg0.getURL());
+		// TODO Auto-generated method stub
+		
 	}
 }

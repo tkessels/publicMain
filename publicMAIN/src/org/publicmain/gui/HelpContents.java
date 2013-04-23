@@ -2,31 +2,27 @@ package org.publicmain.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 
+import org.publicmain.common.LogEngine;
 import org.resources.Help;
 
 /**
@@ -119,8 +115,21 @@ public class HelpContents extends JDialog implements HyperlinkListener{
 
 	@Override
 	public void hyperlinkUpdate(HyperlinkEvent arg0) {
-		System.out.println(arg0.getURL());
-		// TODO Auto-generated method stub
+		if (arg0.getEventType()==EventType.ACTIVATED) {
+			try {
+				openWebpage(new URL(arg0.getURL().toString().split("“")[1]).toURI());
+			} catch (Exception e) {
+				LogEngine.log(this, "Could not open Webbrowser!", LogEngine.ERROR);
+			}
+		}
 		
 	}
+	
+	public static void openWebpage(URI uri) throws IOException {
+	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+	            desktop.browse(uri);
+	    }
+	}
+
 }

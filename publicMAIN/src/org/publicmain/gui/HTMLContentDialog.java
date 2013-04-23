@@ -50,8 +50,8 @@ public class HTMLContentDialog {
 		htmlDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		htmlDialog.setLayout(new BorderLayout());
 		htmlDialog.setIconImage(Help.getIcon(icon).getImage());
-		htmlDialog.setMinimumSize(new Dimension(300, GUI.getGUI().getHeight()));
-		htmlDialog.setPreferredSize(new Dimension(300, GUI.getGUI().getHeight()));
+		htmlDialog.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		htmlDialog.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
 		
 		hlc = new HyperLinkController();
 		
@@ -97,10 +97,6 @@ public class HTMLContentDialog {
 			htmlDialog.setLocationRelativeTo(null);
 		}
 		htmlDialog.setVisible(true);
-	}
-	
-	public void hideIt() {
-		htmlDialog.setVisible(false);
 	}
 }
 

@@ -1,3 +1,4 @@
+
 package org.publicmain.gui;
 
 import java.awt.Dimension;
@@ -8,32 +9,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Vector;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -83,6 +74,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private ContactList contactListWin;
 	private PMTrayIcon trayIcon;
 	private LocalDBConnection locDBCon;
+	private HTMLContentDialog hcdAbout;
+	private HTMLContentDialog hcdHelp;
 
 	/**
 	 * Konstruktor für das GUI mit Initialisierungen
@@ -213,7 +206,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			this.contactListWin.setVisible(true);
 			contactListActive = true;
 		}
-
 	}
 	
 	/**
@@ -616,7 +608,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				textToTray(nachricht, MSGCode.CW_ERROR_TEXT);
 			}
 		}
-		
 	}
 	
 	/**
@@ -661,7 +652,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} else {
 			return null;
 		}
-
 	}
 
 	/**
@@ -674,12 +664,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		contactListWin.repaint();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 */
-	@Override
 	public void update(Observable o, Object arg) {
 		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
 		if(o instanceof KnotenKanal){
@@ -691,9 +675,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	}
 
 	/**
-	 * Diese Methode stellt das Node bereit
-	 * 
-	 * Diese Methode holt das {@link NODE}-Objekt für eine UserID
+	 * Diese Methode stellt das Node bereit und holt das {@link NODE}-Objekt für eine UserID
 	 * 
 	 * @param uid
 	 * @return Node
@@ -718,14 +700,16 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	}
 	
 	/**
+	 * TODO: Kommentar
+	 * 
 	 * @return
 	 */
 	JTabbedPane getTabbedPane(){
 		return this.jTabbedPane;
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	/**
+	 * TODO: Kommentar
 	 */
 	public void stateChanged(ChangeEvent e) {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
@@ -734,13 +718,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	
 	/**
 	 * ActionListener für Menu's
-	 * 
-	 * @author ATRM
-	 *
 	 */
 	class menuContoller implements ActionListener{
 
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			
 			JMenuItem source = (JMenuItem)e.getSource();
@@ -751,13 +731,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				shutdown();
 				break;
 			case "About":
-				new AboutPublicMAIN(me, "About publicMAIN", true);
+				if(hcdAbout == null) {
+					hcdAbout = new HTMLContentDialog("About", "helpContentsIcon.png", "about.html");
+				} else {
+					hcdAbout.showIt();
+				}
 				break;
 			case "Help Contents":
-				if (HelpContents.getMe() == null) {
-					new HelpContents();
+				if(hcdHelp == null) {
+					hcdHelp = new HTMLContentDialog("Help", "helpContentsIcon.png", "helpcontent.html");
 				} else {
-					HelpContents.getMe().showIt();
+					hcdHelp.showIt();
 				}
 				break;
 			case "History":
@@ -775,16 +759,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				break;
 			}
 		}
-		
 	}
 	
 	/**
 	 * WindowListener für GUI
-	 * 
-	 * 
-	 * 
-	 * @author ABerthold
-	 *
 	 */
 	class winController implements WindowListener{
 		public void windowOpened(WindowEvent arg0) {
@@ -809,7 +787,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		@Override
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
-			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
+//			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
 			SettingsWindow.closethis();
 			shutdown();
 			// Object[] eventCache =
@@ -844,6 +822,4 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 	}
 */
-
-
 }

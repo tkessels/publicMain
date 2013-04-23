@@ -17,7 +17,8 @@ import org.resources.Help;
 public class publicMAIN {
 
 	/**
-	 * TODO: Kommentar
+	 * Die Programmstart-Klasse für publicMAIN, hier wird geprüft ob bereits eine Instanz des Programms läuft. Sollte dies zutreffen wird
+	 * der Start einer weiteren Instanz abgebrochen.
 	 * 
 	 * @param args
 	 * @throws IOException 

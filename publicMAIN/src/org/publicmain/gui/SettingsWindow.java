@@ -235,8 +235,7 @@ public class SettingsWindow extends JDialog{
 				//TODO Hier wie gewünscht das Übernehmen der Änderungen initiieren 
 				break;
 			case "Cancel":
-				//TODO: Cancel dinger tun
-//				bdb.createNewUser(statusTextField, backupserverIPTextField, userNameTextField, passWordTextField);
+				me.dispose();
 				break;
 			}
 		}

@@ -83,6 +83,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private ContactList contactListWin;
 	private PMTrayIcon trayIcon;
 	private LocalDBConnection locDBCon;
+	private HTMLContentDialog hcdAbout;
+	private HTMLContentDialog hcdHelp;
 
 	/**
 	 * Konstruktor für das GUI mit Initialisierungen
@@ -278,9 +280,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param focus
 	 */
 	public void addGrpCW(String grpName, boolean focus) {
-		// Gruppenname auf Konvention prüfen, ggf. Änderungen vornehmen.
-		grpName = sanatizeName(grpName);
-		grpName = grpName.toLowerCase();
 		// Hol ref. auf Gruppenfenster wenn existent
 		ChatWindow tmp_cw = getCW(grpName);
 		// wenn ref. leer dann erstelle neues Gruppenfesnter
@@ -294,22 +293,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	}
 
 	/**
-	 * Bereinigt einen eingegebenen Gruppenstring von ungewollten Zeichen
-	 * 
-	 * @param grpName, der vom Benutzer eingegebene Gruppenname
-	 * @return, einen bereinigten String zur Verwendung als Gruppenname
-	 */
-	private String sanatizeName(String name) {
-		String clean_name = name;
-		clean_name = clean_name.trim();
-		clean_name = clean_name.replaceAll(Config.getConfig().getNamePattern(), "");
-		if (clean_name.length() > NAME_LENGTH) {
-			clean_name = clean_name.substring(0, NAME_LENGTH);
-		}
-		return clean_name;
-	}
-	
-	/**
 	 * TODO: Kommentar
 	 * 
 	 * @param uid
@@ -321,17 +304,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if (focus) focus(tmp);
 	}
 
-	/**
-	 * Fokussiert das angegebene ChatWindow
-	 * 
-	 * @param cw, das zu fokussierende Chatwindow
-	 */
-	private void focus(ChatWindow cw) {
-		int index = jTabbedPane.indexOfComponent(cw);
-		if (index >= 0)
-			jTabbedPane.setSelectedIndex(index);
-	}
-	
 	/**
 	 * Diese Methode entfernt ein ChatWindow
 	 * 
@@ -368,33 +340,77 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	}
 	
 	/**
-	 * Diese Methode nimmt die Änderungsanforderung entgegen und prüft ob der
-	 * Name bereits an einen anderen Benutzer oder an eine Gruppe vergeben
-	 * wurde. Existiert der Alias wird false zurückgeliefert in jedem anderen
-	 * Fall wird der Name über die ChatEngine geändert.
+	 * Fokussiert das angegebene ChatWindow
+	 * 
+	 * @param cw, das zu fokussierende Chatwindow
+	 */
+	private void focus(ChatWindow cw) {
+		int index = jTabbedPane.indexOfComponent(cw);
+		if (index >= 0)
+			jTabbedPane.setSelectedIndex(index);
+	}
+	
+	/**
+	 * Diese Methode überprüft einen String (Gruppenname oder Alias) auf Gültigkeit
+	 * 
+	 * Diese Methode überprüft den übergebenen String auf unerlaubte Zeichen und returnt false
+	 * falls unerlaubte Zeichen enthalten sind.
+	 * Wird dieser Name bereits für eine Gruppe (typ = 0) oder einen Alias (typ = 1) verwendet
+	 * wird ebenfalls false returnt. Ansonsten wird true returnt.
+	 * 
+	 * @param name: der String der überprüft werden soll
+	 * @param typ: 0 = Gruppenname, 1 = Alias
+	 * @return true wenn Name korrekt false wenn Name falsche Zeichen enthält
+	 */
+	boolean checkName(String name, int typ){
+		if(name.matches(Config.getConfig().getNamePattern())){
+			if(typ == 0){
+				if(contactListWin==null) return true;
+				return !contactListWin.groupExists(name);
+			} else if(typ == 1){
+				return !contactListWin.aliasExists(name);
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Diese Methode prüft einen übergebenen Namen auf gültige länge und 
+	 * kürzt diesen gegebenenfalls. Außerdem besteht die Möglichkeit den Namen
+	 * zu in Kleinbuchstaben zu setzen.
+	 *  
+	 * @param name
+	 * @param lowern: true = name wird gelowercased, false = keine Veränderung an Großbuchstaben
+	 * @return String: den gekürzten und ggf. gelowercasedten namen
+	 */
+	String confName(String name, boolean lowern){
+		if (name.length() > Config.getConfig().getMaxGroupLength()) {
+			name = name.substring(0, Config.getConfig().getMaxGroupLength());
+		}
+		if(lowern){
+			name = name.toLowerCase();
+		}
+		return name;
+	}
+	
+	/**
+	 * Diese Methode setzt den Alias auf den übergebenen String und schreibt diesen
+	 * in die Config, falls Alias ungültig wird eine entsprechende Fehlermeldung ausgegeben.
 	 * 
 	 * @param alias
 	 * @return boolean
 	 */
-	public boolean changeAlias(String alias){
-		alias = sanatizeName(alias);
-		boolean aliasExists = false;
-		for(Node x : ce.getUsers()){
-			if(x.getAlias().equals(alias)){
-				aliasExists = true;
-			}
-		}
-		if(alias.equals("")){
-			info("Illegal Username! Allowed Charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á", getActiveCW(), 1);
-			return false;
-		} else if(aliasExists) {
-			info("Username already in use", null, 1);
-			return false;
-		} else {
-			ce.setAlias(alias);
+	public void changeAlias(String alias){
+		alias = confName(alias, false);
+		if(checkName(alias, 1)){
+			ce.updateAlias(alias);
 			Config.getConfig().setAlias(alias);
 			Config.write();
-			return true;
+		} else {
+			info("Illegal charakter in username!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 1);
 		}
 	}
 	
@@ -480,10 +496,16 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	void groupSend(String empfGrp, String msg) {
 
 		ChatWindow tmpCW = getCW(empfGrp);
-		if (tmpCW == null) {
-			tmpCW = new ChatWindow(empfGrp);
-			addGrpCW(empfGrp, true);
-			focus(tmpCW);
+		if (tmpCW == null){
+			empfGrp = confName(empfGrp, true);
+			if (checkName(empfGrp, 0)) {
+				tmpCW = new ChatWindow(empfGrp);
+				addGrpCW(empfGrp, true);
+				focus(tmpCW);
+			}
+			else {
+				info("Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2);
+			}
 		} else {
 			focus(tmpCW);
 		}
@@ -720,7 +742,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	class menuContoller implements ActionListener{
 
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			
 			JMenuItem source = (JMenuItem)e.getSource();
@@ -731,13 +752,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				shutdown();
 				break;
 			case "About":
-				new AboutPublicMAIN(me, "About publicMAIN", true);
+				if(hcdAbout == null) {
+					hcdAbout = new HTMLContentDialog("About", "helpContentsIcon.png", "about.html");
+				} else {
+					hcdAbout.showIt();
+				}
 				break;
 			case "Help Contents":
-				if (HelpContents.getMe() == null) {
-					new HelpContents();
+				if(hcdHelp == null) {
+					hcdHelp = new HTMLContentDialog("Help", "helpContentsIcon.png", "helpcontent.html");
 				} else {
-					HelpContents.getMe().showIt();
+					hcdHelp.showIt();
 				}
 				break;
 			case "History":
@@ -789,7 +814,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		@Override
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
-			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
+//			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
 			SettingsWindow.closethis();
 			shutdown();
 			// Object[] eventCache =

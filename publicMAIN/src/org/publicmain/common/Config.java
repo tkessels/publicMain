@@ -155,7 +155,7 @@ public class Config {
 		tmp.setLogVerbosity(4);
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
-		tmp.setNamePattern(".*[^a-zA-Z0-9öäüÖÄÜßéá].*");
+		tmp.setNamePattern("((([-_]?)([a-zA-Z0-9Ã¶Ã¤Ã¼Ã–Ã„ÃœÃŸÃ©Ã¡â™¥])+))+([-_])?");
 		tmp.setNotifyGroup(false);
 		tmp.setNotifyPrivate(false);
 		
@@ -166,7 +166,7 @@ public class Config {
 		tmp.setLocalDBUser("root");
 		tmp.setLocalDBPw("");
 		
-		// daten für externen DB-Backup-Server
+		// daten fÃ¼r externen DB-Backup-Server
 		tmp.setBackupDBDatabasename("db_publicMain");
 		tmp.setBackupDBPort("3306");
 		tmp.setBackupDBUser("root");

@@ -17,7 +17,8 @@ import org.resources.Help;
 public class publicMAIN {
 
 	/**
-	 * TODO: Kommentar
+	 * Die Programmstart-Klasse für publicMAIN, hier wird geprüft ob bereits eine Instanz des Programms läuft. Sollte dies zutreffen wird
+	 * der Start einer weiteren Instanz abgebrochen.
 	 * 
 	 * @param args
 	 * @throws IOException 
@@ -29,11 +30,11 @@ public class publicMAIN {
 				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)
 				boolean tom = StartWindow.getStartWindow();
 				if (tom) {
-					LocalDBConnection.getDBConnection();
+//					LocalDBConnection.getDBConnection();
 					GUI.getGUI();
 				}
 			}else {
-				LocalDBConnection.getDBConnection(); //TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
+//				LocalDBConnection.getDBConnection(); //TODO: Warum läuft das prog nicht direkt weiter wenn der DB-Server aus ist? Selbst wenn dieser Aufruf hier in nem extra Threat ist geht´s nicht.
 				GUI.getGUI();
 			}
 			//Mir gefälltnicht das hier die Controlle weggegeben wird. Es sollte ein strukturierte und Kontrollierter Start formuliert werden der die Module in der richtigen Reihenfolge startet

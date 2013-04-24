@@ -279,7 +279,7 @@ public class StartWindow extends JFrame implements ActionListener{
 						Config.getConfig().setUserID(userID);
 						Config.getConfig().setBackupDBChoosenUsername(choosenBackupDBUserName);
 						Config.getConfig().setBackupDBChoosenUserPassWord(String.valueOf(choosenBackupDBUserPwdHash));
-						Config.getConfig().setBackupDBChoosenIP(choosenBackupDBIP);
+						Config.getConfig().setBackupDBIP(choosenBackupDBIP);
 						Config.write();
 						plsRunGUI = true;
 						synchronized (instanz) {

@@ -1,190 +1,165 @@
 package org.publicmain.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
+import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.GridLayout;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.publicmain.sql.BackupDBConnection;
+import org.publicmain.common.Config;
 import org.resources.Help;
 
 public class SettingsWindow extends JDialog{
 	
 	private static SettingsWindow me;
-	
-	private BackupDBConnection bdb;
-	private JLabel wellcomeLogo;
-	private JLabel wellcomeLabel1;
-	private JLabel nickNameLabel;
-	private JTextField nickNameTextField;
-	private JLabel userNameLabel;
-	private JTextField userNameTextField;
-	private JLabel passWordLabel;
-	private JPasswordField passWordTextField;
-	private JLabel firstNameLabel;
-	private JTextField firstNameTextField;
-	private JLabel lastNameLabel;
-	private JTextField lastNameTextField;
-	private JLabel eMailLabel;
-	private JTextField eMailTextField;
-	private JLabel birthDayLabel;
-	private JTextField birthDayTextField;
-	private JLabel backupserverIPLabel;
-	private JTextField backupserverIPTextField;
-	
-	private JTextField statusTextField;
-	
-	private JButton cancelButton;
-	private JButton applyButton;
-	private JPanel buttonPanel;
-	
+				
 	private GraphicsEnvironment ge;
-	private GraphicsDevice gd;
-	private DisplayMode dm;
+	private GraphicsDevice 		gd;
+	private DisplayMode 		dm;
 	
-	private GridBagConstraints c;
-	private Insets set;
+	private JLabel		banner;
 	
+	private JPanel 		userSettingsPanel;
+	private JLabel 		aliasLabel;
+	private JTextField 	aliasTextField;
+	private JLabel 		fileTransferLabel;
+	private JCheckBox 	fileTransferCheckBox;
+	
+	private JPanel 		trayIconNotificationPanel;
+	private JLabel		grpMsgLabel;
+	private JCheckBox	grpMsgCheckBox;
+	private JLabel		privMsgLabel;
+	private JCheckBox	privMsgCheckBox;
+	
+	private JPanel		backupServerPanel;
+	private JLabel		ipBackupLabel;
+	private	JTextField	ipBackupTextField;
+	private JLabel		portBackupLabel;
+	private JTextField	portBackupTextField;
+	private JLabel		userBackupLabel;
+	private JTextField	userBackupTextField;
+	private JLabel		pwBackupLabel;
+	private JPasswordField pwBackPasswordField;
+	
+	private JPanel		pushPullPanel;
+	private JLabel		userPushPullLabel;
+	private JTextField	userPushPullTextField;
+	private JLabel		pwPushPullLabel;
+	private JPasswordField	pwPushPullPasswordField;
+	
+	private JPanel		buttonPanel;
+	private JButton		resetBtn;
+	private JButton		acceptBtn;
+	private JButton		cancelBtn;
+
 	public SettingsWindow() {
 		this.me = this;
-		this.wellcomeLogo			= 	new JLabel(Help.getIcon("textlogo.png",200,45));
-		this.wellcomeLabel1			=	new JLabel("Please Enter your personal data");
-		this.nickNameLabel			=	new JLabel("Nickname");
-		this.nickNameTextField		=	new JTextField();
-		this.userNameLabel			=	new JLabel("Username");
-		this.userNameTextField 		=	new JTextField();
-		this.passWordLabel			=	new JLabel("Password");
-		this.passWordTextField		=	new JPasswordField();
-		this.firstNameLabel			=	new JLabel("First name");
-		this.firstNameTextField 	=	new JTextField();
-		this.lastNameLabel			=	new JLabel("Last name");
-		this.lastNameTextField 		=	new JTextField();
-		this.eMailLabel				=	new JLabel("eMail");
-		this.eMailTextField 		=	new JTextField();
-		this.birthDayLabel			=	new JLabel("Birthday");
-		this.birthDayTextField 		=	new JTextField();
-		this.backupserverIPLabel	=	new JLabel("Backupserver IP");
-		this.backupserverIPTextField=	new JTextField();
-		
-		this.statusTextField		=	new JTextField();
-		
-		this.cancelButton			=	new JButton("Cancel");
-		this.applyButton			=	new JButton("Apply");
-		this.buttonPanel			=	new JPanel(new BorderLayout());
-		
-		this.buttonPanel.add(applyButton);
-		this.buttonPanel.add(cancelButton, BorderLayout.EAST);
-		this.buttonPanel.setBackground(Color.WHITE);
-		
-		this.applyButton.addActionListener(new SettingsWindowButtonController());
-		this.cancelButton.addActionListener(new SettingsWindowButtonController());
+		this.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
 		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		this.gd = ge.getDefaultScreenDevice();
 		this.dm = gd.getDisplayMode();
 		
-		this.c 						= new GridBagConstraints();
-		this.set 					= new Insets(5, 5, 5, 5);
+		this.banner					 = 	new JLabel(Help.getIcon("textlogo.png",210,50));
 		
-		this.statusTextField.setBackground(new Color(229, 195, 0));
-		this.statusTextField.setEditable(false);
+		this.userSettingsPanel		 = new JPanel(new GridLayout(2,2));
+		this.aliasLabel				 = new JLabel("Alias");
+		this.aliasTextField			 = new JTextField();
+		this.fileTransferLabel		 = new JLabel("Deny file transfer");
+		this.fileTransferCheckBox	 = new JCheckBox();
+		
+		this.trayIconNotificationPanel = new JPanel(new GridLayout(2,2));
+		this.grpMsgLabel 			 = new JLabel("Group messages");
+		this.grpMsgCheckBox			 = new JCheckBox();
+		this.privMsgLabel			 = new JLabel("Private messages");
+		this.privMsgCheckBox		 = new JCheckBox();
+		
+		this.backupServerPanel 		 = new JPanel(new GridLayout(4,2));
+		this.ipBackupLabel 			 = new JLabel("IP address");
+		this.ipBackupTextField 		 = new JTextField();
+		this.portBackupLabel 		 = new JLabel("Port");
+		this.portBackupTextField 	 = new JTextField();
+		this.userBackupLabel 		 = new JLabel("Username");
+		this.userBackupTextField 	 = new JTextField();
+		this.pwBackupLabel 			 = new JLabel("Password");
+		this.pwBackPasswordField 	 = new JPasswordField();
+		
+		this.pushPullPanel 			 = new JPanel(new GridLayout(2,2));
+		this.userPushPullLabel 		 = new JLabel("Username");
+		this.userPushPullTextField	 = new JTextField();
+		this.pwPushPullLabel 		 = new JLabel("Password");
+		this.pwPushPullPasswordField = new JPasswordField();
+		
+		this.buttonPanel 	= new JPanel(new GridLayout(1,3));
+		this.resetBtn 		= new JButton("Reset");
+		this.acceptBtn	 	= new JButton("Accept");
+		this.cancelBtn 		= new JButton("Cancel");
+		
 
-		this.setLayout(new GridBagLayout());
-		c.insets 	= set;
-		c.fill 		= GridBagConstraints.HORIZONTAL;
-		c.anchor	= GridBagConstraints.LINE_START;
+		this.userSettingsPanel.setBorder(BorderFactory.createTitledBorder("User"));
+		this.userSettingsPanel.setPreferredSize(new Dimension(230,62));
+		this.userSettingsPanel.setBackground(Color.WHITE);
+		this.fileTransferCheckBox.setBackground(Color.WHITE);
+		this.userSettingsPanel.add(aliasLabel);
+		this.userSettingsPanel.add(aliasTextField);
+		this.userSettingsPanel.add(fileTransferLabel);
+		this.userSettingsPanel.add(fileTransferCheckBox);
 		
-		// hinzufügen der Komponenten:
-		c.gridx 	= 0;
-		c.gridy 	= 0;
-		c.gridwidth = 2;
-		this.add(wellcomeLogo ,c);
+		this.trayIconNotificationPanel.setBorder(BorderFactory.createTitledBorder("Notification"));
+		this.trayIconNotificationPanel.setPreferredSize(new Dimension(230,62));
+		this.trayIconNotificationPanel.setBackground(Color.WHITE);
+		this.grpMsgCheckBox.setBackground(Color.WHITE);
+		this.privMsgCheckBox.setBackground(Color.WHITE);
+		this.trayIconNotificationPanel.add(grpMsgLabel);
+		this.trayIconNotificationPanel.add(grpMsgCheckBox);
+		this.trayIconNotificationPanel.add(privMsgLabel);
+		this.trayIconNotificationPanel.add(privMsgCheckBox);
 		
-		c.gridy 	= 1;
-		c.gridwidth = 2;
-		this.add(wellcomeLabel1, c);
+		this.backupServerPanel.setBorder(BorderFactory.createTitledBorder("Backup-Server"));
+		this.backupServerPanel.setPreferredSize(new Dimension(230,100));
+		this.backupServerPanel.setBackground(Color.WHITE);
+		this.backupServerPanel.add(ipBackupLabel);
+		this.backupServerPanel.add(ipBackupTextField);
+		this.backupServerPanel.add(portBackupLabel);
+		this.backupServerPanel.add(portBackupTextField);
+		this.backupServerPanel.add(userBackupLabel);
+		this.backupServerPanel.add(userBackupTextField);
+		this.backupServerPanel.add(pwBackupLabel);
+		this.backupServerPanel.add(pwBackPasswordField);
 		
-		c.gridy 	= 2;
-		c.gridwidth = 1;
-		this.add(nickNameLabel, c);
+		this.pushPullPanel.setBorder(BorderFactory.createTitledBorder("push/pull Backup"));
+		this.pushPullPanel.setPreferredSize(new Dimension(230,62));
+		this.pushPullPanel.setBackground(Color.WHITE);
+		this.pushPullPanel.add(userPushPullLabel);
+		this.pushPullPanel.add(userPushPullTextField);
+		this.pushPullPanel.add(pwPushPullLabel);
+		this.pushPullPanel.add(pwPushPullPasswordField);
 		
-		c.gridx 	= 1;
-		this.add(nickNameTextField, c);
+		this.buttonPanel.setBorder(BorderFactory.createCompoundBorder());
+		this.buttonPanel.setPreferredSize(new Dimension(230,25));
+		this.buttonPanel.setBackground(Color.WHITE);
+		this.buttonPanel.add(resetBtn);
+		this.buttonPanel.add(acceptBtn);
+		this.buttonPanel.add(cancelBtn);
 		
-		c.gridx 	= 0;
-		c.gridy 	= 3;
-		this.add(userNameLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(userNameTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 5;
-		this.add(passWordLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(passWordTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 6;
-		this.add(firstNameLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(firstNameTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 7;
-		this.add(lastNameLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(lastNameTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 8;
-		this.add(eMailLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(eMailTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 9;
-		this.add(birthDayLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(birthDayTextField, c);
-		
-		
-		
-		c.gridx 	= 0;
-		c.gridy 	= 10;
-		this.add(backupserverIPLabel, c);
-		
-		c.gridx 	= 1;
-		this.add(backupserverIPTextField, c);
-		
-		c.gridx 	= 0;
-		c.gridy 	= 11;
-		c.gridwidth = 2;
-		this.add(statusTextField, c);
-		
-		c.gridy 	= 12;
-		c.gridwidth = 1;
-		c.gridx 	= 1;
-		this.add(buttonPanel, c);	
+		this.add(banner);
+		this.add(userSettingsPanel);
+		this.add(trayIconNotificationPanel);
+		this.add(backupServerPanel);
+		this.add(pushPullPanel);
+		this.add(buttonPanel);
 		
 		this.setTitle("Settings");
 		this.setModal(false);
@@ -192,9 +167,11 @@ public class SettingsWindow extends JDialog{
 		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setMaximumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.pack();
 		
+		this.getDefaults();
 		this.showIt();
 	}
 	
@@ -207,37 +184,25 @@ public class SettingsWindow extends JDialog{
 		this.setVisible(true);
 	}
 	
-	public static void closethis(){
+	private void getDefaults(){
+		this.aliasTextField.setText(Config.getConfig().getAlias());
+		this.fileTransferCheckBox.setSelected(Config.getConfig().getDisableFileTransfer());
+		this.grpMsgCheckBox.setSelected(Config.getConfig().getNotifyGroup());
+		this.privMsgCheckBox.setSelected(Config.getConfig().getNotifyPrivate());
+		this.ipBackupTextField.setText(Config.getConfig().getBackupDBIP());
+		this.portBackupTextField.setText(Config.getConfig().getBackupDBPort());
+		this.userBackupTextField.setText(Config.getConfig().getBackupDBUser());
+		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
+		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
+		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
+	}
+	
+	public static void closeThis(){
 		if(me!=null)me.dispose();
 	}
 
 	public static void showthis(){
 		if(me==null) new SettingsWindow();
 		me.showIt();
-	}
-	
-/*	public static SettingsWindow getMe(){
-		if(me==null) new SettingsWindow();
-		return me;
-	}*/
-
-	class SettingsWindowButtonController implements ActionListener {
-
-		public SettingsWindowButtonController() {
-		}
-
-		public void actionPerformed(ActionEvent evt) {
-			bdb = BackupDBConnection.getBackupDBConnection();
-			JButton source = (JButton) evt.getSource();
-			switch (source.getText()) {
-
-			case "Apply":
-				//TODO Hier wie gewünscht das Übernehmen der Änderungen initiieren 
-				break;
-			case "Cancel":
-				me.dispose();
-				break;
-			}
-		}
 	}
 }

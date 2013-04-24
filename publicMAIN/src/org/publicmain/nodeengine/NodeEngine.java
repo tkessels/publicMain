@@ -55,9 +55,9 @@ import org.resources.Help;
 public class NodeEngine {
  private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout(); 			//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
  private final long ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout(); 			//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
- private final InetAddress MULTICAST_GROUP = InetAddress.getByName(Config.getConfig().getMulticastGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int MULTICAST_PORT = Config.getConfig().getMulticastPort(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
- private final int MULTICAST_TTL = Config.getConfig().getMulticastTTL(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final InetAddress MULTICAST_GROUP = InetAddress.getByName(Config.getConfig().getMCGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
+ private final int MULTICAST_PORT = Config.getConfig().getMCPort(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
+ private final int MULTICAST_TTL = Config.getConfig().getMCTTL(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
  private final int MAX_CLIENTS = Config.getConfig().getMaxConnections();					//Maximale Anzahl anzunehmender Verbindungen
  private final int MAX_FILE_SIZE = Config.getConfig().getMaxFileSize();
 

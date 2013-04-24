@@ -150,6 +150,7 @@ public class Config {
 		tmp.setMaxFileSize(5000000);
 		tmp.setFileTransferTimeout(120000);
 		tmp.setFileTransferInfoInterval(30000);
+		tmp.setDisableFileTransfer(false);
 		
 		//usability settings
 		tmp.setLogVerbosity(4);

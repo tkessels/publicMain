@@ -100,7 +100,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.about 				= new JMenuItem("About");
 		// TODO: evtl. noch anderes Icon wählen
 		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
-		this.exit				= new JMenuItem("Exit");
+		this.exit				= new JMenuItem("Exit", Help.getIcon("exitSym.png"));
 		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		this.jTabbedPane 		= new JTabbedPane();
 		this.contactListBtn 	= new JToggleButton(Help.getIcon("g18025.png"));
@@ -112,7 +112,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.backupServer		= new JMenu("Backup-Server");
 		this.pushHistory		= new JMenuItem("Push History");
 		this.pullHistory		= new JMenuItem("Pull History");
-		this.settings 			= new JMenuItem("Settings");
+		this.settings 			= new JMenuItem("Settings", Help.getIcon("settingsSym.png"));
 		this.localHistory		= new JMenuItem("Local");
 		this.trayIcon 			= new PMTrayIcon();
 		

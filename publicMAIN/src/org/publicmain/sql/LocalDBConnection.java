@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -70,14 +71,10 @@ public class LocalDBConnection {
 	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=DB und Tabellen angelegt 3=mit db verbunden
 	private int maxVersuche;
 	private long warteZeitInSec;
-	private Collection<Node> allNodes;
-	private HashSet<String> groupsSet;
-	private boolean writtenStandardUser;
 	private Thread connectToDBThread;
 	private int dbVersion;
 	private DatabaseEngine databaseEngine;
 	//--------neue Sachen ende------------
-	private int allNodes_hash ;
 	
 	// verbindungssachen
 	private static LocalDBConnection me;
@@ -97,16 +94,14 @@ public class LocalDBConnection {
 		this.routingOverviewTbl		= "t_routingOverView";
 		this.cal					= Calendar.getInstance();
 		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-		this.allNodes				= Collections.synchronizedSet(new HashSet<Node>());
-		this.allNodes_hash 			= allNodes.hashCode();
-		this.databaseEngine			=databaseEngine;
+		this.databaseEngine			= databaseEngine;
 
 		//--------neue Sachen------------
 		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
 		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=use db_publicmain erfolgreich / hardWorkingThread läuft
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
-		this.writtenStandardUser = false;
+//		this.writtenStandardUser = false;
 		this.connectToDBThread = new Thread(new connectToLocDBServer());
 		this.dbVersion = 89;
 		//--------neue Sachen ende------------
@@ -209,152 +204,168 @@ public class LocalDBConnection {
 		}
 	}
 	
-	public synchronized void writeAllUsersToLocDB(Collection<Node> newAllNodes){
-		allNodes.addAll(newAllNodes);
-	}
-	
-	private void executeWritingUsers(){
-		if(!writtenStandardUser){
-			try {
-				synchronized (stmt) {
-					stmt.execute("CALL p_t_user_saveUsers("
-							+ ChatEngine.getCE().getUserID()
-							+ ",'"
-							+ ChatEngine.getCE().getAlias()
-							+ "','"
-							+ NodeEngine.getNE()
-									.getNode(NodeEngine.getNE().getNodeID())
-									.getUsername() + "')");
-				}
-				
-				} catch (SQLException e) {
-				LogEngine.log(this, "Fehler beim Schreiben der StandardUser in 'executeWritingUsers" + e.getMessage(), LogEngine.ERROR);
-			}
-			writtenStandardUser = true;
-		}
 		
-		
-		if (allNodes_hash != allNodes.hashCode()){
-			Collection<Node> tmpAllNodes = allNodes;
-			StringBuffer saveUserStmt; 
-			Iterator<Node> it = tmpAllNodes.iterator();
-			while (it.hasNext()){
-				Node tmpNode = (Node) it.next();
-				saveUserStmt = new StringBuffer();
-				saveUserStmt.append("CALL p_t_user_saveUsers(");
-				saveUserStmt.append(tmpNode.getUserID() + ",");
-				saveUserStmt.append("'" + tmpNode.getAlias() + "',");
-				saveUserStmt.append("'" + tmpNode.getUsername() + "')");
-				try {
-					synchronized (stmt) {
-						stmt.execute(saveUserStmt.toString());
+	public synchronized boolean writeAllUsersToDB(Collection<Node> allnodes){
+		if (dbStatus >= 3){
+			if (allnodes != null){
+				StringBuffer saveUserStmt; 
+				Iterator<Node> it = allnodes.iterator();
+				boolean alldone=true;
+				while (it.hasNext()){
+					Node tmpNode = (Node) it.next();
+					saveUserStmt = new StringBuffer();
+					saveUserStmt.append("CALL p_t_user_saveUsers(");
+					saveUserStmt.append(tmpNode.getUserID() + ",");
+					saveUserStmt.append("'" + tmpNode.getAlias() + "',");
+					saveUserStmt.append("'" + tmpNode.getUsername() + "')");
+					try {
+						synchronized (stmt) {
+							stmt.execute(saveUserStmt.toString());
+						}
+						LogEngine.log(LocalDBConnection.this, "user" + tmpNode.getUserID() + " in DB-Tabelle " + usrTbl + " eingetragen.", LogEngine.INFO);
+					} catch (SQLException e) {
+						alldone=false;
+						LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ usrTbl + " or " + nodeTbl	 + " "+ e.getMessage(),LogEngine.ERROR);
+						//hier falls während der schreibvorgänge die verbind verloren geht.
 					}
-					LogEngine.log(LocalDBConnection.this, "user" + tmpNode.getUserID() + " in DB-Tabelle " + usrTbl + " eingetragen.", LogEngine.INFO);
-				} catch (SQLException e) {
-					LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in : "+ usrTbl + " or " + nodeTbl	 + " "+ e.getMessage(),LogEngine.ERROR);
-					//hier falls während der schreibvorgänge die verbind verloren geht.
 				}
+				return alldone;
 			}
-			allNodes_hash = allNodes.hashCode();
-		} else {
+			return true;
 		}
+		return false;
 	}
 	
-	public synchronized void writeAllGroupsToLocDB(HashSet<String> newGroupsSet){
-		groupsSet = newGroupsSet;
+	public ResultSet pull_msgs(){
+		return null;
 	}
 	
-	private void executeWriteAllGroupsToLocDB(){
-		if (groupsSet != null){
-			HashSet<String> tmpGroupsSet = groupsSet;
-			groupsSet.clear();
-			StringBuffer saveGroupsStmt; 
-			Iterator<String> it = tmpGroupsSet.iterator();
-			while(it.hasNext()){
-				String tmpGrpStr = it.next();
-				saveGroupsStmt = new StringBuffer();
-				saveGroupsStmt.append("p_t_groups_saveGroups(");
-				saveGroupsStmt.append("'" + tmpGrpStr + "',");
-				saveGroupsStmt.append(ChatEngine.getCE().getUserID()+ ")");
-				try {
-					
-					synchronized (stmt) {
-						stmt.execute(saveGroupsStmt.toString());
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+	public ResultSet pull_users(){
+		return null;
 	}
-
 	
-	public boolean writeMsgToDB(MSG m) {
+	public ResultSet pull_settings(){
+		return null;
+	}
+	
+	
+	public boolean push_msgs(ResultSet backup){
+		return false;
+	}
+	
+	
+	public boolean push_users(ResultSet backup){
+		return false;
+	}
+	
+//Settings werden ins beziehungsweise aus dem ConfigObjekt geladen nicht hier	
+	
+	public synchronized boolean writeAllGroupsToDB(Collection<String> groupsSet){
 		if (dbStatus >= 3) {
-			StringBuffer saveMsgStmt = new StringBuffer();
-			StringBuffer saveGrpStmt = null;
+			if (groupsSet != null) {
+				StringBuffer saveGroupsStmt;
+				Iterator<String> it = groupsSet.iterator();
+				while (it.hasNext()) {
+					String tmpGrpStr = it.next();
+
+					saveGroupsStmt = new StringBuffer();
+					saveGroupsStmt.append("p_t_groups_saveGroups(");
+					saveGroupsStmt.append("'" + tmpGrpStr + "',");
+					saveGroupsStmt.append(ChatEngine.getCE().getUserID() + ")");
+					try {
+
+						synchronized (stmt) {
+							stmt.execute(saveGroupsStmt.toString());
+						}
+					} catch (SQLException e) {
+						LogEngine.log(this, "dumping groups failed",
+								LogEngine.ERROR);
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	
+	public synchronized boolean writeMsgToDB(MSG m) {
+		if (dbStatus >= 3) {
 //			MSG m = locDBInbox.poll();
 			long uid_empfänger = NodeEngine.getNE().getUIDforNID(m.getEmpfänger());
 			long uid_sender = NodeEngine.getNE().getUIDforNID(m.getSender());
-			if (m.getTyp() == NachrichtenTyp.GROUP) {
-				// fügt Gruppe hinzu
-				saveGrpStmt = new StringBuffer();
-				saveGrpStmt.append("CALL p_t_groups_saveGroups(");
-				saveGrpStmt.append("'" + m.getGroup() + "',");
-				saveGrpStmt.append(ChatEngine.getCE().getUserID() + ")");
-				// fügt Nachicht hinzu
-				saveMsgStmt.append("CALL p_t_messages_saveGroupMessage(");
-				saveMsgStmt.append(m.getId() + ",");
-				saveMsgStmt.append(m.getTimestamp() + ",");
-				saveMsgStmt.append(uid_sender + ",");
-				saveMsgStmt.append("'" + m.getGroup() + "',");
-				saveMsgStmt.append("'" + m.getData() + "')");
-			}
-			else if (m.getTyp() == NachrichtenTyp.PRIVATE) {
-				// fügt Nachicht hinzu
-				saveMsgStmt.append("CALL p_t_messages_savePrivateMessage(");
-				saveMsgStmt.append(m.getId() + ",");
-				saveMsgStmt.append(m.getTimestamp() + ",");
-				saveMsgStmt.append(uid_sender + ",");
-				saveMsgStmt.append(uid_empfänger+ ",");
-				saveMsgStmt.append("'" + m.getData() + "')");
-			}
-			else if (m.getTyp() == NachrichtenTyp.SYSTEM) {
-				String toWriteUID_empfänger = String.valueOf(uid_empfänger);
-				if(uid_empfänger == -1){
-					toWriteUID_empfänger = "null";
-				}
-				// fügt Nachicht hinzu
-				saveMsgStmt.append("CALL p_t_messages_saveSystemMessage(");
-				saveMsgStmt.append(m.getId() + ",");
-				saveMsgStmt.append(m.getTimestamp() + ",");
-				saveMsgStmt.append(uid_sender + ",");
-				saveMsgStmt.append(toWriteUID_empfänger + ",");
-				saveMsgStmt.append("'" + m.getCode().ordinal() + "',");
-				saveMsgStmt.append("'" + m.getData() + "')");
-			}
-			else return true;
+			Object data = m.getData();
+			MSGCode code = m.getCode();
+			long timestamp = m.getTimestamp();
+			int id = m.getId();
+			String group = m.getGroup();
+			NachrichtenTyp typ = m.getTyp();
 			
-			if (saveMsgStmt.length()> 0){ //&& saveGrpStmt.length() > 0){
-				synchronized (stmt) {
+			writeMSG(uid_empfänger, uid_sender, data, code, timestamp, id,
+					group, typ);
+		}
+		return false;
+	}
+	
+	
+	private boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ) {
+		StringBuffer saveMsgStmt = new StringBuffer();
+		if (typ == NachrichtenTyp.GROUP) {
+			// fügt Nachicht hinzu
+			saveMsgStmt.append("CALL p_t_messages_saveGroupMessage(");
+			saveMsgStmt.append(id + ",");
+			saveMsgStmt.append(timestamp + ",");
+			saveMsgStmt.append(uid_sender + ",");
+			saveMsgStmt.append("'" + group + "',");
+			saveMsgStmt.append("'" + data + "')");
+		}
+		else if (typ == NachrichtenTyp.PRIVATE) {
+			// fügt Nachicht hinzu
+			saveMsgStmt.append("CALL p_t_messages_savePrivateMessage(");
+			saveMsgStmt.append(id + ",");
+			saveMsgStmt.append(timestamp + ",");
+			saveMsgStmt.append(uid_sender + ",");
+			saveMsgStmt.append(uid_empfänger + ",");
+			saveMsgStmt.append("'" + data + "')");
+		} else if (typ == NachrichtenTyp.SYSTEM) {
+			String toWriteUID_empfänger = String.valueOf(uid_empfänger);
+			if (uid_empfänger == -1) {
+				toWriteUID_empfänger = "null";
+			}
+			// fügt Nachicht hinzu
+			saveMsgStmt.append("CALL p_t_messages_saveSystemMessage(");
+			saveMsgStmt.append(id + ",");
+			saveMsgStmt.append(timestamp + ",");
+			saveMsgStmt.append(uid_sender + ",");
+			saveMsgStmt.append(toWriteUID_empfänger + ",");
+			saveMsgStmt.append("'" + code.ordinal() + "',");
+			saveMsgStmt.append("'" + data + "')");
+		} else
+			return true;
+
+		if (saveMsgStmt.length() > 0) { // && saveGrpStmt.length() > 0){
+			synchronized (stmt) {
 				try {
-					if (saveGrpStmt != null){
-							stmt.execute(saveGrpStmt.toString());
-						}
-						LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_groups_saveGroups aufgerufen", LogEngine.INFO);
+					LogEngine.log(LocalDBConnection.this, "Nachicht " + id
+							+ " mit p_t_groups_saveGroups aufgerufen",
+							LogEngine.INFO);
 					System.out.println(saveMsgStmt.toString());
 					stmt.execute(saveMsgStmt.toString());
 					return true;
-//					LogEngine.log(LocalDBConnection.this, "Nachicht " + m.getId() + " mit p_t_messages_saveMessage aufgerufen", LogEngine.INFO);
+					// LogEngine.log(LocalDBConnection.this, "Nachicht " +
+					// m.getId() +
+					// " mit p_t_messages_saveMessage aufgerufen",
+					// LogEngine.INFO);
 				} catch (Exception e) {
 					dbStatus = 0;
 					return false;
-					//hier falls während der schreibvorgänge die verbind verloren geht.
-				}
+					// hier falls während der schreibvorgänge die verbind
+					// verloren geht.
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	public synchronized void writeRoutingTable_to_t_nodes(Map routingTable){

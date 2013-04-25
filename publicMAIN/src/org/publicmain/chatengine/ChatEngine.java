@@ -20,6 +20,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
+import org.publicmain.sql.DatabaseEngine;
 import org.publicmain.sql.LocalDBConnection;
 
 /**
@@ -383,6 +384,7 @@ public class ChatEngine{
 			if (x.countObservers() == 0) {
 				empty.add(x);
 			}
+
 		}
 		private_channels.removeAll(empty);
 
@@ -397,7 +399,7 @@ public class ChatEngine{
 	public void put(MSG nachricht) {
 		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
-//			LocalDBConnection.getDBConnection().writeMsgToLocDB(nachricht);
+			DatabaseEngine.createDatabaseEngine().put(nachricht);
 		}
 	}
 

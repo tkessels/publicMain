@@ -96,11 +96,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		
 		GUI.me 					= this;
 		this.log 				= new LogEngine();
-		// this.locDBCon 		= LocalDBConnection.getDBConnection();
 		this.about 				= new JMenuItem("About");
 		// TODO: evtl. noch anderes Icon wählen
 		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
-		this.exit				= new JMenuItem("Exit");
+		this.exit				= new JMenuItem("Exit", Help.getIcon("exitSym.png"));
 		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		this.jTabbedPane 		= new JTabbedPane();
 		this.contactListBtn 	= new JToggleButton(Help.getIcon("g18025.png"));
@@ -112,7 +111,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.backupServer		= new JMenu("Backup-Server");
 		this.pushHistory		= new JMenuItem("Push History");
 		this.pullHistory		= new JMenuItem("Pull History");
-		this.settings 			= new JMenuItem("Settings");
+		this.settings 			= new JMenuItem("Settings", Help.getIcon("settingsSym.png"));
 		this.localHistory		= new JMenuItem("Local");
 		this.trayIcon 			= new PMTrayIcon();
 		
@@ -756,7 +755,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 					hcdHelp.showIt();
 				}
 				break;
-			case "History":
+			case "Local":
 				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
@@ -802,13 +801,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 //			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
 			SettingsWindow.closeThis();
 			shutdown();
-			// Object[] eventCache =
-			// {"super"," liegt im Systemtray"};
-			// Object anchor = true;
-			// JOptionPane.showInputDialog(me,
-			// "pMAIN wird ins Systemtray gelegt!",
-			// "pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new
-			// ImageIcon("media/pM16x16.png"), eventCache, anchor);
 		}
 		@Override
 		public void windowActivated(WindowEvent arg0) {

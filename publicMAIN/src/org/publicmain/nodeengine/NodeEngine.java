@@ -46,6 +46,7 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
+import org.publicmain.sql.DatabaseEngine;
 import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
 
@@ -628,12 +629,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				ce.put(paket);
 				break;
 			case GROUP:
-//				sendtcpexcept(paket, quelle);
 				groupRouteSend(paket,quelle);
 				ce.put(paket);
 				break;
 			case SYSTEM:
-//				LocalDBConnection.getDBConnection().writeMsgToLocDB(paket);
+				DatabaseEngine.createDatabaseEngine().put(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
 					allnodes_add((Node) paket.getData());
@@ -874,7 +874,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
-//			LocalDBConnection.getDBConnection().writeAllUsersToLocDB(Arrays.asList(data));
+			DatabaseEngine.createDatabaseEngine().put(data);
 		}
 	}
 	
@@ -886,7 +886,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.add(meinNode);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
-//		LocalDBConnection.getDBConnection().writeAllUsersToLocDB(data);
+		DatabaseEngine.createDatabaseEngine().put(data);
 	}
 	
 	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
@@ -1015,7 +1015,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
-//					LocalDBConnection.getDBConnection().writeAllUsersToLocDB(allNodes); //TODO: nur aktualisierung wegschreiben
+					DatabaseEngine.createDatabaseEngine().put(allNodes); //TODO: nur aktualisierung wegschreiben
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}

@@ -428,8 +428,19 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}).start();
 		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
+		// Wenn es ein About-Fenster gibt, Fenster ausblenden
+		if(hcdAbout != null) {
+			hcdAbout.hideIt();
+		}
+		// Wenn es ein Help-Fenster gibt, Fenster ausblenden
+		if(hcdHelp != null) {
+			hcdHelp.hideIt();
+		}
+		// Symbol in der SystemTray schliessen
 		trayIcon.removeTray();
+		// ChatEngine beenden
 		ce.shutdown();
+		// Datenbankverbindung schliessen
 		if (locDBCon != null) {
 			locDBCon.shutdownLocDB();
 		}

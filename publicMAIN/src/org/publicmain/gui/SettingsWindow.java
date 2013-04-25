@@ -289,26 +289,67 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	private void acceptSettings(){
-		Config.getConfig().setAlias(aliasTextField.getText());
-		GUI.getGUI().changeAlias(aliasTextField.getText());
-		Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
+		boolean changes = false;
+		if(!aliasTextField.getText().equals(Config.getConfig().getAlias())){
+			Config.getConfig().setAlias(aliasTextField.getText());
+			GUI.getGUI().changeAlias(aliasTextField.getText());
+			changes = true;
+		}
+		if(Config.getConfig().getDisableFileTransfer() != fileTransferCheckBox.isSelected()){
+			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
+			changes = true;
+		}
 		
-		Config.getConfig().setNotifyGroup(grpMsgCheckBox.isSelected());
-		Config.getConfig().setNotifyPrivate(privMsgCheckBox.isSelected());
+		if(Config.getConfig().getNotifyGroup() != grpMsgCheckBox.isSelected()){
+			Config.getConfig().setNotifyGroup(grpMsgCheckBox.isSelected());
+			changes = true;
+		}
+		if(Config.getConfig().getNotifyPrivate() != privMsgCheckBox.isSelected()){
+			Config.getConfig().setNotifyPrivate(privMsgCheckBox.isSelected());
+			changes = true;
+		}
 		
-		Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
-		Config.getConfig().setBackupDBChoosenUserPassWord(pwPushPullPasswordField.getPassword().toString());
+		if(!userPushPullTextField.getText().equals(Config.getConfig().getBackupDBChoosenUsername())){
+			Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
+			changes = true;
+		}
+		if(!pwPushPullPasswordField.getPassword().toString().equals(Config.getConfig().getBackupDBChoosenUserPassWord())){
+			Config.getConfig().setBackupDBChoosenUserPassWord(pwPushPullPasswordField.getPassword().toString());
+			changes = true;
+		}
 		
-		Config.getConfig().setLocalDBPort(portLocalDBTextField.getText());
-		Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
-		Config.getConfig().setLocalDBPw(pwLocalDBPasswordField.getPassword().toString());
+		if(!portLocalDBTextField.getText().equals(Config.getConfig().getLocalDBPort())){
+			Config.getConfig().setLocalDBPort(portLocalDBTextField.getText());
+			changes = true;
+		}
+		if(!userLocalDBTextField.getText().equals(Config.getConfig().getLocalDBUser())){
+			Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
+			changes = true;
+		}
+		if(!pwLocalDBPasswordField.getPassword().toString().equals(Config.getConfig().getLocalDBPw())){
+			Config.getConfig().setLocalDBPw(pwLocalDBPasswordField.getPassword().toString());
+			changes = true;
+		}
 		
-		Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
-		Config.getConfig().setBackupDBPort(portBackupTextField.getText());
-		Config.getConfig().setBackupDBUser(userBackupTextField.getText());
-		Config.getConfig().setBackupDBPw(pwBackPasswordField.getPassword().toString());
-		
-		Config.write();
+		if(!ipBackupTextField.getText().equals(Config.getConfig().getBackupDBIP())){
+			Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
+			changes = true;
+		}
+		if(!portBackupTextField.getText().equals(Config.getConfig().getBackupDBPort())){
+			Config.getConfig().setBackupDBPort(portBackupTextField.getText());
+			changes = true;
+		}
+		if(!userBackupTextField.getText().equals(Config.getConfig().getBackupDBUser())){
+			Config.getConfig().setBackupDBUser(userBackupTextField.getText());
+			changes = true;
+		}
+		if(!pwBackPasswordField.getPassword().toString().equals(Config.getConfig().getBackupDBPw())){
+			Config.getConfig().setBackupDBPw(pwBackPasswordField.getPassword().toString());
+			changes = true;
+		}
+		if(changes){
+			Config.write();
+		}
 	}
 	
 	class CardButtonController implements ActionListener{

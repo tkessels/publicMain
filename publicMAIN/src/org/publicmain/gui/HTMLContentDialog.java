@@ -19,6 +19,13 @@ import org.publicmain.gui.HyperLinkController;
 import org.resources.Help;
 
 /**
+ * Diese Klasse stellt einen JDialog bereit welcher mit Titel, Icon und
+ * zu ladenendem HTML-Dokument über einen Konstruktor befüllt wird.
+ * <b>Wichtig: Das ist unser Skript Anteil :-)</b>
+ * 
+ * Bedingt durch die JTextPane werden HTML-Dokumente nur in der
+ * Version 3 und Stylesheets nur in Version 1 unterstützt.
+ * 
  * @author ATRM
  * 
  */
@@ -97,6 +104,9 @@ public class HTMLContentDialog {
 			htmlDialog.setLocationRelativeTo(null);
 		}
 		htmlDialog.setVisible(true);
+	}
+	public void hideIt() {
+		htmlDialog.setVisible(false);
 	}
 }
 

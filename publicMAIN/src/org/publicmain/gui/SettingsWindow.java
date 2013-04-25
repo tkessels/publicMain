@@ -1,5 +1,6 @@
 package org.publicmain.gui;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
@@ -7,9 +8,11 @@ import java.awt.FlowLayout;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -17,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 
 import org.publicmain.common.Config;
 import org.resources.Help;
@@ -31,6 +35,14 @@ public class SettingsWindow extends JDialog{
 	
 	private JLabel		banner;
 	
+	private JPanel		cardButtonsPanel;
+	private JToggleButton userBtn;
+	private JToggleButton databaseBtn;
+	private ButtonGroup btnGrp;
+	private JPanel		cardsPanel;
+	private JPanel		cardUser;
+	private JPanel		cardDB;
+	
 	private JPanel 		userSettingsPanel;
 	private JLabel 		aliasLabel;
 	private JTextField 	aliasTextField;
@@ -43,7 +55,21 @@ public class SettingsWindow extends JDialog{
 	private JLabel		privMsgLabel;
 	private JCheckBox	privMsgCheckBox;
 	
-	private JPanel		backupServerPanel;
+	private JPanel		localDBPanel;
+	private JLabel		portLocalDBLabel;
+	private JTextField	portLocalDBTextField;
+	private JLabel		userLocalDBLabel;
+	private JTextField	userLocalDBTextField;
+	private	JLabel		pwLocalDBLabel;
+	private JPasswordField pwLocalDBPasswordField;
+	
+	private JPanel		pushPullPanel;
+	private JLabel		userPushPullLabel;
+	private JTextField	userPushPullTextField;
+	private JLabel		pwPushPullLabel;
+	private JPasswordField pwPushPullPasswordField;
+	
+	private JPanel		backupDBPanel;
 	private JLabel		ipBackupLabel;
 	private	JTextField	ipBackupTextField;
 	private JLabel		portBackupLabel;
@@ -52,12 +78,6 @@ public class SettingsWindow extends JDialog{
 	private JTextField	userBackupTextField;
 	private JLabel		pwBackupLabel;
 	private JPasswordField pwBackPasswordField;
-	
-	private JPanel		pushPullPanel;
-	private JLabel		userPushPullLabel;
-	private JTextField	userPushPullTextField;
-	private JLabel		pwPushPullLabel;
-	private JPasswordField	pwPushPullPasswordField;
 	
 	private JPanel		buttonPanel;
 	private JButton		resetBtn;
@@ -72,7 +92,15 @@ public class SettingsWindow extends JDialog{
 		this.gd = ge.getDefaultScreenDevice();
 		this.dm = gd.getDisplayMode();
 		
-		this.banner					 = 	new JLabel(Help.getIcon("textlogo.png",210,50));
+		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
+		
+		this.cardButtonsPanel		 = new JPanel(new GridLayout(1,2));
+		this.userBtn				 = new JToggleButton("User", Help.getIcon("private.png"), true);
+		this.databaseBtn			 = new JToggleButton("Database", Help.getIcon("private.png"), false);
+		this.btnGrp					 = new ButtonGroup();
+		this.cardsPanel				 = new JPanel(new CardLayout());
+		this.cardUser				 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		this.cardDB					 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		
 		this.userSettingsPanel		 = new JPanel(new GridLayout(2,2));
 		this.aliasLabel				 = new JLabel("Alias");
@@ -86,7 +114,21 @@ public class SettingsWindow extends JDialog{
 		this.privMsgLabel			 = new JLabel("Private messages");
 		this.privMsgCheckBox		 = new JCheckBox();
 		
-		this.backupServerPanel 		 = new JPanel(new GridLayout(4,2));
+		this.localDBPanel			 = new JPanel(new GridLayout(3,2));
+		this.portLocalDBLabel		 = new JLabel("Port");
+		this.portLocalDBTextField	 = new JTextField();
+		this.userLocalDBLabel		 = new JLabel("Username");
+		this.userLocalDBTextField	 = new JTextField();
+		this.pwLocalDBLabel			 = new JLabel("Password");
+		this.pwLocalDBPasswordField	 = new JPasswordField();
+		
+		this.pushPullPanel 			 = new JPanel(new GridLayout(2,2));
+		this.userPushPullLabel 		 = new JLabel("Username");
+		this.userPushPullTextField	 = new JTextField();
+		this.pwPushPullLabel 		 = new JLabel("Password");
+		this.pwPushPullPasswordField = new JPasswordField();
+		
+		this.backupDBPanel 			 = new JPanel(new GridLayout(4,2));
 		this.ipBackupLabel 			 = new JLabel("IP address");
 		this.ipBackupTextField 		 = new JTextField();
 		this.portBackupLabel 		 = new JLabel("Port");
@@ -96,18 +138,36 @@ public class SettingsWindow extends JDialog{
 		this.pwBackupLabel 			 = new JLabel("Password");
 		this.pwBackPasswordField 	 = new JPasswordField();
 		
-		this.pushPullPanel 			 = new JPanel(new GridLayout(2,2));
-		this.userPushPullLabel 		 = new JLabel("Username");
-		this.userPushPullTextField	 = new JTextField();
-		this.pwPushPullLabel 		 = new JLabel("Password");
-		this.pwPushPullPasswordField = new JPasswordField();
-		
 		this.buttonPanel 	= new JPanel(new GridLayout(1,3));
 		this.resetBtn 		= new JButton("Reset");
 		this.acceptBtn	 	= new JButton("Accept");
 		this.cancelBtn 		= new JButton("Cancel");
 		
-
+		this.btnGrp.add(userBtn);
+		this.btnGrp.add(databaseBtn);
+		
+		this.userBtn.addActionListener(new CardButtonController(cardsPanel));
+		this.databaseBtn.addActionListener(new CardButtonController(cardsPanel));
+		this.resetBtn.addActionListener(new SettingButtonController());
+		this.acceptBtn.addActionListener(new SettingButtonController());
+		this.cancelBtn.addActionListener(new SettingButtonController());
+		
+		this.cardButtonsPanel.setPreferredSize(new Dimension(230,25));
+		this.cardButtonsPanel.setBackground(Color.WHITE);
+		this.cardButtonsPanel.add(userBtn);
+		this.cardButtonsPanel.add(databaseBtn);
+		
+		this.cardUser.setPreferredSize(new Dimension(230,62));
+		this.cardUser.setBackground(Color.WHITE);
+		this.cardUser.add(userSettingsPanel);
+		this.cardUser.add(trayIconNotificationPanel);
+		
+		this.cardDB.setPreferredSize(new Dimension(230,62));
+		this.cardDB.setBackground(Color.WHITE);
+		this.cardDB.add(localDBPanel);
+		this.cardDB.add(pushPullPanel);
+		this.cardDB.add(backupDBPanel);
+		
 		this.userSettingsPanel.setBorder(BorderFactory.createTitledBorder("User"));
 		this.userSettingsPanel.setPreferredSize(new Dimension(230,62));
 		this.userSettingsPanel.setBackground(Color.WHITE);
@@ -127,25 +187,39 @@ public class SettingsWindow extends JDialog{
 		this.trayIconNotificationPanel.add(privMsgLabel);
 		this.trayIconNotificationPanel.add(privMsgCheckBox);
 		
-		this.backupServerPanel.setBorder(BorderFactory.createTitledBorder("Backup-Server"));
-		this.backupServerPanel.setPreferredSize(new Dimension(230,100));
-		this.backupServerPanel.setBackground(Color.WHITE);
-		this.backupServerPanel.add(ipBackupLabel);
-		this.backupServerPanel.add(ipBackupTextField);
-		this.backupServerPanel.add(portBackupLabel);
-		this.backupServerPanel.add(portBackupTextField);
-		this.backupServerPanel.add(userBackupLabel);
-		this.backupServerPanel.add(userBackupTextField);
-		this.backupServerPanel.add(pwBackupLabel);
-		this.backupServerPanel.add(pwBackPasswordField);
+		this.localDBPanel.setBorder(BorderFactory.createTitledBorder("local database"));
+		this.localDBPanel.setPreferredSize(new Dimension(230,82));
+		this.localDBPanel.setBackground(Color.WHITE);
+		this.localDBPanel.add(portLocalDBLabel);
+		this.localDBPanel.add(portLocalDBTextField);
+		this.localDBPanel.add(userLocalDBLabel);
+		this.localDBPanel.add(userLocalDBTextField);
+		this.localDBPanel.add(pwLocalDBLabel);
+		this.localDBPanel.add(pwLocalDBPasswordField);
 		
-		this.pushPullPanel.setBorder(BorderFactory.createTitledBorder("push/pull Backup"));
+		this.pushPullPanel.setBorder(BorderFactory.createTitledBorder("push/pull to backup DB"));
 		this.pushPullPanel.setPreferredSize(new Dimension(230,62));
 		this.pushPullPanel.setBackground(Color.WHITE);
 		this.pushPullPanel.add(userPushPullLabel);
 		this.pushPullPanel.add(userPushPullTextField);
 		this.pushPullPanel.add(pwPushPullLabel);
 		this.pushPullPanel.add(pwPushPullPasswordField);
+		
+		this.backupDBPanel.setBorder(BorderFactory.createTitledBorder("backup database"));
+		this.backupDBPanel.setPreferredSize(new Dimension(230,100));
+		this.backupDBPanel.setBackground(Color.WHITE);
+		this.backupDBPanel.add(ipBackupLabel);
+		this.backupDBPanel.add(ipBackupTextField);
+		this.backupDBPanel.add(portBackupLabel);
+		this.backupDBPanel.add(portBackupTextField);
+		this.backupDBPanel.add(userBackupLabel);
+		this.backupDBPanel.add(userBackupTextField);
+		this.backupDBPanel.add(pwBackupLabel);
+		this.backupDBPanel.add(pwBackPasswordField);
+		
+		this.cardsPanel.setBackground(Color.WHITE);
+		this.cardsPanel.add(cardUser, "User");
+		this.cardsPanel.add(cardDB, "Database");
 		
 		this.buttonPanel.setBorder(BorderFactory.createCompoundBorder());
 		this.buttonPanel.setPreferredSize(new Dimension(230,25));
@@ -154,11 +228,12 @@ public class SettingsWindow extends JDialog{
 		this.buttonPanel.add(acceptBtn);
 		this.buttonPanel.add(cancelBtn);
 		
+		this.cardsPanel.setPreferredSize(new Dimension(230, 270));
+		this.cardsPanel.setBackground(Color.WHITE);
+		
 		this.add(banner);
-		this.add(userSettingsPanel);
-		this.add(trayIconNotificationPanel);
-		this.add(backupServerPanel);
-		this.add(pushPullPanel);
+		this.add(cardButtonsPanel);
+		this.add(cardsPanel);
 		this.add(buttonPanel);
 		
 		this.setTitle("Settings");
@@ -184,19 +259,6 @@ public class SettingsWindow extends JDialog{
 		this.setVisible(true);
 	}
 	
-	private void getDefaults(){
-		this.aliasTextField.setText(Config.getConfig().getAlias());
-		this.fileTransferCheckBox.setSelected(Config.getConfig().getDisableFileTransfer());
-		this.grpMsgCheckBox.setSelected(Config.getConfig().getNotifyGroup());
-		this.privMsgCheckBox.setSelected(Config.getConfig().getNotifyPrivate());
-		this.ipBackupTextField.setText(Config.getConfig().getBackupDBIP());
-		this.portBackupTextField.setText(Config.getConfig().getBackupDBPort());
-		this.userBackupTextField.setText(Config.getConfig().getBackupDBUser());
-		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
-		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
-		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
-	}
-	
 	public static void closeThis(){
 		if(me!=null)me.dispose();
 	}
@@ -204,5 +266,83 @@ public class SettingsWindow extends JDialog{
 	public static void showthis(){
 		if(me==null) new SettingsWindow();
 		me.showIt();
+	}
+	
+	private void getDefaults(){
+		this.aliasTextField.setText(Config.getConfig().getAlias());
+		this.fileTransferCheckBox.setSelected(Config.getConfig().getDisableFileTransfer());
+		
+		this.grpMsgCheckBox.setSelected(Config.getConfig().getNotifyGroup());
+		this.privMsgCheckBox.setSelected(Config.getConfig().getNotifyPrivate());
+		
+		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
+		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
+		
+		this.portLocalDBTextField.setText(Config.getConfig().getLocalDBPort());
+		this.userLocalDBTextField.setText(Config.getConfig().getLocalDBUser());
+		this.pwLocalDBPasswordField.setText(Config.getConfig().getLocalDBPw());
+		
+		this.ipBackupTextField.setText(Config.getConfig().getBackupDBIP());
+		this.portBackupTextField.setText(Config.getConfig().getBackupDBPort());
+		this.userBackupTextField.setText(Config.getConfig().getBackupDBUser());
+		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
+	}
+	
+	private void acceptSettings(){
+		Config.getConfig().setAlias(aliasTextField.getText());
+		GUI.getGUI().changeAlias(aliasTextField.getText());
+		Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
+		
+		Config.getConfig().setNotifyGroup(grpMsgCheckBox.isSelected());
+		Config.getConfig().setNotifyPrivate(privMsgCheckBox.isSelected());
+		
+		Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
+		Config.getConfig().setBackupDBChoosenUserPassWord(pwPushPullPasswordField.getPassword().toString());
+		
+		Config.getConfig().setLocalDBPort(portLocalDBTextField.getText());
+		Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
+		Config.getConfig().setLocalDBPw(pwLocalDBPasswordField.getPassword().toString());
+		
+		Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
+		Config.getConfig().setBackupDBPort(portBackupTextField.getText());
+		Config.getConfig().setBackupDBUser(userBackupTextField.getText());
+		Config.getConfig().setBackupDBPw(pwBackPasswordField.getPassword().toString());
+		
+		Config.write();
+	}
+	
+	class CardButtonController implements ActionListener{
+
+		private JPanel ref;
+		
+		public CardButtonController(JPanel ref){
+			this.ref = ref;
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			CardLayout card = (CardLayout) ref.getLayout();
+			card.show( ref, ((JToggleButton)e.getSource()).getText() );
+		}
+	}
+	
+	class SettingButtonController implements ActionListener{
+
+		public void actionPerformed(ActionEvent e) {
+			JButton source = (JButton)e.getSource();
+			
+			switch(source.getText()){
+			case "Reset" :
+				getDefaults();
+				break;
+			case "Accept" :
+				acceptSettings();
+				closeThis();
+				break;
+			case "Cancel" :
+				closeThis();
+				break;
+			}
+		}
+		
 	}
 }

@@ -756,7 +756,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 					hcdHelp.showIt();
 				}
 				break;
-			case "History":
+			case "Local":
 				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
@@ -802,13 +802,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 //			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
 			SettingsWindow.closeThis();
 			shutdown();
-			// Object[] eventCache =
-			// {"super"," liegt im Systemtray"};
-			// Object anchor = true;
-			// JOptionPane.showInputDialog(me,
-			// "pMAIN wird ins Systemtray gelegt!",
-			// "pMAIN -> Systemtray", JOptionPane.PLAIN_MESSAGE, new
-			// ImageIcon("media/pM16x16.png"), eventCache, anchor);
 		}
 		@Override
 		public void windowActivated(WindowEvent arg0) {

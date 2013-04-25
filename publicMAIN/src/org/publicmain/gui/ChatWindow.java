@@ -315,9 +315,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	public void printInfo(Node nodeforalias) {
 		if (nodeforalias!=null) {
 			Map<String, String> tmp_data = nodeforalias.getData();
+			GUI.getGUI().info("----------------------------------------------------", null,0);
 			GUI.getGUI().info("Infos for User : " + nodeforalias.getAlias(), null,0);
 			for (String x : tmp_data.keySet()) {
-				GUI.getGUI().info(x.toUpperCase() + "\t: " + tmp_data.get(x), null,1);
+				GUI.getGUI().info(x.toUpperCase() + "\t: " + tmp_data.get(x), null,0);
 			}
 			GUI.getGUI().info("----------------------------------------------------", null,0);
 		}
@@ -415,20 +416,20 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		public void dropActionChanged(DropTargetDragEvent dtde) {
 		}
 		public void drop(DropTargetDropEvent event) {
-				 event.acceptDrop(DnDConstants.ACTION_COPY);
-			            try {
-			            	if(isPrivCW){
-						List<File> files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-						if(files.size()==1) {
-							gui.sendFile(files.get(0), userID);
-						}
-						else warn("Only single files can be transfered");
-						}
-			            	else warn("You dropped some files into a GroupChat.... Don't do that!");
-			            } catch (Exception e) {
-			                LogEngine.log(this,"You can only drop one File",LogEngine.ERROR);
-			            }
-			        event.dropComplete(true);
+			event.acceptDrop(DnDConstants.ACTION_COPY);
+	        try {
+	        	if(isPrivCW){
+	        		List<File> files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+				if(files.size()==1) {
+					gui.sendFile(files.get(0), userID);
+				}
+				else warn("Only single files can be transfered");
+				}
+	            else warn("You dropped some files into a GroupChat.... Don't do that!");
+	        } catch (Exception e) {
+	            LogEngine.log(this,"You can only drop one File",LogEngine.ERROR);
+	        }
+	        event.dropComplete(true);
 		}
 		
 		public void dragOver(DropTargetDragEvent dtde) {

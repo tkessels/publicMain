@@ -3,10 +3,7 @@ package org.publicmain.gui;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.DisplayMode;
 import java.awt.FlowLayout;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,10 +26,6 @@ public class SettingsWindow extends JDialog{
 	
 	private static SettingsWindow me;
 				
-	private GraphicsEnvironment ge;
-	private GraphicsDevice 		gd;
-	private DisplayMode 		dm;
-	
 	private JLabel		banner;
 	
 	private JPanel		cardButtonsPanel;
@@ -88,10 +81,6 @@ public class SettingsWindow extends JDialog{
 		this.me = this;
 		this.setResizable(false);
 		this.setLayout(new FlowLayout(FlowLayout.CENTER));
-		
-		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		this.gd = ge.getDefaultScreenDevice();
-		this.dm = gd.getDisplayMode();
 		
 		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
 		

@@ -39,38 +39,46 @@ import org.resources.Help;
  * 
  */
 public class ContactList extends JWindow {
+	
 	private int breite;
+	
 	private JFrame parent;
+	
 	private JInternalFrame internalFrame;
-	private JScrollPane usersScroller;
+	
 	private JScrollPane groupsScroller;
 	private JPanel groupPanel;
-	private JButton createGrp;
-	private JPanel userPanel;
-	private JList<Node> users;
 	private JList<String> groups;
+	private JButton createGrp;
+	
 	private JSplitPane trenner;
 	
+	private JScrollPane usersScroller;
+	private JPanel userPanel;
+	private JList<Node> users;
+	
 	public ContactList(JFrame parent) {
-		this.parent=parent;
-		this.internalFrame = new JInternalFrame("contacts");
-		this.breite = 150;
-		this.internalFrame.setFrameIcon(Help.getIcon("g18050.png"));
-		this.users = new JList<Node>(new UserListModel());
-		this.groups = new JList<String>(new GroupListModel());
-		this.usersScroller = new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		this.parent			= parent;
+		this.internalFrame	= new JInternalFrame("contacts");
+		this.breite			= 150;
+		this.users			= new JList<Node>(new UserListModel());
+		this.groups			= new JList<String>(new GroupListModel());
+		this.usersScroller	= new JScrollPane(users, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		this.groupsScroller = new JScrollPane(groups, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		this.groupPanel = new JPanel(new BorderLayout());
-		this.createGrp = new JButton("Create Group");
-		this.userPanel = new JPanel(new BorderLayout());
-		this.trenner = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		this.groupPanel		= new JPanel(new BorderLayout());
+		this.createGrp		= new JButton("Create Group");
+		this.userPanel		= new JPanel(new BorderLayout());
+		this.trenner		= new JSplitPane(JSplitPane.VERTICAL_SPLIT);
          
 		this.internalFrame.setLayout(new BorderLayout());
-		
-		this.groupPanel.setBorder(BorderFactory.createTitledBorder("GROUPS"));
-		this.userPanel.setBorder(BorderFactory.createTitledBorder("USERS"));
+		this.internalFrame.setFrameIcon(Help.getIcon("g18050.png"));
 		
 		this.groupPanel.setPreferredSize(new Dimension(breite, parent.getHeight()/4));
+		this.groupPanel.setBorder(BorderFactory.createTitledBorder("GROUPS"));
+		this.groupPanel.setBackground(Color.WHITE);
+		
+		this.userPanel.setBorder(BorderFactory.createTitledBorder("USERS"));
+		this.userPanel.setBackground(Color.WHITE);
 		
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.VERTICAL);
@@ -83,8 +91,8 @@ public class ContactList extends JWindow {
 		this.groups.setCellRenderer(new GroupsListCellRenderer());
 		
 		// Listener adden
-		this.users.addMouseListener(new myMouseAdapter());
-		this.groups.addMouseListener(new myMouseAdapter());
+		this.users.addMouseListener(new MyMouseListener());
+		this.groups.addMouseListener(new MyMouseListener());
 		this.createGrp.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -148,7 +156,7 @@ public class ContactList extends JWindow {
 		super.repaint();
 	}
 	
-	class myMouseAdapter implements MouseListener {
+	class MyMouseListener implements MouseListener {
 
 		public void mouseClicked(MouseEvent e) {
 			JList source = (JList) e.getSource();

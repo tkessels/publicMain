@@ -1,6 +1,7 @@
 
 package org.publicmain.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
@@ -180,6 +181,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		// GUI JFrame Einstellungen
 		this.setIconImage(Help.getIcon("pM_Logo.png",64).getImage());
+		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, 250));
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -757,7 +759,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}
 				break;
 			case "Local":
-				new CheckoutHistoryWindow();
+				new HistoryWindow();
 				break;
 			case "Settings":
 				SettingsWindow.showThis();

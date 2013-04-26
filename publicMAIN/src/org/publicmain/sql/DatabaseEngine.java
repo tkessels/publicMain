@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 
@@ -132,7 +135,49 @@ public class DatabaseEngine {
 			}
 		}
 	}
+	
+	/**Queries the local Database for Messages of a selected user (<code>uid</code>) which have been send after the begin date but before the end date. 
+	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by giving a search text.
+	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
+	 * @param uid UserId of User whose messages should be retrieved
+	 * @param begin only messages after the given date (in long) will be considered. begin date will be ignored if negative 
+	 * @param end only messages before the given date (in long) will be considered. end date will be ignored if negative
+	 * @param text only messages containing this text will be shown. text will be ignored if empty string
+	 * @return a JTable listing all the messages fitting the given attributes (Maybe the Database Engine will update the Datamodel of the HistoryWindow later)
+	 */
+	public JTable selectMSGsByUser(long uid,long begin, long end,String text) {
+		return null;
+	}
+	
+	/**Queries the local Database for Messages which have been send with the given <code>alias</code> if send after the begin date but before the end date. 
+	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
+	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
+	 * @param alias used in message
+	 * @param begin only messages after the given date (in long) will be considered. begin date will be ignored if negative 
+	 * @param end only messages before the given date (in long) will be considered. end date will be ignored if negative
+	 * @param text only messages containing this text will be shown. text will be ignored if empty string
+	 * @return a JTable listing all the messages fitting the given attributes
+	 */	
+	public JTable selectMSGsByAlias(String alias,long begin, long end,String text) {
+		return null;
+	}
 
+	/**Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
+	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
+	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
+	 * @param group the message was send to
+	 * @param begin only messages after the given date (in long) will be considered. begin date will be ignored if negative 
+	 * @param end only messages before the given date (in long) will be considered. end date will be ignored if negative
+	 * @param text only messages containing this text will be shown. text will be ignored if empty string
+	 * @return a JTable listing all the messages fitting the given attributes
+	 */	
+	public JTable selectMSGsByGroup(String group,long begin, long end,String text) {
+		return null;
+	}
+	
+	public JComboBox getUsers(){
+		return new JComboBox<UserIdentifier>();
+	}
 
 	public void go() {
 		
@@ -143,6 +188,12 @@ public class DatabaseEngine {
 		
 
 
+	}
+	
+	class UserIdentifier{
+		public String alias;
+		public long uid;
+		public String username;
 	}
 
 	

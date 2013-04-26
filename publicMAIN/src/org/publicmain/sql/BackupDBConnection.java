@@ -1,5 +1,11 @@
 package org.publicmain.sql;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -9,7 +15,9 @@ import java.util.Calendar;
 
 import javax.swing.JTextField;
 
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
+import org.publicmain.common.MSGCode;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -23,21 +31,9 @@ public class BackupDBConnection {
 	private String 		backupRootUser;
 	private String 		backupUser;
 	private String 		rootPasswd;
+	private int 		dbVersion;
 	
-//	//Tabellen der Loc DB
-//	private String chatLogTbl;
-//	private String msgTbl;
-//	private String usrTbl;
-//	private String nodeTbl;
-//	private String groupTbl;
-//	private String configTbl;
-//	private String eventTypeTbl;
-//	private String routingOverviewTbl;
-//	private Calendar cal;
-//	private SimpleDateFormat splDateFormt;
-	
-	
-	// verbindungssachen
+	// Verbindungsdaten
 	private Connection 	rootCon;
 	private Connection 	userCon;
 	
@@ -52,6 +48,34 @@ public class BackupDBConnection {
 			me = new BackupDBConnection();
 		}
 		return me;
+	}
+	
+	public boolean create() {
+		String read=null;
+		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_backup_db.sql").toURI())))){
+			while((read = in.readLine()) != null) {
+				while (!read.endsWith(";") && !read.endsWith("--")){
+					read = read + in.readLine();
+				}
+				stmt.execute(read);
+			}
+			for (MSGCode c : MSGCode.values()){
+				stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
+			}
+			
+			stmt.executeBatch();
+			Config.getConfig().setLocalDBVersion(dbVersion);
+			Config.write();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e2) {
+			e2.printStackTrace();
+		}
+		return false;
 	}
 	
 	public void createNewUser(final JTextField statusTextField, final JTextField serverIPTextField, final JTextField userNameTextField, final JTextField passWordTextField){

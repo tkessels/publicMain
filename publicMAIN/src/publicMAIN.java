@@ -40,7 +40,7 @@ public class publicMAIN {
 			
 		}
 		else{
-			JOptionPane.showMessageDialog(null, "Could not start publicMAIN\nAn instance is already running!", "publicMAIN", JOptionPane.ERROR_MESSAGE, Help.getIcon("pM_Logo2.png",48) );
+			JOptionPane.showMessageDialog(null, "Could not start publicMAIN\nAn instance is already running!", "publicMAIN", JOptionPane.ERROR_MESSAGE, Help.getIcon("pM_Logo.png",48) );
 			LogEngine.log("Could not start publicMAIN An instance is already running!", LogEngine.ERROR);
 		}
 		

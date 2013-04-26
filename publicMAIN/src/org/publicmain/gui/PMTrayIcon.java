@@ -47,7 +47,7 @@ public class PMTrayIcon {
         }
         
         this.popup = new PopupMenu();
-        this.trayIcon = new TrayIcon(Help.getIcon("pM_Logo2.png",16).getImage());
+        this.trayIcon = new TrayIcon(Help.getIcon("pM_Logo.png",16).getImage());
         this.sysTray = SystemTray.getSystemTray();
         this.display = new MenuItem("Display");
         this.notifies = new Menu("Notify");
@@ -118,7 +118,7 @@ public class PMTrayIcon {
 //		                	notifyGrp = item.getState();
 		                	break;
 	                	default :
-	                		trayIcon.displayMessage("Sun TrayIcon Demo", "Martin", TrayIcon.MessageType.NONE);
+	                		trayIcon.displayMessage("default", "default", TrayIcon.MessageType.NONE);
 	                		break;
 	                }
 			}

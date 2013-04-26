@@ -86,6 +86,7 @@ public class SettingsWindow extends JDialog{
 
 	public SettingsWindow() {
 		this.me = this;
+		this.setResizable(false);
 		this.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
 		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -142,6 +143,7 @@ public class SettingsWindow extends JDialog{
 		this.resetBtn 		= new JButton("Reset");
 		this.acceptBtn	 	= new JButton("Accept");
 		this.cancelBtn 		= new JButton("Cancel");
+		
 		
 		this.btnGrp.add(userBtn);
 		this.btnGrp.add(databaseBtn);
@@ -235,11 +237,12 @@ public class SettingsWindow extends JDialog{
 		this.add(cardButtonsPanel);
 		this.add(cardsPanel);
 		this.add(buttonPanel);
+
 		
 		this.setTitle("Settings");
 		this.setModal(false);
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		this.setIconImage(Help.getIcon("pM_Logo2.png").getImage());
+		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setMaximumSize(new Dimension(250, GUI.getGUI().getHeight()));
@@ -247,25 +250,18 @@ public class SettingsWindow extends JDialog{
 		this.pack();
 		
 		this.getDefaults();
-		this.showIt();
-	}
-	
-	public void showIt() {
-		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth() + this.getWidth() < dm.getWidth())) {
-			this.setLocation(GUI.getGUI().getLocation().x + GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
-		} else {
-			this.setLocationRelativeTo(null);
-		}
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
+	
 	
 	public static void closeThis(){
 		if(me!=null)me.dispose();
 	}
 
-	public static void showthis(){
+	public static void showThis(){
 		if(me==null) new SettingsWindow();
-		me.showIt();
+		me.setVisible(true);
 	}
 	
 	private void getDefaults(){

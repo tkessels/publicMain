@@ -97,7 +97,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		GUI.me 					= this;
 		this.log 				= new LogEngine();
 		// this.locDBCon 		= LocalDBConnection.getDBConnection();
-		this.about 				= new JMenuItem("About");
+		this.about 				= new JMenuItem("About", Help.getIcon("aboutSym.png"));
 		// TODO: evtl. noch anderes Icon wählen
 		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
 		this.exit				= new JMenuItem("Exit", Help.getIcon("exitSym.png"));
@@ -179,7 +179,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.ce.register_defaultMSGListener(this);
 
 		// GUI JFrame Einstellungen
-		this.setIconImage(Help.getIcon("pM_Logo2.png",64).getImage());
+		this.setIconImage(Help.getIcon("pM_Logo.png",64).getImage());
 		this.setMinimumSize(new Dimension(250, 250));
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -760,7 +760,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				new CheckoutHistoryWindow();
 				break;
 			case "Settings":
-				SettingsWindow.showthis();
+				SettingsWindow.showThis();
 				break;
 
 			case "Push History":

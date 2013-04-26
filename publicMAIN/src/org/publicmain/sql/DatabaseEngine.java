@@ -1,12 +1,10 @@
 package org.publicmain.sql;
 
-import java.security.KeyStore.Entry;
 import java.util.AbstractMap;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,42 +13,45 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 
 public class DatabaseEngine {
+	
+	
+	public synchronized static DatabaseEngine createDatabaseEngine() {
+		if(me==null) new DatabaseEngine();
+		return me;
+	}
+
+
 	private LocalDBConnection local;
 	private BackupDBConnection backup;
 	
 	private BlockingQueue<MSG> msg2Store;
 	private BlockingQueue<Node> node2Store;
 	private BlockingQueue<Map.Entry<Long, Long>> routes2Store;
+	private BlockingQueue<String> groups2Store; 
 	
 	private HashSet<MSG> failed_msgs;
-	private HashSet<Node> stored_nodes;
+	private List<Node> failed_node;
+//	private HashSet<Node> stored_nodes;
 //	private HashSet<Node> stored_routes;
+ 
+	private static DatabaseEngine me;
+	Thread transporter = new Thread(new DPTransportBot());
 	
 	
-	Thread msgPutter = new Thread(new msgsToDB());
-	Thread nodesPutter = new Thread(new nodesToDB());
-	Thread routesPutter = new Thread(new routesToDB());
 	
-	
-	public DatabaseEngine() {
+	private DatabaseEngine() {
+		me=this;
 		local = LocalDBConnection.getDBConnection(this);
 		backup = BackupDBConnection.getBackupDBConnection();
+		
 		msg2Store = new LinkedBlockingQueue<MSG>();
 		node2Store = new LinkedBlockingQueue<Node>();
 		routes2Store = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
-		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				//
-				msgPutter.start();
-				nodesPutter.start();
-				routesPutter.start();				
-			}
-		}).start();
+		groups2Store = new LinkedBlockingQueue<String>();
 		
 		
+
+		transporter.start();
 		
 	
 		
@@ -77,92 +78,69 @@ public class DatabaseEngine {
 	
 	
 	public void push(){
-		
+		//TODO:
 	}
 	
 	public void pull(){
 		//TODO: HILFE
 	}
 	
-	private final class routesToDB implements Runnable {
+	private final class DPTransportBot implements Runnable {
 		@Override
 		public void run() {
-			
-			while(true){
-				Map.Entry<Long, Long> tmp;
-				try {
-					tmp = routes2Store.take();
-					local.writeRoutingTable_to_t_nodes(tmp.getKey(), tmp.getValue());
-				} catch (InterruptedException e) {
-				}
-			}
-			// TODO Timeing und prüfung
-			
-		}
-	}
-
-	private final class nodesToDB implements Runnable {
-		@Override
-		public void run() {
-			while(true){
-				Node tmp;
-				try {
-					tmp = node2Store.take();
-//					if (!local.writeAllUsersToLocDB(Arrays.asList(tmp))){
-				} catch (InterruptedException e) {
-				}
-			}
-			
-			// TODO prüfen und timeout
-			
-		}
-	}
-
-	private final class msgsToDB implements Runnable {
-		@Override
-		public void run() {
-			synchronized (this) {
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-				}
-			}
-			while(true){
-				try {
-					MSG tmp=msg2Store.take();
-					if(!local.writeMsgToDB(tmp)){
-						if(local.getStatus()){
-							failed_msgs.add(tmp);
-						}else {
-							msg2Store.add(tmp);
-							synchronized (this) {
-								this.wait();
-							}
+			while (true) {
+				if (!local.getStatus()) {
+					synchronized (this) {
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
 						}
 					}
-				} catch (InterruptedException e) {
+				}
+				while (true) {
+
+					// kopiere msgs
+					List<MSG> tmp_msg = new ArrayList<MSG>(msg2Store);
+					msg2Store.removeAll(tmp_msg);
+					// kopiere groups
+					List<String> tmp_groups = new ArrayList<String>(groups2Store);
+					groups2Store.removeAll(tmp_groups);
+					// kopiere nodes
+					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
+					node2Store.removeAll(tmp_nodes);
+
+					// schreibe nodes
+					if(!local.writeAllUsersToDB(tmp_nodes)){
+						failed_node.addAll(tmp_nodes);
+						if(!local.getStatus()) break;
+					}
+					// schreibe groups
+					local.writeAllGroupsToDB(tmp_groups);
+					// schreibe msgs
+					boolean all_msgs_written=true;
+					for (MSG current : tmp_msg) {
+						if(!local.writeMsgToDB(current))
+						all_msgs_written=false;
+						failed_msgs.add(current);
+					}
+					if(all_msgs_written&&!local.getStatus())break;
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
 				}
 			}
-			
-			// TODO timeintervall  und prüfung
-			
+		}
+	}
+
+
+	public void go() {
+		
+		synchronized (transporter) {
+			transporter.notify();
 		}
 
 		
-	}
-	
-
-	public void go() {
-
-		synchronized (msgPutter) {
-			msgPutter.notify();
-		}
-		synchronized (nodesPutter) {
-			nodesPutter.notify();
-		}
-		synchronized (routesPutter) {
-			routesPutter.notify();
-		}
 
 
 	}

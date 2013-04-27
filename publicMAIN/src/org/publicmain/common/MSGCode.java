@@ -52,7 +52,11 @@ public enum MSGCode {
 	CW_WARNING_TEXT("beschreibungEinfügen"),
 	CW_ERROR_TEXT("beschreibungEinfügen"),
 	
+	BACKUP_SERVER_DISCOVER("find active backupservers on the net"),
+	BACKUP_SERVER_OFFER("offer backupserver services on the net"),
+	
 	GUI_INFORM("beschreibungEinfügen");
+	
 	
 private String description;
 	

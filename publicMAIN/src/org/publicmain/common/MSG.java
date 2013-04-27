@@ -25,8 +25,8 @@ import org.publicmain.nodeengine.NodeEngine;
  *
  */
 public class MSG implements Serializable,Comparable<MSG>{
-	private static Integer id_counter=0;
-	private static final long serialVersionUID = 8991L;
+	private static int id_counter=0;
+	private static final long serialVersionUID = 270420135L;
 
 	//Typisierung
 	private final NachrichtenTyp typ;
@@ -42,13 +42,28 @@ public class MSG implements Serializable,Comparable<MSG>{
 	private Object data;
 
 	private MSG(NachrichtenTyp typ) {
-		synchronized (id_counter) {
-			this.id=id_counter;
-			MSG.id_counter++;
-		}
+		this.id = getnextID();
 		this.typ=typ;
 		this.timestamp=System.currentTimeMillis();
 		this.sender= NodeEngine.getNE().getMe().getNodeID();
+	}
+
+	/**
+	 * 
+	 */
+	private static synchronized int getnextID() {
+		return id_counter++;
+	}
+
+	public MSG(NachrichtenTyp typ, MSGCode code, long sender, long empfänger, String group, Object data) {
+		this.typ = typ;
+		this.code = code;
+		this.sender = sender;
+		this.timestamp = System.currentTimeMillis();
+		this.id = getnextID();
+		this.empfänger = empfänger;
+		this.group = group;
+		this.data = data;
 	}
 
 	public MSG(Object payload, MSGCode code){

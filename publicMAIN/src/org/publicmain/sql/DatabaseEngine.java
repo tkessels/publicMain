@@ -6,26 +6,24 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JComboBox;
 import javax.swing.JTable;
+import javax.xml.crypto.NodeSetData;
 
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
+import org.publicmain.nodeengine.NodeEngine;
 
 public class DatabaseEngine {
 	
-	
-	public synchronized static DatabaseEngine createDatabaseEngine() {
-		if(me==null) new DatabaseEngine();
-		return me;
-	}
-
-
-	private LocalDBConnection local;
-	private BackupDBConnection backup;
+	private LocalDBConnection localDB;
+	private BackupDBConnection backupDB;
 	
 	private BlockingQueue<MSG> msg2Store;
 	private BlockingQueue<Node> node2Store;
@@ -34,44 +32,50 @@ public class DatabaseEngine {
 	
 	private HashSet<MSG> failed_msgs;
 	private List<Node> failed_node;
+	private BlockingQueue<Map.Entry<Long, Long>> failed_routes;
 //	private HashSet<Node> stored_nodes;
 //	private HashSet<Node> stored_routes;
  
 	private static DatabaseEngine me;
 	Thread transporter = new Thread(new DPTransportBot());
 	
-	
-	
 	private DatabaseEngine() {
 		me=this;
-		local = LocalDBConnection.getDBConnection(this);
-		backup = BackupDBConnection.getBackupDBConnection();
+		localDB = LocalDBConnection.getDBConnection(this);
+		backupDB = BackupDBConnection.getBackupDBConnection();
 		
 		msg2Store = new LinkedBlockingQueue<MSG>();
 		node2Store = new LinkedBlockingQueue<Node>();
 		routes2Store = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
 		groups2Store = new LinkedBlockingQueue<String>();
+		failed_msgs = new HashSet<MSG>();
+		failed_node = new ArrayList<Node>();
+		failed_routes = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
 		
-		
-
 		transporter.start();
-		
-	
-		
 	}
 	
-	public void put(MSG x){
+	public synchronized static DatabaseEngine getDatabaseEngine() {
+		if(me==null) new DatabaseEngine();
+		return me;
+	}
+	
+	public synchronized void put(MSG x){
 		msg2Store.offer(x);
 	}
 	
-	public void put(Node x){
+	public synchronized void put(Node x){
 		node2Store.offer(x);
 	}
 
-	public void put(Collection<Node> x){
+	public synchronized void put(Collection<Node> x){
 		for (Node node : x) {
 			node2Store.offer(node);
 		}
+	}
+	
+	public void put(String group){
+		groups2Store.add(group);
 	}
 	
 
@@ -91,42 +95,66 @@ public class DatabaseEngine {
 	private final class DPTransportBot implements Runnable {
 		@Override
 		public void run() {
+			boolean locDBWasConnectetBefore = false;
 			while (true) {
-				if (!local.getStatus()) {
-					synchronized (this) {
+				if (!localDB.getStatus()) {
+					synchronized (transporter) {
 						try {
-							this.wait();
+							if (locDBWasConnectetBefore) localDB.reconnectToLocDBServer();
+							transporter.wait();
+							locDBWasConnectetBefore = true;
 						} catch (InterruptedException e) {
 						}
 					}
 				}
 				while (true) {
-
 					// kopiere msgs
 					List<MSG> tmp_msg = new ArrayList<MSG>(msg2Store);
 					msg2Store.removeAll(tmp_msg);
+					
 					// kopiere groups
 					List<String> tmp_groups = new ArrayList<String>(groups2Store);
 					groups2Store.removeAll(tmp_groups);
+					
 					// kopiere nodes
 					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
 					node2Store.removeAll(tmp_nodes);
 
+					// kopiere routen
+					List<Map.Entry<Long, Long>> tmp_routes = new ArrayList<Map.Entry<Long, Long>>(routes2Store);
+					routes2Store.removeAll(tmp_routes);
+					
 					// schreibe nodes
-					if(!local.writeAllUsersToDB(tmp_nodes)){
+					if(!localDB.writeAllUsersToDB(tmp_nodes)){
 						failed_node.addAll(tmp_nodes);
-						if(!local.getStatus()) break;
+						if(!localDB.getStatus()) break;
 					}
+					
 					// schreibe groups
-					local.writeAllGroupsToDB(tmp_groups);
+					localDB.writeAllGroupsToDB(tmp_groups);
+					
 					// schreibe msgs
 					boolean all_msgs_written=true;
 					for (MSG current : tmp_msg) {
-						if(!local.writeMsgToDB(current))
-						all_msgs_written=false;
-						failed_msgs.add(current);
+						if(!localDB.writeMsgToDB(current)){
+							all_msgs_written=false;
+							failed_msgs.add(current);
+						}
 					}
-					if(all_msgs_written&&!local.getStatus())break;
+					if(!all_msgs_written){
+						if(!localDB.getStatus()){
+							break;
+						}
+					}
+					
+					//schreibe alle routen
+					for (Entry<Long, Long> tmp_route : tmp_routes){
+						if(!localDB.writeRoutingTable_to_t_nodes(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
+							failed_routes.add(tmp_route);
+							break;
+						}
+					}
+					
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -179,15 +207,10 @@ public class DatabaseEngine {
 		return new JComboBox<UserIdentifier>();
 	}
 
-	public void go() {
-		
+	public synchronized void go() {
 		synchronized (transporter) {
 			transporter.notify();
 		}
-
-		
-
-
 	}
 	
 	class UserIdentifier{

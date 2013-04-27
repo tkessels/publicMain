@@ -234,6 +234,7 @@ public class ChatEngine{
 	 *            alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name) {
+		DatabaseEngine.getDatabaseEngine().put(gruppen_name);
 		synchronized (myGroups) {
 			if (myGroups.add(gruppen_name)) {
 				ne.joinGroup(Arrays.asList(gruppen_name), null);
@@ -399,7 +400,7 @@ public class ChatEngine{
 	public void put(MSG nachricht) {
 		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
-			DatabaseEngine.createDatabaseEngine().put(nachricht);
+			DatabaseEngine.getDatabaseEngine().put(nachricht);
 		}
 	}
 

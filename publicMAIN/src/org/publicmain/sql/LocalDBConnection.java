@@ -35,6 +35,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
+import org.resources.Help;
 
 import com.mysql.jdbc.PreparedStatement;
 import com.mysql.jdbc.log.Log;
@@ -131,7 +132,7 @@ public class LocalDBConnection {
 					run();
 				}
 			} else {
-				LogEngine.log(this,	versuche +". zum DB-Verbindungsaufbau fehlgeschlagen -> für zugriff auf locDB sorgen und neu starten! ", LogEngine.ERROR);
+				LogEngine.log(this,	versuche +". zum DB-Verbindungsaufbau fehlgeschlagen -> für Zugriff auf locDB sorgen und neu starten! ", LogEngine.ERROR);
 			}
 		}
 	}
@@ -191,7 +192,7 @@ public class LocalDBConnection {
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		String read=null;
-		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_db.sql").toURI())))){
+		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_LocalDB.sql").toURI())))){
 			while((read = in.readLine()) != null) {
 				while (!read.endsWith(";") && !read.endsWith("--")){
 					read = read + in.readLine();

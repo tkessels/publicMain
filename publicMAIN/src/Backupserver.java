@@ -1,9 +1,18 @@
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
@@ -17,7 +26,8 @@ import org.publicmain.common.Node;
 
 public class Backupserver {
 	private final static  int BACKUP_DATABASE_VERSION = 12345;
-
+	private static Connection con;
+	private static Statement stmt;
 	/**
 	 * @param args
 	 */
@@ -160,10 +170,18 @@ public class Backupserver {
 		System.exit(1);
 	}
 
-	private static boolean checkConnection(String ip, String port, String username, String password) {
+	private static boolean checkConnection(String ip, String port, String username, String password) {	
 		String databasename = Config.getConfig().getBackupDBDatabasename();
-		//TODO:Testen ob Datenbank vorhanden .... bei ner lokalen backup db kann hier auch stat der übergebenen IP 127.0.0.1 genommen werden oder?
-		return true;
+		String url			= "jdbc:mysql://localhost:"+ port + "/";	//TODO: IP not used. Caused faults. Just "localhost" and "127.0.0.1" seems to be possible.
+		try {
+			con = DriverManager.getConnection(url, username, password);
+			stmt = con.createStatement();
+			return true;
+		} catch (SQLException e) {
+			LogEngine.log("chekConnection","Fehler beim verbinden mit " + url + " : " + e.getMessage(),LogEngine.ERROR);
+			return false;
+		}
+		//TODO:Testen ob Datenbank vorhanden .... bei ner lokalen backup db kann hier auch statt der übergebenen IP 127.0.0.1 genommen werden oder? -> JA!
 	}
 	private static boolean checkVersion(String ip, String port, String username, String password) {
 		String databasename = Config.getConfig().getBackupDBDatabasename();
@@ -178,9 +196,39 @@ public class Backupserver {
 	
 	private static boolean createDatabase(String ip, String port, String username, String password) {
 		String databasename = Config.getConfig().getBackupDBDatabasename();
-		
+		try {
+			stmt.execute("use " + databasename);
+			return true;
+		} catch (SQLException e) {
+			String read=null;
+			try (BufferedReader in = new BufferedReader(new FileReader(new File("C:/Users/LeeGewiese/git/publicMain/publicMAIN/bin/org/publicmain/sql/create_BackupDB.sql")))){ //TODO: Don´t know how to get the right path of resource
+				while((read = in.readLine()) != null) {
+					while (!read.endsWith(";") && !read.endsWith("--")){
+						read = read + in.readLine();
+					}
+					stmt.execute(read);
+				}
+				stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_msgType`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain_backup`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
+				
+				//Hier wird die Tabelle t_msgType automatisch befüllt!
+				for (MSGCode c : MSGCode.values()){
+					stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
+				}
+				stmt.executeBatch();
+				return true;
+			} catch (FileNotFoundException e1) {
+				LogEngine.log("Error caused by reading create_BackupDB.sql: " + e1.getMessage(), LogEngine.ERROR);
+				return false;
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (SQLException e1) {
+				LogEngine.log("Error caused executing a sql statment: " + e1.getMessage(), LogEngine.ERROR);
+			}
+			return false;
+		}
 		//CreateScript auf der Database ausführen und true zurückliefern wenn erfolgreich!!!
-		return true;
 	}
 
 }

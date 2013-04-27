@@ -110,7 +110,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		multi_socket.setLoopbackMode(true);
 		multi_socket.setTimeToLive(MULTICAST_TTL);
 
-		meinNode = new Node();
+		meinNode = new Node(server_socket.getLocalPort(),nodeID,ce.getUserID(),System.getProperty("user.name"),ce.getAlias());
 		allNodes.add(meinNode);
 		
 		myStrategy=new WeightedDistanceStrategy(1, 0, 0);
@@ -171,9 +171,9 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		return (root_connection != null && root_connection.isConnected());
 	}
 
-	public int getServer_port() {
-		return server_socket.getLocalPort();
-	}
+//	public int getServer_port() {
+//		return server_socket.getLocalPort();
+//	}
 	
 	/**
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen Nodes beinhaltet.

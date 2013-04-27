@@ -19,7 +19,7 @@ import org.publicmain.nodeengine.NodeEngine;
  */
 
 public class Node extends DefaultMutableTreeNode implements Serializable {
-	private static final long	serialVersionUID	= 23132123133L;
+	private static final long	serialVersionUID	= 270420131L;
 //	private static Node me;
 	private final long nodeID;
 	private final long userID;
@@ -29,7 +29,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	private final String hostname;
 	private int server_port;
 	
-	public Node() {
+	public Node(int port, long nid, long uid, String username, String alias) {
 		this.nodeID = NodeEngine.getNE().getNodeID();
 		this.userID = ChatEngine.getCE().getUserID();
 		this.username 	=	System.getProperty("user.name");
@@ -37,7 +37,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 		
 		this.hostname=getMyHostname();
 		this.sockets=getMyIPs();
-		server_port = NodeEngine.getNE().getServer_port();
+		server_port = port;
 	}
 	
 	
@@ -161,7 +161,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	
 	@Override
 	public Object clone() {
-		return new Node();
+		return new Node(this.server_port,this.nodeID,this.userID,this.username,this.alias);
 	}
 	
 

@@ -238,7 +238,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		byte[] buf = MSG.getBytes(nachricht);
 		try {
 			if (buf.length < 65000) {
-				multi_socket.send(new DatagramPacket(buf, buf.length, MULTICAST_GROUP, 6789));
+				multi_socket.send(new DatagramPacket(buf, buf.length, MULTICAST_GROUP, MULTICAST_PORT));
 				LogEngine.log(this, "sende [MC]", nachricht);
 			}
 			else LogEngine.log(this, "MSG zu groß für UDP-Paket", LogEngine.ERROR);

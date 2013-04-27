@@ -11,13 +11,14 @@ import java.util.Properties;
 
 
 public class Config {
+	private static final String APPNAME 			=     (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
 	private static final int CURRENTVERSION		=	5;
 	private static final int MINVERSION				=	5;
 	private static final String APPDATA=System.getenv("APPDATA")+File.separator+"publicMAIN"+File.separator;
 	private static final String JARLOCATION=Config.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-	private static final String	lock_file_name		= 	"pm.loc";
-	private static final String	system_conf_name	= 	"publicMAIN.cfg";
-	private static final String	user_conf_name		= 	"config.cfg"; 
+	private static final String	lock_file_name		= 	APPNAME+".loc";
+	private static final String	system_conf_name	= 	APPNAME+"_sys.cfg";
+	private static final String	user_conf_name		= 	APPNAME+".cfg"; 
 	private static File loc_file						=	new File(APPDATA,lock_file_name);
 	private static File system_conf					=	new File(new File(JARLOCATION).getParentFile(),system_conf_name);
 	private static File user_conf					=	new File(APPDATA,user_conf_name);

@@ -112,6 +112,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 		meinNode = new Node();
 		allNodes.add(meinNode);
+		DatabaseEngine.getDatabaseEngine().put(meinNode);
 		
 		myStrategy=new WeightedDistanceStrategy(1, 0, 0);
 
@@ -633,7 +634,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				ce.put(paket);
 				break;
 			case SYSTEM:
-				DatabaseEngine.createDatabaseEngine().put(paket);
+				DatabaseEngine.getDatabaseEngine().put(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
 					allnodes_add((Node) paket.getData());
@@ -874,7 +875,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			int hash = allNodes.hashCode();
 			allNodes.add(data);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
-			DatabaseEngine.createDatabaseEngine().put(data);
+			DatabaseEngine.getDatabaseEngine().put(data);
 		}
 	}
 	
@@ -886,7 +887,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 			allNodes.add(meinNode);
 			if(allNodes.hashCode()!=hash)allNodes.notifyAll();
 		}
-		DatabaseEngine.createDatabaseEngine().put(data);
+		DatabaseEngine.getDatabaseEngine().put(data);
 	}
 	
 	/** Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und versucht ihn neu Verbinden zu lassen bei Misserfolg.
@@ -1015,7 +1016,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
-					DatabaseEngine.createDatabaseEngine().put(allNodes); //TODO: nur aktualisierung wegschreiben
+					DatabaseEngine.getDatabaseEngine().put(allNodes); //TODO: nur aktualisierung wegschreiben
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}

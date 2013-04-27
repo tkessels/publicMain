@@ -87,12 +87,12 @@ public class Config {
 	private Config() {
 		me=this;
 
-		System.out.println(loc_file.getParent() + " : " +loc_file.exists()+ ":" + loc_file);
-		System.out.println(system_conf.getParent() + " : " +system_conf.exists()+ ":" + system_conf);
-		System.out.println(user_conf.getParent() + " : " +user_conf.exists()+ ":" + user_conf);
+//		System.out.println(loc_file.getParent() + " : " +loc_file.exists()+ ":" + loc_file);
+//		System.out.println(system_conf.getParent() + " : " +system_conf.exists()+ ":" + system_conf);
+//		System.out.println(user_conf.getParent() + " : " +user_conf.exists()+ ":" + user_conf);
 		
 		settings = new ConfigData(getSourceSettings());
-		LogEngine.log(this, "default settings loaded from source",LogEngine.INFO);
+		LogEngine.log(this, "default settings loaded from source ["+((system_conf.exists())?"S":"0")+"|"+((user_conf.exists())?"U":"0")+"]",LogEngine.INFO);
 		
 		//try to overload system-settings from Jars Location
 		if (system_conf.canRead()) {

@@ -198,7 +198,6 @@ public class LocalDBConnection {
 				}
 				stmt.execute(read);
 			}
-			//TODO: durch änderungen in der db muss hier noch angepasst werden.
 			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_messages_savePrivateMessage`;");
 			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_savePrivateMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newDisplayName VARCHAR(45), IN newTxt VARCHAR(200), IN newFk_t_users_userID_empfaenger BIGINT(20)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender, displayName,txt , fk_t_users_userID_empfaenger) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newDisplayName,  newTxt, newFk_t_users_userID_empfaenger); END;");
 			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_messages_saveGroupMessage`;");
@@ -215,9 +214,10 @@ public class LocalDBConnection {
 			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_msgType`;");
 			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
 			
+			stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_nodes_saveNodes`;");
+			stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_nodes_saveNodes` (IN newNodeID BIGINT(20), IN newComputerName VARCHAR(45), IN newFk_t_users_userID_2 BIGINT(20), IN newFk_t_nodes_nodeID BIGINT(20)) BEGIN INSERT INTO t_nodes (nodeID, computerName, fk_t_users_userID_2, fk_t_nodes_nodeID) VALUES (newNodeID, newComputerName, newFk_t_users_userID_2, newFk_t_nodes_nodeID) ON DUPLICATE KEY UPDATE computerName=VALUES(computerName), fk_t_users_userID_2=VALUES(fk_t_users_userID_2), fk_t_nodes_nodeID=VALUES(fk_t_nodes_nodeID); END;");
+					
 			//Hier wird die Tabelle t_msgType automatisch befüllt!
-			
-			
 			for (MSGCode c : MSGCode.values()){
 				stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
 			}
@@ -238,6 +238,25 @@ public class LocalDBConnection {
 	}
 	
 		
+	public ResultSet pull_msgs(){
+		return null;
+	}
+	
+	public ResultSet pull_users(){
+		return null;
+	}
+	
+	public ResultSet pull_settings(){
+		return null;
+	}
+	
+	public boolean push_msgs(ResultSet backup){
+		return false;
+	}
+	
+	public boolean push_users(ResultSet backup){
+		return false;
+	}
 	public synchronized boolean writeAllUsersToDB(Collection<Node> allnodes){
 		if (dbStatus >= 3){
 			if (allnodes != null){
@@ -266,26 +285,6 @@ public class LocalDBConnection {
 			}
 			return true;
 		}
-		return false;
-	}
-	
-	public ResultSet pull_msgs(){
-		return null;
-	}
-	
-	public ResultSet pull_users(){
-		return null;
-	}
-	
-	public ResultSet pull_settings(){
-		return null;
-	}
-	
-	public boolean push_msgs(ResultSet backup){
-		return false;
-	}
-	
-	public boolean push_users(ResultSet backup){
 		return false;
 	}
 	//Settings werden ins beziehungsweise aus dem ConfigObjekt geladen nicht hier	
@@ -338,7 +337,7 @@ public class LocalDBConnection {
 	}
 	
 	
-	private boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ, String senderAlias) {
+	private synchronized boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ, String senderAlias) {
 		StringBuffer saveMsgStmt = new StringBuffer();
 		if (typ == NachrichtenTyp.GROUP) {
 			// fügt Nachicht hinzu
@@ -378,7 +377,6 @@ public class LocalDBConnection {
 		if (saveMsgStmt.length() > 0) { // && saveGrpStmt.length() > 0){
 			synchronized (stmt) {
 				try {
-					LogEngine.log(LocalDBConnection.this, "Nachicht " + id + " mit p_t_groups_saveGroups aufgerufen", LogEngine.INFO);
 					stmt.execute(saveMsgStmt.toString());
 					return true;
 				} catch (Exception e) {
@@ -393,9 +391,27 @@ public class LocalDBConnection {
 		return true;
 	}
 
-	public synchronized void writeRoutingTable_to_t_nodes(Map routingTable){
-	}
 	
+
+	public synchronized boolean writeRoutingTable_to_t_nodes(Long nIDZiel, String hostNameZiel, Long uIDZiel, Long nIDGateWay) {
+		StringBuffer saveNodeStmt = new StringBuffer();
+		if (dbStatus >= 3){
+			saveNodeStmt.append("p_t_nodes_saveNodes(");
+			saveNodeStmt.append(nIDZiel + ",");
+			saveNodeStmt.append("'" + hostNameZiel + "',");
+			saveNodeStmt.append(uIDZiel+ "',");
+			saveNodeStmt.append(nIDGateWay+ "')");
+		}
+		try {
+			stmt.execute(saveNodeStmt.toString());
+			return true;
+		} catch (SQLException e) {
+			LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in: t_nodes "+ e.getMessage(),LogEngine.ERROR);
+			dbStatus = 0;
+			return false;
+		}
+	}
+
 	public void deleteAllMsgs () {
 	}
 	
@@ -486,8 +502,5 @@ public class LocalDBConnection {
 		}
 	}
 
-	public void writeRoutingTable_to_t_nodes(Long key, Long value) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 }

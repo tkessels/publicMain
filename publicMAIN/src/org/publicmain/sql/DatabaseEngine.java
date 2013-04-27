@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,6 +32,7 @@ public class DatabaseEngine {
 	
 	private HashSet<MSG> failed_msgs;
 	private List<Node> failed_node;
+	private BlockingQueue<Map.Entry<Long, Long>> failed_routes;
 //	private HashSet<Node> stored_nodes;
 //	private HashSet<Node> stored_routes;
  
@@ -48,6 +50,7 @@ public class DatabaseEngine {
 		groups2Store = new LinkedBlockingQueue<String>();
 		failed_msgs = new HashSet<MSG>();
 		failed_node = new ArrayList<Node>();
+		failed_routes = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
 		
 		transporter.start();
 	}
@@ -57,15 +60,15 @@ public class DatabaseEngine {
 		return me;
 	}
 	
-	public void put(MSG x){
+	public synchronized void put(MSG x){
 		msg2Store.offer(x);
 	}
 	
-	public void put(Node x){
+	public synchronized void put(Node x){
 		node2Store.offer(x);
 	}
 
-	public void put(Collection<Node> x){
+	public synchronized void put(Collection<Node> x){
 		for (Node node : x) {
 			node2Store.offer(node);
 		}
@@ -117,6 +120,10 @@ public class DatabaseEngine {
 					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
 					node2Store.removeAll(tmp_nodes);
 
+					// kopiere routen
+					List<Map.Entry<Long, Long>> tmp_routes = new ArrayList<Map.Entry<Long, Long>>(routes2Store);
+					routes2Store.removeAll(tmp_routes);
+					
 					// schreibe nodes
 					if(!localDB.writeAllUsersToDB(tmp_nodes)){
 						failed_node.addAll(tmp_nodes);
@@ -136,6 +143,14 @@ public class DatabaseEngine {
 					}
 					if(!all_msgs_written){
 						if(!localDB.getStatus()){
+							break;
+						}
+					}
+					
+					//schreibe alle routen
+					for (Entry<Long, Long> tmp_route : tmp_routes){
+						if(!localDB.writeRoutingTable_to_t_nodes(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
+							failed_routes.add(tmp_route);
 							break;
 						}
 					}

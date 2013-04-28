@@ -60,15 +60,15 @@ public class DatabaseEngine {
 		return me;
 	}
 	
-	public synchronized void put(MSG x){
+	public void put(MSG x){
 		msg2Store.offer(x);
 	}
 	
-	public synchronized void put(Node x){
+	public void put(Node x){
 		node2Store.offer(x);
 	}
 
-	public synchronized void put(Collection<Node> x){
+	public void put(Collection<Node> x){
 		for (Node node : x) {
 			node2Store.offer(node);
 		}
@@ -81,6 +81,14 @@ public class DatabaseEngine {
 
 	public void put(long target, long gateway){
 		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
+	}
+	
+	public void deleteLocalHistory() {
+		localDB.deleteAllMsgs();
+	}
+	
+	public void deleteBackup() {
+//		TODO:Tell BackupServer to Drop users data
 	}
 	
 	

@@ -6,6 +6,7 @@ import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.gui.GUI;
 import org.publicmain.gui.StartWindow;
+import org.publicmain.nodeengine.MulticastConnectionHandler;
 import org.publicmain.sql.DatabaseEngine;
 import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
@@ -28,6 +29,7 @@ public class publicMAIN {
 		if(Config.getLock()){
 			DatabaseEngine.getDatabaseEngine();
 			if(Config.getConfig().getUserID() == null){
+				MulticastConnectionHandler.getMC().discoverBUS();
 				//TODO: hier darauf warten bis nutzer daten eingegeben und "submit" gedrückt hat. also zum Beispiel ein boolean im Startwindwo überprüfen
 				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)
 				boolean tom = StartWindow.getStartWindow();

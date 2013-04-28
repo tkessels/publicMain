@@ -39,6 +39,7 @@ import javax.swing.tree.TreeNode;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
+import org.publicmain.common.ConfigData;
 import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -605,7 +606,15 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 					if((payload==nodeID)||(payload==-1337)) {
 						if (root_connection!=null)root_connection.close();
 					}
-					
+					break;
+				case BACKUP_SERVER_OFFER:
+					ConfigData tmp = (ConfigData) paket.getData();
+					Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
+					Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
+					Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());
+					Config.getConfig().setBackupDBPw(tmp.getBackupDBPw());
+					Config.getConfig().setBackupDBDatabasename(tmp.getBackupDBDatabasename());
+					Config.write();
 					break;
 				default:
 					LogEngine.log(this, "handling [MC]:undefined", paket);
@@ -1081,6 +1090,8 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		case "reconnect_all":
 			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
 			break;
+		case "poll_bus":
+			multi_socket.discoverBUS();
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;

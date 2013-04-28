@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 import java.util.Properties;
 
 import org.publicmain.common.Config;
+import org.publicmain.common.ConfigData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -74,6 +75,10 @@ public class MulticastConnectionHandler {
 			LogEngine.log(this, e);
 		}
 	}
+	
+	public void discoverBUS() {
+		MulticastConnectionHandler.getMC().sendmutlicast(new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_DISCOVER, -1, -1, null, null));
+	}
 
 	public synchronized void sendunicast(MSG nachricht, Node target) {
 		for (InetAddress x : target.getSockets()) {
@@ -103,7 +108,14 @@ public class MulticastConnectionHandler {
 	private void handle(MSG paket) {
 		if(paket.getTyp()==NachrichtenTyp.SYSTEM) {
 			if(paket.getCode()==MSGCode.BACKUP_SERVER_OFFER) {
-				Properties tmp = (Properties) paket.getData();
+				ConfigData tmp = (ConfigData) paket.getData();
+				System.out.println(tmp);
+				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
+				Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
+				Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());
+				Config.getConfig().setBackupDBPw(tmp.getBackupDBPw());
+				Config.getConfig().setBackupDBDatabasename(tmp.getBackupDBDatabasename());
+				Config.write();
 			}
 		}
 	}

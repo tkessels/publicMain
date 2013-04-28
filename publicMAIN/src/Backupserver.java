@@ -116,6 +116,7 @@ public class Backupserver {
 					if (!databasename.equals(Config.getConfig().getBackupDBDatabasename()))Config.getConfig().setBackupDBDatabasename(databasename);
 					Config.write();
 					System.out.println("BackupServer is Running:");
+					System.out.println(Config.getConfig());
 					while (true) {
 						byte[] buff = new byte[65535];
 						DatagramPacket tmp = new DatagramPacket(buff, buff.length);
@@ -125,12 +126,12 @@ public class Backupserver {
 							LogEngine.log("BackupServer", "recieved", nachricht);
 							
 							if(nachricht.getTyp()==NachrichtenTyp.SYSTEM&&nachricht.getCode()==MSGCode.BACKUP_SERVER_DISCOVER) {
-								MSG reply = new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_OFFER, nid, nachricht.getSender(), "", Config.getConfig());
+								MSG reply = new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_OFFER, -1,-1, "", Config.getConfig());
 
 								byte[] buf = MSG.getBytes(reply);
 								if (buf.length < 65000) {
-									backupserver.send(new DatagramPacket(buf, buf.length, mcgroup, Config.getConfig().getMCPort()));
-									LogEngine.log("BackupServer", "sende", nachricht);
+									backupserver.send(new DatagramPacket(buf, buf.length, tmp.getAddress(),tmp.getPort()));
+									LogEngine.log("BackupServer", "sending", reply);
 								}
 								else LogEngine.log("BackupServer", "MSG zu groß für UDP-Paket", LogEngine.ERROR);
 							}

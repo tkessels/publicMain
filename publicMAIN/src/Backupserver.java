@@ -23,6 +23,8 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
+import org.publicmain.sql.DatabaseEngine;
+import org.resources.Help;
 
 public class Backupserver {
 	private final static  int BACKUP_DATABASE_VERSION = 12345;
@@ -113,7 +115,7 @@ public class Backupserver {
 					if (!password.equals(Config.getConfig().getBackupDBPw()))Config.getConfig().setBackupDBPw(password);
 					if (!databasename.equals(Config.getConfig().getBackupDBDatabasename()))Config.getConfig().setBackupDBDatabasename(databasename);
 					Config.write();
-					
+					System.out.println("BackupServer is Running:");
 					while (true) {
 						byte[] buff = new byte[65535];
 						DatagramPacket tmp = new DatagramPacket(buff, buff.length);
@@ -143,6 +145,7 @@ public class Backupserver {
 			}
 			else {
 				System.err.println("Server is online but database is outdatet or not present and couldn't be created!");
+				System.exit(1);
 			}
 		}else {
 			System.err.println("Could not connect to given Database. Shutting down!");
@@ -150,6 +153,7 @@ public class Backupserver {
 			System.err.println("user\t\t\t:" + username);
 			System.err.println("password\t:" + password);
 			System.err.println("database\t\t:" + Config.getConfig().getBackupDBDatabasename());
+			System.exit(1);
 		}
 
 	}
@@ -169,6 +173,7 @@ public class Backupserver {
 		System.err.println("		Will setup the backupserver for a local Database ("+ip+":3306) with user \"root\" and empty password ");
 		System.exit(1);
 	}
+	
 
 	private static boolean checkConnection(String ip, String port, String username, String password) {	
 		String databasename = Config.getConfig().getBackupDBDatabasename();
@@ -178,7 +183,7 @@ public class Backupserver {
 			stmt = con.createStatement();
 			return true;
 		} catch (SQLException e) {
-			LogEngine.log("chekConnection","Fehler beim verbinden mit " + url + " : " + e.getMessage(),LogEngine.ERROR);
+			LogEngine.log("Fehler beim verbinden mit " + url + " : " + e.getMessage(),LogEngine.ERROR);
 			return false;
 		}
 		//TODO:Testen ob Datenbank vorhanden .... bei ner lokalen backup db kann hier auch statt der übergebenen IP 127.0.0.1 genommen werden oder? -> JA!
@@ -201,7 +206,7 @@ public class Backupserver {
 			return true;
 		} catch (SQLException e) {
 			String read=null;
-			try (BufferedReader in = new BufferedReader(new FileReader(new File("C:/Users/LeeGewiese/git/publicMain/publicMAIN/bin/org/publicmain/sql/create_BackupDB.sql")))){ //TODO: Don´t know how to get the right path of resource
+			try (BufferedReader in = new BufferedReader(new FileReader(Help.getFile("create_BackupDB.sql")))){
 				while((read = in.readLine()) != null) {
 					while (!read.endsWith(";") && !read.endsWith("--")){
 						read = read + in.readLine();

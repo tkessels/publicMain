@@ -192,7 +192,7 @@ public class LocalDBConnection {
 	
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		String read=null;
-		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_LocalDB.sql").toURI())))){
+		try (BufferedReader in = new BufferedReader(new FileReader(Help.getFile("create_LocalDB.sql")))){
 			while((read = in.readLine()) != null) {
 				while (!read.endsWith(";") && !read.endsWith("--")){
 					read = read + in.readLine();
@@ -233,8 +233,6 @@ public class LocalDBConnection {
 			e1.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} catch (URISyntaxException e2) {
-			e2.printStackTrace();
 		}
 	}
 	

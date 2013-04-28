@@ -1,9 +1,12 @@
 package org.resources;
 
 import java.awt.Image;
+import java.io.File;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
+
+import org.publicmain.sql.DatabaseEngine;
 
 public class Help {
 	
@@ -12,6 +15,10 @@ public class Help {
 	}
 	public static ImageIcon getIcon(String filename,int size) {
 		return getIcon(filename, size,size);
+	}
+	
+	public static File getFile(String filename) {
+		return new File(Help.class.getResource(filename).getFile());
 	}
 	
 	

@@ -98,10 +98,10 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `db_publicmain`.`t_settings` ;
 
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
-  `key` VARCHAR(45) NOT NULL ,
+  `settingsKey` VARCHAR(45) NOT NULL ,
   `fk_t_users_userID_3` BIGINT(20) NOT NULL ,
-  `value` VARCHAR(45) NOT NULL ,
-  PRIMARY KEY (`key`) ,
+  `settingsValue` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`settingsKey`) ,
   INDEX `fk_t_settings_t_users1_idx` (`fk_t_users_userID_3` ASC) ,
   CONSTRAINT `fk_t_users_userID_3`
     FOREIGN KEY (`fk_t_users_userID_3` )
@@ -138,6 +138,45 @@ ENGINE = InnoDB;
 
 USE `db_publicmain` ;
 
+-- -----------------------------------------------------
+-- Placeholder table for view `db_publicmain`.`v_pullAll_t_users`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_users` (`userID` INT, `displayName` INT, `userName` INT);
+
+-- -----------------------------------------------------
+-- Placeholder table for view `db_publicmain`.`v_pullAll_t_messages`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_messages` (`msgID` INT, `timestmp` INT, `fk_t_users_userID_sender` INT, `displayName` INT, `txt` INT, `fk_t_users_userID_empfaenger` INT, `fk_t_groups_groupName` INT, `fk_t_msgType_ID` INT);
+
+-- -----------------------------------------------------
+-- Placeholder table for view `db_publicmain`.`v_pullALL_t_settings`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullALL_t_settings` (`settingsKey` INT, `fk_t_users_userID_3` INT, `settingsValue` INT);
+
+-- -----------------------------------------------------
+-- View `db_publicmain`.`v_pullAll_t_users`
+-- -----------------------------------------------------
+DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_users` ;
+DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_users`;
+USE `db_publicmain`;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_users` AS SELECT * FROM t_users;
+
+-- -----------------------------------------------------
+-- View `db_publicmain`.`v_pullAll_t_messages`
+-- -----------------------------------------------------
+DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_messages` ;
+DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_messages`;
+USE `db_publicmain`;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_messages` AS SELECT * FROM t_messages;
+
+-- -----------------------------------------------------
+-- View `db_publicmain`.`v_pullALL_t_settings`
+-- -----------------------------------------------------
+DROP VIEW IF EXISTS `db_publicmain`.`v_pullALL_t_settings` ;
+DROP TABLE IF EXISTS `db_publicmain`.`v_pullALL_t_settings`;
+USE `db_publicmain`;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_pullALL_t_settings` AS SELECT * FROM t_settings;
+USE `db_publicmain`;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

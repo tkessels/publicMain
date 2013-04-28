@@ -157,7 +157,7 @@ public class DatabaseEngine {
 					
 					//schreibe alle routen
 					for (Entry<Long, Long> tmp_route : tmp_routes){
-						if(!localDB.writeRoutingTable_to_t_nodes(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
+						if(!localDB.writeRoutingTableToDB(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
 							failed_routes.add(tmp_route);
 							break;
 						}

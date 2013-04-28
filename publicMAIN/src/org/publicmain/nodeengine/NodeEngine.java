@@ -402,28 +402,25 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	private void recieve_file(final MSG data_paket) {
 		Object[] tmp = (Object[]) data_paket.getData();
 		FileTransferData tmp_file = (FileTransferData) tmp[0];
-		final File destination = ce.request_File(tmp_file);
-		
-		tmp_file.accepted=(destination!=null);
-		MSG reply = new MSG(tmp_file,MSGCode.FILE_RECIEVED,data_paket.getSender());
-//		reply.setEmpfänger(data_paket.getSender());
-		routesend(reply);
-		if(destination!=null) {
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					data_paket.save(destination);
-				} catch (IOException e) {
-					e.printStackTrace();
+		final File destination;
+		if(!Config.getConfig().getDisableFileTransfer()&&((destination = ce.request_File(tmp_file))!=null)) {
+			tmp_file.accepted =true;
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						data_paket.save(destination);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		}).start();
-		
+			}).start();
+		} else {
+			tmp_file.accepted=false;
+		}
+		MSG reply = new MSG(tmp_file,MSGCode.FILE_RECIEVED,data_paket.getSender());
+		routesend(reply);
 	}
-	}
-	/*private void discover(Node newRoot) {
-		sendunicast(new MSG(meinNode, MSGCode.ROOT_DISCOVERY), newRoot);
-	}*/
+
 
 	private void discover() {
 		new Thread(new Runnable() {
@@ -739,6 +736,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 
 	private void recieve_file(final FileTransferData tmp) {
+		if(!Config.getConfig().getDisableFileTransfer()) {
 		new Thread(new Runnable() {
 			public void run() {
 				long until = System.currentTimeMillis()+Config.getConfig().getFileTransferTimeout()-1000;
@@ -788,6 +786,12 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 				}
 			}}
 		}).start();
+		}
+		else {
+			tmp.accepted=false;
+			routesend(new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid()));
+			
+		}
 	}
 
 	public void routesend(MSG paket) {

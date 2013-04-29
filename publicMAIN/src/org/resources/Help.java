@@ -1,11 +1,17 @@
 package org.resources;
 
 import java.awt.Image;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
 
+import org.publicmain.common.LogEngine;
 import org.publicmain.sql.DatabaseEngine;
 
 public class Help {
@@ -17,9 +23,38 @@ public class Help {
 		return getIcon(filename, size,size);
 	}
 	
-	public static File getFile(String filename) {
-		return new File(Help.class.getResource(filename).getFile());
+	public static InputStream getInputStream(String filename) throws IOException {
+		return Help.class.getResource(filename).openStream();
 	}
+	
+	public static File getFile(String filename) throws IOException {
+
+		File tmp = null;
+
+		InputStream inputStream = getInputStream(filename);
+
+		try {
+			tmp = File.createTempFile("pm", "script");
+
+			try (BufferedOutputStream bos = new BufferedOutputStream(
+					new FileOutputStream(tmp));
+					BufferedInputStream bin = new BufferedInputStream(
+							inputStream);) {
+				byte[] cup = new byte[512];
+				int len = -1;
+				while ((len = bin.read(cup)) != -1) {
+					bos.write(cup, 0, len);
+				}
+			} catch (IOException e1) {
+				LogEngine.log("Resources", e1 );
+			}
+		} catch (Exception e) {
+			LogEngine.log("Resources", e );
+		}
+
+		return tmp;
+	}
+	
 	
 	
 	

@@ -16,11 +16,11 @@ public class ResultWindow extends JDialog {
 	
 	public ResultWindow(){
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.setLocationRelativeTo(null);
 		
 		this.resultTable = new JTable();
 		
 		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 		
 	}

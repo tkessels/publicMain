@@ -799,6 +799,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			if (contactListBtn.isSelected()) {
 				contactListWin.toFront();
 			}
+			me.toFront();
 		}
 	}
 	

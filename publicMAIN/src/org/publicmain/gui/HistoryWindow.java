@@ -119,11 +119,11 @@ public class HistoryWindow extends JDialog{
 		this.myPanel				= new JPanel(new GridLayout(3,2));
 		this.BeginLabel				= new JLabel("Begin");
 		this.BeginPanel				= new JPanel(new BorderLayout());
-		this.BeginDateTextField		= new JTextField(10);
+		this.BeginDateTextField		= new JTextField(8);
 		this.BeginSpinner			= new JSpinner(sdmBegin);
 		this.EndLabel				= new JLabel("End");;
 		this.EndPanel				= new JPanel(new BorderLayout());
-		this.EndDateTextField		= new JTextField(10);
+		this.EndDateTextField		= new JTextField(8);
 		this.EndSpinner				= new JSpinner(sdmEnd);
 		this.SearchTextLabel		= new JLabel("Message text");
 		this.SearchTextTextField	= new JTextField();

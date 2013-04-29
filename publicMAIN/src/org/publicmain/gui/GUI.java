@@ -439,6 +439,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(hcdHelp != null) {
 			hcdHelp.hideIt();
 		}
+		// Kontaktliste schlieﬂen
+		contactListZuklappen();
+		// SettingsWindow schlieﬂen
+		SettingsWindow.closeThis();
+		// HistoryWindow schlieﬂen
+		HistoryWindow.closeThis();
 		// Symbol in der SystemTray schliessen
 		trayIcon.removeTray();
 		// ChatEngine beenden
@@ -789,9 +795,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 		
 		public void windowClosed(WindowEvent arg0) {
-			contactListZuklappen();
-//			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
-			SettingsWindow.closeThis();
 			shutdown();
 		}
 

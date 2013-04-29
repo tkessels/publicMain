@@ -172,7 +172,8 @@ public class DatabaseEngine {
 		}
 	}
 	
-	/**Queries the local Database for Messages of a selected user (<code>uid</code>) which have been send after the begin date but before the end date. 
+	/**
+	 * Queries the local Database for Messages of a selected user (<code>uid</code>) which have been send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by giving a search text.
 	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
 	 * @param uid UserId of User whose messages should be retrieved
@@ -185,7 +186,8 @@ public class DatabaseEngine {
 		return null;
 	}
 	
-	/**Queries the local Database for Messages which have been send with the given <code>alias</code> if send after the begin date but before the end date. 
+	/**
+	 * Queries the local Database for Messages which have been send with the given <code>alias</code> if send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
 	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
 	 * @param alias used in message
@@ -198,7 +200,8 @@ public class DatabaseEngine {
 		return null;
 	}
 
-	/**Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
+	/**
+	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
 	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
 	 * @param group the message was send to

@@ -1132,7 +1132,7 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	        JFrame frame = new JFrame( "publicMAIN - Topology" );
 	        frame.add( new JScrollPane( tree ));
 	        
-	        frame.setIconImage(new ImageIcon(Help.class.getResource("pM_Logo2.png")).getImage());
+	        frame.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 	        frame.setMinimumSize(new Dimension(250, 400));
 	        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 	        frame.pack();

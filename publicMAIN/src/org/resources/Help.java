@@ -34,7 +34,7 @@ public class Help {
 		InputStream inputStream = getInputStream(filename);
 
 		try {
-			tmp = File.createTempFile("pm", "script");
+			tmp = File.createTempFile("publicMain", "script");
 
 			try (BufferedOutputStream bos = new BufferedOutputStream(
 					new FileOutputStream(tmp));

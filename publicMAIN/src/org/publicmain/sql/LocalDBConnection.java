@@ -69,6 +69,8 @@ public class LocalDBConnection {
 	private Thread connectToDBThread;
 	private final static int LOCAL_DATABASE_VERSION = 4;
 	private DatabaseEngine databaseEngine;
+	private ConfigData localSettings;
+	private boolean ceReadyForWritingSettings;
 	//--------neue Sachen ende------------
 	
 	// verbindungssachen
@@ -100,6 +102,7 @@ public class LocalDBConnection {
 		this.warteZeitInSec = 10;
 //		this.writtenStandardUser = false;
 		this.connectToDBThread = new Thread(new firstConnectToLocDBServerBot());
+		this.ceReadyForWritingSettings = false;
 		//--------neue Sachen ende------------
 		connectToDBThread.start();
 	}
@@ -329,6 +332,10 @@ public class LocalDBConnection {
 					try {
 						synchronized (stmt) {
 							stmt.execute(saveUserStmt.toString());
+							if (!ceReadyForWritingSettings){
+								ceReadyForWritingSettings = true;
+								if (localSettings != null) writeAllSettingsToDB(localSettings);				
+							}
 						}
 					} catch (SQLException e) {
 						alldone=false;
@@ -481,40 +488,37 @@ public class LocalDBConnection {
 	}
 
 	public synchronized void writeAllSettingsToDB(final ConfigData settings) {
-
-		new Thread(new Runnable() {
-			public void run() {
-				if (dbStatus >= 3) {
-					synchronized (stmt) {
-						for (String key : settings.stringPropertyNames()) {
-							StringBuffer saveSettingsStmt = new StringBuffer();
-							if (!settings.getProperty(key).equals("")){
-								saveSettingsStmt.append("CALL p_t_settings_saveSettings(");
-								saveSettingsStmt.append("'" + key + "',");
-								saveSettingsStmt.append(ChatEngine.getCE().getUserID() + ",");
-								saveSettingsStmt.append("'"+ settings.getProperty(key) + "');");
-								try {
-									stmt.addBatch(saveSettingsStmt.toString());
-								} catch (SQLException e) {
-									LogEngine.log(this, "Error by 'addBatch: " + e.getMessage(), LogEngine.ERROR);
+		localSettings = settings;
+		if (ceReadyForWritingSettings){
+			new Thread(new Runnable() {
+				public void run() {
+					if (dbStatus >= 3) {
+						synchronized (stmt) {
+							for (String key : localSettings.stringPropertyNames()) {
+								StringBuffer saveSettingsStmt = new StringBuffer();
+								if (!localSettings.getProperty(key).equals("")){
+									saveSettingsStmt.append("CALL p_t_settings_saveSettings(");
+									saveSettingsStmt.append("'" + key + "',");
+									saveSettingsStmt.append(ChatEngine.getCE().getUserID() + ",");
+									saveSettingsStmt.append("'"+ localSettings.getProperty(key) + "');");
+									try {
+										stmt.addBatch(saveSettingsStmt.toString());
+									} catch (SQLException e) {
+										LogEngine.log(this, "Error by 'addBatch: " + e.getMessage(), LogEngine.ERROR);
+									}
 								}
 							}
-						}
-						try {
-							stmt.executeBatch();
-						} catch (SQLException e) {
-							LogEngine.log(LocalDBConnection.this,"Communication with LocDB failed while 'writeAllSettingsToDB': " + e.getMessage(), LogEngine.ERROR);
-							dbStatus = 0;
+							try {
+								stmt.executeBatch();
+							} catch (SQLException e) {
+								LogEngine.log(LocalDBConnection.this,"Communication with LocDB failed while 'writeAllSettingsToDB': " + e.getMessage(), LogEngine.ERROR);
+								dbStatus = 0;
+							}
 						}
 					}
 				}
-			}
-
-			private void sleep(long l) {
-				// TODO Auto-generated method stub
-				
-			}
-		}).start();
+			}).start();
+		}
 	}
 	
 	public boolean deleteAllMsgs () {

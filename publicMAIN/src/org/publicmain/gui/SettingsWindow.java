@@ -208,19 +208,17 @@ public class SettingsWindow extends JDialog{
 		this.backupDBPanel.add(pwBackupLabel);
 		this.backupDBPanel.add(pwBackPasswordField);
 		
+		this.cardsPanel.setPreferredSize(new Dimension(230, 270));
 		this.cardsPanel.setBackground(Color.WHITE);
 		this.cardsPanel.add(cardUser, "User");
 		this.cardsPanel.add(cardDB, "Database");
 		
-		this.buttonPanel.setBorder(BorderFactory.createCompoundBorder());
+//		this.buttonPanel.setBorder(BorderFactory.createCompoundBorder());
 		this.buttonPanel.setPreferredSize(new Dimension(230,25));
 		this.buttonPanel.setBackground(Color.WHITE);
 		this.buttonPanel.add(resetBtn);
 		this.buttonPanel.add(acceptBtn);
 		this.buttonPanel.add(cancelBtn);
-		
-		this.cardsPanel.setPreferredSize(new Dimension(230, 270));
-		this.cardsPanel.setBackground(Color.WHITE);
 		
 		this.add(banner);
 		this.add(cardButtonsPanel);

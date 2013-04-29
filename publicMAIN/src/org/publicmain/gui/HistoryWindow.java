@@ -203,6 +203,7 @@ public class HistoryWindow extends JDialog{
 		this.EndPanel.setBackground(Color.WHITE);
 		this.EndPanel.add(EndDateTextField,BorderLayout.CENTER);
 		this.EndDateTextField.setEditable(false);
+		this.EndDateTextField.addMouseListener(new MyMouseAdapter());
 		this.EndPanel.add(EndSpinner,BorderLayout.EAST);
 		this.myPanel.add(EndPanel);
 		this.myPanel.add(SearchTextLabel);
@@ -282,7 +283,7 @@ public class HistoryWindow extends JDialog{
 	
 	class MyMouseAdapter extends MouseAdapter{
 		public void mouseClicked(MouseEvent e) {
-			
+			new Kalender( (JTextField) e.getSource() );
 		}
 	}
 	

@@ -12,15 +12,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.sql.Time;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -31,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
+
+import org.resources.Help;
 
 
 @SuppressWarnings("serial")
@@ -240,7 +240,11 @@ public class Kalender extends JDialog {
 			}
 			
 			//iCAl einlesen
-			readICS(new File("src//Feiertage.ics"));
+			try {
+				readICS(Help.getFile("Feiertage.ics"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
 		}
 		
@@ -301,8 +305,10 @@ public class Kalender extends JDialog {
 		
 		private GregorianCalendar meinTag;
 		public kTag(GregorianCalendar tag) {
+			DateFormat df;
+		    df = DateFormat.getDateInstance(DateFormat.SHORT);
 			meinTag = tag;
-			this.setActionCommand(new java.sql.Date(meinTag.getTimeInMillis()).toString());
+			this.setActionCommand(df.format(meinTag.getTime()));
 		}
 		private boolean inDST;
 		private String feiertagBez;

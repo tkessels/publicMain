@@ -100,7 +100,7 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_settings` ;
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
   `settingsKey` VARCHAR(45) NOT NULL ,
   `fk_t_users_userID_3` BIGINT(20) NOT NULL ,
-  `settingsValue` VARCHAR(45) NOT NULL ,
+  `settingsValue` VARCHAR(100) NOT NULL ,
   PRIMARY KEY (`settingsKey`) ,
   INDEX `fk_t_settings_t_users1_idx` (`fk_t_users_userID_3` ASC) ,
   CONSTRAINT `fk_t_users_userID_3`
@@ -144,9 +144,9 @@ USE `db_publicmain` ;
 CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_users` (`userID` INT, `displayName` INT, `userName` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `db_publicmain`.`v_pullAll_t_messages`
+-- Placeholder table for view `db_publicmain`.`v_pullAllPrivGroup_t_messages`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_messages` (`msgID` INT, `timestmp` INT, `fk_t_users_userID_sender` INT, `displayName` INT, `txt` INT, `fk_t_users_userID_empfaenger` INT, `fk_t_groups_groupName` INT, `fk_t_msgType_ID` INT);
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAllPrivGroup_t_messages` (`msgID` INT, `timestmp` INT, `fk_t_users_userID_sender` INT, `displayName` INT, `txt` INT, `fk_t_users_userID_empfaenger` INT, `fk_t_groups_groupName` INT, `fk_t_msgType_ID` INT);
 
 -- -----------------------------------------------------
 -- Placeholder table for view `db_publicmain`.`v_pullALL_t_settings`
@@ -162,12 +162,12 @@ USE `db_publicmain`;
 CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_users` AS SELECT * FROM t_users;
 
 -- -----------------------------------------------------
--- View `db_publicmain`.`v_pullAll_t_messages`
+-- View `db_publicmain`.`v_pullAllPrivGroup_t_messages`
 -- -----------------------------------------------------
-DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_messages` ;
-DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_messages`;
+DROP VIEW IF EXISTS `db_publicmain`.`v_pullAllPrivGroup_t_messages` ;
+DROP TABLE IF EXISTS `db_publicmain`.`v_pullAllPrivGroup_t_messages`;
 USE `db_publicmain`;
-CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_messages` AS SELECT * FROM t_messages;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAllPrivGroup_t_messages` AS SELECT * FROM t_messages WHERE fk_t_msgType_ID = null;
 
 -- -----------------------------------------------------
 -- View `db_publicmain`.`v_pullALL_t_settings`
@@ -177,6 +177,7 @@ DROP TABLE IF EXISTS `db_publicmain`.`v_pullALL_t_settings`;
 USE `db_publicmain`;
 CREATE OR REPLACE VIEW `db_publicmain`.`v_pullALL_t_settings` AS SELECT * FROM t_settings;
 USE `db_publicmain`;
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

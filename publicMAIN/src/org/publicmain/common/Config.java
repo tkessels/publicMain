@@ -9,6 +9,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 
+import org.publicmain.sql.DatabaseEngine;
+
 
 public class Config {
 	private static final String APPNAME 			=     (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
@@ -23,6 +25,7 @@ public class Config {
 	private static File system_conf					=	new File(new File(JARLOCATION).getParentFile(),system_conf_name);
 	private static File user_conf					=	new File(APPDATA,user_conf_name);
 	private static Config me;
+	private static DatabaseEngine de;
 	
 	private ConfigData settings;
 
@@ -38,6 +41,7 @@ public class Config {
 			me = new Config();
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
+		if(de!=null) de.writeConfig();				//TODO: hier ne Alternative überlegen da es sonst NuppointerExceptions in der LocDB gibt da diese die uID aus der CE haben will die´s noch nicht gibt oder wie oder was!!!
 		return me.savetoDisk();
 	}
 	
@@ -51,6 +55,10 @@ public class Config {
 			LogEngine.log(Config.class, "Could not write system settings: "+system_conf +" reason : "+e.getMessage(), LogEngine.WARNING);
 			return false;
 		}
+	}
+	
+	public static void registerDatabaseEngine(DatabaseEngine databaseengine){
+		de = databaseengine;
 	}
 
 	

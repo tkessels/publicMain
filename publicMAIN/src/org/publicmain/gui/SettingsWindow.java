@@ -213,7 +213,6 @@ public class SettingsWindow extends JDialog{
 		this.cardsPanel.add(cardUser, "User");
 		this.cardsPanel.add(cardDB, "Database");
 		
-//		this.buttonPanel.setBorder(BorderFactory.createCompoundBorder());
 		this.buttonPanel.setPreferredSize(new Dimension(230,25));
 		this.buttonPanel.setBackground(Color.WHITE);
 		this.buttonPanel.add(resetBtn);
@@ -310,7 +309,7 @@ public class SettingsWindow extends JDialog{
 			changes = true;
 		}
 		if(!pwLocalDBPasswordField.getPassword().toString().equals(Config.getConfig().getLocalDBPw())){
-			Config.getConfig().setLocalDBPw(pwLocalDBPasswordField.getPassword().toString());
+			Config.getConfig().setLocalDBPw(new String(pwLocalDBPasswordField.getPassword()));
 			changes = true;
 		}
 		

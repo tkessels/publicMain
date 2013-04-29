@@ -1,5 +1,6 @@
 package org.publicmain.gui;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,8 +31,9 @@ public class HistoryWindow extends JDialog{
 		
 	private static HistoryWindow me;
 
+	private JLabel		banner;
+	
 	private JPanel		searchTypePanel;
-	private JLabel		searchTypeLabel;
 	private JToggleButton userToggleButton;
 	private JToggleButton aliasToggleButton;
 	private JToggleButton groupToggleButton;
@@ -71,8 +73,7 @@ public class HistoryWindow extends JDialog{
 	private JLabel		SearchTextLabel;
 	private JTextField	SearchTextTextField;
 	
-	private JPanel		resultPanel;
-	private JTable		resultTable;
+	private JPanel		platzhalterPanel;
 	
 	private JPanel		buttonPanel;
 	private JButton		searchButton;
@@ -85,8 +86,9 @@ public class HistoryWindow extends JDialog{
 		this.setResizable(false);
 		this.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
-		this.searchTypePanel 		= new JPanel();
-		this.searchTypeLabel		= new JLabel("type of search");
+		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
+		
+		this.searchTypePanel 		= new JPanel(new GridLayout(1,3));
 		this.userToggleButton		= new JToggleButton("User");
 		this.aliasToggleButton		= new JToggleButton("Alias");
 		this.groupToggleButton		= new JToggleButton("Group");
@@ -97,39 +99,39 @@ public class HistoryWindow extends JDialog{
 		this.cardGroupSearchPanel	= new JPanel(new FlowLayout(FlowLayout.CENTER));
 		
 		this.date 					= new Date();
-		this.sdmBegin 					= new SpinnerDateModel(date, null, null, Calendar.HOUR_OF_DAY);
+		this.sdmBegin 				= new SpinnerDateModel(date, null, null, Calendar.HOUR_OF_DAY);
+		this.sdmEnd					= new SpinnerDateModel(date, null, null, Calendar.HOUR_OF_DAY);
 		
-		this.userSearchPanel		= new JPanel(new GridLayout(4,2));
+		this.userSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.userSelectLabel		= new JLabel("Username");
 		this.userSelectComboBox		= new JComboBox<>();
 		
-		this.aliasSearchPanel		= new JPanel(new GridLayout(4,2));
+		this.aliasSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.aliasSelectLabel		= new JLabel("Alias");
 		this.aliasSelectTextField	= new JTextField();
 		
-		this.groupSearchPanel		= new JPanel(new GridLayout(4,2));
+		this.groupSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.groupSelectLabel		= new JLabel("Groupname");
 		this.groupSelectTextField	= new JTextField();
 		
-		this.myPanel				= new JPanel();
+		this.myPanel				= new JPanel(new GridLayout(3,2));
 		this.BeginLabel				= new JLabel("Begin");
-		this.BeginPanel				= new JPanel();
+		this.BeginPanel				= new JPanel(new BorderLayout());
 		this.BeginDateTextField		= new JTextField(10);
 		this.BeginSpinner			= new JSpinner(sdmBegin);
 		this.EndLabel				= new JLabel("End");;
-		this.EndPanel				= new JPanel();
+		this.EndPanel				= new JPanel(new BorderLayout());
 		this.EndDateTextField		= new JTextField(10);
 		this.EndSpinner				= new JSpinner(sdmEnd);
 		this.SearchTextLabel		= new JLabel("Message text");
 		this.SearchTextTextField	= new JTextField();
 		
+		this.platzhalterPanel		= new JPanel();
+		
 		this.dateEditorBegin		= new JSpinner.DateEditor(BeginSpinner, "hh:mm");
 		this.dateEditorEnd			= new JSpinner.DateEditor(EndSpinner, "hh:mm");
 		this.BeginSpinner.setEditor(dateEditorBegin);
 		this.EndSpinner.setEditor(dateEditorEnd);
-		
-		this.resultPanel			= new JPanel();
-		this.resultTable			= new JTable();
 		
 		this.buttonPanel			= new JPanel();
 		this.searchButton			= new JButton("Search");
@@ -152,69 +154,69 @@ public class HistoryWindow extends JDialog{
 		this.searchTypePanel.add(aliasToggleButton);
 		this.searchTypePanel.add(groupToggleButton);
 		
-		this.cardUserSearchPanel.setPreferredSize(new Dimension(230,270));
 		this.cardUserSearchPanel.setBackground(Color.WHITE);
 		this.cardUserSearchPanel.add(userSearchPanel);
 		
-		this.cardAliasSearchPanel.setPreferredSize(new Dimension(230,270));
 		this.cardAliasSearchPanel.setBackground(Color.WHITE);
 		this.cardAliasSearchPanel.add(aliasSearchPanel);
 		
-		this.cardGroupSearchPanel.setPreferredSize(new Dimension(230,270));
 		this.cardGroupSearchPanel.setBackground(Color.WHITE);
 		this.cardGroupSearchPanel.add(groupSearchPanel);
 		
 		this.userSearchPanel.setBorder(BorderFactory.createTitledBorder("User search"));
-		this.userSearchPanel.setPreferredSize(new Dimension(230,270));
+		this.userSearchPanel.setPreferredSize(new Dimension(230,42));
 		this.userSearchPanel.setBackground(Color.WHITE);
 		this.userSearchPanel.add(userSelectLabel);
 		this.userSearchPanel.add(userSelectComboBox);
 		
 		this.aliasSearchPanel.setBorder(BorderFactory.createTitledBorder("Alias search"));
-		this.aliasSearchPanel.setPreferredSize(new Dimension(230,270));
+		this.aliasSearchPanel.setPreferredSize(new Dimension(230,42));
 		this.aliasSearchPanel.setBackground(Color.WHITE);
 		this.aliasSearchPanel.add(aliasSelectLabel);
 		this.aliasSearchPanel.add(aliasSelectTextField);
 		
 		this.groupSearchPanel.setBorder(BorderFactory.createTitledBorder("Group search"));
-		this.groupSearchPanel.setPreferredSize(new Dimension(230,270));
+		this.groupSearchPanel.setPreferredSize(new Dimension(230,42));
 		this.groupSearchPanel.setBackground(Color.WHITE);
 		this.groupSearchPanel.add(groupSelectLabel);
 		this.groupSearchPanel.add(groupSelectTextField);
 		
-		this.cardsPanel.setPreferredSize(new Dimension(230,270));
+		this.cardsPanel.setPreferredSize(new Dimension(230,50));
 		this.cardsPanel.setBackground(Color.WHITE);
 		this.cardsPanel.add(cardUserSearchPanel, "User");
 		this.cardsPanel.add(cardAliasSearchPanel, "Alias");
 		this.cardsPanel.add(cardGroupSearchPanel, "Group");
 		
+		this.myPanel.setBorder(BorderFactory.createTitledBorder("Search options"));
+		this.myPanel.setPreferredSize(new Dimension(230,80));
+		this.myPanel.setBackground(Color.WHITE);
 		this.myPanel.add(BeginLabel);
 		this.BeginPanel.setBackground(Color.WHITE);
-		this.BeginPanel.add(BeginDateTextField);
-		this.BeginPanel.add(BeginSpinner);
+		this.BeginPanel.add(BeginDateTextField,BorderLayout.CENTER);
+		this.BeginPanel.add(BeginSpinner,BorderLayout.EAST);
 		this.myPanel.add(BeginPanel);
 		this.myPanel.add(EndLabel);
 		this.EndPanel.setBackground(Color.WHITE);
-		this.EndPanel.add(EndDateTextField);
-		this.EndPanel.add(EndSpinner);
+		this.EndPanel.add(EndDateTextField,BorderLayout.CENTER);
+		this.EndPanel.add(EndSpinner,BorderLayout.EAST);
 		this.myPanel.add(EndPanel);
 		this.myPanel.add(SearchTextLabel);
 		this.myPanel.add(SearchTextTextField);
 		
-		this.resultPanel.setPreferredSize(new Dimension(230,62));
-		this.resultPanel.setBackground(Color.WHITE);
-		this.resultPanel.add(resultTable);
+		this.platzhalterPanel.setPreferredSize(new Dimension(230,137));
+		this.platzhalterPanel.setBackground(Color.WHITE);
 		
-		this.buttonPanel.setPreferredSize(new Dimension(230,25));
+		this.buttonPanel.setPreferredSize(new Dimension(230,27));
 		this.buttonPanel.setBackground(Color.WHITE);
 		this.buttonPanel.add(searchButton);
 		this.buttonPanel.add(cancelButton);
 		
+		this.add(banner);
 		this.add(searchTypePanel);
 		this.add(cardsPanel);
 		this.add(myPanel);
+		this.add(platzhalterPanel);
 		this.add(buttonPanel);
-		this.add(resultPanel);
 		
 		
 		this.setTitle("History");
@@ -263,8 +265,10 @@ public class HistoryWindow extends JDialog{
 			
 			switch(source.getText()){
 			case "Search" :
+				new ResultWindow();
 				break;
 			case "Cancel" :
+				closeThis();
 				break;
 			
 			}

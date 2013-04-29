@@ -85,8 +85,8 @@ public class SettingsWindow extends JDialog{
 		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
 		
 		this.cardButtonsPanel		 = new JPanel(new GridLayout(1,2));
-		this.userBtn				 = new JToggleButton("User", Help.getIcon("private.png"), true);
-		this.databaseBtn			 = new JToggleButton("Database", Help.getIcon("private.png"), false);
+		this.userBtn				 = new JToggleButton("User", Help.getIcon("userSettingsSym.png",10,16), true);
+		this.databaseBtn			 = new JToggleButton("Database", Help.getIcon("dbSettingsSym.png",12,16), false);
 		this.btnGrp					 = new ButtonGroup();
 		this.cardsPanel				 = new JPanel(new CardLayout());
 		this.cardUser				 = new JPanel(new FlowLayout(FlowLayout.CENTER));

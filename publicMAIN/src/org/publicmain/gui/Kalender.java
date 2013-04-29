@@ -42,18 +42,20 @@ public class Kalender extends JDialog {
 	private MonthPanel mPanel;
 	final private String[] MONATSNAMEN = {"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"};
 	final private String[] TAGENAMEN = {"Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"};
-	private JTextField target;
+	private HistoryWindow target;
 	private JDialog me;
 	private JPanel monthPanel;
 	private JButton preMonthButton;
 	private JButton nxtMonthButton;
+	private boolean isBegin;
 	
 	
 	/**
 	 * Create the Kalendardialog ;)
 	 */
-	public Kalender(JTextField target) {
+	public Kalender(HistoryWindow target,boolean isBegin) {
 		this.me = this;
+		this.isBegin=isBegin;
 		this.target =target;
 		this.selectedMonth = new GregorianCalendar();
 		this.monthPanel = new JPanel();
@@ -196,9 +198,11 @@ public class Kalender extends JDialog {
 				//Aktionlistener für inDst hinzufügen
 				t.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						//todo Return that day
-//						System.out.println(t.getActionCommand());
-						target.setText(t.getActionCommand());
+						kTag source = (kTag)e.getSource();
+						System.out.println(source.getActionCommand());
+						if(isBegin)target.setBegin(source.getDate());
+						else target.setEnd(source.getDate());
+						
 						dispose();
 						
 					}
@@ -315,7 +319,7 @@ public class Kalender extends JDialog {
 		
 		public kTag(GregorianCalendar tag) {
 		    this.df = DateFormat.getDateInstance(DateFormat.SHORT);
-			this.meinTag = tag;
+			this.meinTag = (GregorianCalendar) tag.clone();
 			this.setActionCommand(df.format(meinTag.getTime()));
 		}
 		
@@ -331,6 +335,10 @@ public class Kalender extends JDialog {
 		public void setFeiertagBez(String feiertagBez) {
 			this.feiertagBez = feiertagBez;
 		}	
+		public GregorianCalendar getDate(){
+			return meinTag;
+		}
+		
 	}
 
 }

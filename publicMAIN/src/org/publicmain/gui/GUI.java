@@ -112,8 +112,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.history 			= new JMenu("History");
 		this.help	 			= new JMenu("Help");
 		this.backupServer		= new JMenu("Backup-Server");
-		this.pushHistory		= new JMenuItem("Push History");
-		this.pullHistory		= new JMenuItem("Pull History");
+		this.pushHistory		= new JMenuItem("Push History", Help.getIcon("pushDBSym.png"));
+		this.pullHistory		= new JMenuItem("Pull History", Help.getIcon("pullDBSym.png"));
 		this.settings 			= new JMenuItem("Settings", Help.getIcon("settingsSym.png"));
 		this.localHistory		= new JMenuItem("Local");
 		this.trayIcon 			= new PMTrayIcon();

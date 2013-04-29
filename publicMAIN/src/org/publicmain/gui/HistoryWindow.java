@@ -10,8 +10,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -19,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -45,7 +49,8 @@ public class HistoryWindow extends JDialog{
 	private JPanel		cardAliasSearchPanel;
 	private JPanel		cardGroupSearchPanel;
 	
-	private Date		date;
+	private Date		beginDate;
+	private Date		endDate;
 	private SpinnerDateModel sdmBegin;
 	private SpinnerDateModel sdmEnd;
 	private JSpinner.DateEditor dateEditorBegin;
@@ -64,22 +69,25 @@ public class HistoryWindow extends JDialog{
 	private JTextField	groupSelectTextField;
 	
 	private JPanel		myPanel;
-	private JPanel		BeginPanel;
-	private JLabel		BeginLabel;
-	private JTextField	BeginDateTextField;
-	private JSpinner	BeginSpinner;
-	private JPanel		EndPanel;
-	private JLabel		EndLabel;
-	private JTextField	EndDateTextField;
-	private	JSpinner	EndSpinner;
-	private JLabel		SearchTextLabel;
-	private JTextField	SearchTextTextField;
+	private JPanel		beginPanel;
+	private JLabel		beginLabel;
+	private JTextField	beginDateTextField;
+	private JSpinner	beginSpinner;
+	private JPanel		endPanel;
+	private JLabel		endLabel;
+	private JTextField	endDateTextField;
+	private	JSpinner	endSpinner;
+	private JLabel		searchTextLabel;
+	private JTextField	searchTextTextField;
 	
 	private JPanel		platzhalterPanel;
 	
 	private JPanel		buttonPanel;
 	private JButton		searchButton;
 	private JButton		cancelButton;
+	
+	private GregorianCalendar beginGregCal;
+	private GregorianCalendar endGregCal;
 	
 	
 	
@@ -100,9 +108,10 @@ public class HistoryWindow extends JDialog{
 		this.cardAliasSearchPanel	= new JPanel(new FlowLayout(FlowLayout.CENTER));
 		this.cardGroupSearchPanel	= new JPanel(new FlowLayout(FlowLayout.CENTER));
 		
-		this.date 					= new Date();
-		this.sdmBegin 				= new SpinnerDateModel(date, null, null, Calendar.HOUR_OF_DAY);
-		this.sdmEnd					= new SpinnerDateModel(date, null, null, Calendar.HOUR_OF_DAY);
+		this.beginDate 				= new Date();
+		this.sdmBegin 				= new SpinnerDateModel(beginDate, null, null, Calendar.HOUR_OF_DAY);
+		this.endDate 				= new Date();
+		this.sdmEnd					= new SpinnerDateModel(endDate, null, null, Calendar.HOUR_OF_DAY);
 		
 		this.userSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.userSelectLabel		= new JLabel("Username");
@@ -117,27 +126,30 @@ public class HistoryWindow extends JDialog{
 		this.groupSelectTextField	= new JTextField();
 		
 		this.myPanel				= new JPanel(new GridLayout(3,2));
-		this.BeginLabel				= new JLabel("Begin");
-		this.BeginPanel				= new JPanel(new BorderLayout());
-		this.BeginDateTextField		= new JTextField(8);
-		this.BeginSpinner			= new JSpinner(sdmBegin);
-		this.EndLabel				= new JLabel("End");;
-		this.EndPanel				= new JPanel(new BorderLayout());
-		this.EndDateTextField		= new JTextField(8);
-		this.EndSpinner				= new JSpinner(sdmEnd);
-		this.SearchTextLabel		= new JLabel("Message text");
-		this.SearchTextTextField	= new JTextField();
+		this.beginLabel				= new JLabel("Begin (date/time)");
+		this.beginPanel				= new JPanel(new BorderLayout());
+		this.beginDateTextField		= new JTextField(8);
+		this.beginSpinner			= new JSpinner(sdmBegin);
+		this.endLabel				= new JLabel("End (date/time)");;
+		this.endPanel				= new JPanel(new BorderLayout());
+		this.endDateTextField		= new JTextField(8);
+		this.endSpinner				= new JSpinner(sdmEnd);
+		this.searchTextLabel		= new JLabel("Message text");
+		this.searchTextTextField	= new JTextField();
 		
 		this.platzhalterPanel		= new JPanel();
 		
-		this.dateEditorBegin		= new JSpinner.DateEditor(BeginSpinner, "hh:mm");
-		this.dateEditorEnd			= new JSpinner.DateEditor(EndSpinner, "hh:mm");
-		this.BeginSpinner.setEditor(dateEditorBegin);
-		this.EndSpinner.setEditor(dateEditorEnd);
+		this.dateEditorBegin		= new JSpinner.DateEditor(beginSpinner, "HH:mm");
+		this.dateEditorEnd			= new JSpinner.DateEditor(endSpinner, "HH:mm");
+		this.beginSpinner.setEditor(dateEditorBegin);
+		this.endSpinner.setEditor(dateEditorEnd);
 		
 		this.buttonPanel			= new JPanel();
 		this.searchButton			= new JButton("Search");
 		this.cancelButton			= new JButton("Cancel");
+		
+		this.beginGregCal			= new GregorianCalendar();
+		this.endGregCal				= new GregorianCalendar();
 		
 		
 		this.btnGrp.add(userToggleButton);
@@ -192,22 +204,24 @@ public class HistoryWindow extends JDialog{
 		this.myPanel.setBorder(BorderFactory.createTitledBorder("Search options"));
 		this.myPanel.setPreferredSize(new Dimension(230,80));
 		this.myPanel.setBackground(Color.WHITE);
-		this.myPanel.add(BeginLabel);
-		this.BeginPanel.setBackground(Color.WHITE);
-		this.BeginPanel.add(BeginDateTextField,BorderLayout.CENTER);
-		this.BeginDateTextField.setEditable(false);
-		this.BeginDateTextField.addMouseListener(new MyMouseAdapter());
-		this.BeginPanel.add(BeginSpinner,BorderLayout.EAST);
-		this.myPanel.add(BeginPanel);
-		this.myPanel.add(EndLabel);
-		this.EndPanel.setBackground(Color.WHITE);
-		this.EndPanel.add(EndDateTextField,BorderLayout.CENTER);
-		this.EndDateTextField.setEditable(false);
-		this.EndDateTextField.addMouseListener(new MyMouseAdapter());
-		this.EndPanel.add(EndSpinner,BorderLayout.EAST);
-		this.myPanel.add(EndPanel);
-		this.myPanel.add(SearchTextLabel);
-		this.myPanel.add(SearchTextTextField);
+		this.myPanel.add(beginLabel);
+		this.beginPanel.setBackground(Color.WHITE);
+		this.beginPanel.add(beginDateTextField,BorderLayout.CENTER);
+		this.beginDateTextField.setEditable(false);
+		this.beginDateTextField.setToolTipText("click to configure date");
+		this.beginDateTextField.addMouseListener(new MyMouseAdapter());
+		this.beginPanel.add(beginSpinner,BorderLayout.EAST);
+		this.myPanel.add(beginPanel);
+		this.myPanel.add(endLabel);
+		this.endPanel.setBackground(Color.WHITE);
+		this.endPanel.add(endDateTextField,BorderLayout.CENTER);
+		this.endDateTextField.setEditable(false);
+		this.endDateTextField.setToolTipText("click to configure date");
+		this.endDateTextField.addMouseListener(new MyMouseAdapter());
+		this.endPanel.add(endSpinner,BorderLayout.EAST);
+		this.myPanel.add(endPanel);
+		this.myPanel.add(searchTextLabel);
+		this.myPanel.add(searchTextTextField);
 		
 		this.platzhalterPanel.setPreferredSize(new Dimension(230,137));
 		this.platzhalterPanel.setBackground(Color.WHITE);
@@ -240,11 +254,23 @@ public class HistoryWindow extends JDialog{
 	}
 	
 	
-	public static void closeThis(){
+	void setEnd(GregorianCalendar temp){
+		endGregCal=temp;
+		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+		endDateTextField.setText(df.format(temp.getTime()));
+		
+	}
+	void setBegin(GregorianCalendar temp){
+		beginGregCal=temp;
+		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
+		beginDateTextField.setText(df.format(temp.getTime()));
+	}
+	
+	static void closeThis(){
 		if(me!=null)me.dispose();
 	}
 
-	public static void showThis(){
+	static void showThis(){
 		if(me==null) new HistoryWindow();
 		me.setVisible(true);
 	}
@@ -271,7 +297,13 @@ public class HistoryWindow extends JDialog{
 			
 			switch(source.getText()){
 			case "Search" :
-				new ResultWindow();
+//				beginGregCal.set(beginGregCal.get(Calendar.YEAR), beginGregCal.get(Calendar.MONTH), beginGregCal.get(Calendar.DATE), , minute)
+				if(endGregCal.getTimeInMillis() > beginGregCal.getTimeInMillis()){
+					new ResultWindow();
+					closeThis();
+				} else {
+					JOptionPane.showMessageDialog(me, "Check your date settings", "Illegal timerange", JOptionPane.ERROR_MESSAGE);
+				}
 				break;
 			case "Cancel" :
 				closeThis();
@@ -283,9 +315,12 @@ public class HistoryWindow extends JDialog{
 	
 	class MyMouseAdapter extends MouseAdapter{
 		public void mouseClicked(MouseEvent e) {
-			new Kalender( (JTextField) e.getSource() );
+			if(e.getSource()==beginDateTextField){
+				new Kalender( me, true);
+			}
+			if(e.getSource()==endDateTextField){
+				new Kalender( me, false);
+			}
 		}
 	}
-	
 }
-

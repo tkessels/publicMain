@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -778,10 +779,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	/**
 	 * WindowListener für GUI
 	 */
-	class winController implements WindowListener{
-		public void windowOpened(WindowEvent arg0) {
-		}
-		@Override
+	class winController extends WindowAdapter{
 		// Wird das GUI minimiert wird die Userlist zugeklappt und der
 		// userListBtn zurückgesetzt:
 		public void windowIconified(WindowEvent arg0) {
@@ -789,23 +787,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				contactListZuklappen();
 			}
 		}
-		@Override
-		public void windowDeiconified(WindowEvent arg0) {
-		}
-		@Override
-		public void windowDeactivated(WindowEvent arg0) {
-		}
-		@Override
-		public void windowClosing(WindowEvent arg0) {
-		}
-		@Override
+		
 		public void windowClosed(WindowEvent arg0) {
 			contactListZuklappen();
 //			if(HelpContents.getMe()!=null)HelpContents.getMe().dispose();
 			SettingsWindow.closeThis();
 			shutdown();
 		}
-		@Override
+
 		public void windowActivated(WindowEvent arg0) {
 			if (contactListBtn.isSelected()) {
 				contactListWin.toFront();

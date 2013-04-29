@@ -194,7 +194,6 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 			active = false;
 		}
 		
-		@Override
 		public void run() {
 			active = true;
 			while (active) {
@@ -209,8 +208,6 @@ public class ChatWindowTab extends JPanel implements MouseListener{
 		public void stopit() {
 			active = false;
 		}
-		
-
 	}
 }
 	

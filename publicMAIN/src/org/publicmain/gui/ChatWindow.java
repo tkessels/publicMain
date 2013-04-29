@@ -6,14 +6,17 @@ import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -412,9 +415,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		return false;
 	}
 	
-	private final class DropTargetListenerImplementation implements DropTargetListener {
-		public void dropActionChanged(DropTargetDragEvent dtde) {
-		}
+	private final class DropTargetListenerImplementation extends DropTargetAdapter {
 		public void drop(DropTargetDropEvent event) {
 			event.acceptDrop(DnDConstants.ACTION_COPY);
 	        try {
@@ -432,12 +433,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	        event.dropComplete(true);
 		}
 		
-		public void dragOver(DropTargetDragEvent dtde) {
-		}
-		public void dragExit(DropTargetEvent dte) {
-		}
-		public void dragEnter(DropTargetDragEvent dtde) {
-		}
 	}
 
 
@@ -473,13 +468,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 
-	private final class MouseListenerImplementation implements MouseListener {
-		public void mouseReleased(MouseEvent e) {
-		}
-
-		public void mousePressed(MouseEvent e) {
-		}
-
+	private final class MouseListenerImplementation extends MouseAdapter {
 		public void mouseExited(MouseEvent e) {
 			JButton source = (JButton) e.getSource();
 			if(onlineState){
@@ -493,16 +482,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				source.setForeground(new Color(255, 130, 13));
 			}
 		}
-
-		public void mouseClicked(MouseEvent e) {
-		}
 	}
 
 
 	/**
 	 * KeyListener für Nachrichtenhistorie ggf. für andere Dinge verwendbar
 	 */
-	private class History implements KeyListener{
+	private class History extends KeyAdapter{
 
 			private ArrayList<String> eingabeHistorie;
 			private int eingabeAktuell;
@@ -518,15 +504,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				target.addKeyListener(this);
 			}
 
-			public void keyTyped(KeyEvent arg0) {
-			}
-
 			public void add(String eingabe) {
 				eingabeHistorie.add(eingabe);
 				eingabeAktuell = eingabeHistorie.size();
-			}
-
-			public void keyReleased(KeyEvent arg0) {
 			}
 
 			public void keyPressed(KeyEvent arg0) {

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.MouseInfo;
@@ -36,73 +37,74 @@ import org.resources.Help;
 @SuppressWarnings("serial")
 public class Kalender extends JDialog {
 
-	private GregorianCalendar gewaehlterMonat;
-	private JLabel lNow;
-	private MonatsPanel mPanel;
+	private Calendar selectedMonth;
+	private JLabel nowLabel;
+	private MonthPanel mPanel;
 	final private String[] MONATSNAMEN = {"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"};
 	final private String[] TAGENAMEN = {"Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"};
-	JTextField target;
-	Kalender me;
+	private JTextField target;
+	private JDialog me;
+	private JPanel monthPanel;
+	private JButton preMonthButton;
+	private JButton nxtMonthButton;
+	
 	
 	/**
 	 * Create the Kalendardialog ;)
 	 */
 	public Kalender(JTextField target) {
-		me = this;
+		this.me = this;
 		this.target =target;
-		gewaehlterMonat = new GregorianCalendar(); //holt datum von heute
-		setBounds(100, 100, 450, 300);
-		BorderLayout borderLayout = new BorderLayout();
-		borderLayout.setVgap(5);
-		borderLayout.setHgap(5);
-		getContentPane().setLayout(borderLayout);
-		getContentPane().setBackground(SystemColor.info);
+		this.selectedMonth = new GregorianCalendar();
+		this.monthPanel = new JPanel();
+		this.preMonthButton = new JButton("<");
+		this.nxtMonthButton = new JButton(">");
+		this.nowLabel = new JLabel( ( MONATSNAMEN[selectedMonth.get(Calendar.MONTH)] + " " + selectedMonth.get(Calendar.YEAR) ) );
 		
-		// --------------------------- Monatsauswahl ---------------------- //
+		this.setLayout(new BorderLayout(1, 1));
+		this.setBackground(Color.WHITE);
 		
-		JPanel pMonatsAuswahl = new JPanel();
-		pMonatsAuswahl.setBackground(SystemColor.info);
-		getContentPane().add(pMonatsAuswahl, BorderLayout.NORTH);
-		pMonatsAuswahl.setLayout(new BorderLayout(0, 0));
+		this.monthPanel.setBackground(Color.WHITE);
+		this.monthPanel.setBorder(new LineBorder(new Color(5,64,94), 1, true));
+		this.monthPanel.setLayout(new BorderLayout(0, 0));
+		
+		this.nowLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		this.nowLabel.setFont(new Font("Arial", Font.BOLD, 14));
+		this.nowLabel.setForeground(new Color(5,64,94));
 				
-			JButton bzuruck = new JButton("<");
-			bzuruck.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					gewaehlterMonat = new GregorianCalendar(gewaehlterMonat.get(Calendar.YEAR), (gewaehlterMonat.get(Calendar.MONTH)-1), 1 ); //ein Monat runter
-					lNow.setText((MONATSNAMEN[gewaehlterMonat.get(Calendar.MONTH)]+" "+gewaehlterMonat.get(Calendar.YEAR)));
-					getContentPane().remove(mPanel);
-					mPanel = new MonatsPanel();
-					getContentPane().add(mPanel, BorderLayout.CENTER);
-					mPanel.validate();
-										
-				}
-			});
-			pMonatsAuswahl.add(bzuruck, BorderLayout.WEST);
-			
-			lNow = new JLabel( (MONATSNAMEN[gewaehlterMonat.get(Calendar.MONTH)]+" "+gewaehlterMonat.get(Calendar.YEAR)) );
-			lNow.setHorizontalAlignment(SwingConstants.CENTER);
-			lNow.setFont(new Font("Arial", Font.BOLD, 14));
-			pMonatsAuswahl.add(lNow, BorderLayout.CENTER);
 		
-			JButton bvor = new JButton(">");
-			bvor.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					gewaehlterMonat = new GregorianCalendar(gewaehlterMonat.get(Calendar.YEAR), (gewaehlterMonat.get(Calendar.MONTH)+1), 1 ); //ein Monat drauf
-					lNow.setText((MONATSNAMEN[gewaehlterMonat.get(Calendar.MONTH)]+" "+gewaehlterMonat.get(Calendar.YEAR)));
-					getContentPane().remove(mPanel);
-					mPanel = new MonatsPanel();
-					getContentPane().add(mPanel, BorderLayout.CENTER);
-					mPanel.validate();
-				}
-			});
-			pMonatsAuswahl.add(bvor, BorderLayout.EAST);
-			
-		// --------------------------- MonatsPanel --------------------------//
+		this.preMonthButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				selectedMonth = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), (selectedMonth.get(Calendar.MONTH)-1), 1 ); //ein Monat runter
+				nowLabel.setText( ( MONATSNAMEN[selectedMonth.get(Calendar.MONTH)] + " " + selectedMonth.get(Calendar.YEAR) ) );
+				me.remove(mPanel);
+				mPanel = new MonthPanel();
+				me.add(mPanel, BorderLayout.CENTER);
+				mPanel.validate();
+			}
+		});
+		
+		this.nxtMonthButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				selectedMonth = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), (selectedMonth.get(Calendar.MONTH)+1), 1 ); //ein Monat drauf
+				nowLabel.setText( ( MONATSNAMEN[selectedMonth.get(Calendar.MONTH)] + " " + selectedMonth.get(Calendar.YEAR) ) );
+				me.remove(mPanel);
+				mPanel = new MonthPanel();
+				me.add(mPanel, BorderLayout.CENTER);
+				mPanel.validate();
+			}
+		});
+		
+		this.monthPanel.add(nowLabel, BorderLayout.CENTER);
+		this.monthPanel.add(preMonthButton, BorderLayout.WEST);
+		this.monthPanel.add(nxtMonthButton, BorderLayout.EAST);
+		
+		this.mPanel = new MonthPanel();
+		
+		this.add(monthPanel, BorderLayout.NORTH);
+		this.add(mPanel, BorderLayout.CENTER);
 
-			mPanel = new MonatsPanel();
-			getContentPane().add(mPanel, BorderLayout.CENTER);
-
-			this.setUndecorated(true);
+		this.setUndecorated(true);
 		this.pack();
 		this.setLocation(MouseInfo.getPointerInfo().getLocation());
 		this.setVisible(true);
@@ -126,7 +128,7 @@ public class Kalender extends JDialog {
 		public void focusLost(FocusEvent e) {
 			Component other = e.getOppositeComponent();
 			if(other!=null){
-//			System.out.println(other.getClass().getSimpleName());
+			System.out.println(other.getClass().getSimpleName());
 			while (other.getParent()!=null) {
 				other = other.getParent();
 				if(other instanceof Kalender) break;
@@ -144,24 +146,25 @@ public class Kalender extends JDialog {
 	 * @author Volker
 	 *
 	 */
-	public class MonatsPanel extends JPanel {
+	public class MonthPanel extends JPanel {
 	
 		private GregorianCalendar heute;
 		
 		/**
 		 * Konsruktor bau eine Monatsübersicht des gewählten Monats auf
 		 */
-		public MonatsPanel(){
+		public MonthPanel(){
 			heute = new GregorianCalendar();
 			this.addFocusListener(new Disposer());
-			this.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
+			this.setBorder(new LineBorder(new Color(5,64,94), 1, true));
 			this.setLayout(new GridLayout(0, 7, 5, 5));
-			this.setBackground(SystemColor.info);
+			this.setBackground(Color.WHITE);
 			
 			//MO bis So schreiben
 			for (String tag : TAGENAMEN){ 
 				JLabel lbl = new JLabel(tag.substring(0, 2));
 				lbl.setHorizontalAlignment(SwingConstants.CENTER);
+				lbl.setForeground(new Color(5,64,94));
 				this.add(lbl);
 			}
 			
@@ -176,16 +179,16 @@ public class Kalender extends JDialog {
 			for( final kTag t : dieserMonat.getMonat()){
 				t.setText(""+tNr); 
 				//heute markieren
-				if ( 	heute.get(Calendar.YEAR) == gewaehlterMonat.get(Calendar.YEAR) &&  //heute markieren
-						heute.get(Calendar.MONTH) == gewaehlterMonat.get(Calendar.MONTH) &&
+				if ( 	heute.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR) &&  //heute markieren
+						heute.get(Calendar.MONTH) == selectedMonth.get(Calendar.MONTH) &&
 						tNr == heute.get(Calendar.DAY_OF_MONTH)) {
-					t.setBorder(new LineBorder(Color.GREEN, 2, true)); 
+					t.setBorder(new LineBorder(new Color(255,133,18), 2, true)); 
 					t.setToolTipText("Heute");
 				}
 				
 				// Fallse feiertag, bezeichnung setzen und markieren
 				if ( t.getFeiertagBez() != null ){
-					t.setBorder(new LineBorder(Color.GRAY, 2, true)); 
+					t.setBorder(new LineBorder(Color.RED, 2, true)); 
 					t.setToolTipText(t.getFeiertagBez());
 				}
 				
@@ -221,7 +224,7 @@ public class Kalender extends JDialog {
 		private List<kTag> monat;
 		
 		public MonatsDaten(){
-			this.ersterTag = new GregorianCalendar(gewaehlterMonat.get(Calendar.YEAR), gewaehlterMonat.get(Calendar.MONTH), 1 );
+			this.ersterTag = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), selectedMonth.get(Calendar.MONTH), 1 );
 			this.letzterTag = ersterTag.getActualMaximum(Calendar.DAY_OF_MONTH);
 			this.monat = new ArrayList<kTag>();
 			
@@ -298,20 +301,20 @@ public class Kalender extends JDialog {
 	 * inDST - ob man in DST war
 	 * feiertagBez - bezeichnung eines Feiertages
 	 * und hat dementsprechende getter & setter
-	 * @author Volker
 	 *
 	 */
 	private class kTag extends JButton{
 		
 		private GregorianCalendar meinTag;
-		public kTag(GregorianCalendar tag) {
-			DateFormat df;
-		    df = DateFormat.getDateInstance(DateFormat.SHORT);
-			meinTag = tag;
-			this.setActionCommand(df.format(meinTag.getTime()));
-		}
+		private DateFormat df;
 		private boolean inDST;
 		private String feiertagBez;
+		
+		public kTag(GregorianCalendar tag) {
+		    this.df = DateFormat.getDateInstance(DateFormat.SHORT);
+			this.meinTag = tag;
+			this.setActionCommand(df.format(meinTag.getTime()));
+		}
 		
 		public boolean isInDST() {
 			return inDST;

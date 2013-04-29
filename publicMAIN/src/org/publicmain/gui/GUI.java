@@ -766,7 +766,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}
 				break;
 			case "Local":
-				new HistoryWindow();
+				HistoryWindow.showThis();
 				break;
 			case "Settings":
 				SettingsWindow.showThis();

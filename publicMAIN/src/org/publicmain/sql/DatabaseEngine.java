@@ -16,6 +16,7 @@ import javax.swing.JTable;
 import javax.xml.crypto.NodeSetData;
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.Config;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
@@ -52,7 +53,14 @@ public class DatabaseEngine {
 		failed_node = new ArrayList<Node>();
 		failed_routes = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
 		
+		Config.registerDatabaseEngine(this);
+		//Config.write();
+		
 		transporter.start();
+	}
+	
+	public void writeConfig(){
+		localDB.writeAllSettingsToDB(Config.getConfig());
 	}
 	
 	public synchronized static DatabaseEngine getDatabaseEngine() {

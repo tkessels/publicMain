@@ -37,7 +37,7 @@ import org.resources.Help;
 @SuppressWarnings("serial")
 public class Kalender extends JDialog {
 
-	private Calendar selectedMonth;
+	private GregorianCalendar selectedMonth;
 	private JLabel nowLabel;
 	private MonthPanel mPanel;
 	final private String[] MONATSNAMEN = {"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"};
@@ -128,7 +128,7 @@ public class Kalender extends JDialog {
 		public void focusLost(FocusEvent e) {
 			Component other = e.getOppositeComponent();
 			if(other!=null){
-			System.out.println(other.getClass().getSimpleName());
+//			System.out.println(other.getClass().getSimpleName());
 			while (other.getParent()!=null) {
 				other = other.getParent();
 				if(other instanceof Kalender) break;
@@ -157,7 +157,7 @@ public class Kalender extends JDialog {
 			heute = new GregorianCalendar();
 			this.addFocusListener(new Disposer());
 			this.setBorder(new LineBorder(new Color(5,64,94), 1, true));
-			this.setLayout(new GridLayout(0, 7, 5, 5));
+			this.setLayout(new GridLayout(0, 7, 1, 1));
 			this.setBackground(Color.WHITE);
 			
 			//MO bis So schreiben
@@ -178,6 +178,7 @@ public class Kalender extends JDialog {
 			int tNr = 1;
 			for( final kTag t : dieserMonat.getMonat()){
 				t.setText(""+tNr); 
+				t.setForeground(new Color(5,64,94));
 				//heute markieren
 				if ( 	heute.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR) &&  //heute markieren
 						heute.get(Calendar.MONTH) == selectedMonth.get(Calendar.MONTH) &&
@@ -196,6 +197,7 @@ public class Kalender extends JDialog {
 				t.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						//todo Return that day
+//						System.out.println(t.getActionCommand());
 						target.setText(t.getActionCommand());
 						dispose();
 						
@@ -219,14 +221,16 @@ public class Kalender extends JDialog {
 	private class MonatsDaten{
 		
 		private int tageOffset;
-		private Calendar ersterTag;
+		private GregorianCalendar ersterTag;
 		private int letzterTag;
 		private List<kTag> monat;
+		private GregorianCalendar buttondate;
 		
 		public MonatsDaten(){
 			this.ersterTag = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), selectedMonth.get(Calendar.MONTH), 1 );
 			this.letzterTag = ersterTag.getActualMaximum(Calendar.DAY_OF_MONTH);
 			this.monat = new ArrayList<kTag>();
+			this.buttondate = new GregorianCalendar(ersterTag.get(Calendar.YEAR), ersterTag.get(Calendar.MONTH), ersterTag.get(Calendar.DAY_OF_MONTH));
 			
 			//wann ist der erste Montag - offSet
 			tageOffset = 7;
@@ -235,7 +239,6 @@ public class Kalender extends JDialog {
 				tageOffset--;
 			}
 			if (tageOffset ==7) tageOffset =0;
-			GregorianCalendar buttondate = new GregorianCalendar(ersterTag.get(Calendar.YEAR), ersterTag.get(Calendar.MONTH), ersterTag.get(Calendar.DAY_OF_MONTH));
 						
 			for(int i = 0 ; i<letzterTag ; i++){
 				monat.add(new kTag(buttondate));

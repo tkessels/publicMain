@@ -62,7 +62,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 4;
+	private final static int LOCAL_DATABASE_VERSION = 6;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -221,8 +221,8 @@ public class LocalDBConnection {
 				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_groups_saveGroups`;");
 				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newGroupName VARCHAR(20),IN newFk_t_users_userID BIGINT(20)) BEGIN insert into t_groups (groupName, fk_t_users_userID) values (newGroupName,newFk_t_users_userID) ON DUPLICATE KEY UPDATE fk_t_users_userID=VALUES(fk_t_users_userID); END;");
 				
-				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_saveUsers`;");
-				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsers` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45)) BEGIN insert into t_users (userID, displayName, userName) values (newUserID,newDisplayName,newUserName) ON DUPLICATE KEY UPDATE displayName=VALUES(displayName),userName=VALUES(userName); END;");
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_saveUsersAndNodes`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsersAndNodes` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45), IN newNodeID BIGINT(20),  IN newComputerName VARCHAR(45)) BEGIN	insert into t_users (userID, displayName, userName) values (newUserID,newDisplayName,newUserName) ON DUPLICATE KEY UPDATE displayName=VALUES(displayName), userName=VALUES(userName); INSERT INTO t_nodes(nodeID, computerName, fk_t_users_userID_2) VALUES (newNodeID, newComputerName, newUserID) ON DUPLICATE KEY UPDATE computerName=VALUES(computerName), fk_t_users_userID_2=VALUES(fk_t_users_userID_2);END;");
 				
 				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_msgType`;");
 				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
@@ -319,10 +319,13 @@ public class LocalDBConnection {
 				while (it.hasNext()){
 					Node tmpNode = (Node) it.next();
 					saveUserStmt = new StringBuffer();
-					saveUserStmt.append("CALL p_t_user_saveUsers(");
+					saveUserStmt.append("CALL p_t_user_saveUsersAndNodes(");
 					saveUserStmt.append(tmpNode.getUserID() + ",");
 					saveUserStmt.append("'" + tmpNode.getAlias() + "',");
-					saveUserStmt.append("'" + tmpNode.getUsername() + "')");
+					saveUserStmt.append("'" + tmpNode.getUsername() + "',");
+					saveUserStmt.append(tmpNode.getNodeID()+ ",");
+					saveUserStmt.append("'" + tmpNode.getHostname() + "')");
+					
 					try {
 						synchronized (stmt) {
 							stmt.execute(saveUserStmt.toString());

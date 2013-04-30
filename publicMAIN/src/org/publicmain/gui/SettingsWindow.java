@@ -272,6 +272,7 @@ public class SettingsWindow extends JDialog{
 	
 	private void acceptSettings(){
 		boolean changes = false;
+		
 		if(!aliasTextField.getText().equals(Config.getConfig().getAlias())){
 			Config.getConfig().setAlias(aliasTextField.getText());
 			GUI.getGUI().changeAlias(aliasTextField.getText());
@@ -295,9 +296,13 @@ public class SettingsWindow extends JDialog{
 			Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
 			changes = true;
 		}
-		if(!pwPushPullPasswordField.getPassword().toString().equals(Config.getConfig().getBackupDBChoosenUserPassWord())){
-			Config.getConfig().setBackupDBChoosenUserPassWord(pwPushPullPasswordField.getPassword().toString());
-			changes = true;
+		if(pwPushPullPasswordField.getPassword().length>1)
+		{
+			String tmp_password = new String(pwPushPullPasswordField.getPassword());
+			if(!tmp_password.equals(Config.getConfig().getBackupDBChoosenUserPassWord())) {
+				Config.getConfig().setBackupDBChoosenUserPassWord(tmp_password);
+				changes = true;
+			}
 		}
 		
 		if(!portLocalDBTextField.getText().equals(Config.getConfig().getLocalDBPort())){
@@ -308,27 +313,41 @@ public class SettingsWindow extends JDialog{
 			Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
 			changes = true;
 		}
-		if(!pwLocalDBPasswordField.getPassword().toString().equals(Config.getConfig().getLocalDBPw())){
-			Config.getConfig().setLocalDBPw(new String(pwLocalDBPasswordField.getPassword()));
-			changes = true;
+		
+		if(pwLocalDBPasswordField.getPassword().length>1)
+		{
+			String tmp_password = new String(pwLocalDBPasswordField.getPassword());
+			if(!tmp_password.equals(Config.getConfig().getLocalDBPw())) {
+				Config.getConfig().setLocalDBPw(tmp_password);
+				changes = true;
+			}
 		}
 		
 		if(!ipBackupTextField.getText().equals(Config.getConfig().getBackupDBIP())){
 			Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
 			changes = true;
 		}
+		
 		if(!portBackupTextField.getText().equals(Config.getConfig().getBackupDBPort())){
 			Config.getConfig().setBackupDBPort(portBackupTextField.getText());
 			changes = true;
 		}
+		
 		if(!userBackupTextField.getText().equals(Config.getConfig().getBackupDBUser())){
 			Config.getConfig().setBackupDBUser(userBackupTextField.getText());
 			changes = true;
 		}
-		if(!pwBackPasswordField.getPassword().toString().equals(Config.getConfig().getBackupDBPw())){
-			Config.getConfig().setBackupDBPw(pwBackPasswordField.getPassword().toString());
-			changes = true;
+		
+		if(pwBackPasswordField.getPassword().length>1)
+		{
+			String tmp_password = new String(pwBackPasswordField.getPassword());
+			if(!tmp_password.equals(Config.getConfig().getBackupDBPw())) {
+				Config.getConfig().setBackupDBPw(tmp_password);
+				changes = true;
+			}
 		}
+		
+		
 		if(changes){
 			Config.write();
 		}

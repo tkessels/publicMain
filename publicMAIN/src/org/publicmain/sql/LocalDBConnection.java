@@ -9,20 +9,17 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.swing.JTextPane;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
@@ -34,8 +31,6 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
 import org.resources.Help;
-
-import com.mysql.jdbc.PreparedStatement;
 
 /**
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
@@ -530,7 +525,27 @@ public class LocalDBConnection {
 		}
 	}
 	
-	public void searchInHistory (JTextPane historyContentTxt, String chosenNTyp, String chosenAliasOrGrpName, Date fromDateTime, Date toDateTime, HTMLEditorKit htmlKit, HTMLDocument htmlDoc){
+	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
+		if (dbStatus >= 3){
+			try {
+				PreparedStatement searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE '?' OR fk_t_users_userID_empfaenger LIKE '?') AND displayName LIKE '?' AND fk_t_groups_groupName LIKE '?' AND (timestmp BETWEEN '?' AND '?') AND txt LIKE '?' ");
+				searchInHistStmt.setString(1, userID);
+				searchInHistStmt.setString(2, userID);
+				searchInHistStmt.setString(3, alias);
+				searchInHistStmt.setString(4, groupName);
+				searchInHistStmt.setLong(5, begin);
+				searchInHistStmt.setLong(6, end);
+				searchInHistStmt.setString(7, msgTxt);
+				
+				return searchInHistStmt.executeQuery();
+				
+			} catch (SQLException e) {
+				LogEngine.log(this, "Error while executing 'searchInHistStmt' PreparedStatment: " + e.getMessage(), LogEngine.ERROR);
+				return null;
+			}
+		}
+		return null;
+		
 //		if (isDBConnected){
 //			try {
 //				String tmpStmtStr = (

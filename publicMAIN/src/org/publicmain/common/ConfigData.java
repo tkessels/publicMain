@@ -265,11 +265,11 @@ public class ConfigData extends Properties {
 	}
 
 	public String getBackupDBUser(){
-		return this.getProperty("backup_db_user");
+		return this.getProperty("sql.backup_db_user");
 	}
 
 	public String getBackupDBPw(){
-		return this.getProperty("backup_db_password");
+		return this.getProperty("sql.backup_db_password");
 	}
 	
 	public String getBackupDBIP(){

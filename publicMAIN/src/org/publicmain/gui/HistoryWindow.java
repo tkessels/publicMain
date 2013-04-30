@@ -30,6 +30,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.LineBorder;
 
 import org.resources.Help;
 

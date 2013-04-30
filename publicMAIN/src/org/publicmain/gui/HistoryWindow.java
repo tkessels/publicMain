@@ -32,6 +32,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.LineBorder;
 
+import org.publicmain.common.Node;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
@@ -90,6 +91,8 @@ public class HistoryWindow extends JDialog{
 	
 	private GregorianCalendar beginGregCal;
 	private GregorianCalendar endGregCal;
+	
+	private String activeCard = "user";
 	
 	
 	
@@ -150,8 +153,8 @@ public class HistoryWindow extends JDialog{
 		this.searchButton			= new JButton("Search");
 		this.cancelButton			= new JButton("Cancel");
 		
-		this.beginGregCal			= new GregorianCalendar();
-		this.endGregCal				= new GregorianCalendar();
+//		this.beginGregCal			= new GregorianCalendar();
+//		this.endGregCal				= new GregorianCalendar();
 		
 		
 		this.btnGrp.add(userToggleButton);
@@ -289,7 +292,9 @@ public class HistoryWindow extends JDialog{
 		
 		public void actionPerformed(ActionEvent e) {
 			CardLayout card = (CardLayout) ref.getLayout();
-			card.show( ref, ((JToggleButton)e.getSource()).getText() );
+			String text = ((JToggleButton)e.getSource()).getText();
+			card.show( ref, text );
+			activeCard=text;
 		}
 	}
 	
@@ -297,16 +302,44 @@ public class HistoryWindow extends JDialog{
 
 		public void actionPerformed(ActionEvent e) {
 			JButton source = (JButton)e.getSource();
-			
+//			cardsPanel.get
 			switch(source.getText()){
 			case "Search" :
-//				beginGregCal.set(beginGregCal.get(Calendar.YEAR), beginGregCal.get(Calendar.MONTH), beginGregCal.get(Calendar.DATE), , minute)
-				if(endGregCal.getTimeInMillis() > beginGregCal.getTimeInMillis()){
-					new ResultWindow();
-					closeThis();
-				} else {
-					JOptionPane.showMessageDialog(me, "Check your date settings", "Illegal timerange", JOptionPane.ERROR_MESSAGE);
+//				System.out.println(beginSpinner.getValue().getClass());
+
+				Date value = (Date) beginSpinner.getValue();
+				if(beginGregCal!=null){
+					System.out.println(beginGregCal);
+					beginGregCal.set(Calendar.HOUR_OF_DAY,value.getHours() );
+					beginGregCal.set(Calendar.MINUTE,value.getMinutes() );
+					System.out.println(beginGregCal);
 				}
+				if(endGregCal!=null){
+					value = (Date) endSpinner.getValue();
+					System.out.println(endGregCal);
+					endGregCal.set(Calendar.HOUR_OF_DAY,value.getHours() );
+					endGregCal.set(Calendar.MINUTE,value.getMinutes() );
+					System.out.println(endGregCal);
+				}
+//				beginGregCal.set(beginGregCal.get(Calendar.YEAR), beginGregCal.get(Calendar.MONTH), beginGregCal.get(Calendar.DATE), , minute)
+				switch(activeCard){
+				case "User":
+					Node selectedNode = (Node) userSelectComboBox.getSelectedItem();
+					new ResultWindow(DatabaseEngine.getDatabaseEngine().selectMSGsByUser(selectedNode.getUserID(),beginGregCal, endGregCal, searchTextTextField.getText()));
+					break;
+				case "Group":
+				    new ResultWindow(DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSelectTextField.getText(), beginGregCal, endGregCal, searchTextTextField.getText()));
+					break;
+					
+				case "Alias":
+					break;
+					default:
+				}
+//				if(endGregCal.getTimeInMillis() > beginGregCal.getTimeInMillis()){
+//					closeThis();
+//				} else {
+//					JOptionPane.showMessageDialog(me, "Check your date settings", "Illegal timerange", JOptionPane.ERROR_MESSAGE);
+//				}
 				break;
 			case "Cancel" :
 				closeThis();

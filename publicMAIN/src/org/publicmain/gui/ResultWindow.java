@@ -14,11 +14,11 @@ public class ResultWindow extends JDialog {
 	
 	private JTable resultTable;
 	
-	public ResultWindow(){
+	public ResultWindow(JTable result){
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		
-		this.resultTable = new JTable();
-		
+		this.resultTable = result;
+		this.add(resultTable);
 		this.pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);

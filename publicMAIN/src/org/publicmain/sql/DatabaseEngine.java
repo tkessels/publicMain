@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -193,7 +194,16 @@ public class DatabaseEngine {
 	 * @param text only messages containing this text will be shown. text will be ignored if empty string
 	 * @return a JTable listing all the messages fitting the given attributes (Maybe the Database Engine will update the Datamodel of the HistoryWindow later)
 	 */
-	public JTable selectMSGsByUser(long uid,long begin, long end,String text) {
+	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
+		ResultSet tmp =localDB.pull_msgs();
+		
+		
+		try {
+			return new JTable(buildTableModel(tmp));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
@@ -221,7 +231,7 @@ public class DatabaseEngine {
 	 * @param text only messages containing this text will be shown. text will be ignored if empty string
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
-	public JTable selectMSGsByGroup(String group,long begin, long end,String text) {
+	public JTable selectMSGsByGroup(String group,GregorianCalendar begin, GregorianCalendar end,String text) {
 		return null;
 	}
 	
@@ -249,14 +259,6 @@ public class DatabaseEngine {
 			        Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),"");
 			        aModel.addElement(tmp_node);
 			    }
-
-				
-				
-				
-				
-				
-				
-				
 				
 				
 			}else

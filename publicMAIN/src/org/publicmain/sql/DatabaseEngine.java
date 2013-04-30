@@ -103,7 +103,6 @@ public class DatabaseEngine {
 //		TODO:Tell BackupServer to Drop users data
 	}
 	
-	
 	public void push(){
 		//TODO:
 	}
@@ -308,9 +307,5 @@ public class DatabaseEngine {
 		public long uid;
 		public String username;
 	}
-
-	
-	
-	
 
 }

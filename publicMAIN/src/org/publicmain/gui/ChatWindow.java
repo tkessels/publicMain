@@ -76,6 +76,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td></td>join group</tr>" +
 			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>message to group</tr>" +
 			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>whisper to user</tr>" +
+			"<tr><td>[b]</td><td>&lt;message&gt;</td><td>[/b]</td>formated message (bold)</tr>" +
+			"<tr><td>[u]</td><td>&lt;message&gt;</td><td>[/u]</td>formated message (underline)</tr>" +
+			"<tr><td>[i]</td><td>&lt;message&gt;</td><td>[/i]</td>formated message (italic)</tr>" +
+			"<tr><td>[strike]</td><td>&lt;message&gt;</td><td>[/strike]</td>formated message (striked)</tr>" +
 			"</table><br>";
 	private boolean onlineState;
 	private Thread onlineStateSetter;

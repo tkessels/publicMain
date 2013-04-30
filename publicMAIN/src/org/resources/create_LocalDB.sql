@@ -14,6 +14,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_users` (
   PRIMARY KEY (`userID`) )
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
 -- Table `db_publicmain`.`t_groups`
 -- -----------------------------------------------------
@@ -31,6 +32,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_groups` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
 -- Table `db_publicmain`.`t_msgType`
 -- -----------------------------------------------------
@@ -42,6 +44,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_msgType` (
   `description` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`msgTypeID`) )
 ENGINE = InnoDB;
+
 
 -- -----------------------------------------------------
 -- Table `db_publicmain`.`t_messages`
@@ -84,6 +87,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
 -- -----------------------------------------------------
 -- Table `db_publicmain`.`t_settings`
 -- -----------------------------------------------------
@@ -101,6 +105,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
 
 -- -----------------------------------------------------
 -- Table `db_publicmain`.`t_nodes`
@@ -132,7 +137,7 @@ USE `db_publicmain` ;
 -- -----------------------------------------------------
 -- Placeholder table for view `db_publicmain`.`v_pullAll_t_users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_users` (`userID` INT, `displayName` INT, `userName` INT);
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_users` (`userID` INT, `displayName` INT, `userName` INT, `nodeID` INT, `computerName` INT, `fk_t_users_userID_2` INT, `fk_t_nodes_nodeID` INT);
 
 -- -----------------------------------------------------
 -- Placeholder table for view `db_publicmain`.`v_pullAll_t_messages`
@@ -150,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullALL_t_settings` (`settingsKey`
 DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_users` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_users`;
 USE `db_publicmain`;
-CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_users` AS SELECT * FROM t_users;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_users` AS 	SELECT * FROM t_users, t_nodes WHERE userID = fk_t_users_userID_2;
 
 -- -----------------------------------------------------
 -- View `db_publicmain`.`v_pullAll_t_messages`
@@ -158,7 +163,7 @@ CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_users` AS SELECT * FROM t_us
 DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_messages` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_messages`;
 USE `db_publicmain`;
-CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_messages` AS SELECT * FROM t_messages;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_messages` 	AS SELECT * FROM t_messages;
 
 -- -----------------------------------------------------
 -- View `db_publicmain`.`v_pullALL_t_settings`

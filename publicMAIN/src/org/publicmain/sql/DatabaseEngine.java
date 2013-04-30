@@ -192,33 +192,35 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes (Maybe the Database Engine will update the Datamodel of the HistoryWindow later)
 	 */
 	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
-		
+
 		ResultSet tmp;
+
 		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
 		String para_alias	="%";
-		String para_group	="%";
-		String para_text	=text;
+		String para_group	="";
+		String para_text	="%"+text+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
-		
-		
-		
+		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+
+
 		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
 		else tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
-		
+
 		if(tmp!=null){
-		
-		
-		try {
-			return new JTable(buildTableModel(tmp));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+
+			try {
+				return new JTable(buildTableModel(tmp));
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+
+			}
 		}
-		}
-		return new JTable();
+		System.out.println("Abfrage hat nicht geklappt");
+		return allMSGs();
 	}
-	
+
 	/**
 	 * Queries the local Database for Messages which have been send with the given <code>alias</code> if send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
@@ -230,18 +232,7 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
 	public JTable selectMSGsByAlias(String alias,long begin, long end,String text) {
-		ResultSet tmp =localDB.pull_msgs();
-		if(tmp!=null){
-		
-		
-		try {
-			return new JTable(buildTableModel(tmp));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		}
-		return null;
+		return allMSGs();
 	}
 
 	/**
@@ -257,30 +248,47 @@ public class DatabaseEngine {
 	public JTable selectMSGsByGroup(String group,GregorianCalendar begin, GregorianCalendar end,String text) {
 		ResultSet tmp =localDB.pull_msgs();
 		if(tmp!=null){
-		
-		
-		try {
-			return new JTable(buildTableModel(tmp));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+
+			try {
+				return new JTable(buildTableModel(tmp));
+			} catch (SQLException e) {
+				//			e.printStackTrace();
+				System.out.println(e.getMessage());
+			}
 		}
-		}
-		return null;
+		System.out.println("Abfrage hat nicht geklappt");
+		return allMSGs();
+
 	}
-	
+
+	public JTable allMSGs() {
+		ResultSet tmp =localDB.pull_msgs();
+		if(tmp!=null){
+
+
+			try {
+				return new JTable(buildTableModel(tmp));
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return new JTable();
+
+	}
+
 	public JComboBox getUsers(){
-		UserComboModel aModel = new UserComboModel();
-		JComboBox<Node> tmp_combo = new JComboBox<Node>(aModel);
-//		Node empty = new Node(-1, "", "", "");
-		tmp_combo.insertItemAt(null, 0);
-		
+//		UserComboModel aModel = new UserComboModel();
+//		JComboBox<Node> tmp_combo = new JComboBox<Node>(aModel);
+		//		Node empty = new Node(-1, "", "", "");
+//		tmp_combo.insertItemAt(null, 0);
+
 		try {
 
 			ResultSet tmp = localDB.pull_users();
 			if(tmp!=null){
 				ResultSetMetaData meta = tmp.getMetaData();
-				
+
 				Vector<String> cols_title = new Vector<String>();
 				int columnCount = meta.getColumnCount();
 				for (int column = 1; column <= columnCount; column++) {
@@ -288,12 +296,18 @@ public class DatabaseEngine {
 				}
 				System.out.println(cols_title);
 				
-			    while (tmp.next()) {
-			        Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
-			        aModel.addElement(tmp_node);
-			    }
+				Vector<Node> nodes = new Vector<Node>();
 				
 				
+
+				while (tmp.next()) {
+					Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
+					nodes.add(tmp_node);
+				}
+				return new JComboBox<Node>(nodes);
+
+//				aModel.addElement(tmp_node);
+
 			}else
 				System.out.println("tmp war null" );
 
@@ -301,8 +315,8 @@ public class DatabaseEngine {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return tmp_combo;
-		
+		return null;
+
 	}
 	
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {

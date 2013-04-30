@@ -32,11 +32,6 @@ public class PMTrayIcon {
 	private Menu notifies;
 	private CheckboxMenuItem notifyPrivMsg;
 	private CheckboxMenuItem notifyGroupMsg;
-	private CheckboxMenuItem sync;
-	//private boolean notifyPriv = Config.getConfig().getNotifyPrivate();
-	//private boolean notifyGrp = Config.getConfig().getNotifyGroup();
-	//this.notifyPriv 
-	//this.notifyGrp 
 	
 	
     public PMTrayIcon() {
@@ -53,7 +48,6 @@ public class PMTrayIcon {
         this.notifies = new Menu("Notify");
         this.notifyPrivMsg = new CheckboxMenuItem("Private Messages",Config.getConfig().getNotifyPrivate());
         this.notifyGroupMsg = new CheckboxMenuItem("Group Messages",Config.getConfig().getNotifyGroup());
-        this.sync = new CheckboxMenuItem("Synchronize");
         
         this.exit = new MenuItem("Exit");
 
@@ -62,7 +56,6 @@ public class PMTrayIcon {
         popup.add(notifies);
         notifies.add(notifyPrivMsg);
         notifies.add(notifyGroupMsg);
-        popup.add(sync);
         popup.addSeparator();
         popup.add(exit);
         trayIcon.setPopupMenu(popup);

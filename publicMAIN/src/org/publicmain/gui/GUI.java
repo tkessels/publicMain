@@ -39,6 +39,7 @@ import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
+import org.publicmain.sql.DatabaseEngine;
 import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
 
@@ -62,11 +63,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private JMenu pMAIN;
 	private JMenu history;
 	private JMenu help;
+	private JMenu localDB;
 	private JMenu backupServer;
 	private JMenuItem pullHistory;
 	private JMenuItem pushHistory;
+	private JMenuItem delBackupHistory;
 	private JMenuItem settings;
-	private JMenuItem localHistory;
+	private JMenuItem searchLocalHistory;
+	private JMenuItem deleteLocalHistory;
 	private JMenuItem about;
 	private JMenuItem helpContent;
 	private JMenuItem exit;
@@ -111,11 +115,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.pMAIN	 			= new JMenu("pMAIN");
 		this.history 			= new JMenu("History");
 		this.help	 			= new JMenu("Help");
+		this.localDB			= new JMenu("Local-DB");
 		this.backupServer		= new JMenu("Backup-Server");
 		this.pushHistory		= new JMenuItem("Push History", Help.getIcon("pushDBSym.png"));
 		this.pullHistory		= new JMenuItem("Pull History", Help.getIcon("pullDBSym.png"));
+		this.delBackupHistory	= new JMenuItem("Delete History", Help.getIcon("delBackupHistory.png",14,16));
 		this.settings 			= new JMenuItem("Settings", Help.getIcon("settingsSym.png"));
-		this.localHistory		= new JMenuItem("Local", Help.getIcon("historySym.png"));
+		this.searchLocalHistory		= new JMenuItem("Search", Help.getIcon("historySym.png"));
+		this.deleteLocalHistory		= new JMenuItem("Delete", Help.getIcon("delHistorySym.png"));
 		this.trayIcon 			= new PMTrayIcon();
 		
 		/**
@@ -126,7 +133,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.exit.addActionListener(new menuContoller());			
 		this.about.addActionListener(new menuContoller());
 		this.helpContent.addActionListener(new menuContoller());
-		this.localHistory.addActionListener(new menuContoller());
+		this.searchLocalHistory.addActionListener(new menuContoller());
+		this.deleteLocalHistory.addActionListener(new menuContoller());
+		this.pullHistory.addActionListener(new menuContoller());
+		this.pushHistory.addActionListener(new menuContoller());
+		this.delBackupHistory.addActionListener(new menuContoller());
 		this.settings.addActionListener(new menuContoller());
 		
 		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
@@ -149,14 +160,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		/**
 		 * Men¸-Komponenten hinzuf¸gen
 		 */
-		this.history.add(localHistory);
+		this.history.add(localDB);
 		this.history.add(backupServer);
 		this.pMAIN.add(settings);
 		this.pMAIN.add(exit);
 		this.help.add(helpContent);
 		this.help.add(about);
+		this.localDB.add(searchLocalHistory);
+		this.localDB.add(deleteLocalHistory);
 		this.backupServer.add(pushHistory);
 		this.backupServer.add(pullHistory);
+		this.backupServer.add(delBackupHistory);
 		this.menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.LINE_AXIS));
 		this.menuBar.add(contactListBtn);
 		this.menuBar.add(pMAIN);
@@ -380,8 +394,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return String: den gek¸rzten und ggf. gelowercasedten namen
 	 */
 	String confName(String name, boolean lowern){
-		if (name.length() > Config.getConfig().getMaxGroupLength()) {
-			name = name.substring(0, Config.getConfig().getMaxGroupLength());
+		if (name.length() > NAME_LENGTH) {
+			name = name.substring(0, NAME_LENGTH);
 		}
 		if(lowern){
 			name = name.toLowerCase();
@@ -431,6 +445,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}).start();
 		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
+		// Hauptfenster schlieﬂen
+		me.dispose();
 		// Wenn es ein About-Fenster gibt, Fenster ausblenden
 		if(hcdAbout != null) {
 			hcdAbout.hideIt();
@@ -765,18 +781,24 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 					hcdHelp.showIt();
 				}
 				break;
-			case "Local":
+			case "Search":
 				HistoryWindow.showThis();
+				break;
+			case "Delete":
+				DatabaseEngine.getDatabaseEngine().deleteLocalHistory();
 				break;
 			case "Settings":
 				SettingsWindow.showThis();
 				break;
 
 			case "Push History":
-				// TODO: Daten auf den DB-Server schieben
+				DatabaseEngine.getDatabaseEngine().push();
 				break;
 			case "Pull History":
-				// TODO: Daten vom DB-Server holen
+				DatabaseEngine.getDatabaseEngine().pull();
+				break;
+			case "Delete History":
+				DatabaseEngine.getDatabaseEngine().deleteBackup();
 				break;
 			}
 		}

@@ -36,13 +36,14 @@ public class Config {
 		return me.settings;
 	}
 	
-	public static synchronized boolean write() {
+	public static synchronized void write() {
 		if (me==null) {
 			me = new Config();
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
+		
 		if(de!=null) de.writeConfig();				//TODO: hier ne Alternative überlegen da es sonst NuppointerExceptions in der LocDB gibt da diese die uID aus der CE haben will die´s noch nicht gibt oder wie oder was!!!
-		return me.savetoDisk();
+		me.savetoDisk();
 	}
 	
 	public static synchronized boolean writeSystemConfiguration() {
@@ -181,24 +182,29 @@ public class Config {
 		tmp.setBackupDBPort("3306");
 		tmp.setBackupDBUser("root");
 		tmp.setBackupDBPw("");
-//		
-//		
+		
 		return tmp;
 	}
 
 
 	
 
-	private boolean savetoDisk(){
-		try(FileOutputStream fos = new FileOutputStream(user_conf)) 
-		{
-			settings.store(fos,"publicMAIN - USER - SETTINGS");
-			LogEngine.log(this, "User settings written to " + user_conf, LogEngine.WARNING);
-			return true;
-		} catch (IOException e1) {
-			LogEngine.log(this, "Could not write user settings: "+user_conf +" reason : "+e1.getMessage(), LogEngine.WARNING);
-		}
-		return false;
+	private void savetoDisk(){
+		new Thread(new Runnable() {
+			public void run() {
+				try (final FileOutputStream fos = new FileOutputStream(
+						user_conf)) {
+					settings.store(fos, "publicMAIN - USER - SETTINGS");
+					LogEngine.log(Config.this, "User settings written to "
+							+ user_conf, LogEngine.WARNING);
+				} catch (IOException e1) {
+					LogEngine.log(Config.this,
+							"Could not write user settings: " + user_conf
+									+ " reason : " + e1.getMessage(),
+							LogEngine.WARNING);
+				}
+			}
+		}).start();
 	}
 
 

@@ -392,7 +392,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				//TODO: ggf. eingabe durch Methode filtern
 				this.gui.groupSend(gruppe, eingabe);
 						}
-		// leeren des Eingabefeldes (eingabeFeld)
+		// Speichen in Befehlshistory und leeren des Eingabefeldes (eingabeFeld)
+		this.keyHistory.add(eingabe);
 		this.eingabeFeld.setText("");
 		}
 	}
@@ -644,11 +645,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			public History(JTextField target) {
 				eingabeHistorie=new ArrayList<String>();
 				eingabeAktuell=0;
-				target.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						add( ( (JTextField)e.getSource() ).getText() );	
-					}
-				});
 				target.addKeyListener(this);
 			}
 
@@ -671,7 +667,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					} else
 						tmp.setText("");
 				} else {
-//					System.out.println(arg0.getKeyCode());
 				}
 		}
 	}

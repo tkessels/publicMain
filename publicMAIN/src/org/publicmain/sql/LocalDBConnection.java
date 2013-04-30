@@ -69,7 +69,6 @@ public class LocalDBConnection {
 	private Thread connectToDBThread;
 	private final static int LOCAL_DATABASE_VERSION = 4;
 	private DatabaseEngine databaseEngine;
-	private ConfigData localSettings;
 	private boolean ceReadyForWritingSettings;
 	//--------neue Sachen ende------------
 	
@@ -334,7 +333,7 @@ public class LocalDBConnection {
 							stmt.execute(saveUserStmt.toString());
 							if (!ceReadyForWritingSettings){
 								ceReadyForWritingSettings = true;
-								if (localSettings != null) writeAllSettingsToDB(localSettings);				
+								Config.write();				
 							}
 						}
 					} catch (SQLException e) {
@@ -488,19 +487,18 @@ public class LocalDBConnection {
 	}
 
 	public synchronized void writeAllSettingsToDB(final ConfigData settings) {
-		localSettings = settings;
 		if (ceReadyForWritingSettings){
 			new Thread(new Runnable() {
 				public void run() {
 					if (dbStatus >= 3) {
 						synchronized (stmt) {
-							for (String key : localSettings.stringPropertyNames()) {
+							for (String key : settings.stringPropertyNames()) {
 								StringBuffer saveSettingsStmt = new StringBuffer();
-								if (!localSettings.getProperty(key).equals("")){
+								if (!settings.getProperty(key).equals("")){
 									saveSettingsStmt.append("CALL p_t_settings_saveSettings(");
 									saveSettingsStmt.append("'" + key + "',");
 									saveSettingsStmt.append(ChatEngine.getCE().getUserID() + ",");
-									saveSettingsStmt.append("'"+ localSettings.getProperty(key) + "');");
+									saveSettingsStmt.append("'"+ settings.getProperty(key) + "');");
 									try {
 										stmt.addBatch(saveSettingsStmt.toString());
 									} catch (SQLException e) {

@@ -274,9 +274,9 @@ public class SettingsWindow extends JDialog{
 		boolean changes = false;
 		
 		if(!aliasTextField.getText().equals(Config.getConfig().getAlias())){
-			Config.getConfig().setAlias(aliasTextField.getText());
 			GUI.getGUI().changeAlias(aliasTextField.getText());
-			changes = true;
+			//hier wird bewusst changes nicht auf true gesetz, da die Methode changeAlias()
+			//das schreiben der config übernimmt.
 		}
 		if(Config.getConfig().getDisableFileTransfer() != fileTransferCheckBox.isSelected()){
 			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
@@ -292,9 +292,13 @@ public class SettingsWindow extends JDialog{
 			changes = true;
 		}
 		
-		if(!userPushPullTextField.getText().equals(Config.getConfig().getBackupDBChoosenUsername())){
-			Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
-			changes = true;
+		if (!userPushPullTextField.getText().equals(""))
+		{
+			String tmpUserPushPull = userPushPullTextField.getText();
+			if (!tmpUserPushPull.equals(Config.getConfig().getBackupDBChoosenUsername())) {
+				Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
+				changes = true;
+			}
 		}
 		if(pwPushPullPasswordField.getPassword().length>1)
 		{
@@ -323,11 +327,14 @@ public class SettingsWindow extends JDialog{
 			}
 		}
 		
-		if(!ipBackupTextField.getText().equals(Config.getConfig().getBackupDBIP())){
-			Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
-			changes = true;
+		if (!ipBackupTextField.getText().equals(""))
+		{
+			String tmpBackupIp = ipBackupTextField.getText();
+			if (!tmpBackupIp.equals(Config.getConfig().getBackupDBIP())) {
+				Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
+				changes = true;
+			}
 		}
-		
 		if(!portBackupTextField.getText().equals(Config.getConfig().getBackupDBPort())){
 			Config.getConfig().setBackupDBPort(portBackupTextField.getText());
 			changes = true;

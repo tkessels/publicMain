@@ -780,7 +780,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}
 				break;
 			case "Search":
-				HistoryWindow.showThis();
+//				HistoryWindow.showThis();
+				new HistoryWindow();
 				break;
 			case "Delete":
 				DatabaseEngine.getDatabaseEngine().deleteLocalHistory();

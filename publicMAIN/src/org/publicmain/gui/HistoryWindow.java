@@ -32,6 +32,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.LineBorder;
 
+import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 public class HistoryWindow extends JDialog{
@@ -59,7 +60,7 @@ public class HistoryWindow extends JDialog{
 	
 	private JPanel 		userSearchPanel;
 	private JLabel		userSelectLabel;
-	private JComboBox<String> userSelectComboBox;
+	private JComboBox userSelectComboBox;
 	
 	private JPanel		aliasSearchPanel;
 	private	JLabel		aliasSelectLabel;
@@ -116,7 +117,7 @@ public class HistoryWindow extends JDialog{
 		
 		this.userSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.userSelectLabel		= new JLabel("Username");
-		this.userSelectComboBox		= new JComboBox<>();
+		this.userSelectComboBox		= DatabaseEngine.getDatabaseEngine().getUsers();
 		
 		this.aliasSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.aliasSelectLabel		= new JLabel("Alias");
@@ -242,7 +243,8 @@ public class HistoryWindow extends JDialog{
 		
 		this.setTitle("History");
 		this.setModal(false);
-		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+//		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));

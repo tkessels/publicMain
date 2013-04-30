@@ -1,5 +1,8 @@
 package org.publicmain.sql;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,18 +10,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.JComboBox;
 import javax.swing.JTable;
-import javax.xml.crypto.NodeSetData;
+import javax.swing.table.DefaultTableModel;
 
-import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
+import org.publicmain.gui.UserListModel;
 import org.publicmain.nodeengine.NodeEngine;
 
 public class DatabaseEngine {
@@ -223,7 +226,73 @@ public class DatabaseEngine {
 	}
 	
 	public JComboBox getUsers(){
-		return new JComboBox<UserIdentifier>();
+		UserComboModel aModel = new UserComboModel();
+		//aModel.addElement(NodeEngine.getNE().getMe());
+		JComboBox<Node> tmp_combo = new JComboBox<Node>(aModel);
+		try {
+
+			ResultSet tmp = localDB.pull_users();
+			if(tmp!=null){
+				ResultSetMetaData meta = tmp.getMetaData();
+				Vector<String> cols_title = new Vector<String>();
+				int columnCount = meta.getColumnCount();
+				for (int column = 1; column <= columnCount; column++) {
+					cols_title.add(meta.getColumnName(column));
+				}
+				System.out.println(cols_title);
+				
+				
+				Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+			    while (tmp.next()) {
+
+			        Vector<Object> vector = new Vector<Object>();
+			        Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),"");
+			        aModel.addElement(tmp_node);
+			    }
+
+				
+				
+				
+				
+				
+				
+				
+				
+				
+			}else
+				System.out.println("tmp war null" );
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return tmp_combo;
+		
+	}
+	
+	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
+	    ResultSetMetaData metaData = rs.getMetaData();
+
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    int columnCount = metaData.getColumnCount();
+	    for (int column = 1; column <= columnCount; column++) {
+	        columnNames.add(metaData.getColumnName(column));
+	    }
+
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    while (rs.next()) {
+	        Vector<Object> vector = new Vector<Object>();
+	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+	            vector.add(rs.getObject(columnIndex));
+	        }
+	        data.add(vector);
+	    }
+
+	    return new DefaultTableModel(data, columnNames);
+
 	}
 
 	public synchronized void go() {

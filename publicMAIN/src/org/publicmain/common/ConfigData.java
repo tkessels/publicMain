@@ -3,7 +3,7 @@ import java.util.Properties;
 
 public class ConfigData extends Properties {
 
-	private static final long serialVersionUID = 7968268488626148729L;
+	private static final long serialVersionUID = 300420139L;
 
 	public ConfigData() {
 		super();

@@ -7,18 +7,13 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,27 +38,36 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 
 /**
- * @author ATRM
+ * Diese Klasse stellt ein ChatWindow bereit
  * 
+ * Diese Klasse stellt ein ChatWindow bereit, dieses enthält einen Bereich
+ * in dem Nachrichten angezeigt werden, ein Feld zur Texteingabe sowie
+ * einen Button um den Text zu senden.
+ * @author ATRM
  */
-
 public class ChatWindow extends JPanel implements ActionListener, Observer {
 
-	// Deklarationen:
-	private String name;
-	private JButton sendenBtn;
+	private GUI gui;
+	private ChatWindowTab myTab;
+	
 	private JTextPane msgTextPane;
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
 	private JScrollPane msgTextScroller;
 	private JTextField eingabeFeld;
-	private String gruppe;
+	private JButton sendenBtn;
+	private JPanel eingBereichPanel;
+	
+	private String name;
 	private Long userID;
+	private String gruppe;
 	private boolean isPrivCW;
-	private GUI gui;
+	
 	private History keyHistory;
-	private ChatWindowTab myTab;
-	private JPanel panel;
+	
+	private boolean onlineState;
+	private Thread onlineStateSetter;
+	//TODO: den helptext auslagern (externe String Klasse oder in Datei)
 	private String helptext="<br><table color='#05405E'>" +
 			"<tr><td colspan='3'><b>Command</b></td><td><b>Description</b></td></tr>" +
 			"<tr><td colspan='3'>/clear</td><td>clear screen</td></tr>" +
@@ -81,9 +85,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td>[i]</td><td>&lt;message&gt;</td><td>[/i]</td>formated message (italic)</tr>" +
 			"<tr><td>[strike]</td><td>&lt;message&gt;</td><td>[/strike]</td>formated message (striked)</tr>" +
 			"</table><br>";
-	private boolean onlineState;
-	private Thread onlineStateSetter;
 
+	/**
+	 * Dieser Konstruktor erstellt ein privates ChatWindow
+	 * @param uid
+	 */
 	public ChatWindow( long uid) {
 		this.userID = uid;
 		this.isPrivCW = true;
@@ -92,7 +98,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		doWindowbuildingstuff();
 	}
 
-
+	/**
+	 * Dieser Konstruktor erstellt ein ChatWindow für eine Gruppe
+	 * @param gruppenname
+	 */
 	public ChatWindow(String gruppenname) {
 		gruppe = gruppenname;
 		this.name = gruppenname;
@@ -101,102 +110,141 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		doWindowbuildingstuff();
 	}
 
-	public void updateName() {
-		if(isPrivCW) {
-			Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
-			if(nodeForUID!=null)this.name = nodeForUID.getAlias();
-			myTab.updateAlias();
-		}
-	}
 	/**
-	 * Erstellt Content und macht Layout für das Chatpanel
+	 * Diese Methode erstellt den Inhalt und konfiguriert
+	 * das Layout für das ChatWindow
 	 */
 	private void doWindowbuildingstuff() {
-		this.myTab =  new ChatWindowTab(name, GUI.getGUI().getTabbedPane(), this); 
 		// Layout für ChatWindow (JPanel) festlegen auf BorderLayout:
 		this.setLayout(new BorderLayout());
 
 		// Initialisierungen:
 		this.gui = GUI.getGUI();
+		this.myTab =  new ChatWindowTab(name, gui.getTabbedPane(), this); 
 		this.sendenBtn = new JButton("send");
 		this.msgTextPane = new JTextPane();
 		this.htmlKit = new HTMLEditorKit();
 		this.htmlDoc = new HTMLDocument();
 		this.msgTextScroller = new JScrollPane(msgTextPane,	JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.eingabeFeld = new JTextField();
-		this.panel = new JPanel(new BorderLayout());
+		this.eingBereichPanel = new JPanel(new BorderLayout());
+		this.keyHistory=new History(eingabeFeld);
 
+		// Konfiguration des Bereiches für Nachrichten (msgTextPane)
 		this.msgTextPane.setEditable(false);
 		this.msgTextPane.setPreferredSize(new Dimension(400, 300));
 		this.msgTextPane.setEditorKit(htmlKit);
 		this.msgTextPane.setDocument(htmlDoc);
 
-		this.eingabeFeld.setDocument(new SetMaxText(200)); // später über Configure-Datei
+		// Konfiguration des Eingabefeldes (eingabeFeld)
+		//TODO: später über ConfigureDatei
+		this.eingabeFeld.setDocument(new SetMaxText(200));
 
-		// KeyListener für Nachrichtenhistorie hinzufügen
+		// benötigte Listener für das Eingabefeld (eingabeFeld) hinzufügen
 		this.eingabeFeld.addKeyListener(new History(eingabeFeld));
+		this.eingabeFeld.addActionListener(this);
 
+		// benötigte Listener für den Sendebutton (sendenBtn) hinzufügen
 		this.sendenBtn.addActionListener(this);
 		this.sendenBtn.addMouseListener(new MouseListenerImplementation());
-
-		this.eingabeFeld.addActionListener(this);
-		this.keyHistory=new History(eingabeFeld);
-
-		this.panel.add(eingabeFeld, BorderLayout.CENTER);
-		this.panel.add(sendenBtn, BorderLayout.EAST);
 		
+		// Eingabefeld und Sendebutton zum Eingabebereich (eingBereichPanel) hinzufügen
+		this.eingBereichPanel.add(eingabeFeld, BorderLayout.CENTER);
+		this.eingBereichPanel.add(sendenBtn, BorderLayout.EAST);
+		
+		// Nachrichtenbereich und Eingabebereich zum ChatWindow hinzufügen
 		this.add(msgTextScroller, BorderLayout.CENTER);
-		this.add(panel, BorderLayout.SOUTH);
+		this.add(eingBereichPanel, BorderLayout.SOUTH);
 
-		
+		// Thread für Onlinestatus eines ChatWindows anlegen und für privates ChatWindow starten
 		this.onlineStateSetter = new Thread(new RunnableImplementation());
 		if(isPrivCW){
 			this.onlineStateSetter.start();
 		}
+		
+		// Ein DropTarget für den Dateiversand per Drag&Drop auf den Nachrichtenbereich legen
 		new DropTarget(msgTextPane, new DropTargetListenerImplementation());
 		
+		// ChatWindow anzeigen
 		this.setVisible(true);
 	}
 	
 	/**
-	 * @return String für Tab..
+	 * Diese Methode ist ein Getter für den Namen des ChatWindows.
+	 * 
+	 * Diese Methode liefert den Namen des ChatWindows für die Anzeige im Tab.
+	 * @return String
 	 */
-	public String getChatWindowName() {
+	String getChatWindowName() {
 		return this.name;
 	}
 	
-	void setChatWindowName(String name){
-		this.name = name;
+	/**
+	 * Diese Methode ermöglicht ein Update des Namens für ein ChatWindow.
+	 * 
+	 * Diese Methode setzt den Namen des ChatWindows neu falls ein User seinen Alias ändert.
+	 */
+	void updateName() {
+		if(isPrivCW) {
+			Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
+			if(nodeForUID!=null)this.name = nodeForUID.getAlias();
+			myTab.updateAlias();
+		}
 	}
 	
 	/**
-	 * @return
+	 * Diese Methode ist ein Getter für den Tab des ChatWindows.
+	 * 
+	 * Diese Methode liefert das JPanel myTab für die Zuordnung zum richtigen Tab
+	 * des JTabbedPane im GUI. Wird beim erstellen des ChatWindows benötigt um
+	 * den Title des Tabs zu rendern.
+	 * @return JPanel
 	 */
-	public JPanel getWindowTab(){
+	JPanel getWindowTab(){
 		return this.myTab;
 	}
 	
 	/**
-	 * @return
+	 * Diese Methode ist ein Getter für den Onlinestatus des ChatWindows.
+	 * 
+	 * Diese Methode liefert den Onlinestatus des ChatWindows welcher für ein 
+	 * privates ChatWindow verwendet wird um anzuzeigen ob ein Chatpartner zu
+	 * dem ein ChatWindow geöffnet ist online/offline ist.
+	 * @return boolean
 	 */
 	boolean getOnlineState(){
 		return this.onlineState;
 	}
 	
+	/**
+	 * Diese Methode setzt den Focus im ChatWindow.
+	 * 
+	 * Diese Methode setzt den Focus im ChatWindow auf das Eingabefeld (eingabeFeld).
+	 * Desweiteren wird dafür gesorgt das der Tab eines inaktiven ChatWindows, welches eine Nachricht
+	 * erhalten hat, bei Aktivierung des ChatWindows aufhört zu blinken.
+	 */
 	void focusEingabefeld(){
 		this.eingabeFeld.requestFocusInWindow();
 		this.myTab.stopBlink();
 	}
 	
 	/**
-	 * @return ture wenn privates ChatWindow
+	 * Diese Methode prüft ob das ChatWindow ein privates ChatWindow ist.
+	 * 
+	 * Diese Methode liefert true wenn das ChatWindw ein privates ChatWindow ist.
+	 * Ist dies nicht der Fall wird false zurückgegeben.
+	 * @return boolean
 	 */
 	public boolean isPrivate(){
 		return this.isPrivCW;
 	}
 	
 	/**
-	 * @return true wenn Gruppen ChatWindow 
+	 * Diese Methode prüft ob das ChatWindow ein ChatWindow für eine Gruppe ist.
+	 * 
+	 * Diese Methode liefert true wenn das ChatWindw einer Gruppe gehört.
+	 * Ist dies nicht der Fall wird false zurückgegeben.
+	 * @return boolean 
 	 */
 	public boolean isGroup(){
 		return !this.isPrivCW;

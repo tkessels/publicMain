@@ -65,6 +65,7 @@ public class LocalDBConnection {
 	private final static int LOCAL_DATABASE_VERSION = 4;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
+	private PreparedStatement searchInHistStmt;
 	//--------neue Sachen ende------------
 	
 	// verbindungssachen
@@ -273,10 +274,9 @@ public class LocalDBConnection {
 		if (dbStatus >= 3) {
 			synchronized (stmt) {
 				try {
-					return stmt.executeQuery("SELECT * FROM 'v_pullAll_t_users';");
+					return stmt.executeQuery("SELECT * FROM v_pullAll_t_users");
 				} catch (SQLException e) {
-					// TODO: evtl. fehlermeldung + in DatabaseEngine für
-					// reconnect sorgen!
+					LogEngine.log(this, "Error while pulling all users: " + e.getMessage(), LogEngine.ERROR);
 					dbStatus = 0;
 					return null;
 				}
@@ -528,7 +528,7 @@ public class LocalDBConnection {
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
 		if (dbStatus >= 3){
 			try {
-				PreparedStatement searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE '?' OR fk_t_users_userID_empfaenger LIKE '?') AND displayName LIKE '?' AND fk_t_groups_groupName LIKE '?' AND (timestmp BETWEEN '?' AND '?') AND txt LIKE '?' ");
+				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE '?' OR fk_t_users_userID_empfaenger LIKE '?') AND displayName LIKE '?' AND fk_t_groups_groupName LIKE '?' AND (timestmp BETWEEN '?' AND '?') AND txt LIKE '?' ");
 				searchInHistStmt.setString(1, userID);
 				searchInHistStmt.setString(2, userID);
 				searchInHistStmt.setString(3, alias);
@@ -615,7 +615,11 @@ public class LocalDBConnection {
 		try {
 			if(stmt!=null){
 				stmt.close();
-				LogEngine.log(LocalDBConnection.this,"stmt des LocDBServers closed",LogEngine.INFO);
+				LogEngine.log(LocalDBConnection.this,"stmt of LocDBServers closed",LogEngine.INFO);
+			}
+			if (searchInHistStmt!=null){
+				searchInHistStmt.close();
+				LogEngine.log(LocalDBConnection.this,"searchInHistStmt of LocDBServers closed",LogEngine.INFO);
 			}
 		} catch (SQLException e) {
 			LogEngine.log(this, e);

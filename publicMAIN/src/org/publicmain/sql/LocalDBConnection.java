@@ -250,6 +250,7 @@ public class LocalDBConnection {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (SQLException e) {
+			LogEngine.log(this, e.getMessage(), LogEngine.ERROR);
 			e.printStackTrace();
 		}
 	}
@@ -259,7 +260,7 @@ public class LocalDBConnection {
 		if (dbStatus >= 3){
 			synchronized (stmt) {
 				try {
-					return stmt.executeQuery("SELECT * FROM 'v_pullAll_t_messages';");
+					return stmt.executeQuery("SELECT * FROM v_pullAll_t_messages");
 				} catch (SQLException e) {
 					//TODO: evtl. fehlermeldung + in DatabaseEngine für reconnect sorgen!
 					dbStatus = 0;
@@ -289,7 +290,7 @@ public class LocalDBConnection {
 		if (dbStatus >= 3) {
 			synchronized (stmt) {
 				try {
-					return stmt.executeQuery("SELECT * FROM 'v_pullALL_t_settings';");
+					return stmt.executeQuery("SELECT * FROM v_pullALL_t_settings");
 				} catch (SQLException e) {
 					// TODO: evtl. fehlermeldung + in DatabaseEngine für
 					// reconnect sorgen!

@@ -101,7 +101,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// this.locDBCon 		= LocalDBConnection.getDBConnection();
 		this.about 				= new JMenuItem("About", Help.getIcon("aboutSym.png"));
 		// TODO: evtl. noch anderes Icon wählen
-		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpContentsIcon.png"));
+		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpSym.png", 12, 16));
 		this.exit				= new JMenuItem("Exit", Help.getIcon("exitSym.png"));
 		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
 		this.jTabbedPane 		= new JTabbedPane();
@@ -115,7 +115,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.pushHistory		= new JMenuItem("Push History", Help.getIcon("pushDBSym.png"));
 		this.pullHistory		= new JMenuItem("Pull History", Help.getIcon("pullDBSym.png"));
 		this.settings 			= new JMenuItem("Settings", Help.getIcon("settingsSym.png"));
-		this.localHistory		= new JMenuItem("Local");
+		this.localHistory		= new JMenuItem("Local", Help.getIcon("historySym.png"));
 		this.trayIcon 			= new PMTrayIcon();
 		
 		/**

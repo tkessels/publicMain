@@ -92,7 +92,7 @@ public class HistoryWindow extends JDialog{
 	private GregorianCalendar beginGregCal;
 	private GregorianCalendar endGregCal;
 	
-	private String activeCard = "user";
+	private String activeCard = "User";
 	
 	
 	
@@ -335,11 +335,6 @@ public class HistoryWindow extends JDialog{
 					break;
 					default:
 				}
-//				if(endGregCal.getTimeInMillis() > beginGregCal.getTimeInMillis()){
-//					closeThis();
-//				} else {
-//					JOptionPane.showMessageDialog(me, "Check your date settings", "Illegal timerange", JOptionPane.ERROR_MESSAGE);
-//				}
 				break;
 			case "Cancel" :
 				closeThis();

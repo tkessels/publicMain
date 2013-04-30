@@ -195,6 +195,7 @@ public class DatabaseEngine {
 	 */
 	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
 		ResultSet tmp =localDB.pull_msgs();
+		if(tmp!=null){
 		
 		
 		try {
@@ -202,6 +203,7 @@ public class DatabaseEngine {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
 		}
 		return null;
 	}
@@ -217,6 +219,17 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
 	public JTable selectMSGsByAlias(String alias,long begin, long end,String text) {
+		ResultSet tmp =localDB.pull_msgs();
+		if(tmp!=null){
+		
+		
+		try {
+			return new JTable(buildTableModel(tmp));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
 		return null;
 	}
 
@@ -231,6 +244,17 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
 	public JTable selectMSGsByGroup(String group,GregorianCalendar begin, GregorianCalendar end,String text) {
+		ResultSet tmp =localDB.pull_msgs();
+		if(tmp!=null){
+		
+		
+		try {
+			return new JTable(buildTableModel(tmp));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
 		return null;
 	}
 	
@@ -255,7 +279,7 @@ public class DatabaseEngine {
 			    while (tmp.next()) {
 
 			        Vector<Object> vector = new Vector<Object>();
-			        Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),"");
+			        Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
 			        aModel.addElement(tmp_node);
 			    }
 				

@@ -115,7 +115,7 @@ DROP TABLE IF EXISTS `db_publicmain`.`t_nodes` ;
 CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_nodes` (
   `nodeID` BIGINT(20) NOT NULL ,
   `computerName` VARCHAR(45) NOT NULL ,
-  `fk_t_users_userID_2` BIGINT(20) NULL ,
+  `fk_t_users_userID_2` BIGINT(20) NOT NULL ,
   `fk_t_nodes_nodeID` BIGINT(20) NULL ,
   PRIMARY KEY (`nodeID`) ,
   INDEX `fk_t_nodes_t_user1_idx` (`fk_t_users_userID_2` ASC) ,

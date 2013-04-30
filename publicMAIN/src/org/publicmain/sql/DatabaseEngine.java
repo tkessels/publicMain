@@ -58,8 +58,6 @@ public class DatabaseEngine {
 		failed_routes = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
 		
 		Config.registerDatabaseEngine(this);
-		//Config.write();
-		
 		transporter.start();
 	}
 	
@@ -194,7 +192,20 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes (Maybe the Database Engine will update the Datamodel of the HistoryWindow later)
 	 */
 	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
-		ResultSet tmp =localDB.pull_msgs();
+		
+		ResultSet tmp;
+		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
+		String para_alias	="%";
+		String para_group	="%";
+		String para_text	=text;
+		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
+		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
+		
+		
+		
+		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		else tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		
 		if(tmp!=null){
 		
 		
@@ -205,7 +216,7 @@ public class DatabaseEngine {
 			e.printStackTrace();
 		}
 		}
-		return null;
+		return new JTable();
 	}
 	
 	/**
@@ -260,13 +271,16 @@ public class DatabaseEngine {
 	
 	public JComboBox getUsers(){
 		UserComboModel aModel = new UserComboModel();
-		//aModel.addElement(NodeEngine.getNE().getMe());
 		JComboBox<Node> tmp_combo = new JComboBox<Node>(aModel);
+//		Node empty = new Node(-1, "", "", "");
+		tmp_combo.insertItemAt(null, 0);
+		
 		try {
 
 			ResultSet tmp = localDB.pull_users();
 			if(tmp!=null){
 				ResultSetMetaData meta = tmp.getMetaData();
+				
 				Vector<String> cols_title = new Vector<String>();
 				int columnCount = meta.getColumnCount();
 				for (int column = 1; column <= columnCount; column++) {
@@ -274,11 +288,7 @@ public class DatabaseEngine {
 				}
 				System.out.println(cols_title);
 				
-				
-				Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 			    while (tmp.next()) {
-
-			        Vector<Object> vector = new Vector<Object>();
 			        Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
 			        aModel.addElement(tmp_node);
 			    }

@@ -324,8 +324,10 @@ public class HistoryWindow extends JDialog{
 //				beginGregCal.set(beginGregCal.get(Calendar.YEAR), beginGregCal.get(Calendar.MONTH), beginGregCal.get(Calendar.DATE), , minute)
 				switch(activeCard){
 				case "User":
+					long uid;
 					Node selectedNode = (Node) userSelectComboBox.getSelectedItem();
-					new ResultWindow(DatabaseEngine.getDatabaseEngine().selectMSGsByUser(selectedNode.getUserID(),beginGregCal, endGregCal, searchTextTextField.getText()));
+					uid = (userSelectComboBox.getSelectedItem()!=null)?selectedNode.getUserID() : -1;
+					new ResultWindow(DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, searchTextTextField.getText()));
 					break;
 				case "Group":
 				    new ResultWindow(DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSelectTextField.getText(), beginGregCal, endGregCal, searchTextTextField.getText()));

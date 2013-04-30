@@ -445,8 +445,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}).start();
 		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
-		// Hauptfenster schlieﬂen
-		me.dispose();
 		// Wenn es ein About-Fenster gibt, Fenster ausblenden
 		if(hcdAbout != null) {
 			hcdAbout.hideIt();

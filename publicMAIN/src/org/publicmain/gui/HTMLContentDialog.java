@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -95,6 +94,9 @@ public class HTMLContentDialog {
 		showIt();
 	}
 	
+	/**
+	 * Die Position des HTMLContentDialog festlegen und auf sichtbar setzen. 
+	 */
 	public void showIt() {
 		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth()
 				+ htmlDialog.getWidth() < dm.getWidth())) {
@@ -105,6 +107,10 @@ public class HTMLContentDialog {
 		}
 		htmlDialog.setVisible(true);
 	}
+	
+	/**
+	 * Den HTMLContentDialog ausblenden,
+	 */
 	public void hideIt() {
 		htmlDialog.setVisible(false);
 	}

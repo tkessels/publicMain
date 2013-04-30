@@ -94,7 +94,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.userID = uid;
 		this.isPrivCW = true;
 		Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
-		if(nodeForUID!=null)this.name = nodeForUID.getAlias();
+		if(nodeForUID!=null){
+			this.name = nodeForUID.getAlias();
+		}
 		doWindowbuildingstuff();
 	}
 
@@ -103,10 +105,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param gruppenname
 	 */
 	public ChatWindow(String gruppenname) {
-		gruppe = gruppenname;
+		this.gruppe = gruppenname;
 		this.name = gruppenname;
 		this.isPrivCW = false;
-		onlineState = true;
+		this.onlineState = true;
 		doWindowbuildingstuff();
 	}
 
@@ -182,7 +184,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	/**
 	 * Diese Methode ermöglicht ein Update des Namens für ein ChatWindow.
 	 * 
-	 * Diese Methode setzt den Namen des ChatWindows neu falls ein User seinen Alias ändert.
+	 * Diese Methode sorgt dafür, dass der Namen des ChatWindows geändert wird,
+	 * falls ein User seinen Alias ändert.
 	 */
 	void updateName() {
 		if(isPrivCW) {
@@ -235,44 +238,57 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * Ist dies nicht der Fall wird false zurückgegeben.
 	 * @return boolean
 	 */
-	public boolean isPrivate(){
+	boolean isPrivate(){
 		return this.isPrivCW;
 	}
 	
 	/**
-	 * Diese Methode prüft ob das ChatWindow ein ChatWindow für eine Gruppe ist.
+	 * Diese Methode prüft ob das ChatWindow für eine Gruppe ist.
 	 * 
-	 * Diese Methode liefert true wenn das ChatWindw einer Gruppe gehört.
+	 * Diese Methode liefert true wenn das ChatWindow einer Gruppe gehört.
 	 * Ist dies nicht der Fall wird false zurückgegeben.
 	 * @return boolean 
 	 */
-	public boolean isGroup(){
+	boolean isGroup(){
 		return !this.isPrivCW;
 	}
 	
+	
 	/**
-	 * @param x
+	 * Diese Methode schreibt eine Info in den Nachrichtenbereich.
+	 * 
+	 * Diese Methode schreibt einen übergebenen String (text) als Infomeldung
+	 * in den Nachrichtenbereich des ChatWindows.
+	 * @param text (String) übergebene Nachricht 
 	 */
-	public void info(String x){
-		putMSG(new MSG(x,MSGCode.CW_INFO_TEXT));
+	void info(String text){
+		putMSG(new MSG(text,MSGCode.CW_INFO_TEXT));
 	}
 	
 	/**
-	 * @param x
+	 * Diese Methode schreibt eine Warnung in den Nachrichtenbereich.
+	 * 
+	 * Diese Methode schreibt einen übergebenen String (text) als Warnmeldung
+	 * in den Nachrichtenbereich des ChatWindows.
+	 * @param text (String) übergebene Nachricht 
 	 */
-	public void warn(String x){
-		putMSG(new MSG(x,MSGCode.CW_WARNING_TEXT));
+	void warn(String text){
+		putMSG(new MSG(text,MSGCode.CW_WARNING_TEXT));
 	}
 	
 	/**
-	 * @param x
+	 * Diese Methode schreibt einen Error in den Nachrichtenbereich.
+	 * 
+	 * Diese Methode schreibt einen übergebenen String (text) als Errormeldung
+	 * in den Nachrichtenbereich des ChatWindows.
+	 * @param text (String) übergebene Nachricht 
 	 */
-	public void error(String x){
-		putMSG(new MSG(x,MSGCode.CW_ERROR_TEXT));
+	void error(String text){
+		putMSG(new MSG(text,MSGCode.CW_ERROR_TEXT));
 	}
 	
-	/**
-	 * In dieser Methode werden die Texteingaben aus dem eingabeFeld verarbeitet
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
 		// Eingabe aus dem Textfeld in String eingabe speichern
@@ -281,7 +297,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		// HTML-Elemente verhindern
 		eingabe = eingabe.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
-		// erlaubte HTML-Elemente mit anderem Syntax einfügen
+		// Erlaubte HTML-Elemente mit anderem Syntax einfügen
 		eingabe = eingabe.replaceAll("(\\[)(?=/?(b|u|i|strike)\\])", "<");
 		eingabe = eingabe.replaceAll("(?<=((</?)(b|u|i|strike)))(\\])", ">");
 		
@@ -290,20 +306,25 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 			// Prüfen ob die Eingabe ein Befehl ist
 			if (eingabe.startsWith("/")) {
+				// Temporäres StringArray um Befehl, Parameter und Nachricht zu trennen
 				String[] tmp;
 				
-				// Prüfen ob die Eingabe ein einfacher Befehl ist
+				// Einfache Befehle ohne Parameter
+				// Das Nachrichtenfeld (msgTextPane) leeren
 				if (eingabe.equals("/clear")) {
 					this.msgTextPane.setText("");
 				}
+				// Ausgabe der Hilfe im Nachrichtenfeld (msgTextPane)
 				else if (eingabe.equals("/help")) {
 					info(helptext);
 				}
+				// Das Programm beenden
 				else if (eingabe.equals("/exit")) {
 					this.gui.shutdown();
 				}
 
-				// Prüfen ob es ein Befehl mit Parametern ist und ob diese vorhanden sind
+				// Befehle mit Parameter
+				// Einen Nutzer ignorieren
 				else if (eingabe.startsWith("/ignore ")	&& (tmp = eingabe.split(" ", 2)).length == 2) {
 					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
 					if((tmp_node!=null) && this.gui.ignoreUser(tmp_node.getUserID())){
@@ -314,6 +335,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						LogEngine.log("Ignorieren von " + tmp[1] + " nicht möglich!", LogEngine.INFO);
 					}
 				}
+				// Einen Nutzer nicht weiter ignorieren
 				else if (eingabe.startsWith("/unignore ") && (tmp = eingabe.split(" ", 2)).length == 2){
 					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
 					if((tmp_node!=null) && this.gui.unignoreUser(tmp_node.getUserID())){
@@ -322,23 +344,30 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 						warn(tmp[1] + "wurde nicht gefunden!");
 					}
 				}
+				// Seinen eigenen Alias ändern
 				else if (eingabe.startsWith("/alias ") && (tmp = eingabe.split(" ", 2)).length == 2) {
 					GUI.getGUI().changeAlias(tmp[1]);
 				}
+				// Informationen über einen Nutzer im Nachrichtenfeld (msgTextPane) ausgeben
 				else if (eingabe.startsWith("/info ") && (tmp = eingabe.split(" ", 2)).length == 2) {
 					Node nodeforalias=ChatEngine.getCE().getNodeforAlias(tmp[1]);
 					printInfo(nodeforalias);
 				}
+				// Debugbefehle (/debug) zulassen
 				else if (eingabe.startsWith("/debug ") && (tmp = eingabe.split(" ", 3)).length >= 2) {
 					ChatEngine.getCE().debug(tmp[1],(tmp.length>2)?tmp[2]:"");
 				}
+				// Eine Flüsternachricht (privat Nachricht) versenden
 				else if (eingabe.startsWith("/w ") && (tmp = eingabe.split(" ", 3)).length == 3) {
 					Node tmp_node=ChatEngine.getCE().getNodeforAlias(tmp[1]);
-					if(tmp_node!=null)this.gui.privSend(tmp_node.getUserID(), tmp[2]);
+					if(tmp_node!=null){
+						this.gui.privSend(tmp_node.getUserID(), tmp[2]);
+					}
 					else{
 						warn(tmp[1] + " wurde nicht gefunden!");
 					}
 				}
+				// Eine Gruppe erstellen/beitreten und/oder eine Nachricht an eine Gruppe senden
 				else if (eingabe.startsWith("/g ")) {
 					if ((tmp = eingabe.split(" ", 3)).length == 2) {
 						this.gui.addGrpCW(tmp[1], true);
@@ -352,60 +381,78 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 			}
 
-			// Wenn es kein Befehl ist muss es wohl eine Nachricht sein
+			// Standardvorgehensweise für Nachrichten
+			// Private Nachrichten
 			else if (isPrivate()) {
-				// ggf. eingabe durch Methode filtern
+				//TODO:ggf. eingabe durch Methode filtern
 				this.gui.privSend(userID, eingabe);
 			}
+			// Gruppennachrichten
 			else {
-				// ggf. eingabe durch Methode filtern
+				//TODO: ggf. eingabe durch Methode filtern
 				this.gui.groupSend(gruppe, eingabe);
 						}
-		// In jedem Fall wird das Eingabefeld gelöscht
+		// leeren des Eingabefeldes (eingabeFeld)
 		this.eingabeFeld.setText("");
 		}
 	}
 
 
-	public void printInfo(Node nodeforalias) {
+	/**
+	 * Diese Methode gibt Informationen über einen Nutzer aus.
+	 * 
+	 * Diese Methode gibt die im übergebenen Node enthaltenen Informationen
+	 * über einen Nutzer im Nachrichtenbereich (msgTextPane) aus.
+	 * @param nodeforalias (Node) übergebener Node
+	 */
+	void printInfo(Node nodeforalias) {
 		if (nodeforalias!=null) {
 			Map<String, String> tmp_data = nodeforalias.getData();
-			GUI.getGUI().info("----------------------------------------------------", null,0);
-			GUI.getGUI().info("Infos for User : " + nodeforalias.getAlias(), null,0);
+			gui.info("----------------------------------------------------", null,0);
+			gui.info("Infos for User : " + nodeforalias.getAlias(), null,0);
 			for (String x : tmp_data.keySet()) {
-				GUI.getGUI().info(x.toUpperCase() + "\t: " + tmp_data.get(x), null,0);
+				gui.info(x.toUpperCase() + "\t: " + tmp_data.get(x), null,0);
 			}
-			GUI.getGUI().info("----------------------------------------------------", null,0);
+			gui.info("----------------------------------------------------", null,0);
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
 	public void update(Observable sourceChannel, Object msg) {
-		if(GUI.getGUI().getTabbedPane().indexOfComponent(this)!=GUI.getGUI().getTabbedPane().getSelectedIndex()){
+		if(gui.getTabbedPane().indexOfComponent(this)!=gui.getTabbedPane().getSelectedIndex()){
 			this.myTab.startBlink();
 		}
 		MSG tmpMSG = (MSG) msg;
-		gui.msgToTray(tmpMSG);
-		this.putMSG(tmpMSG);
+		this.gui.msgToTray(tmpMSG);
+		putMSG(tmpMSG);
 		LogEngine.log(this,"ausgabe",tmpMSG);
 	}
 	
 	/**
 	 * @param msg
 	 */
-	public void putMSG(MSG msg){
+	//TODO: Diese Methode kann evtl gelöscht werden und printMSG() verwendet werden
+	private void putMSG(MSG msg){
 		this.printMSG(msg);
 	}
+	
 	/**
-	 * Methode zur Benachrichtigung des Benutzers über das Textausgabefeld
-	 * (msgTextArea), gleichzeitig wird die LogEngine informiert.
+	 * Diese Methode benachrichtigt den Nutzer über den Nachrichtenbereich
 	 * 
-	 * @param reason
+	 * Diese Methode dient zur Benachrichtigung des Benutzers über das Textausgabefeld
+	 * (msgTextArea). Die übergebene Nachricht wird je nach Nachrichtentyp formatiert
+	 * und über das HTMLEditorKit (htmlKit) zum  HTMLDocument (htmlDoc) hinzugefügt, welches
+	 * die formatierte Nachricht im Nachrichtenbereich anhängt.
+	 * @param msg (MSG) übergebene Nachricht
 	 */
 	private void printMSG(MSG msg) {
 		String color = "black";
 		Node sender = ChatEngine.getCE().getNodeForNID(msg.getSender());
 		String senderalias = (sender!=null)? sender.getAlias():"unknown";
 		
+		// Unterscheidung anhand des Nachrichtentyps
 		switch(msg.getTyp()){
 		
 		case SYSTEM:
@@ -447,38 +494,63 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			default:
 		
 		}
+		// Position ans Ende des Nachrichtenbereichs setzen
 		msgTextPane.setCaretPosition(htmlDoc.getLength());
-		//LogEngine.log(this,"printing",msg);
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
+	//TODO: Kommentar
 	public boolean equals(Object obj) {
 		if (obj!=null) {
-			if(gruppe!=null&& gruppe.equals(obj))return true;
-			if(userID!=null&&userID.equals(obj))return true;
-			if(obj instanceof ChatWindow) {
+			if(	gruppe != null && gruppe.equals(obj) ){
+				return true;
+			}
+			if( userID != null && userID.equals(obj) ){
+				return true;
+			}
+			if( obj instanceof ChatWindow ) {
 				ChatWindow other = (ChatWindow) obj;
-				if (other.isPrivCW != isPrivCW)return false;
-				if (other.gruppe != gruppe)return false;
-				if (other.userID != userID)return false;
+				if (other.isPrivCW != isPrivCW){
+					return false;
+				}
+				if (other.gruppe != gruppe){
+					return false;
+				}
+				if (other.userID != userID){
+					return false;
+				}
 				return true;
 			}
 		}
 		return false;
 	}
 	
+	
+	/**
+	 *
+	 * @author ATRM
+	 */
+	//TODO: Kommentar
 	private final class DropTargetListenerImplementation extends DropTargetAdapter {
+		/* (non-Javadoc)
+		 * @see java.awt.dnd.DropTargetListener#drop(java.awt.dnd.DropTargetDropEvent)
+		 */
 		public void drop(DropTargetDropEvent event) {
 			event.acceptDrop(DnDConstants.ACTION_COPY);
 	        try {
 	        	if(isPrivCW){
 	        		List<File> files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-				if(files.size()==1) {
-					gui.sendFile(files.get(0), userID);
+					if(files.size()==1) {
+						gui.sendFile(files.get(0), userID);
+					} else {
+						warn("Only single files can be transfered");
+					}
+				} else {
+					warn("You dropped some files into a GroupChat.... Don't do that!");
 				}
-				else warn("Only single files can be transfered");
-				}
-	            else warn("You dropped some files into a GroupChat.... Don't do that!");
 	        } catch (Exception e) {
 	            LogEngine.log(this,"You can only drop one File",LogEngine.ERROR);
 	        }
@@ -488,7 +560,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 
+	/**
+	 * @author ATRM
+	 */
+	//TODO: Kommentar
 	private final class RunnableImplementation implements Runnable {
+		/* (non-Javadoc)
+		 * @see java.lang.Runnable#run()
+		 */
 		@Override
 		public void run() {
 			while(true){
@@ -520,7 +599,19 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 
+	/**
+	 * Diese ElementKlasse stellt einen MouseAdapter für das ChatWindow bereit.
+	 * 
+	 * Diese ElementKlasse ermöglicht es dem ChatWindow auf MouseEvents zu reagieren.
+	 * Wird mit der Maus über den Sendenbutton (sendenBtn) gefahren färbt sich die
+	 * Schrift des Buttons orange. Beim verlassen des Buttons wird diese wieder schwarz. 
+	 * @author ATRM
+	 */
 	private final class MouseListenerImplementation extends MouseAdapter {
+		
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
+		 */
 		public void mouseExited(MouseEvent e) {
 			JButton source = (JButton) e.getSource();
 			if(onlineState){
@@ -528,6 +619,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
+		 */
 		public void mouseEntered(MouseEvent e) {
 			JButton source = (JButton) e.getSource();
 			if(onlineState){
@@ -537,9 +631,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	}
 
 
+	
 	/**
-	 * KeyListener für Nachrichtenhistorie ggf. für andere Dinge verwendbar
+	 * @author ATRM
 	 */
+	//TODO: Kommentar und prüfen ob Funktionsfähig
 	private class History extends KeyAdapter{
 
 			private ArrayList<String> eingabeHistorie;
@@ -550,7 +646,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				eingabeAktuell=0;
 				target.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-					add(((JTextField)e.getSource()).getText());	
+						add( ( (JTextField)e.getSource() ).getText() );	
 					}
 				});
 				target.addKeyListener(this);
@@ -563,9 +659,11 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 			public void keyPressed(KeyEvent arg0) {
 				JTextField tmp = (JTextField) arg0.getSource();
+				// Aktion für Pfeiltaste nach oben (KeyCode 38)
 				if (arg0.getKeyCode() == 38 && eingabeAktuell > 0) {
 					eingabeAktuell--;
 					tmp.setText(eingabeHistorie.get(eingabeAktuell));
+				// Aktion für Pfeiltaste nach unten (KeyCode 40)
 				} else if (arg0.getKeyCode() == 40 && eingabeAktuell < eingabeHistorie.size()) {
 					eingabeAktuell++;
 					if (eingabeAktuell < eingabeHistorie.size()) {
@@ -573,7 +671,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					} else
 						tmp.setText("");
 				} else {
-
+//					System.out.println(arg0.getKeyCode());
 				}
 		}
 	}

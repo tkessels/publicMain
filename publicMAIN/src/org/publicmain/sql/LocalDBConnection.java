@@ -274,10 +274,8 @@ public class LocalDBConnection {
 		if (dbStatus >= 3) {
 			synchronized (stmt) {
 				try {
-					return stmt.executeQuery("SELECT * FROM 'v_pullAll_t_users'");
+					return stmt.executeQuery("SELECT * FROM v_pullAll_t_users");
 				} catch (SQLException e) {
-					// TODO: evtl. fehlermeldung + in DatabaseEngine für
-					// reconnect sorgen!
 					LogEngine.log(this, "Error while pulling all users: " + e.getMessage(), LogEngine.ERROR);
 					dbStatus = 0;
 					return null;

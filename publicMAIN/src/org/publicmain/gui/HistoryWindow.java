@@ -61,7 +61,7 @@ public class HistoryWindow extends JDialog{
 	
 	private JPanel 		userSearchPanel;
 	private JLabel		userSelectLabel;
-	private JComboBox userSelectComboBox;
+	private JComboBox<Node> userSelectComboBox;
 	
 	private JPanel		aliasSearchPanel;
 	private	JLabel		aliasSelectLabel;
@@ -97,7 +97,7 @@ public class HistoryWindow extends JDialog{
 	
 	
 	public HistoryWindow() {
-		this.me = this;
+		HistoryWindow.me = this;
 		this.setResizable(false);
 		this.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
@@ -121,6 +121,14 @@ public class HistoryWindow extends JDialog{
 		this.userSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.userSelectLabel		= new JLabel("Username");
 		this.userSelectComboBox		= DatabaseEngine.getDatabaseEngine().getUsers();
+		System.out.println(this.userSelectComboBox.getModel().getSize());
+		Node tmp =this.userSelectComboBox.getModel().getElementAt(3);
+		for (int i = 0; i < this.userSelectComboBox.getModel().getSize(); i++) {
+			
+			this.userSelectComboBox.setSelectedItem(tmp);
+			System.out.println(this.userSelectComboBox.getSelectedItem());
+			System.out.println(i+":"+this.userSelectComboBox.getModel().getElementAt(i));
+		}
 		
 		this.aliasSearchPanel		= new JPanel(new GridLayout(1,2));
 		this.aliasSelectLabel		= new JLabel("Alias");
@@ -152,9 +160,6 @@ public class HistoryWindow extends JDialog{
 		this.buttonPanel			= new JPanel();
 		this.searchButton			= new JButton("Search");
 		this.cancelButton			= new JButton("Cancel");
-		
-//		this.beginGregCal			= new GregorianCalendar();
-//		this.endGregCal				= new GregorianCalendar();
 		
 		
 		this.btnGrp.add(userToggleButton);

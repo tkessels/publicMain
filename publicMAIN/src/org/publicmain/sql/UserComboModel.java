@@ -19,6 +19,7 @@ public class UserComboModel implements ComboBoxModel<Node> {
 	listener = new ArrayList<ListDataListener>();
 	selected =0;
 	}
+	
 
 	@Override
 	public int getSize() {
@@ -38,20 +39,24 @@ public class UserComboModel implements ComboBoxModel<Node> {
 
 	@Override
 	public void removeListDataListener(ListDataListener l) {
-		// TODO Auto-generated method stub
+		listener.remove(l);
 		
 	}
 
 	@Override
 	public void setSelectedItem(Object anItem) {
-		// TODO Auto-generated method stub
+		if(data.indexOf(anItem)>=0)selected=data.indexOf(anItem);
 		
 	}
 
 	@Override
 	public Object getSelectedItem() {
-		// TODO Auto-generated method stub
-		return null;
+		return data.get(selected);
+	}
+
+	public void add(Node tmp_node) {
+		data.add(tmp_node);
+		
 	}
 	
 

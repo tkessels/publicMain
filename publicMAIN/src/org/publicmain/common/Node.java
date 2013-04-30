@@ -29,9 +29,9 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	private final String hostname;
 	private int server_port;
 	
-	public Node(long uid, String username, String alias, String hostname){
-		this.nodeID = NodeEngine.getNE().getNodeID();
-		this.userID = ChatEngine.getCE().getUserID();
+	public Node(long nid, long uid, String username, String alias, String hostname){
+		this.nodeID = nid;
+		this.userID = uid;
 		this.username 	=	username;
 		this.alias		=	alias;
 		this.hostname=hostname;
@@ -39,8 +39,8 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	}
 	
 	public Node(int port, long nid, long uid, String username, String alias) {
-		this.nodeID = NodeEngine.getNE().getNodeID();
-		this.userID = ChatEngine.getCE().getUserID();
+		this.nodeID =nid;
+		this.userID =uid;
 		this.username 	=	System.getProperty("user.name");
 		this.alias		=	ChatEngine.getCE().getAlias();
 		
@@ -119,6 +119,11 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	@Override
 	public String toString() {
 		return alias+"@"+hostname;
+	}
+	
+
+	public String toString2() {
+		return "Node [nodeID=" + nodeID + ", userID=" + userID + ", " + (alias != null ? "alias=" + alias + ", " : "") + (username != null ? "username=" + username + ", " : "") + (sockets != null ? "sockets=" + sockets + ", " : "") + (hostname != null ? "hostname=" + hostname + ", " : "") + "server_port=" + server_port + "]";
 	}
 	
 	

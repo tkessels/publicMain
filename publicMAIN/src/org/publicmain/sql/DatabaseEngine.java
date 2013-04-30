@@ -11,10 +11,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -22,7 +24,6 @@ import javax.swing.table.DefaultTableModel;
 import org.publicmain.common.Config;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
-import org.publicmain.gui.UserListModel;
 import org.publicmain.nodeengine.NodeEngine;
 
 public class DatabaseEngine {
@@ -201,6 +202,7 @@ public class DatabaseEngine {
 		String para_text	="%"+text+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
+		
 		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
 
@@ -277,43 +279,40 @@ public class DatabaseEngine {
 
 	}
 
-	public JComboBox getUsers(){
-//		UserComboModel aModel = new UserComboModel();
-//		JComboBox<Node> tmp_combo = new JComboBox<Node>(aModel);
-		//		Node empty = new Node(-1, "", "", "");
-//		tmp_combo.insertItemAt(null, 0);
-
+	public JComboBox<Node> getUsers(){
 		try {
 
 			ResultSet tmp = localDB.pull_users();
 			if(tmp!=null){
-				ResultSetMetaData meta = tmp.getMetaData();
+//				ResultSetMetaData meta = tmp.getMetaData();
 
-				Vector<String> cols_title = new Vector<String>();
-				int columnCount = meta.getColumnCount();
-				for (int column = 1; column <= columnCount; column++) {
-					cols_title.add(meta.getColumnName(column));
-				}
-				System.out.println(cols_title);
-				
+//				Vector<String> cols_title = new Vector<String>();
+//				int columnCount = meta.getColumnCount();
+//				for (int column = 1; column <= columnCount; column++) {
+//					cols_title.add(meta.getColumnName(column));
+//				}
+//				System.out.println(cols_title);
+//				
 				Vector<Node> nodes = new Vector<Node>();
-				
-				
+				Set <Node> testdata = new HashSet<Node>();
 
 				while (tmp.next()) {
-					Node tmp_node = new Node(tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
+					Node tmp_node = new Node(tmp.getLong(4),tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
 					nodes.add(tmp_node);
+					testdata.add(tmp_node);
+					System.out.println(tmp_node.toString2());
 				}
-				return new JComboBox<Node>(nodes);
+				DefaultComboBoxModel<Node> tobi = new DefaultComboBoxModel<Node>(nodes);
+				JComboBox<Node> tmp_combo = new JComboBox<Node>(tobi);
+				tmp_combo.insertItemAt(null, 0);
+				return tmp_combo;
 
-//				aModel.addElement(tmp_node);
 
 			}else
 				System.out.println("tmp war null" );
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage() );
 		}
 		return null;
 
@@ -350,10 +349,5 @@ public class DatabaseEngine {
 		}
 	}
 	
-	class UserIdentifier{
-		public String alias;
-		public long uid;
-		public String username;
-	}
 
 }

@@ -77,7 +77,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>unignore this user</td></tr>" +
 			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>display information about user</td></tr>" +
 			"<tr><td>/alias</td><td colspan='2'>&lt;username&gt;</td><td>change username</td></tr>" +
-			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td></td>join group</tr>" +
+			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td></td>join/create group</tr>" +
 			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>message to group</tr>" +
 			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>whisper to user</tr>" +
 			"<tr><td>[b]</td><td>&lt;message&gt;</td><td>[/b]</td>formated message (bold)</tr>" +
@@ -346,7 +346,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				}
 				// Seinen eigenen Alias ändern
 				else if (eingabe.startsWith("/alias ") && (tmp = eingabe.split(" ", 2)).length == 2) {
-					GUI.getGUI().changeAlias(tmp[1]);
+					this.gui.changeAlias(tmp[1]);
 				}
 				// Informationen über einen Nutzer im Nachrichtenfeld (msgTextPane) ausgeben
 				else if (eingabe.startsWith("/info ") && (tmp = eingabe.split(" ", 2)).length == 2) {

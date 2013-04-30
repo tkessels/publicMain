@@ -307,8 +307,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public void addPrivCW(long uid,boolean focus){
 		ChatWindow tmp = getCW(uid);
-		if(tmp == null)tmp=createChat(uid);
-		if (focus) focus(tmp);
+		if(tmp == null){
+			tmp=createChat(uid);
+		}
+		if (focus){
+			focus(tmp);
+		}
 	}
 
 	/**
@@ -506,6 +510,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param msg, String die Nachricht
 	 */
 	void privSend(long empfUID, String msg) {
+		ChatWindow tmpCW = getCW(empfUID);
+		if(tmpCW == null){
+			tmpCW = new ChatWindow(empfUID);
+			addPrivCW(empfUID, false);
+		}
 		ce.send_private(empfUID, msg);
 	}
 
@@ -524,14 +533,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			empfGrp = confName(empfGrp, true);
 			if (checkName(empfGrp, 0)) {
 				tmpCW = new ChatWindow(empfGrp);
-				addGrpCW(empfGrp, true);
-				focus(tmpCW);
+				addGrpCW(empfGrp, false);
 			}
 			else {
 				info("Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2);
 			}
 		} else {
-			focus(tmpCW);
+//			focus(tmpCW);
 		}
 		ce.send_group(empfGrp, msg);
 	}

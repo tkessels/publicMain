@@ -769,14 +769,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				break;
 			case "About":
 				if(hcdAbout == null) {
-					hcdAbout = new HTMLContentDialog("About", "helpContentsIcon.png", "about.html");
+					hcdAbout = new HTMLContentDialog("About", "pM_Logo.png", "about.html");
 				} else {
 					hcdAbout.showIt();
 				}
 				break;
 			case "Help Contents":
 				if(hcdHelp == null) {
-					hcdHelp = new HTMLContentDialog("Help", "helpContentsIcon.png", "helpcontent.html");
+					hcdHelp = new HTMLContentDialog("Help", "helpSym.png", "helpcontent.html");
 				} else {
 					hcdHelp.showIt();
 				}

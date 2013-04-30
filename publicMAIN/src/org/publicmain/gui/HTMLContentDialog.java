@@ -1,5 +1,7 @@
 package org.publicmain.gui;
 
+import java.applet.Applet;
+import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,6 +41,7 @@ public class HTMLContentDialog {
 	private GraphicsEnvironment ge;
 	private GraphicsDevice gd;
 	private DisplayMode dm;
+	private AudioClip sound;
 
 	/**
 	 * Konstruktor zum Füllen des JDialog mit Titel, Icon und HTML-Dokument.
@@ -72,6 +75,12 @@ public class HTMLContentDialog {
 		htmlContentPane.setBackground(new Color(255, 255, 255));
 		htmlContentPane.setEditable(false);
 
+		try {
+			this.sound = Applet.newAudioClip(Help.getFile("fahrstuhl.mp3").toURL());
+		} catch (Exception e2) {
+			System.out.println(e2.getMessage());
+		}
+		
 		/**
 		 * Dieser Thread läd das HTML-Dokument auf die htmlContentPane, ohne die Anwendung
 		 * zu blockieren.
@@ -106,6 +115,9 @@ public class HTMLContentDialog {
 			htmlDialog.setLocationRelativeTo(null);
 		}
 		htmlDialog.setVisible(true);
+		if(sound!=null){
+			sound.play();
+		}
 	}
 	
 	/**
@@ -113,6 +125,9 @@ public class HTMLContentDialog {
 	 */
 	public void hideIt() {
 		htmlDialog.setVisible(false);
+		if(sound!=null){
+			sound.stop();
+		}
 	}
 }
 

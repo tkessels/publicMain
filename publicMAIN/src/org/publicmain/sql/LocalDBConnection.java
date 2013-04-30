@@ -62,7 +62,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 7;
+	private final static int LOCAL_DATABASE_VERSION = 9;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -80,8 +80,6 @@ public class LocalDBConnection {
 	
  	private LocalDBConnection(DatabaseEngine databaseEngine) {
 		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
-		this.user 					= Config.getConfig().getLocalDBUser();
-		this.passwd 				= Config.getConfig().getLocalDBPw();
 		this.dbName 				= Config.getConfig().getLocalDBDatabasename();
 		this.usrTbl					= "t_user";
 		this.nodeTbl				= "t_nodes";
@@ -144,7 +142,7 @@ public class LocalDBConnection {
 	
 	private synchronized boolean connectToLocDBServer(){
 		try {
-			con = DriverManager.getConnection(url, user, passwd);
+			con = DriverManager.getConnection(url, Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
 			stmt = con.createStatement();
 			LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
 			dbStatus = 1;
@@ -206,7 +204,7 @@ public class LocalDBConnection {
 					read = read + in.readLine();
 				}
 				synchronized (stmt) {
-					stmt.execute(read);
+					stmt.addBatch(read);
 				}
 			}
 			//INSERT PROCEDURES
@@ -232,6 +230,14 @@ public class LocalDBConnection {
 				
 				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_settings_saveSettings`;");
 				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_settings_saveSettings` (IN newSettingsKey VARCHAR(45),IN newFk_t_users_userID_3 BIGINT(20), IN newSettingsValue VARCHAR(100)) BEGIN INSERT INTO t_settings (settingsKey, fk_t_users_userID_3, settingsValue) VALUES (newsettingsKey, newFk_t_users_userID_3, newSettingsValue) ON DUPLICATE KEY UPDATE fk_t_users_userID_3=VALUES(fk_t_users_userID_3), settingsValue=VALUES(settingsValue); END;");
+				//PUSH PROCEDURES
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_pushMessages`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_pushMessages` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20),IN newDisplayName VARCHAR(200), IN newTxt VARCHAR(200),  IN newFk_t_users_userID_empfaenger BIGINT(20), IN newFk_t_groups_groupName VARCHAR(20), IN newFk_t_msgType_ID INT) BEGIN	INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, DisplayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID) VALUES (msgID, timestmp, fk_t_users_userID_sender, displayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID); END;");
+				
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_pushUsers`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_pushUsers` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45)) BEGIN INSERT INTO t_users (userID, displayName, userName) VALUES (newUserID,newDisplayName,newUserName) ON DUPLICATE KEY UPDATE displayName=VALUES(displayName), userName=VALUES(userName); END;");
+				
+				
 				//TRIGGER
 				stmt.addBatch("DROP TRIGGER IF EXISTS `db_publicmain`.`tr_t_messages`;");
 				stmt.addBatch("CREATE TRIGGER `db_publicmain`.`tr_t_messages` BEFORE INSERT ON t_messages FOR EACH ROW SET new.displayName = (SELECT displayName FROM t_users WHERE userID = new.fk_t_users_userID_sender);");
@@ -244,6 +250,7 @@ public class LocalDBConnection {
 				dbStatus = 2;
 				Config.getConfig().setLocalDBVersion(LOCAL_DATABASE_VERSION);
 				Config.write();
+				LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -302,11 +309,56 @@ public class LocalDBConnection {
 		return null;
 	}
 	
-	public boolean push_msgs(ResultSet backup){
+	public boolean push_msgs(ResultSet msgRS){
+		if (dbStatus >=3){
+			try {
+				synchronized (stmt) {
+				while (msgRS.next()){
+					StringBuffer pushMsgStmt = new StringBuffer();
+					pushMsgStmt.append("CALL p_t_messages_pushMessages(");
+					pushMsgStmt.append(msgRS.getInt("msgID") + ",");
+					pushMsgStmt.append(msgRS.getLong("timestmp") + ",");
+					pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_sender") + ",");
+					pushMsgStmt.append("'" + msgRS.getString("displayName") + "',");
+					pushMsgStmt.append("'" + msgRS.getString("txt") + "',");
+					pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_empfaenger") + ",");
+					pushMsgStmt.append("'" + msgRS.getString("fk_t_groups_groupName") + "',");
+					pushMsgStmt.append(msgRS.getInt("fk_t_msgType_ID") + ")");
+					
+					stmt.addBatch(pushMsgStmt.toString());
+				}
+				stmt.executeBatch();
+				return true;
+				}
+			} catch (SQLException e) {
+				LogEngine.log(this, "Error while executing 'push_msgs': " + e.getMessage(), LogEngine.ERROR);
+				return false;
+			}
+		}
 		return false;
 	}
 	
-	public boolean push_users(ResultSet backup){
+	public boolean push_users(ResultSet usrRS){
+		if (dbStatus >=3){
+			try {
+				synchronized (stmt) {
+				while (usrRS.next()){
+					StringBuffer pushMsgStmt = new StringBuffer();
+					pushMsgStmt.append("CALL p_t_user_pushUsers(");
+					pushMsgStmt.append(usrRS.getLong("userID") + ",");
+					pushMsgStmt.append("'" + usrRS.getString("displayName") + "',");
+					pushMsgStmt.append("'" + usrRS.getString("userName") + "')");
+					
+					stmt.addBatch(pushMsgStmt.toString());
+				}
+				stmt.executeBatch();
+				return true;
+				}
+			} catch (SQLException e) {
+				LogEngine.log(this, "Error while executing 'push_msgs': " + e.getMessage(), LogEngine.ERROR);
+				return false;
+			}
+		}
 		return false;
 	}
 	
@@ -412,7 +464,6 @@ public class LocalDBConnection {
 		return getNode(nid).getUserID();
 	}
 	
-
 	private synchronized boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ) {
 		StringBuffer saveMsgStmt = new StringBuffer();
 		if (typ == NachrichtenTyp.GROUP) {

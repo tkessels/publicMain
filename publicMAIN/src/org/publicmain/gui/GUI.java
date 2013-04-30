@@ -784,7 +784,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				new HistoryWindow();
 				break;
 			case "Delete":
-				DatabaseEngine.getDatabaseEngine().deleteLocalHistory();
+				if(JOptionPane.showConfirmDialog(me, "Do you really want to delete the local history?", "Delete local history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0){
+					DatabaseEngine.getDatabaseEngine().deleteLocalHistory();
+				}
 				break;
 			case "Settings":
 				SettingsWindow.showThis();

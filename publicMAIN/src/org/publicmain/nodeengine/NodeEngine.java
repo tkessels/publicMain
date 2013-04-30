@@ -57,11 +57,6 @@ import org.resources.Help;
 public class NodeEngine {
  private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout(); 			//Timeout bis der Node die Suche nach anderen Nodes aufgibt und sich zum Root erklärt
  private final long ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout(); 			//Zeitspanne die ein Root auf Root_Announces wartet um zu entscheiden wer ROOT bleibt. 
- private final InetAddress MULTICAST_GROUP = InetAddress.getByName(Config.getConfig().getMCGroup()); 	//Default MulticastGruppe für Verbindungsaushandlung
- private final int MULTICAST_PORT = Config.getConfig().getMCPort(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
- private final int MULTICAST_TTL = Config.getConfig().getMCTTL(); 						//Default Port für MulticastGruppe für Verbindungsaushandlung
-// private final int MAX_CLIENTS = Config.getConfig().getMaxConnections();					//Maximale Anzahl anzunehmender Verbindungen
-// private final int MAX_FILE_SIZE = Config.getConfig().getMaxFileSize();
 
  private static volatile NodeEngine ne; 	//Statischer Zeiger auf einzige Instanz der NodeEngine
  private final long nodeID;
@@ -72,7 +67,6 @@ public class NodeEngine {
  private ServerSocket server_socket; 				//Server Socket für eingehende Verbindungen (Passiv/Childs)
  private ConnectionHandler root_connection;	//TCP Socket zur Verbindung mit anderen Knoten (Aktiv/Parent/Root)
  
- //private MulticastSocket multi_socket;			//Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
  private MulticastConnectionHandler multi_socket;			//Multicast/Broadcast UDP-Socket zu Verbindungsaushandlung
  public List<ConnectionHandler> connections; 	//Liste bestehender Childverbindungen in eigener HüllKlasse
  
@@ -87,7 +81,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
  private volatile boolean online; 				//Dieser Knoten möchte an sein und verbunden bleiben (signalisiert allen Threads wenn die Anwendung beendet wird)
  private volatile boolean rootDiscovering;	//Dieser Knoten ist gerade dabei ROOT_ANNOUNCES zu sammeln um einen neuen ROOT zu wählen
 
-// private Thread multicastRecieverBot		= new Thread(new MulticastReciever());			//Thread zum annehmen und verarbeiten der Multicast-Pakete
  private Thread connectionsAcceptBot 	= new Thread(new ConnectionsAccepter()); 	//Thread akzeptiert und schachtelt eingehen Verbindungen auf dem ServerSocket
  private Thread rootMe	;																			//Thread der nach einem Delay Antrag auf RootMode stellt wird mit einem Discover gestartet
  private Thread rootClaimProcessor;												 				//Thread zum Sammeln und Auswerten von Root_Announces (Ansprüche auf Rootmode) wird beim empfang/versand eines RootAnnounce getstatet.
@@ -110,10 +103,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		server_socket = new ServerSocket(0);
 		multi_socket = MulticastConnectionHandler.getMC();
 		multi_socket.registerNodeEngine(this);
-//		multi_socket = new MulticastSocket(MULTICAST_PORT);
-//		multi_socket.joinGroup(MULTICAST_GROUP);
-//		multi_socket.setLoopbackMode(true);
-//		multi_socket.setTimeToLive(MULTICAST_TTL);
 
 		meinNode = new Node(server_socket.getLocalPort(),nodeID,ce.getUserID(),System.getProperty("user.name"),ce.getAlias());
 		allNodes.add(meinNode);
@@ -123,7 +112,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 
 		connectionsAcceptBot.start();
-//		multicastRecieverBot.start();
 
 		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
 
@@ -154,10 +142,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	/**
 	 * isConnected() gibt "true" zurück wenn die laufende Nodeengin hochgefahren und mit anderen Nodes verbunden oder root ist, "false" wenn nicht.
 	 */
-	/*
-	 * public boolean isOnline(){ return online; }
-	 */
-
 	private boolean hasChildren() {
 		return connections.size() > 0;
 	}
@@ -177,9 +161,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		return (root_connection != null && root_connection.isConnected());
 	}
 
-//	public int getServer_port() {
-//		return server_socket.getLocalPort();
-//	}
 	
 	/**
 	 * getNodes() gibt ein NodeArray zurück welche alle verbundenen Nodes beinhaltet.
@@ -241,37 +222,10 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 * MSG-Paket hier in File und destination geteilt.
 	 */
 	private void sendmutlicast(MSG nachricht) {
-//		byte[] buf = MSG.getBytes(nachricht);
-//		try {
-//			if (buf.length < 65000) {
-//				multi_socket.send(new DatagramPacket(buf, buf.length, MULTICAST_GROUP, MULTICAST_PORT));
-//				LogEngine.log(this, "sende [MC]", nachricht);
-//			}
-//			else LogEngine.log(this, "MSG zu groß für UDP-Paket", LogEngine.ERROR);
-//		}
-//		catch (IOException e) {
-//			LogEngine.log(e);
-//		}
 		multi_socket.sendmutlicast(nachricht);
 	}
 
 	private void sendunicast(MSG msg, Node newRoot) {
-//		byte[] data = MSG.getBytes(msg);
-//		if (data.length < 65000) {
-//			for (InetAddress x : newRoot.getSockets()) {
-//				if (!meinNode.getSockets().contains(x)) {
-//					DatagramPacket unicast = new DatagramPacket(data,
-//							data.length, x, MULTICAST_PORT);//über Unicast
-//					try {
-//						multi_socket.send(unicast);
-//						LogEngine
-//								.log(this, "sende [" + x.toString() + "]", msg);
-//					} catch (IOException e) {
-//						LogEngine.log(e);
-//					}
-//				}
-//			}
-//		}
 		multi_socket.sendunicast(msg, newRoot);
 	}
 
@@ -282,7 +236,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	}
 
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
-//		if (!isRoot() && root_connection != ch) root_connection.send(msg);
 		if (hasParent()&&root_connection != ch) root_connection.send(msg);
 		if (hasChildren())sendchild(msg, ch);
 	}
@@ -1219,25 +1172,6 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 		}
 	}
 
-/*	private final class MulticastReciever implements Runnable {
-		public void run() {
-			if(multi_socket==null)return;
-			while (true) {
-				byte[] buff = new byte[65535];
-				DatagramPacket tmp = new DatagramPacket(buff, buff.length);
-				try {
-					multi_socket.receive(tmp);
-					MSG nachricht = MSG.getMSG(tmp.getData());
-					LogEngine.log("multicastRecieverBot", "multicastRecieve", nachricht);
-					if (nachricht != null) handleMulticast(nachricht);
-				}
-				catch (IOException e) {
-					LogEngine.log(e);
-				}
-			}
-		}
-	}
-*/
 	private final class ConnectionsAccepter implements Runnable {
 		public void run() {
 			if(connections==null||server_socket==null)return;

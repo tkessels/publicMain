@@ -310,7 +310,7 @@ public class LocalDBConnection {
 	}
 	
 	public boolean push_msgs(ResultSet msgRS){
-		if (dbStatus >=3){
+		if (dbStatus >=3 &&  msgRS != null){
 			try {
 				synchronized (stmt) {
 				while (msgRS.next()){
@@ -339,7 +339,7 @@ public class LocalDBConnection {
 	}
 	
 	public boolean push_users(ResultSet usrRS){
-		if (dbStatus >=3){
+		if (dbStatus >=3 && usrRS != null){
 			try {
 				synchronized (stmt) {
 				while (usrRS.next()){
@@ -609,6 +609,7 @@ public class LocalDBConnection {
 				
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while executing 'searchInHistStmt' PreparedStatment: " + e.getMessage(), LogEngine.ERROR);
+				dbStatus = 0;
 				return null;
 			}
 		}

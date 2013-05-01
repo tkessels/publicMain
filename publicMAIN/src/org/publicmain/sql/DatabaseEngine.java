@@ -20,6 +20,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 import org.publicmain.common.Config;
 import org.publicmain.common.MSG;
@@ -194,8 +195,8 @@ public class DatabaseEngine {
 	 */
 	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
 
-		ResultSet tmp;
-
+		ResultSet tmpRS;
+		
 		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
 		String para_alias	=null;
 		String para_group	=null;
@@ -205,18 +206,15 @@ public class DatabaseEngine {
 		
 		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
+		if (para_begin<para_end) tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		else tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
 
-		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
-		else tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
-
-		if(tmp!=null){
-
-
+		
+		if(tmpRS!=null){
 			try {
-				return new JTable(buildTableModel(tmp));
+				return new JTable(buildTableModel(tmpRS));
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
-
 			}
 		}
 		System.out.println("Abfrage hat nicht geklappt");

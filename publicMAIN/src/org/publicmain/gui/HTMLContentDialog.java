@@ -1,6 +1,5 @@
 package org.publicmain.gui;
 
-import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -75,11 +74,11 @@ public class HTMLContentDialog {
 		htmlContentPane.setBackground(new Color(255, 255, 255));
 		htmlContentPane.setEditable(false);
 
-		try {
-			this.sound = Applet.newAudioClip(Help.class.getResource("fahrstuhl.mp3"));
-		} catch (Exception e2) {
-			System.out.println(e2.getMessage());
-		}
+//		try {
+//			this.sound = Applet.newAudioClip(Help.class.getResource("fahrstuhl.mp3"));
+//		} catch (Exception e2) {
+//			System.out.println(e2.getMessage());
+//		}
 		
 		/**
 		 * Dieser Thread läd das HTML-Dokument auf die htmlContentPane, ohne die Anwendung
@@ -121,7 +120,8 @@ public class HTMLContentDialog {
 	}
 	
 	/**
-	 * Den HTMLContentDialog ausblenden,
+	 * Den HTMLContentDialog ausblenden.
+	 * TODO: Überprüfen ob diese Methode genutzt wird!
 	 */
 	public void hideIt() {
 		htmlDialog.setVisible(false);

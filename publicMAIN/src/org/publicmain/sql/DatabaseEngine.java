@@ -197,9 +197,9 @@ public class DatabaseEngine {
 		ResultSet tmp;
 
 		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
-		String para_alias	="%";
+		String para_alias	=null;
 		String para_group	=null;
-		String para_text	="%"+text+"%";
+		String para_text	="%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 		
@@ -233,8 +233,34 @@ public class DatabaseEngine {
 	 * @param text only messages containing this text will be shown. text will be ignored if empty string
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
-	public JTable selectMSGsByAlias(String alias,long begin, long end,String text) {
+	public JTable selectMSGsByAlias(String alias,GregorianCalendar begin, GregorianCalendar end,String text) {
+		ResultSet tmp;
+
+		String para_uid	=null;
+		String para_alias	=alias.trim();
+		String para_group	=null;
+		String para_text	="%"+text.trim()+"%";
+		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
+		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
+		
+		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+
+		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		else tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+
+		if(tmp!=null){
+
+
+			try {
+				return new JTable(buildTableModel(tmp));
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+
+			}
+		}
+		System.out.println("Abfrage hat nicht geklappt");
 		return allMSGs();
+
 	}
 
 	/**
@@ -248,15 +274,26 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
 	public JTable selectMSGsByGroup(String group,GregorianCalendar begin, GregorianCalendar end,String text) {
-		ResultSet tmp =localDB.pull_msgs();
+		ResultSet tmp;
+
+		String para_uid	=null;
+		String para_alias	=null;
+		String para_group	=(group.trim().length()==0)?"%":"%"+group.trim()+"%";
+		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
+		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
+		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
+		
+		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+
+		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);else
+		tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+
 		if(tmp!=null){
-
-
 			try {
 				return new JTable(buildTableModel(tmp));
 			} catch (SQLException e) {
-				//			e.printStackTrace();
 				System.out.println(e.getMessage());
+
 			}
 		}
 		System.out.println("Abfrage hat nicht geklappt");
@@ -305,7 +342,7 @@ public class DatabaseEngine {
 				DefaultComboBoxModel<Node> tobi = new DefaultComboBoxModel<Node>(nodes);
 				JComboBox<Node> tmp_combo = new JComboBox<Node>(tobi);
 				tmp_combo.insertItemAt(null, 0);
-				tmp_combo.setSelectedIndex(0);
+				tmp_combo.setSelectedItem(null);
 				return tmp_combo;
 
 

@@ -8,6 +8,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DateFormat;
@@ -54,8 +56,8 @@ public class HistoryWindow extends JDialog{
 	
 	private Date		beginDate;
 	private Date		endDate;
-	private SpinnerDateModel sdmBegin;
-	private SpinnerDateModel sdmEnd;
+	private SpinnerDateModel sdmBegin; //müssen das attribute sein
+	private SpinnerDateModel sdmEnd;   //müsen das attribute sein
 	private JSpinner.DateEditor dateEditorBegin;
 	private JSpinner.DateEditor dateEditorEnd;
 	
@@ -64,12 +66,12 @@ public class HistoryWindow extends JDialog{
 	private JComboBox<Node> userSelectComboBox;
 	
 	private JPanel		aliasSearchPanel;
-	private	JLabel		aliasSelectLabel;
-	private JTextField	aliasSelectTextField;
+	private	JLabel		aliasSearchLabel;
+	private JTextField	aliasSearchTextField;
 	
 	private JPanel		groupSearchPanel;
-	private	JLabel		groupSelectLabel;
-	private JTextField	groupSelectTextField;
+	private	JLabel		groupSearchLabel;
+	private JTextField	groupSearchTextField;
 	
 	private JPanel		myPanel;
 	private JPanel		beginPanel;
@@ -81,7 +83,7 @@ public class HistoryWindow extends JDialog{
 	private JTextField	endDateTextField;
 	private	JSpinner	endSpinner;
 	private JLabel		searchTextLabel;
-	private JTextField	searchTextTextField;
+	private JTextField	textSearchTextField;
 	
 	private JPanel		platzhalterPanel;
 	
@@ -103,9 +105,11 @@ public class HistoryWindow extends JDialog{
 		
 		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
 		
-		this.searchTypePanel 		= new JPanel(new GridLayout(1,3));
-		this.userToggleButton		= new JToggleButton("User");
-		this.aliasToggleButton		= new JToggleButton("Alias");
+		
+		
+		this.searchTypePanel 			= new JPanel(new GridLayout(1,3));
+		this.userToggleButton			= new JToggleButton("User");
+		this.aliasToggleButton			= new JToggleButton("Alias");
 		this.groupToggleButton		= new JToggleButton("Group");
 		this.btnGrp					= new ButtonGroup();
 		this.cardsPanel				= new JPanel(new CardLayout());
@@ -115,40 +119,41 @@ public class HistoryWindow extends JDialog{
 		
 		this.beginDate 				= new Date();
 		this.sdmBegin 				= new SpinnerDateModel(beginDate, null, null, Calendar.HOUR_OF_DAY);
-		this.endDate 				= new Date();
+		this.endDate 					= new Date();
 		this.sdmEnd					= new SpinnerDateModel(endDate, null, null, Calendar.HOUR_OF_DAY);
 		
-		this.userSearchPanel		= new JPanel(new GridLayout(1,2));
-		this.userSelectLabel		= new JLabel("Username");
+		this.userSearchPanel			= new JPanel(new GridLayout(1,2));
+		this.userSelectLabel			= new JLabel("Username");
 		this.userSelectComboBox		= DatabaseEngine.getDatabaseEngine().getUsers();
-		System.out.println(this.userSelectComboBox.getModel().getSize());
-		Node tmp =this.userSelectComboBox.getModel().getElementAt(3);
-		for (int i = 0; i < this.userSelectComboBox.getModel().getSize(); i++) {
-			
-			this.userSelectComboBox.setSelectedItem(tmp);
-			System.out.println(this.userSelectComboBox.getSelectedItem());
-			System.out.println(i+":"+this.userSelectComboBox.getModel().getElementAt(i));
-		}
+		
 		
 		this.aliasSearchPanel		= new JPanel(new GridLayout(1,2));
-		this.aliasSelectLabel		= new JLabel("Alias");
-		this.aliasSelectTextField	= new JTextField();
+		this.aliasSearchLabel		= new JLabel("Alias");
+		this.aliasSearchTextField	= new JTextField();
+		this.aliasSearchTextField.setActionCommand("Search");
+		this.aliasSearchTextField.addActionListener(new HistoryButtonController());
+		
 		
 		this.groupSearchPanel		= new JPanel(new GridLayout(1,2));
-		this.groupSelectLabel		= new JLabel("Groupname");
-		this.groupSelectTextField	= new JTextField();
+		this.groupSearchLabel		= new JLabel("Groupname");
+		this.groupSearchTextField	= new JTextField();
+		this.groupSearchTextField.setActionCommand("Search");
+		this.groupSearchTextField.addActionListener(new HistoryButtonController());
 		
 		this.myPanel				= new JPanel(new GridLayout(3,2));
-		this.beginLabel				= new JLabel("Begin (date/time)");
-		this.beginPanel				= new JPanel(new BorderLayout());
-		this.beginDateTextField		= new JTextField(8);
+		this.beginLabel			= new JLabel("Begin (date/time)");
+		this.beginPanel			= new JPanel(new BorderLayout());
+		this.beginDateTextField	= new JTextField(8);
 		this.beginSpinner			= new JSpinner(sdmBegin);
 		this.endLabel				= new JLabel("End (date/time)");;
-		this.endPanel				= new JPanel(new BorderLayout());
+		this.endPanel			= new JPanel(new BorderLayout());
 		this.endDateTextField		= new JTextField(8);
-		this.endSpinner				= new JSpinner(sdmEnd);
+		this.endSpinner			= new JSpinner(sdmEnd);
 		this.searchTextLabel		= new JLabel("Message text");
-		this.searchTextTextField	= new JTextField();
+		
+		this.textSearchTextField	= new JTextField();
+		this.textSearchTextField.setActionCommand("Search");
+		this.textSearchTextField.addActionListener(new HistoryButtonController());
 		
 		this.platzhalterPanel		= new JPanel();
 		
@@ -159,8 +164,10 @@ public class HistoryWindow extends JDialog{
 		
 		this.buttonPanel			= new JPanel();
 		this.searchButton			= new JButton("Search");
-		this.cancelButton			= new JButton("Cancel");
+		this.searchButton.setActionCommand("Search");
 		
+		this.cancelButton			= new JButton("Cancel");
+		this.cancelButton.setActionCommand("Cancel");
 		
 		this.btnGrp.add(userToggleButton);
 		this.btnGrp.add(aliasToggleButton);
@@ -169,6 +176,7 @@ public class HistoryWindow extends JDialog{
 		this.userToggleButton.addActionListener(new CardButtonController(cardsPanel));
 		this.aliasToggleButton.addActionListener(new CardButtonController(cardsPanel));
 		this.groupToggleButton.addActionListener(new CardButtonController(cardsPanel));
+		
 		this.searchButton.addActionListener(new HistoryButtonController());
 		this.cancelButton.addActionListener(new HistoryButtonController());
 		
@@ -196,14 +204,14 @@ public class HistoryWindow extends JDialog{
 		this.aliasSearchPanel.setBorder(BorderFactory.createTitledBorder("Alias search"));
 		this.aliasSearchPanel.setPreferredSize(new Dimension(230,42));
 		this.aliasSearchPanel.setBackground(Color.WHITE);
-		this.aliasSearchPanel.add(aliasSelectLabel);
-		this.aliasSearchPanel.add(aliasSelectTextField);
+		this.aliasSearchPanel.add(aliasSearchLabel);
+		this.aliasSearchPanel.add(aliasSearchTextField);
 		
 		this.groupSearchPanel.setBorder(BorderFactory.createTitledBorder("Group search"));
 		this.groupSearchPanel.setPreferredSize(new Dimension(230,42));
 		this.groupSearchPanel.setBackground(Color.WHITE);
-		this.groupSearchPanel.add(groupSelectLabel);
-		this.groupSearchPanel.add(groupSelectTextField);
+		this.groupSearchPanel.add(groupSearchLabel);
+		this.groupSearchPanel.add(groupSearchTextField);
 		
 		this.cardsPanel.setPreferredSize(new Dimension(230,50));
 		this.cardsPanel.setBackground(Color.WHITE);
@@ -219,6 +227,7 @@ public class HistoryWindow extends JDialog{
 		this.beginPanel.add(beginDateTextField,BorderLayout.CENTER);
 		this.beginDateTextField.setEditable(false);
 		this.beginDateTextField.setToolTipText("click to configure date");
+		this.beginDateTextField.setText("<click>");
 		this.beginDateTextField.addMouseListener(new MyMouseAdapter());
 		this.beginPanel.add(beginSpinner,BorderLayout.EAST);
 		this.myPanel.add(beginPanel);
@@ -227,11 +236,13 @@ public class HistoryWindow extends JDialog{
 		this.endPanel.add(endDateTextField,BorderLayout.CENTER);
 		this.endDateTextField.setEditable(false);
 		this.endDateTextField.setToolTipText("click to configure date");
+		this.endDateTextField.setText("<click>");
 		this.endDateTextField.addMouseListener(new MyMouseAdapter());
 		this.endPanel.add(endSpinner,BorderLayout.EAST);
 		this.myPanel.add(endPanel);
 		this.myPanel.add(searchTextLabel);
-		this.myPanel.add(searchTextTextField);
+		this.myPanel.add(textSearchTextField);
+
 		
 		this.platzhalterPanel.setPreferredSize(new Dimension(230,137));
 		this.platzhalterPanel.setBackground(Color.WHITE);
@@ -306,8 +317,8 @@ public class HistoryWindow extends JDialog{
 	class HistoryButtonController implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
-			JButton source = (JButton)e.getSource();
-			switch(source.getText()){
+//			JButton source = (JButton)e.getSource();
+			switch(e.getActionCommand()){
 			case "Search" :
 
 				Date value = (Date) beginSpinner.getValue();
@@ -325,27 +336,31 @@ public class HistoryWindow extends JDialog{
 					System.out.println(endGregCal);
 				}
 //				beginGregCal.set(beginGregCal.get(Calendar.YEAR), beginGregCal.get(Calendar.MONTH), beginGregCal.get(Calendar.DATE), , minute)
+				JTable selectMSGsByUser = null;
+				System.out.println(e.getSource().getClass().getSimpleName());
 				switch(activeCard){
 				case "User":
 					long uid;
 					Node selectedNode = (Node) userSelectComboBox.getSelectedItem();
 					uid = (userSelectComboBox.getSelectedItem()!=null)?selectedNode.getUserID() : -1;
-					JTable selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, searchTextTextField.getText());
-					if(selectMSGsByUser!=null)new ResultWindow(selectMSGsByUser);
+					selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, textSearchTextField.getText());
 					break;
 				case "Group":
-				    new ResultWindow(DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSelectTextField.getText(), beginGregCal, endGregCal, searchTextTextField.getText()));
+					selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSearchTextField.getText(), beginGregCal, endGregCal, textSearchTextField.getText());
 					break;
-					
 				case "Alias":
+					selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByAlias(aliasSearchTextField.getText(), beginGregCal,endGregCal,textSearchTextField.getText());
 					break;
-					default:
+				default:
 				}
+				
+				if(selectMSGsByUser!=null)new ResultWindow(selectMSGsByUser);
+				
+				
 				break;
 			case "Cancel" :
 				closeThis();
 				break;
-			
 			}
 		}
 	}

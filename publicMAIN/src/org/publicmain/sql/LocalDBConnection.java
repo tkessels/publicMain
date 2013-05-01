@@ -589,9 +589,9 @@ public class LocalDBConnection {
 				StringBuilder prepState = new StringBuilder();
 				prepState.append("SELECT * from t_messages WHERE ");
 				if(userID!=null)prepState.append("(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ");
-				if(alias != null)prepState.append("displayName LIKE ? AND ");
+				if(alias != null)prepState.append("(displayName LIKE ? OR fk_t_users_userID_empfaenger = (SELECT userID from t_users WHERE displayname LIKE ?)) AND");
 				if(groupName!=null)prepState.append("fk_t_groups_groupName LIKE ? AND ");
-				prepState.append("(timestmp BETWEEN ? AND ?) AND txt LIKE ? AND length(txt)>0");
+				prepState.append("(timestmp BETWEEN ? AND ?) AND txt LIKE ? AND length(txt)>0 ORDER BY timestmp");
 				System.out.println(prepState);
 				searchInHistStmt = con.prepareStatement(prepState.toString());
 //				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
@@ -599,7 +599,10 @@ public class LocalDBConnection {
 				int part=1;
 				if(userID!=null)searchInHistStmt.setString(part++, userID);
 				if(userID!=null)searchInHistStmt.setString(part++, userID);
-				if(alias != null)searchInHistStmt.setString(part++, alias);
+				if(alias != null){
+					searchInHistStmt.setString(part++, alias);
+					searchInHistStmt.setString(part++, alias);
+				}
 				if(groupName!=null)searchInHistStmt.setString(part++, groupName);
 				searchInHistStmt.setLong(part++, begin);
 				searchInHistStmt.setLong(part++, end);

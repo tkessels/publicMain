@@ -309,7 +309,7 @@ public class LocalDBConnection {
 	}
 	
 	public boolean push_msgs(ResultSet msgRS){
-		if (dbStatus >=3){
+		if (dbStatus >=3 &&  msgRS != null){
 			try {
 				synchronized (stmt) {
 				while (msgRS.next()){
@@ -338,7 +338,7 @@ public class LocalDBConnection {
 	}
 	
 	public boolean push_users(ResultSet usrRS){
-		if (dbStatus >=3){
+		if (dbStatus >=3 && usrRS != null){
 			try {
 				synchronized (stmt) {
 				while (usrRS.next()){

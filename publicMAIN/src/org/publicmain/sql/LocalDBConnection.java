@@ -609,6 +609,7 @@ public class LocalDBConnection {
 				
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while executing 'searchInHistStmt' PreparedStatment: " + e.getMessage(), LogEngine.ERROR);
+				dbStatus = 0;
 				return null;
 			}
 		}

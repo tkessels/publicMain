@@ -433,34 +433,20 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 	 *             Wenn der hergestellte Socket
 	 */
 	private void connectTo(Node knoten) {
-		Socket tmp_socket = null;
-		for (InetAddress x : knoten.getSockets()) {
-			if (!meinNode.getSockets().contains(x)) {
-				try {
-					tmp_socket = new Socket(x.getHostAddress(),knoten.getServer_port());
-				} catch (UnknownHostException e) {
-					LogEngine.log(e);
-				} catch (IOException e) {
-					LogEngine.log(e);
-				}
-				if (tmp_socket != null && tmp_socket.isConnected())
-					break; // wenn eine Verbindung mit einer der IPs des
-							// Knotenaufgebaut wurden konnte. Hör auf
-			}
-		}
-		if (tmp_socket != null) {
 			try {
-				root_connection = new ConnectionHandler(tmp_socket);
-				setRootMode(false);
-				setGroup(myGroups);// FIXME:Bleibt das hier
-				sendroot(new MSG(getMe()));
-				sendroot(new MSG(myGroups, MSGCode.GROUP_REPLY));
-				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
-				sendroot(new MSG(null, MSGCode.GROUP_POLL));
+				root_connection=ConnectionHandler.connectTo(knoten);
+				if (root_connection!=null) {
+					setRootMode(false);
+					setGroup(myGroups);
+					sendroot(new MSG(getMe()));
+					sendroot(new MSG(myGroups, MSGCode.GROUP_REPLY));
+					sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
+					sendroot(new MSG(null, MSGCode.GROUP_POLL));
+				}
 			} catch (IOException e) {
 				LogEngine.log(e);
 			}
-		}
+//		}
 	}
 	
 

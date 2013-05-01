@@ -5,7 +5,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,9 +44,21 @@ public class ConnectionHandler {
 	/**
 	 * TODO: Konstruktor-Kommentar, was wird hier grob gemacht?
 	 * 
-	 * @param underlying
+	 * @param knoten
 	 * @throws IOException
 	 */
+	
+	public static ConnectionHandler connectTo(Node knoten) throws IOException{
+		Socket tmp_socket = null;
+		for (InetAddress x : knoten.getSockets()) {
+			if (!Node.getMyIPs().contains(x)) {
+					tmp_socket = new Socket(x.getHostAddress(),knoten.getServer_port());
+				if (tmp_socket != null && tmp_socket.isConnected()) break; // wenn eine Verbindung mit einer der IPs des  Knotenaufgebaut wurden konnte. Hör auf
+			}
+		}
+		return new ConnectionHandler(tmp_socket);
+	}
+	
 	public ConnectionHandler(Socket underlying) throws IOException {
 
 		ne = NodeEngine.getNE();

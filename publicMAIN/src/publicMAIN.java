@@ -1,6 +1,5 @@
 import java.io.IOException;
 
-import javax.sound.sampled.Clip;
 import javax.swing.JOptionPane;
 
 import org.publicmain.common.Config;
@@ -19,11 +18,12 @@ import org.resources.Help;
 public class publicMAIN {
 
 	/**
-	 * Die Programmstart-Klasse für publicMAIN, hier wird geprüft ob bereits eine Instanz des Programms läuft. Sollte dies zutreffen wird
-	 * der Start einer weiteren Instanz abgebrochen.
+	 * Die Programmstart-Klasse für publicMAIN, hier wird geprüft ob bereits
+	 * eine Instanz des Programms läuft. Sollte dies zutreffen wird der Start
+	 * einer weiteren Instanz abgebrochen.
 	 * 
 	 * @param args
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
 		if(Config.getLock()){
@@ -34,19 +34,28 @@ public class publicMAIN {
 				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)
 				boolean tom = StartWindow.getStartWindow();
 				if (tom) {
-//					Help.playSound("logon.wav");
+					// Help.playSound("logon.wav");
 					GUI.getGUI();
 				}
 			}else {
-				//if autopull = true dann pull
-//				Help.playSound("logon.wav");
+				// if autopull = true dann pull
+				// Help.playSound("logon.wav");
 				GUI.getGUI();
 			}
-			//Mir gefälltnicht das hier die Controlle weggegeben wird. Es sollte ein strukturierte und Kontrollierter Start formuliert werden der die Module in der richtigen Reihenfolge startet
+			// Mir gefälltnicht das hier die Kontrolle weggegeben wird. Es
+			// sollte ein strukturierte und Kontrollierter Start formuliert
+			// werden der die Module in der richtigen Reihenfolge startet
 		}
 		else{
-			JOptionPane.showMessageDialog(null, "Could not start publicMAIN\nAn instance is already running!", "publicMAIN", JOptionPane.ERROR_MESSAGE, Help.getIcon("pM_Logo.png",48) );
-			LogEngine.log("Could not start publicMAIN An instance is already running!", LogEngine.ERROR);
+			JOptionPane
+					.showMessageDialog(
+							null,
+							"Could not start publicMAIN\nAn instance is already running!",
+							"publicMAIN", JOptionPane.ERROR_MESSAGE,
+							Help.getIcon("pM_Logo.png", 48));
+			LogEngine
+					.log("Could not start publicMAIN An instance is already running!",
+							LogEngine.ERROR);
 		}
 		
 	}

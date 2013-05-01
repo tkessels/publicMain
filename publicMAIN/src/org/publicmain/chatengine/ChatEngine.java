@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -21,7 +20,6 @@ import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
 import org.publicmain.sql.DatabaseEngine;
-import org.publicmain.sql.LocalDBConnection;
 
 /**
  * @author ATRM
@@ -81,7 +79,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Findet zu einer definierten NodeID zugehörigen Node in der Liste
+	 * Findet zu einer definierten NodeID zugehörigen Node in der Liste.
 	 * 
 	 * @param nid, NodeID
 	 * @return Node-Objekt zu angegebenem NodeID
@@ -170,7 +168,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Weisst die ChatEngine an einen <code>text</code> an eine gruppe
+	 * Weisst die ChatEngine an einen <code>Text</code> an eine Gruppe
 	 * <code>group</code> zu schicken.
 	 * 
 	 * @param group, Gruppenbezeichnung
@@ -187,8 +185,10 @@ public class ChatEngine{
 	 * Weisst die ChatEngine an eine <code>Datei</code> an einen Nutzer mit der
 	 * entsprechenden <code>uid</code> zu schicken.
 	 * 
-	 * @param datei, Datei
-	 * @param uid, UID des Empfängers
+	 * @param datei
+	 *            Datei
+	 * @param uid
+	 *            UID des Empfängers
 	 * 
 	 * @return id des Dateitransfers für spätere Rückfragen
 	 */
@@ -202,7 +202,8 @@ public class ChatEngine{
 		}
 	}
 
-	/**NOT IMPLEMENTED YET
+	/**
+	 * NOT IMPLEMENTED YET
 	 * Gibt den Zustand der Übertragung einer Datei an
 	 * 
 	 * @param file_transfer_ID
@@ -385,10 +386,8 @@ public class ChatEngine{
 			if (x.countObservers() == 0) {
 				empty.add(x);
 			}
-
 		}
 		private_channels.removeAll(empty);
-
 	}
 
 	/**
@@ -419,7 +418,7 @@ public class ChatEngine{
 							if (x.add(tmp))
 								break;
 					} else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
-//						System.out.println("PRIVATE MSG");
+						// System.out.println("PRIVATE MSG");
 						boolean msgAssigned = false;
 						for (KnotenKanal y : private_channels) {
 							if (y.add(tmp)) {
@@ -429,7 +428,8 @@ public class ChatEngine{
 						}
 						// Kein CW angemeldet um die Nachricht aufzunehmen sende
 						// es an GUI via DEFAULT CHANNEL
-						if (!msgAssigned)default_channel.add(tmp);
+						if (!msgAssigned)
+							default_channel.add(tmp);
 					}
 				} catch (InterruptedException e) {
 					// Unterbrochen beim Warten...
@@ -440,8 +440,10 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Die eigenen Gruppenmigliedschaften holen.
+	 * Getter für die eigenen Gruppenmigliedschaften, liefert ein Set, vom Typ
+	 * String, zurück.
 	 * 
+	 * @return
 	 */
 	public Set<String> getMyGroups() {
 		synchronized (myGroups) {
@@ -451,7 +453,6 @@ public class ChatEngine{
 
 	/**
 	 * Den eigenen Benutzeralias ändern.
-	 * 
 	 */
 	public void updateAlias(String newAlias) {
 		setAlias(newAlias);

@@ -1,6 +1,5 @@
 package org.publicmain.gui;
 
-import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,12 +9,12 @@ import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import javax.sound.sampled.Clip;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 
-import org.publicmain.gui.HyperLinkController;
 import org.resources.Help;
 
 /**
@@ -30,7 +29,7 @@ import org.resources.Help;
  * 
  */
 
-public class HTMLContentDialog {
+public class HTMLContentDialog extends JDialog {
 
 	private JDialog htmlDialog;
 	private JTextPane htmlContentPane;
@@ -40,7 +39,7 @@ public class HTMLContentDialog {
 	private GraphicsEnvironment ge;
 	private GraphicsDevice gd;
 	private DisplayMode dm;
-	private AudioClip sound;
+	private Clip sound;
 
 	/**
 	 * Konstruktor zum Füllen des JDialog mit Titel, Icon und HTML-Dokument.
@@ -51,15 +50,16 @@ public class HTMLContentDialog {
 	 */
 	public HTMLContentDialog(String title, String icon, final String htmlFile) {
 		
-		htmlDialog = new JDialog();
+		htmlDialog = this;
 		
-		htmlDialog.setTitle(title);
-		htmlDialog.setModal(false);
-		htmlDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		htmlDialog.setLayout(new BorderLayout());
-		htmlDialog.setIconImage(Help.getIcon(icon).getImage());
-		htmlDialog.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
-		htmlDialog.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setTitle(title);
+		this.setModal(false);
+		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		this.setLayout(new BorderLayout());
+		this.setIconImage(Help.getIcon(icon).getImage());
+		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
+		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+		
 		
 		hlc = new HyperLinkController();
 		
@@ -107,15 +107,16 @@ public class HTMLContentDialog {
 	 */
 	public void showIt() {
 		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth()
-				+ htmlDialog.getWidth() < dm.getWidth())) {
-			htmlDialog.setLocation(GUI.getGUI().getLocation().x
+				+ this.getWidth() < dm.getWidth())) {
+			this.setLocation(GUI.getGUI().getLocation().x
 					+ GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
 		} else {
-			htmlDialog.setLocationRelativeTo(null);
+			this.setLocationRelativeTo(null);
 		}
-		htmlDialog.setVisible(true);
+		this.setVisible(true);
+		sound = Help.getSound("test.wav");
 		if(sound!=null){
-			sound.play();
+			sound.start();
 		}
 	}
 	
@@ -124,10 +125,25 @@ public class HTMLContentDialog {
 	 * TODO: Überprüfen ob diese Methode genutzt wird!
 	 */
 	public void hideIt() {
-		htmlDialog.setVisible(false);
+		this.setVisible(false);
 		if(sound!=null){
 			sound.stop();
 		}
 	}
+	
+	@Override
+	@Deprecated
+	public void hide() {
+		if(sound!=null)sound.stop();
+		super.hide();
+	}
+	
+	@Override
+	public void dispose() {
+		if(sound!=null)sound.stop();
+		super.dispose();
+	}
+	
+	
 }
 

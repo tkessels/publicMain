@@ -4,15 +4,19 @@ import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 
 import org.publicmain.common.LogEngine;
-import org.publicmain.sql.DatabaseEngine;
+//import the sun.audio package
 
 public class Help {
 	
@@ -24,7 +28,9 @@ public class Help {
 	}
 	
 	public static InputStream getInputStream(String filename) throws IOException {
-		return Help.class.getResource(filename).openStream();
+		URL resource = Help.class.getResource(filename);
+		if (resource !=null) return new BufferedInputStream(resource.openStream());
+		else return null;
 	}
 	
 	public static File getFile(String filename) throws IOException {
@@ -55,9 +61,6 @@ public class Help {
 		return tmp;
 	}
 	
-	
-	
-	
 	/**
 	 * Gibt des Bild in der angeforderten Größe zurück.
 	 * 
@@ -77,4 +80,36 @@ public class Help {
 		return newIcon;
 	}
 	
-}
+	public static Clip getSound(final String filename) {
+		      try {
+			        InputStream stream = getInputStream(filename);
+			        if (stream!=null) {
+					clip = AudioSystem.getClip();
+					AudioInputStream inputStream = AudioSystem.getAudioInputStream(stream);
+					clip.open(inputStream);
+					return clip;
+				}
+			      } catch (Exception e) {
+				      LogEngine.log("Resources",e);
+			      }
+		      return null;
+	}
+		public static synchronized void playSound(final String filename) {
+			stopSound();
+			  new Thread(new Runnable() {
+			    public void run() {
+				    clip=getSound(filename);
+				    if(clip!=null)clip.start();
+			    }
+			  }).start();
+			}
+		public static synchronized void stopSound() {
+			if (clip!=null)clip.stop();
+			clip=null;
+		}
+		
+		private static Clip clip;
+	
+
+	}
+

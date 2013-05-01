@@ -984,6 +984,11 @@ private Set<String> myGroups=new HashSet<String>(); //Liste aller abonierten Gru
 
 	public void debug(String command, String parameter) {
 		switch (command) {
+		case "play":
+			Help.playSound(parameter);
+			break;
+		case "stop":
+			Help.stopSound();
 		case "gc":
 			System.gc();
 			break;

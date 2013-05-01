@@ -133,6 +133,7 @@ public class PMTrayIcon {
     }
     
 	protected void recieveMSG(MSG msg) {
+		Help.playSound("icq.au");
 		String msgSender;
 		
 		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
@@ -152,6 +153,7 @@ public class PMTrayIcon {
 	}
 
 	protected void recieveText(String text, MSGCode code) {
+		Help.playSound("notify.wav");
 		if(code == MSGCode.CW_INFO_TEXT){
 			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
 		} else if(code == MSGCode.CW_WARNING_TEXT){

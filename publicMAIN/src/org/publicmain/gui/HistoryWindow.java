@@ -307,10 +307,8 @@ public class HistoryWindow extends JDialog{
 
 		public void actionPerformed(ActionEvent e) {
 			JButton source = (JButton)e.getSource();
-//			cardsPanel.get
 			switch(source.getText()){
 			case "Search" :
-//				System.out.println(beginSpinner.getValue().getClass());
 
 				Date value = (Date) beginSpinner.getValue();
 				if(beginGregCal!=null){
@@ -330,9 +328,7 @@ public class HistoryWindow extends JDialog{
 				switch(activeCard){
 				case "User":
 					long uid;
-					System.out.println(userSelectComboBox.getSelectedIndex());
 					Node selectedNode = (Node) userSelectComboBox.getSelectedItem();
-					System.out.println(userSelectComboBox.getItemCount());
 					uid = (userSelectComboBox.getSelectedItem()!=null)?selectedNode.getUserID() : -1;
 					JTable selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, searchTextTextField.getText());
 					if(selectMSGsByUser!=null)new ResultWindow(selectMSGsByUser);

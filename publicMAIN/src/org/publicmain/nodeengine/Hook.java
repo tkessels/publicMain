@@ -9,11 +9,12 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 
 /**
- * Dies Klasse erlaubt es eine Reihe von Vergleichskriterien (Haken) abzuspeichern und eine
- * blockende Abfrage zu starten, sie erlaubt es einer Methode einen Haken zu registrieren und
- * zu blocken bis eine MSG entsprechender Zusammensetzung angekommen ist. Dabei wird ein Timeout
+ * Dies Klasse erlaubt es eine Reihe von Vergleichskriterien (Haken)
+ * abzuspeichern und eine blockende Abfrage zu starten, sie erlaubt es einer
+ * Methode einen Haken zu registrieren und zu blocken bis eine MSG
+ * entsprechender Zusammensetzung angekommen ist. Dabei wird ein Timeout
  * benötigt um tote Hooks zu verhindern.
- *  
+ * 
  * @author ATRM
  * 
  */
@@ -23,16 +24,27 @@ public class Hook {
 	// ArrayList aller registrierten Filter
 	private volatile List<Haken> allHooks = new CopyOnWriteArrayList<Haken>();
 
+	/**
+	 * Private Methode für den Haken um sich zu registrieren.
+	 * 
+	 * @param toAdd
+	 */
 	private void add(Haken toAdd) {
 		allHooks.add(toAdd);
 	}
 
+	/**
+	 * Private Methode für den Haken um die Registrierung wieder rückgängig zu
+	 * machen.
+	 * 
+	 * @param toRemove
+	 */
 	private void remove(Haken toRemove) {
 		allHooks.remove(toRemove);
 	}
 
 	/**
-	 * Richtet einen Hook ein der blockt bis eine MSG mit den Entsprechenden
+	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
 	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
 	 * verknüpft und müssen alle erfüllt werden.
 	 * 
@@ -56,6 +68,7 @@ public class Hook {
 	 * @param timeout
 	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
+	 *            
 	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
@@ -75,16 +88,38 @@ public class Hook {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
+	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
+	 * verknüpft und müssen alle erfüllt werden.
 	 * 
 	 * @param typ
+	 *            Nachrichtentyp der zu erwartenden Nachricht. Also ob
+	 *            <code>SYSTEM, GROUP,PRIVATE</code> oder <code>DATA</code>
 	 * @param code
+	 *            Der MSGCode der Nachricht. Also um welchen Typ von
+	 *            SystemNachricht es sich handelt (z.B.:
+	 *            <code>NODE_UPDATE </code> oder <code>ECHO_REQUEST</code>)
 	 * @param nid
+	 *            NodeID des Absenders
 	 * @param payload
+	 *            TODO: payload-Kommentar!
 	 * @param filter
+	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
+	 *            NodeEngine ausgeschlossen werden soll.
+	 *            <ul>
+	 *            <li><code>true</code>-Nachricht wird von handle nicht weiter
+	 *            betrachtet
+	 *            <li><code>false</code>-Nachricht wird normal
+	 *            weiterverarbeitet.
 	 * @param timeout
+	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
+	 *            bleiben soll bevor er sich selbst enfernt.
 	 * @param paket
-	 * @return
+	 *            TODO: paket-Kommentar!
+	 * 
+	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
+	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
+	 *         eine Nachricht zu matchen.
 	 */
 	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,Object payload,boolean filter, long timeout,MSG paket) {
 		Haken x = new Haken(typ,code, nid,payload,filter);
@@ -102,16 +137,38 @@ public class Hook {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
+	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
+	 * verknüpft und müssen alle erfüllt werden.
 	 * 
 	 * @param typ
+	 *            Nachrichtentyp der zu erwartenden Nachricht. Also ob
+	 *            <code>SYSTEM, GROUP,PRIVATE</code> oder <code>DATA</code>
 	 * @param code
+	 *            Der MSGCode der Nachricht. Also um welchen Typ von
+	 *            SystemNachricht es sich handelt (z.B.:
+	 *            <code>NODE_UPDATE </code> oder <code>ECHO_REQUEST</code>)
 	 * @param nid
+	 *            NodeID des Absenders
 	 * @param payload
+	 *            TODO: payload-Kommentar - von eben kopieren!
 	 * @param filter
+	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
+	 *            NodeEngine ausgeschlossen werden soll.
+	 *            <ul>
+	 *            <li><code>true</code>-Nachricht wird von handle nicht weiter
+	 *            betrachtet
+	 *            <li><code>false</code>-Nachricht wird normal
+	 *            weiterverarbeitet.
 	 * @param timeout
+	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
+	 *            bleiben soll bevor er sich selbst enfernt.
 	 * @param dothat
-	 * @return
+	 *            TODO: dothat-Kommentar!
+	 * 
+	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
+	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
+	 *         eine Nachricht zu matchen.
 	 */
 	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,
 			Object payload, boolean filter, long timeout, Runnable dothat) {
@@ -130,7 +187,7 @@ public class Hook {
 	
 	/**
 	 * Nicht blockierende Methode die für eine gewisse Zeit <code>timeout</code>
-	 * alle Nachrichten verwirft die den angegebennen Krieterien entspricht.
+	 * alle Nachrichten verwirft die den angegebennen Kriterien entspricht.
 	 * 
 	 * @param typ
 	 *            Typ der zu verwerfenden Nachricht
@@ -166,7 +223,12 @@ public class Hook {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * TODO: Überprüfen!
+	 * 
+	 * Diese Methode prüft ob einer der registrierten Haken auf das
+	 * mitgelieferte Paket passt und ob es bei passendem Haken noch
+	 * weiterverarbeitet werden soll <code>true</code> oder nicht
+	 * <code>false</code>.
 	 * 
 	 * @param paket
 	 * @return
@@ -194,6 +256,8 @@ public class Hook {
 	
 	
 	/**
+	 * TODO: Ausformulieren, dass ungefähr klar wird was hier passiert!
+	 * 
 	 * Interne Klasse für Parameter Kapsel und Semaphore. 
 	 */
 	private class Haken {
@@ -209,7 +273,7 @@ public class Hook {
 		private MSG hookedMSG;
 
 		/**
-		 * TODO: Kommentar!
+		 * TODO: Kommentar und aufräumen!
 		 * 
 		 * @param typ
 		 * @param code
@@ -284,7 +348,7 @@ public class Hook {
 		}
 		
 		/**
-		 * TODO: Kommentar!
+		 * TODO: Kommentar! Überprüfen ob noch benötigt!
 		 * 
 		 * @return
 		 */

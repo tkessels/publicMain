@@ -111,6 +111,7 @@ public class ConnectionHandler {
 	 * die weiteren Anweisungen nicht mehr ausgeführt werden.
 	 */
 	public void close() {
+		me=null;
 
 		try {
 			line_out.close();
@@ -125,9 +126,6 @@ public class ConnectionHandler {
 		} catch (IOException e) {
 		}
 		LogEngine.log(this.toString(), "closed", LogEngine.INFO);
-		me = null;
-		// TODO: Entscheidung - Tobi
-		// pakets_rein_hol_bot.stop();
 		pakets_rein_hol_bot = null;
 		ne.remove(this);
 	}
@@ -141,21 +139,19 @@ public class ConnectionHandler {
 	}
 	
 	/**
-	 * Methode zum anpingen anderer Nodes, durch den MSGCode sendet der andere Node
-	 * eine Anwort.
+	 *  Sendet ein ECHO_REQUEST Paket zum anderen Verbindungsende 
 	 */
 	private void ping() {
 		send(new MSG(null, MSGCode.ECHO_REQUEST));
 	}
 	
 	/**
-	 * TODO: Überprüfen!
 	 * 
 	 * Methode für das routen von Gruppen-Nachrichten. Diese Methode speichert welche
 	 * Gruppen auf welcher Verbindung existieren.
 	 * 
-	 * @param gruppe
-	 * @return
+	 * @param gruppe Collection von Gruppenstrings die an dieser Verbindung existieren
+	 * @return <code>true</code> Wenn sich die Liste durch die Aktion verändert hat, anderfalls <code>false</code>
 	 */
 	public boolean add(Collection<String> gruppe) {
 		synchronized (groups) {
@@ -164,8 +160,7 @@ public class ConnectionHandler {
 	}
 	
 	/**
-	 * TODO: Kommentar!
-	 * 
+	 * Entfernt eine Collection von Gruppen Strings von dieser Verbindung.
 	 * @param gruppe
 	 * @return
 	 */
@@ -228,12 +223,10 @@ public class ConnectionHandler {
 	}
 	
 	/**
-	 * TODO: Überprüfen!
+	 * Vergleichbar mit "route add" fügt diese Methode diese Verbindung als gateway für alle Nodes aus <code>toAdd</code> hinzu.
 	 * 
-	 * Methode zum routen von Steuerungsanforderungen, beispielsweise <code>allNodesUpdate</code>.
-	 * 
-	 * @param toAdd
-	 * @return
+	 * @param toAdd Collection von Nodes die über diese TCP-Verbindung zu erreichen sind.
+	 * @return <code>true</code> Wenn sich die Liste durch die Aktion verändert hat, anderfalls <code>false</code>
 	 */
 	public boolean addChildren(Collection<Node> toAdd) {
 		synchronized (children) {
@@ -254,10 +247,10 @@ public class ConnectionHandler {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Aktuallisiert die Liste der über die Verbindung angebundenen Nodes
 	 * 
-	 * @param toSet
-	 * @return
+	 * @param toSet Neue Liste von Nodes
+	 * @return <code>true</code> Wenn sich die Liste durch die Aktion verändert hat, anderfalls <code>false</code> 
 	 */
 	public boolean setChildren(Collection<Node> toSet) {
 		synchronized (children) {
@@ -270,11 +263,11 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * TODO: Überprüfen!
 	 * 
-	 * Der Reciever-Thread hört auf den Verbindungen ob eingende Nachrichten
-	 * oder Steuerungsanforderungen ankommen und nach Typ beantwortet oder
-	 * weitergeleitet werden müssen.
+	 * 
+	 * Der Reciever-Thread hört auf der Verbindung ob eingende Nachrichten
+	 * oder Steuerungsanforderungen ankommen und behandelt einige LowLevel Nachrichten 
+	 * selbst bevor er sie ggf. weiterleitet.
 	 */
 	class Reciever implements Runnable {
 		public void run() {
@@ -322,13 +315,14 @@ public class ConnectionHandler {
 							// ist -> Thread beenden
 				}
 			}
-			close();
+			if(me!=null) me.close();
 		}
 	}	
 
 	/**
-	 * TODO: Kommentar!
-	 *
+	 * Der Pinger ist als prüfende Instanz für die Verbindungsgüteprüfung konzipiert wird jedoch noch nicht verwendet.
+	 * Die NoteEngine sollte auf grundlage von Verbindungsauslastung und Verbindungsqualität zu einem spätern Zeitpunkt 
+	 * einzelne Verbindungen austauschen können. (Noch nicht implementiert)
 	 */
 	class Pinger implements Runnable {
 		private final long PING_INTERVAL = Config.getConfig().getPingInterval();

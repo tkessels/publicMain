@@ -63,7 +63,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 10;
+	private final static int LOCAL_DATABASE_VERSION = 13;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -587,18 +587,20 @@ public class LocalDBConnection {
 //				else searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ? AND fk_t_groups_groupName LIKE ? AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
 				//test
 				StringBuilder prepState = new StringBuilder();
-				prepState.append("SELECT * from t_messages WHERE ");
-				if(userID!=null)prepState.append("(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ");
-				if(alias != null)prepState.append("(displayName LIKE ? OR fk_t_users_userID_empfaenger = (SELECT userID from t_users WHERE displayname LIKE ?)) AND");
-				if(groupName!=null)prepState.append("fk_t_groups_groupName LIKE ? AND ");
-				prepState.append("(timestmp BETWEEN ? AND ?) AND txt LIKE ? AND length(txt)>0 ORDER BY timestmp");
+				prepState.append("SELECT * from v_searchInHistory WHERE ");
+				if(userID!=null)prepState.append("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
+				if(alias != null)prepState.append("(sender LIKE ? OR recipient LIKE ?) AND");
+				if(groupName!=null)prepState.append("group LIKE ? AND ");
+				prepState.append("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
 				System.out.println(prepState);
 				searchInHistStmt = con.prepareStatement(prepState.toString());
 //				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
 				//test
 				int part=1;
-				if(userID!=null)searchInHistStmt.setString(part++, userID);
-				if(userID!=null)searchInHistStmt.setString(part++, userID);
+				if(userID!=null) {
+					searchInHistStmt.setString(part++, userID);
+					searchInHistStmt.setString(part++, userID);
+				}
 				if(alias != null){
 					searchInHistStmt.setString(part++, alias);
 					searchInHistStmt.setString(part++, alias);
@@ -607,7 +609,7 @@ public class LocalDBConnection {
 				searchInHistStmt.setLong(part++, begin);
 				searchInHistStmt.setLong(part++, end);
 				searchInHistStmt.setString(part++, msgTxt);
-				
+				System.out.println(searchInHistStmt.toString());
 				return searchInHistStmt.executeQuery();
 				
 			} catch (SQLException e) {

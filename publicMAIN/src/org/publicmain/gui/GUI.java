@@ -457,7 +457,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(hcdHelp != null) {
 			hcdHelp.hideIt();
 		}
-		Help.playSound("logoff.wav");
+//		Help.playSound("logoff.wav");
 		// Kontaktliste schlieﬂen
 		contactListZuklappen();
 		// SettingsWindow schlieﬂen

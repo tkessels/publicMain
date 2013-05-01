@@ -20,11 +20,11 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
 import org.publicmain.common.Config;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
+import org.publicmain.gui.SimpleTableDemo;
 import org.publicmain.nodeengine.NodeEngine;
 
 public class DatabaseEngine {
@@ -200,7 +200,7 @@ public class DatabaseEngine {
 		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
 		String para_alias	=null;
 		String para_group	=null;
-		String para_text	="%"+text.trim()+"%";
+		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 		
@@ -235,9 +235,9 @@ public class DatabaseEngine {
 		ResultSet tmp;
 
 		String para_uid	=null;
-		String para_alias	=alias.trim();
+		String para_alias	=(alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
 		String para_group	=null;
-		String para_text	="%"+text.trim()+"%";
+		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 		
@@ -250,7 +250,8 @@ public class DatabaseEngine {
 
 
 			try {
-				return new JTable(buildTableModel(tmp));
+//				return new JTable(buildTableModel(tmp));
+				return buildTable(tmp);
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 
@@ -354,6 +355,47 @@ public class DatabaseEngine {
 
 	}
 	
+	
+	public static JTable buildTable(ResultSet rs) throws SQLException{
+
+		    ResultSetMetaData metaData = rs.getMetaData();
+
+		    // names of columns
+		    int columnCount = metaData.getColumnCount();
+		    String[] columnNames = new String[columnCount];
+		    for (int column = 1; column <= columnCount; column++) {
+		        columnNames[column-1]=metaData.getColumnName(column);
+		    }
+		    System.out.println(columnNames);
+		    
+
+		    // data of the table
+		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		    while (rs.next()) {
+		        Vector<Object> vector = new Vector<Object>();
+		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+		            vector.add(rs.getObject(columnIndex));
+		        }
+		        data.add(vector);
+		    }
+//		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
+//		    tblModel.setColumnIdentifiers(colHdrs);
+		    
+		    data.toArray();
+		    Object [][] array = new Object[data.size()][columnCount];
+		    int i  =0;
+		    for (Vector<Object> tmp : data) {
+			    array[i++]=tmp.toArray();
+		}
+		  
+		    new SimpleTableDemo(columnNames,array);
+		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
+		    tmod.setColumnIdentifiers(columnNames);
+		    JTable tmp = new JTable(tmod);
+		    
+		    return tmp;
+		
+	}
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
 
 	    ResultSetMetaData metaData = rs.getMetaData();

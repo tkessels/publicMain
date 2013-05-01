@@ -32,6 +32,10 @@ public class ResultWindow extends JDialog {
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 		
+
+		
 	}
+	
+	
 	
 }

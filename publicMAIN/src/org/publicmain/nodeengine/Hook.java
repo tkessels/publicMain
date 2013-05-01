@@ -102,7 +102,7 @@ public class Hook {
 	 * @param nid
 	 *            NodeID des Absenders
 	 * @param payload
-	 *            TODO: payload-Kommentar!
+	 *            Daten die das Paket trägt
 	 * @param filter
 	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
 	 *            NodeEngine ausgeschlossen werden soll.
@@ -270,13 +270,13 @@ public class Hook {
 		private MSG hookedMSG;
 
 		/**
-		 * TODO: Kommentar und aufräumen!
+		 * Erzeugt einen Haken der die angegebennen Paramter matched 
 		 * 
-		 * @param typ
-		 * @param code
-		 * @param sender
-		 * @param payload
-		 * @param filter
+		 * @param typ Nachrichtentyp der betrachtet werden soll
+		 * @param code Nachrichtencode der betrachtet werden soll
+		 * @param sender Sender  der betrachtet werden soll 
+		 * @param payload Daten der betrachtet werden sollen
+		 * @param filter Ob die Nachricht entfernt werden soll oder nicht
 		 */
 		public Haken(NachrichtenTyp typ, MSGCode code, Long sender,
 				Object payload, boolean filter) {
@@ -291,10 +291,10 @@ public class Hook {
 		}
 		
 		/**
-		 * TODO: Kommentar und aufräumen!
+		 * Prüft alle registrierten Hacken und prüft ob einer der Hacken möchte, dass das Paket 
 		 * 
-		 * @param x
-		 * @return
+		 * @param x die zu überpüfende Nachricht
+		 * @return true wenn es einen passenden Hacken gibt und dieser wünscht das die Nachricht entfernt wird
 		 */
 		private synchronized boolean check(MSG x) {
 			// System.out.println(allHooks);
@@ -328,9 +328,9 @@ public class Hook {
 		}
 
 		/**
-		 * TODO: Kommentar!
+		 * Birgt die MSG die den Haken gematched hat.
 		 * 
-		 * @return
+		 * @return Hooked Message oder <code>null</code> wenn Timout abgelaufen
 		 */
 		private MSG getHookedMSG() {
 			return hookedMSG;

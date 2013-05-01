@@ -588,10 +588,10 @@ public class LocalDBConnection {
 				//test
 				StringBuilder prepState = new StringBuilder();
 				prepState.append("SELECT * from t_messages WHERE ");
-				prepState.append(((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" ));
-				prepState.append(((alias!=null)?"displayName LIKE ? AND ":""));
-				prepState.append(((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":""));
-				prepState.append("(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
+				if(userID!=null)prepState.append("(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ");
+				if(alias != null)prepState.append("displayName LIKE ? AND ");
+				if(groupName!=null)prepState.append("fk_t_groups_groupName LIKE ? AND ");
+				prepState.append("(timestmp BETWEEN ? AND ?) AND txt LIKE ? AND length(txt)>0");
 				System.out.println(prepState);
 				searchInHistStmt = con.prepareStatement(prepState.toString());
 //				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");

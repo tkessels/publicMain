@@ -76,7 +76,7 @@ public class HTMLContentDialog {
 		htmlContentPane.setEditable(false);
 
 		try {
-			this.sound = Applet.newAudioClip(Help.getFile("fahrstuhl.mp3").toURL());
+			this.sound = Applet.newAudioClip(Help.class.getResource("fahrstuhl.mp3"));
 		} catch (Exception e2) {
 			System.out.println(e2.getMessage());
 		}

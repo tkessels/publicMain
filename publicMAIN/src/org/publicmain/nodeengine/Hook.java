@@ -223,8 +223,6 @@ public class Hook {
 	}
 	
 	/**
-	 * TODO: Überprüfen!
-	 * 
 	 * Diese Methode prüft ob einer der registrierten Haken auf das
 	 * mitgelieferte Paket passt und ob es bei passendem Haken noch
 	 * weiterverarbeitet werden soll <code>true</code> oder nicht
@@ -266,7 +264,6 @@ public class Hook {
 		private MSGCode code;
 		private Long sender;
 		private Object payload;
-		// TODO: Entscheidung - Tobi
 		// private Long reciever;
 		// private String gruppe;
 		private boolean filter;
@@ -288,7 +285,6 @@ public class Hook {
 			this.code = code;
 			this.sender = sender;
 			this.payload = payload;
-			// TODO: Entscheidung - Tobi
 			// this.reciever = reciever;
 			// this.gruppe = gruppe;
 			this.filter = filter;
@@ -306,17 +302,10 @@ public class Hook {
 			boolean code_check = (code == null) || code.equals(x.getCode());
 			boolean sender_check = (sender == null)
 					|| sender.equals(x.getSender());
-			// System.out.println(sender);
-			// System.out.println(x.getSender());
 			boolean payload_check = (payload == null)
 					|| payload.equals(x.getData());
-			// boolean
-			// reciever_check=(reciever==null)||reciever==x.getEmpfänger();
+			// boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
 			// boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
-			// System.out.println("typ:"+typ_check);
-			// System.out.println("code:"+code_check);
-			// System.out.println("sender:"+sender_check);
-			// System.out.println("payload:"+payload_check);
 
 			if (typ_check && code_check && sender_check && payload_check) {// &&reciever_check&&gruppe_check)
 																			// {
@@ -345,15 +334,6 @@ public class Hook {
 		 */
 		private MSG getHookedMSG() {
 			return hookedMSG;
-		}
-		
-		/**
-		 * TODO: Kommentar! Überprüfen ob noch benötigt!
-		 * 
-		 * @return
-		 */
-		private Hook getOuterType() {
-			return Hook.this;
 		}
 	}
 }

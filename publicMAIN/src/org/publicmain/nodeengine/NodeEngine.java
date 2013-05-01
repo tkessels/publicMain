@@ -303,9 +303,15 @@ public class NodeEngine {
 	 * @param nachricht
 	 */
 	public void sendtcp(MSG nachricht) {
-		if (hasParent()) 		sendroot(nachricht); 
-		//FIXME Concurrent Modification Exception beim disconnecten
-		if (hasChildren()) 	for (ConnectionHandler x : connections) x.send(nachricht);
+		if (hasParent()) {
+			sendroot(nachricht);
+		}
+		// FIXME: Concurrent Modification Exception beim disconnecten
+		if (hasChildren()) {
+			for (ConnectionHandler x : connections) {
+				x.send(nachricht);
+			}
+		}
 	}
 
 	/**
@@ -315,8 +321,12 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
-		if (hasParent()&&root_connection != ch) root_connection.send(msg);
-		if (hasChildren())sendchild(msg, ch);
+		if (hasParent() && root_connection != ch) {
+			root_connection.send(msg);
+		}
+		if (hasChildren()) {
+			sendchild(msg, ch);
+		}
 	}
 	
 	/**
@@ -326,7 +336,11 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendchild(MSG msg, ConnectionHandler ch) {
-		for (ConnectionHandler x : connections)if (x != ch||ch==null) x.send(msg);
+		for (ConnectionHandler x : connections) {
+			if (x != ch || ch == null) {
+				x.send(msg);
+			}
+		}
 	}
 
 	/**

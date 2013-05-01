@@ -19,6 +19,7 @@ public class ResultWindow extends JDialog {
 	public ResultWindow(JTable result){
 		this.resultTable = result;
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		this.setTitle("rows:"+resultTable.getRowCount());
 		ScrollPane scroller = new ScrollPane();
 		scroller.add(resultTable);
 		this.add(scroller);

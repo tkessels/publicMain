@@ -198,7 +198,7 @@ public class DatabaseEngine {
 
 		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
 		String para_alias	="%";
-		String para_group	="";
+		String para_group	=null;
 		String para_text	="%"+text+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
@@ -305,6 +305,7 @@ public class DatabaseEngine {
 				DefaultComboBoxModel<Node> tobi = new DefaultComboBoxModel<Node>(nodes);
 				JComboBox<Node> tmp_combo = new JComboBox<Node>(tobi);
 				tmp_combo.insertItemAt(null, 0);
+				tmp_combo.setSelectedIndex(0);
 				return tmp_combo;
 
 

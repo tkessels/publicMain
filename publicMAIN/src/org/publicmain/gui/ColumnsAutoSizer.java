@@ -8,6 +8,12 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+/**
+ * 
+ * 
+ * @author ATRM
+ *
+ */
 public class ColumnsAutoSizer {
  
     public static void sizeColumnsToFit(JTable table) {

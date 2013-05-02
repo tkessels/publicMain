@@ -36,6 +36,10 @@ import org.publicmain.common.Node;
 import org.resources.Help;
 
 /**
+ * Diese Klasse stellt die Kontaktliste zur Verfügung
+ * 
+ * Diese Klasse 
+ * 
  * @author ATRM
  * 
  */

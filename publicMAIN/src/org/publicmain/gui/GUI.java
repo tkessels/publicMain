@@ -581,7 +581,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	boolean ignoreUser(long uid) {
 		if(ce.ignore_user(uid)) {
 			notifyGUI();
-			info(ce.getNodeForUID(uid).getAlias() + " is <b>ignored!</b>", null, 2);
+			info(ce.getNodeForUID(uid) + " is <b>ignored!</b>", null, 2);
 			return true;
 		}
 		return false;
@@ -596,7 +596,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	boolean unignoreUser(long uid) {
 		if(ce.unignore_user(uid)) {
 			notifyGUI();
-			info(ce.getNodeForUID(uid).getAlias() + " is <b>unignored!</b>", null, 2);
+			info(ce.getNodeForUID(uid) + " is <b>unignored!</b>", null, 2);
 			return true;
 		}
 		return false;

@@ -110,10 +110,17 @@ public class LocalDBConnection {
 		public void run() {
 			int versuche = 0;
 			while ((versuche < maxVersuche) && (dbStatus == 0)) { // hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
-				if(connectToLocDBServerAsRoot()){
-					versuche = 0;
-				} else {
-					versuche ++;
+				//TODO: Connect als user als erstes probieren!
+//				if(connectToLocDBServerAspublicMain() && correctLocDBVersion()){
+//				databaseEngine.go();
+//				LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+//				} else {
+					if(connectToLocDBServerAsRoot()){
+						versuche = 0;
+					} else {
+						versuche ++;
+//					}
+					
 				}
 			}
 			if(dbStatus >= 1){
@@ -121,7 +128,7 @@ public class LocalDBConnection {
 					synchronized (stmt) {
 						stmt.executeQuery("use " + dbName);
 					}
-					if(Config.getConfig().getLocalDBVersion() != LOCAL_DATABASE_VERSION){
+					if(!correctLocDBVersion()){
 						createDbAndTables();
 						run();
 					} else {
@@ -145,6 +152,15 @@ public class LocalDBConnection {
 		}
 	}
 	
+	private boolean correctLocDBVersion (){
+		if(Config.getConfig().getLocalDBVersion() == LOCAL_DATABASE_VERSION){
+			return true;
+		}
+		return false;
+	}
+	
+	
+	
 	private synchronized boolean connectToLocDBServerAsRoot(){
 		try {
 			if(stmt!= null) stmt.close();
@@ -161,32 +177,27 @@ public class LocalDBConnection {
 				LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
 			}
 			dbStatus = 0;
+			return false;
 		}
-		
-		return false;
 	}
 	
-	private synchronized boolean connectToLocDBServerAspublicMain(){
+	private synchronized boolean connectToLocDBServerAspublicMain() {
 		try {
-			if(stmt!= null) stmt.close();
-			if(con!= null) con.close();
+			if (stmt != null) stmt.close();
+			if (con != null) con.close();
 			con = DriverManager.getConnection(url, Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
 			stmt = con.createStatement();
 			synchronized (stmt) {
 				stmt.executeQuery("use " + dbName);
-			}	
-			LogEngine.log(this, "DB-ServerVerbindung als " + Config.getConfig().getLocalDBUser() +" hergestellt", LogEngine.INFO);
+				dbStatus = 3;
+			}
+			LogEngine.log(this, "DB-ServerVerbindung als "+ Config.getConfig().getLocalDBUser() + " hergestellt",LogEngine.INFO);
 			return true;
 		} catch (SQLException e) {
-			LogEngine.log(this, "Error while connecting as publicMain: " + e.getMessage(), LogEngine.ERROR);
-			try {
-				Thread.sleep(warteZeitInSec * 1000);
-			} catch (InterruptedException e1) {
-				LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
-			}
+			LogEngine.log(this,"Error while connecting as publicMain: " + e.getMessage(),LogEngine.ERROR);
 			dbStatus = 0;
+			return false;
 		}
-		return false;
 	}
 	
 	public boolean getStatus(){
@@ -524,6 +535,7 @@ public class LocalDBConnection {
 			if (prpstmt!=null) {
 				synchronized (stmt) {
 					prpstmt.execute();
+					prpstmt.close();
 				}
 			}
 		} catch (Exception e) {

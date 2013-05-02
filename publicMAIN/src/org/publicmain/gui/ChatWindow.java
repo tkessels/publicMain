@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -73,6 +74,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			"<tr><td colspan='3'>/clear</td><td>clear screen</td></tr>" +
 			"<tr><td colspan='3'>/exit</td><td>exit program</td></tr>" +
 			"<tr><td colspan='3'>/help</td><td>display this help</td></tr>" +
+			"<tr><td colspan='3'>/afk</td><td>afk on/off</td></tr>" +
 			"<tr><td>/ignore</td><td colspan='2'>&lt;username&gt;</td><td>ignore this user</td></tr>" +
 			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>unignore this user</td></tr>" +
 			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>display information about user</td></tr>" +
@@ -227,8 +229,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * erhalten hat, bei Aktivierung des ChatWindows aufhört zu blinken.
 	 */
 	void focusEingabefeld(){
-		this.eingabeFeld.requestFocusInWindow();
-		this.myTab.stopBlink();
+		Runnable tmp = new Runnable() {
+			public void run() {
+				ChatWindow.this.eingabeFeld.requestFocusInWindow();
+				ChatWindow.this.myTab.stopBlink();
+			}
+		};
+		SwingUtilities.invokeLater(tmp);
 	}
 	
 	/**
@@ -317,6 +324,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				// Ausgabe der Hilfe im Nachrichtenfeld (msgTextPane)
 				else if (eingabe.equals("/help")) {
 					info(helptext);
+				}
+				// AwayFromKeyboard aktivieren/deaktivieren
+				else if (eingabe.equals("/afk")) {
+					this.gui.afk();
 				}
 				// Das Programm beenden
 				else if (eingabe.equals("/exit")) {

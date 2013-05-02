@@ -12,14 +12,14 @@ import org.publicmain.common.NachrichtenTyp;
 public class GruppenKanal extends Kanal {
 
 	/**
-	 * TODO: Kommentar
+	 * Konstruktor für den GruppenKanal
 	 */
 	public GruppenKanal(String gruppe) {
 		super(gruppe.toLowerCase());
 	}
 
 	/**
-	 * TODO: Kommentar
+	 * Liefert den Namensstring des Gruppenkanals als Hash-Wert.
 	 */
 	public int hashCode() {
 		return toString().hashCode();

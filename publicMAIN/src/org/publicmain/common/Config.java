@@ -2,77 +2,104 @@ package org.publicmain.common;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import java.util.Properties;
-
-import javax.swing.SwingUtilities;
 
 import org.publicmain.sql.DatabaseEngine;
 
+/**
+ * Diese Klasse enth�lt wichtige Konfigurationsdaten zur Anwendung.
+ * 
+ * @author ATRM
+ * 
+ */
 
 public class Config {
-	private static final String APPNAME 			=     (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
-	private static final int CURRENTVERSION		=	5;
+	
+	private static final String APPNAME 			=   (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
+	private static final int CURRENTVERSION			=	5;
 	private static final int MINVERSION				=	5;
 	private static final String APPDATA=System.getenv("APPDATA")+File.separator+"publicMAIN"+File.separator;
 	private static final String JARLOCATION=Config.class.getProtectionDomain().getCodeSource().getLocation().getFile();
 	private static final String	lock_file_name		= 	APPNAME+".loc";
 	private static final String	system_conf_name	= 	APPNAME+"_sys.cfg";
 	private static final String	user_conf_name		= 	APPNAME+".cfg"; 
-	private static File loc_file						=	new File(APPDATA,lock_file_name);
+	private static File loc_file					=	new File(APPDATA,lock_file_name);
 	private static File system_conf					=	new File(new File(JARLOCATION).getParentFile(),system_conf_name);
 	private static File user_conf					=	new File(APPDATA,user_conf_name);
 	private static Config me;
 	private static DatabaseEngine de;
-	
 	private ConfigData settings;
 
+	/**
+	 * Getter welcher die aktuelle Konfiguration zur�cliefert.
+	 * 
+	 * @return
+	 */
 	public static synchronized ConfigData getConfig() {
-		if (me==null) {
+		if (me == null) {
 			me = new Config();
 		}
 		return me.settings;
 	}
-	
+
+	/**
+	 * TODO: Kommentar!
+	 */
+	@SuppressWarnings("static-access")
 	public static synchronized void write() {
 		if (me==null) {
 			me = new Config();
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
-		
-		if(de!=null) de.writeConfig();				
+		if(de!=null) {
+			de.writeConfig();
+		}				
 		me.savetoDisk();
 	}
 	
+	/**
+	 * System-Konfiguration schreiben.
+	 * 
+	 * @return
+	 */
 	public static synchronized boolean writeSystemConfiguration() {
-		try(FileOutputStream fos = new FileOutputStream(system_conf)){
-			getSourceSettings().store(fos,"publicMAIN - SYSTEM - SETTINGS");
-			LogEngine.log(Config.class, "System configurations file written to " + system_conf, LogEngine.INFO);
+		try (FileOutputStream fos = new FileOutputStream(system_conf)) {
+			getSourceSettings().store(fos, "publicMAIN - SYSTEM - SETTINGS");
+			LogEngine.log(Config.class,
+					"System configurations file written to " + system_conf,
+					LogEngine.INFO);
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
-			LogEngine.log(Config.class, "Could not write system settings: "+system_conf +" reason : "+e.getMessage(), LogEngine.WARNING);
+			LogEngine.log(Config.class, "Could not write system settings: "
+					+ system_conf + " reason : " + e.getMessage(),
+					LogEngine.WARNING);
 			return false;
 		}
 	}
 	
-	public static void registerDatabaseEngine(DatabaseEngine databaseengine){
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @param databaseengine
+	 */
+	public static void registerDatabaseEngine(DatabaseEngine databaseengine) {
 		de = databaseengine;
 	}
-
 	
-	
-	/**Method tries to Lock a file <code>pm.loc</code> in Users <code>APPDATA\publicMAIN</code> folder. And returns result as boolen.
+	/**
+	 * Method tries to Lock a file <code>pm.loc</code> in Users <code>APPDATA\publicMAIN</code> folder. And returns result as boolen.
 	 * It also adds a shutdown hook to the VM to remove Lock from File if Program exits.
 	 * @return <code>true</code> if File could be locked <code>false</code> if File has already been locked
 	 */
 	public static boolean getLock() {
         try {
-            if(!loc_file.getParentFile().exists())loc_file.getParentFile().mkdirs();
+            if(!loc_file.getParentFile().exists()) {
+				loc_file.getParentFile().mkdirs();
+			}
             final RandomAccessFile randomAccessFile = new RandomAccessFile(loc_file, "rw");
             final FileLock fileLock = randomAccessFile.getChannel().tryLock();
             if (fileLock != null) {
@@ -95,59 +122,64 @@ public class Config {
         return false;
     }
 
+	/**
+	 * Standart-Konstruktor f�r die Config-Klasse. 
+	 */
 	private Config() {
-		me=this;
-
-//		System.out.println(loc_file.getParent() + " : " +loc_file.exists()+ ":" + loc_file);
-//		System.out.println(system_conf.getParent() + " : " +system_conf.exists()+ ":" + system_conf);
-//		System.out.println(user_conf.getParent() + " : " +user_conf.exists()+ ":" + user_conf);
-		
+		me = this;
 		settings = new ConfigData(getSourceSettings());
-		LogEngine.log(this, "default settings loaded from source ["+((system_conf.exists())?"S":"0")+"|"+((user_conf.exists())?"U":"0")+"]",LogEngine.INFO);
-		
-		//try to overload system-settings from Jars Location
+		LogEngine.log(
+				this,
+				"default settings loaded from source ["
+						+ ((system_conf.exists()) ? "S" : "0") + "|"
+						+ ((user_conf.exists()) ? "U" : "0") + "]",
+				LogEngine.INFO);
+		// Versuche die System-Einstellungen vom JAR zu �berladen
 		if (system_conf.canRead()) {
 			try (FileInputStream in = new FileInputStream(system_conf)) {
 				ConfigData system = new ConfigData(settings);
 				system.load(in);
-				LogEngine.log(this, "system settings loaded from "+system_conf,LogEngine.INFO);
+				LogEngine.log(this, "system settings loaded from "
+						+ system_conf, LogEngine.INFO);
 				this.settings = system;
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				LogEngine.log(this, "error while loading system settings from "+system_conf,LogEngine.ERROR);
+				LogEngine.log(this, "error while loading system settings from "
+						+ system_conf, LogEngine.ERROR);
 			}
 		}
-		
 		ConfigData user = new ConfigData(settings);
-		//try to overload user-settings from AppData folder
+		// Versuche die Benutzer-Einstellungen aus AppData zu �berladen
 		if (user_conf.canRead()) {
 			try (FileInputStream in = new FileInputStream(user_conf)) {
 				user.load(in);
-				if(user.getCurrentVersion()<MINVERSION) {
+				if (user.getCurrentVersion() < MINVERSION) {
 					settings.setUserID(user.getUserID());
 					settings.setAlias(user.getAlias());
-					LogEngine.log(this, "user settings outdated only userid and alias will be used from " + user_conf, LogEngine.INFO);
-				}
-				else settings=user;
-				LogEngine.log(this, "user settings loaded from " + user_conf, LogEngine.INFO);
+					LogEngine.log(this,
+							"user settings outdated only userid and alias will be used from "
+									+ user_conf, LogEngine.INFO);
+				} else
+					settings = user;
+				LogEngine.log(this, "user settings loaded from " + user_conf,
+						LogEngine.INFO);
 			} catch (IOException e) {
-				LogEngine.log(this, "default config could not be read. reason:" + e.getMessage(), LogEngine.WARNING);
+				LogEngine.log(this, "default config could not be read. reason:"
+						+ e.getMessage(), LogEngine.WARNING);
 			}
-		}
-		
-		
-		
-		
+		}		
 	}
 
 	
-	
+	/**
+	 * Die Methode liefert die Standart-Einstellungen der Anwendung
+	 * 
+	 * @return
+	 */
 	private static ConfigData getSourceSettings() {
 		ConfigData tmp = new ConfigData();
-		
 		tmp.setCurrentVersion(CURRENTVERSION);
-
-		//Network parameters
+		// Netzwerk-Parameter
 		tmp.setMCGroup("230.223.223.223");
 		tmp.setMCPort(6789);
 		tmp.setMCTTL(10);
@@ -157,22 +189,19 @@ public class Config {
 		tmp.setTreeBuildTime(1000);
 		tmp.setPingInterval(30000);
 		tmp.setPingEnabled(false);
-		
-		//FileTransferParameters
+		// Dateitransfer-Einstellungen
 		tmp.setMaxFileSize(5000000);
 		tmp.setFileTransferTimeout(120000);
 		tmp.setFileTransferInfoInterval(30000);
 		tmp.setDisableFileTransfer(false);
-		
-		//usability settings
+		// Standart-Einstellungen der Anwendung
 		tmp.setLogVerbosity(4);
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
 		tmp.setNamePattern("((([-_]?)([a-zA-Z0-9öäüÖÄÜßéá♥])+))+([-_])?");
 		tmp.setNotifyGroup(false);
 		tmp.setNotifyPrivate(false);
-		
-		//local mySQL Database settings
+		// Lokale mySQL Datenbank-Einstellungen
 		tmp.setLocalDBVersion(0);
 		tmp.setLocalDBDatabasename("db_publicMain");
 		tmp.setLocalDBPort("3306");
@@ -184,13 +213,12 @@ public class Config {
 		tmp.setBackupDBPort("3306");
 		tmp.setBackupDBUser("backupPublicMain");
 		tmp.setBackupDBPw("backupPublicMain");
-		
 		return tmp;
 	}
-
-
 	
-
+	/**
+	 * Einstellungen in einem Thread als Datei auf die Festplatte speichern.
+	 */
 	private void savetoDisk(){
 		Runnable target = new Runnable() {
 			public void run() {

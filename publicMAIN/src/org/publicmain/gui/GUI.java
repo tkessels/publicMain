@@ -82,6 +82,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private LocalDBConnection locDBCon;
 	private HTMLContentDialog hcdAbout;
 	private HTMLContentDialog hcdHelp;
+	private boolean afkStatus;	
 
 	/**
 	 * Konstruktor für das GUI mit Initialisierungen
@@ -124,6 +125,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.searchLocalHistory		= new JMenuItem("Search", Help.getIcon("historySym.png"));
 		this.deleteLocalHistory		= new JMenuItem("Delete", Help.getIcon("delHistorySym.png"));
 		this.trayIcon 			= new PMTrayIcon();
+		this.afkStatus 			= false;
 		
 		/**
 		 * Erstellen erforderlicher Controller und Listener
@@ -359,6 +361,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		int index = jTabbedPane.indexOfComponent(cw);
 		if (index >= 0)
 			jTabbedPane.setSelectedIndex(index);
+		cw.focusEingabefeld();
 	}
 	
 	/**
@@ -433,6 +436,26 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public ChatWindow getActiveCW() {
 		return (ChatWindow) jTabbedPane.getSelectedComponent();
 	}	
+	
+	/**
+	 * Diese Methode setzt den AFK Status (afkStatus).
+	 * 
+	 * Diese Methode setzt afkStatus auf false wenn true bzw.
+	 * auf true wenn false
+	 */
+	public void afk(){
+		this.afkStatus =! this.afkStatus;
+	}
+	
+	/**
+	 * Diese Methode gibt den AFK Status zurück.
+	 * 
+	 * Diese Methode gibt true zurück falls der User afk ist ansonsten false.
+	 * @return boolean afkStatus
+	 */
+	public boolean isAFK() {
+		return afkStatus;
+	}
 	
 	
 	/**
@@ -511,12 +534,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param msg, String die Nachricht
 	 */
 	void privSend(long empfUID, String msg) {
-		ChatWindow tmpCW = getCW(empfUID);
-		if(tmpCW == null){
-			tmpCW = new ChatWindow(empfUID);
-			addPrivCW(empfUID, false);
+		if(empfUID!=ce.getUserID()){
+			ce.send_private(empfUID, msg);
+		} else {
+			info("Message to yourself, is not allowed", null, 2);
 		}
-		ce.send_private(empfUID, msg);
 	}
 
 	/**
@@ -711,9 +733,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
-			Node tmp_node = ce.getNodeForNID(tmp.getSender());
-			me.addPrivCW(tmp_node.getUserID(), false);
-			ce.put(tmp);
+			Node tmp_node =null;
+			if(tmp.getSender()!=ce.getMyNodeID())tmp_node = ce.getNodeForNID(tmp.getSender());
+			else if (tmp.getEmpfänger()!=ce.getMyNodeID())tmp_node = ce.getNodeForNID(tmp.getEmpfänger());
+			if(tmp_node!=null){
+				me.addPrivCW(tmp_node.getUserID(), false);
+				ce.put(tmp);
+			}
 		}
 	}
 
@@ -837,7 +863,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			me.toFront();
 		}
 	}
-	
+
+
 	/**
 	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus
 	 */

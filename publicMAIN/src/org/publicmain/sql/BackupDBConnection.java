@@ -87,8 +87,22 @@ public class BackupDBConnection {
 		
 		return null;
 	}
-	
-	
-	
-	
+	public void push_msgs(ResultSet tmp_messages) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void push_users(ResultSet tmp_users) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void push_settings(ResultSet tmp_settings) {
+		// TODO Auto-generated method stub
+		
+	}
+	public boolean getStatus() {
+		//returns true if Backupserver is connected and User in config is present
+		//Displays a Dialog for Userdata if Connection is present but Userdata not
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

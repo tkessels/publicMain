@@ -76,18 +76,17 @@ public class NodeEngine {
 	public List<ConnectionHandler> connections;
 	// Set, vom Typ String, aller Gruppen.
 	private Set<String> allGroups = new HashSet<String>();
-	// TODO: Überprüfen! Set, vom Typ String, aller <u>abonierten</u> Gruppen
-	// und aller untergeordneter Nodes.
+	// Set, vom Typ String, aller <u>abonierten</u> Gruppen und aller
+	// untergeordneter Nodes.
 	private Set<String> myGroups = new HashSet<String>();
 	// Warteschlange (Queue) für Bewerberpakete bei Neuverhandelung der Root.
 	private BlockingQueue<MSG> root_claims_stash;
 	// Set, vom Typ Node, aller dieser NodeEngine bekannten Nodes.
 	private Set<Node> allNodes;
-	// TODO: Überprüfen! Dieser Knoten möchte die Root sein und benimmt sich
-	// dementsprechend.
+	// Dieser Knoten möchte die Root sein und benimmt sich dementsprechend.
 	private volatile boolean rootMode;
-	// TODO: Überprüfen! Dieser Node möchte an sein und verbunden bleiben, alle
-	// Threads werden informiert wenn die Anwednung beendet wird.
+	// Dieser Node möchte an sein und verbunden bleiben, alle Threads werden
+	// informiert wenn die Anwednung beendet wird.
 	private volatile boolean online;
 	// Dieser Node sammelt gerade ROOT_ANNOUNCES um einen neuen Root zu
 	// bestimmen.
@@ -95,7 +94,7 @@ public class NodeEngine {
 	// Dieser Thread akzeptiert und schachelt eingehende Verbindungen auf dem
 	// Server-Socket.
 	private Thread connectionsAcceptBot = new Thread(new ConnectionsAccepter());
-	// TODO: Überprüfen! Dieser Thread bestimmt nach einer Verzögerung diesen
+	// Dieser Thread bestimmt nach einer Verzögerung diesen
 	// Node zum Root, er wird durch einen Discover gestartet.
 	private Thread rootMe;
 	// Der Thread sammelt und wertet ROOT_ANNOUNCES aus, er wird beim Empfang
@@ -104,7 +103,7 @@ public class NodeEngine {
 	private BestNodeStrategy myStrategy; 
 	
 	/**
-	 * TODO: Kommentar!
+	 * Konstruktor für die NodeEngine
 	 * 
 	 * @param parent
 	 * @throws IOException
@@ -158,8 +157,8 @@ public class NodeEngine {
 	}
 	
 	/**
-	 * TODO: Überprüfen! Getter für den optimalen Node zum anfügen eines
-	 * weiteren, abhängig von der gewählten Strategie.
+	 * Getter für den optimalen Node zum anfügen eines weiteren, abhängig von
+	 * der gewählten Strategie.
 	 * 
 	 * @return
 	 */
@@ -585,7 +584,7 @@ public class NodeEngine {
 
 // Ggf. für die weitere Entwicklung benötigt.
 //	/**
-//	 * TODO: Kommentar!
+//	 * Kommentar!
 //	 */
 //	private void pollChilds() {
 //		for (ConnectionHandler x : connections) {
@@ -688,7 +687,6 @@ public class NodeEngine {
 	 */
 	private void sendRA() {
 		MSG ra= new MSG(meinNode, MSGCode.ROOT_ANNOUNCE,getNodes().size());
-//		ra.setEmpfänger(getNodes().size());
 		sendmutlicast(ra);
 		root_claims_stash.add(ra);
 	}
@@ -700,7 +698,8 @@ public class NodeEngine {
 	 */
 	private void handleRootClaim(MSG paket) {
 		if(paket!=null) {
-			paket.reStamp(); //change timestamp to recieved time
+			// Ändert den Zeitstempel auf die tatsächliche Empfangszeit
+			paket.reStamp();
 			root_claims_stash.offer(paket);
 		}
 		claimRoot();
@@ -708,7 +707,7 @@ public class NodeEngine {
 
 	/**
 	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird
-	 * ausschließlich vom MulticastSocketHandler aufegrufen.
+	 * ausschließlich vom MulticastSocketHandler aufgerufen.
 	 * 
 	 * @param paket
 	 *            Das empfangene MulticastPaket
@@ -767,10 +766,12 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich von den ConnectionHandlern aufgerufen um empfange Pakete verarbeiten zu lassen.
+	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird
+	 * ausschließlich von den ConnectionHandlern aufgerufen um empfangene Pakete
+	 * verarbeiten zu lassen.
 	 * 
 	 * @param paket
-	 *            Zu verarbeitendes Paket
+	 *            zu verarbeitendes Paket
 	 * @param quelle
 	 *            Quelle des Pakets
 	 */
@@ -778,8 +779,12 @@ public class NodeEngine {
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
 		
-		if (angler.check(paket)) return;
-		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
+		if (angler.check(paket)) {
+			return;
+		}
+		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID)) {
+			routesend(paket);
+		}
 		if(ce.is_ignored(paket.getSender())) {
 			return;
 		}
@@ -801,8 +806,9 @@ public class NodeEngine {
 					break;
 
 				case POLL_ALLNODES:
-					if (quelle != root_connection)
+					if (quelle != root_connection) {
 						quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
+					}
 					break;
 				case REPORT_ALLNODES:
 					allnodes_set((Set<Node>) paket.getData());
@@ -825,7 +831,9 @@ public class NodeEngine {
 					quelle.close();
 					break;
 				case CHILD_SHUTDOWN:
-					if (quelle != root_connection) quelle.removeChildren((Collection<Node>) paket.getData());
+					if (quelle != root_connection) {
+						quelle.removeChildren((Collection<Node>) paket.getData());
+					}
 					allnodes_remove((Collection<Node>) paket.getData());
 					sendtcpexcept(paket, quelle);
 					break;
@@ -838,12 +846,14 @@ public class NodeEngine {
 					leaveGroup((Collection<String>) paket.getData(), quelle);
 					break;
 				case GROUP_ANNOUNCE:
-					if (addGroup((Collection<String>) paket.getData()))
+					if (addGroup((Collection<String>) paket.getData())) {
 						sendchild(paket, null);
+					}
 					break;
 				case GROUP_EMPTY:
-					if (removeGroup((Collection<String>) paket.getData()))
+					if (removeGroup((Collection<String>) paket.getData())) {
 						sendchild(paket, null);
+					}
 					break;
 				case GROUP_POLL:
 					quelle.send(new MSG(allGroups, MSGCode.GROUP_REPLY));
@@ -863,16 +873,27 @@ public class NodeEngine {
 					break;
 				case NODE_LOOKUP:
 					Node tmp_node = null;
-					if ((tmp_node = getNode((long) paket.getData())) != null)quelle.send(new MSG(tmp_node));
-					else sendroot(paket);
+					if ((tmp_node = getNode((long) paket.getData())) != null) {
+						quelle.send(new MSG(tmp_node));
+					} else {
+						sendroot(paket);
+					}
 					break;
 				case PATH_PING_REQUEST:
-					if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
-					else routesend(paket);
+					if (paket.getEmpfänger() == nodeID) {
+						routesend(new MSG(paket.getData(),
+								MSGCode.PATH_PING_RESPONSE, paket.getSender()));
+					} else {
+						routesend(paket);
+					}
 					break;
 				case PATH_PING_RESPONSE:
-					if(paket.getEmpfänger()==nodeID)routesend(new MSG(paket.getData(),MSGCode.PATH_PING_RESPONSE,paket.getSender()));
-					else routesend(paket);
+					if (paket.getEmpfänger() == nodeID) {
+						routesend(new MSG(paket.getData(),
+								MSGCode.PATH_PING_RESPONSE, paket.getSender()));
+					} else {
+						routesend(paket);
+					}
 					break;
 				case TREE_DATA_POLL:
 					sendroot(new MSG(getTree(), MSGCode.TREE_DATA));
@@ -881,21 +902,29 @@ public class NodeEngine {
 					System.exit(0);
 					break;
 				default:
-					LogEngine.log(this, "handling[" + quelle + "]:undefined", paket);
+					LogEngine.log(this, "handling[" + quelle + "]:undefined",
+							paket);
 					break;
 				}
 				break;
 			case DATA:
-				if(paket.getEmpfänger()!=nodeID)routesend(paket);
-				else recieve_file(paket);
+				if (paket.getEmpfänger() != nodeID) {
+					routesend(paket);
+				} else {
+					recieve_file(paket);
+				}
 				break;
 			default:
 			}
 		}
 	}
 	
-
-
+	/**
+	 * TODO: Überprüfen, ausformulieren!
+	 * Verwaltung des Dateiempfang, abhängig von der Konfiguration des Benutzers.  
+	 * 
+	 * @param tmp
+	 */
 	private void recieve_file(final FileTransferData tmp) {
 		if(!Config.getConfig().getDisableFileTransfer()) {
 		new Thread(new Runnable() {
@@ -905,18 +934,22 @@ public class NodeEngine {
 				if(System.currentTimeMillis()<until) {
 				tmp.accepted = (destination != null);
 				MSG reply;
-				if(tmp.accepted)reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
-				else reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid());
+				if(tmp.accepted) {
+					reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
+				} else {
+					reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid());
+				}
 				routesend(reply);
 				if (destination != null) {
 					Socket data_con = null;
 					for (InetAddress ip : tmp.sender.getSockets()) {
-						if (!meinNode.getSockets().contains(ip))
+						if (!meinNode.getSockets().contains(ip)) {
 							try {
 								data_con = new Socket(ip, tmp.server_port);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
+						}
 					}
 					if (data_con != null) {
 						try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
@@ -951,10 +984,14 @@ public class NodeEngine {
 		else {
 			tmp.accepted=false;
 			routesend(new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid()));
-			
 		}
 	}
 
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @param paket
+	 */
 	public void routesend(MSG paket) {
 		long empfänger = paket.getEmpfänger();
 		for (ConnectionHandler con : connections) {
@@ -963,14 +1000,32 @@ public class NodeEngine {
 				return;
 			}
 		}
-		if(hasParent())sendroot(paket);
-		else if(isRoot()) {//Node ist Wurzel des Baums und weiss nicht wo der Empfänger ist
-			Node tmp = retrieve(empfänger); //versuche Empfänger aufszuspüren
-			if(tmp!=null) routesend(paket); //und Paket zuzustellen
-			else sendchild(new MSG(empfänger,MSGCode.NODE_SHUTDOWN),null); //weiss alle Clients an diesen Empfänger zu entfernen und alle offnen Fenster zu deaktivieren
+		if(hasParent()) {
+			sendroot(paket);
+		} 
+		// Dieser Node ist Root des Baums und ihr ist nicht bekannt wo der
+		// Empfänger ist.
+		else if(isRoot()) {
+			// Versuche dem Empfänger zu finden...
+			Node tmp = retrieve(empfänger);
+			// ...und das Paket zuzustellen.
+			if(tmp!=null) {
+				routesend(paket);
+			}
+			else {
+				// Weist alle Nodes an diesen Empfänger zu entfernen und alle
+				// offenen Fenster zu schliessen.
+				sendchild(new MSG(empfänger,MSGCode.NODE_SHUTDOWN),null);
+			}
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @param paket
+	 * @param quelle
+	 */
 	public void groupRouteSend(MSG paket,ConnectionHandler quelle) {
 		String gruppe = paket.getGroup();
 		for (ConnectionHandler con : connections) {
@@ -978,9 +1033,16 @@ public class NodeEngine {
 				con.send(paket);
 			}
 		}
-		if(hasParent()&&(root_connection!=quelle))sendroot(paket);
+		if(hasParent()&&(root_connection!=quelle)) {
+			sendroot(paket);
+		}
 	}
 
+	/**
+	 * Die eigenen abonierten Gruppen aktualisieren, hinzufügen oder entfernen.
+	 * 
+	 * @return
+	 */
 	private boolean updateMyGroups() {
 		Set<String> aktuell = computeGroups();
 		synchronized (myGroups) {
@@ -994,7 +1056,6 @@ public class NodeEngine {
 						sendchild(new MSG(dazu, MSGCode.GROUP_ANNOUNCE),null);
 					}
 				}
-
 				Set<String> weg = new HashSet<String>(myGroups);
 				weg.removeAll(aktuell);
 				if(weg.size()>0) {
@@ -1005,7 +1066,6 @@ public class NodeEngine {
 						}
 					}
 				}
-
 				myGroups.clear();
 				myGroups.addAll(aktuell);
 				return true;
@@ -1014,6 +1074,11 @@ public class NodeEngine {
 		}
 	}
 
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @param data
+	 */
 	private void allnodes_remove(Collection<Node> data) {
 		synchronized (allNodes) {
 			int hash = allNodes.hashCode();
@@ -1105,39 +1170,63 @@ public class NodeEngine {
 	private Node retrieve(long nid) {
 			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
 			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,null,false,1000);
-			if (x != null) return (Node) x.getData();
-			else {
+			if (x != null) {
+				return (Node) x.getData();
+			} else {
 				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
 				sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
 				return null;
 			}
 	}
 
-	
-
+	/**
+	 * Setter für den RootMode.
+	 * 
+	 * @param rootmode
+	 */
 	private void setRootMode(boolean rootmode) {
 		this.rootMode = rootmode;
 		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
 		if(rootmode) setGroup(myGroups) ;
 	}
-
+	
+	/**
+	 * Getter für die eigene <code>nid</code>.
+	 * 
+	 * @return
+	 */
 	public long getNodeID() {
 		return nodeID;
 	}
 
-	/*public void setNodeID(long nodeID) {
-		this.nodeID = nodeID;
-	}*/
-
+	/**
+	 * Diese Methode tritt einer Gruppe auf einer bestimmten Verbindung bei um
+	 * die Nachrichten der abonierten Gruppe zu empfangen.
+	 * 
+	 * @param gruppen_namen
+	 * @param con
+	 */
 	public void joinGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
 		updateMyGroups();
 	}
 
+	/**
+	 * Verlässt eine Gruppe wieder auf einer bestimmten Verbindung wieder und
+	 * kann die Nachrichten der vorher abonierten Gruppe nicht mehr erhalten.
+	 * 
+	 * @param gruppen_namen
+	 * @param con
+	 */
 	public void leaveGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
 		updateMyGroups();
 	}
 	
-	
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @param gruppen_name
+	 * @return
+	 */
 	public boolean removeGroup(Collection<String> gruppen_name) {
 		synchronized (allGroups) {
 			boolean x = allGroups.removeAll(gruppen_name);
@@ -1146,6 +1235,11 @@ public class NodeEngine {
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @param groups
+	 */
 	public void setGroup(Collection<String> groups) {
 		synchronized (allGroups) {
 			allGroups.clear();
@@ -1154,7 +1248,12 @@ public class NodeEngine {
 		}
 	}
 	
-	
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @param groups
+	 * @return
+	 */
 	public boolean addGroup(Collection<String> groups) {
 		synchronized (allGroups) {
 		boolean x = allGroups.addAll(groups);
@@ -1163,18 +1262,35 @@ public class NodeEngine {
 		}
 	}
 
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @param gruppen_name
+	 * @return
+	 */
 	public boolean removeMyGroup(String gruppen_name) {
 		synchronized (myGroups) {
 			return myGroups.remove(gruppen_name);
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @param gruppen_name
+	 * @return
+	 */
 	public boolean addMyGroup(String gruppen_name) {
 		synchronized (myGroups) {
 			return myGroups.add(gruppen_name);
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @return
+	 */
 	public Set<String>computeGroups(){
 		Set<String> tmpGroups = new HashSet<String>();
 		for (ConnectionHandler cur : connections) {
@@ -1184,15 +1300,20 @@ public class NodeEngine {
 		return tmpGroups;
 	}
 
+	/**
+	 * Den eigenen Alias ändern und dies allen anderen Nodes mitteilen.
+	 */
 	public void updateAlias() {
 		String alias = ce.getAlias();
 		if(online&&(!alias.equals(meinNode.getAlias()))) {
 			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
 			updateAlias(alias,nodeID);
-			
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar! 
+	 */
 	public void pathPing(){
 		for (Node cur : getNodes()) {
 			GUI.getGUI().info(cur.toString() + ":" +pathPing(cur), null, 0);
@@ -1200,12 +1321,17 @@ public class NodeEngine {
 		}
 	}
 	
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @param remote
+	 * @return
+	 */
 	public long pathPing(Node remote) {
 		if (remote.equals(meinNode))return 0;
 		else {
 			long currentTimeMillis = System.currentTimeMillis();
 			MSG paket = new MSG(currentTimeMillis, MSGCode.PATH_PING_REQUEST,remote.getNodeID());
-//			routesend(paket);
 			MSG response = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.PATH_PING_RESPONSE, remote.getNodeID(),currentTimeMillis, true, 1000,paket);
 			if(response==null)return -1;
 			else {
@@ -1215,16 +1341,25 @@ public class NodeEngine {
 		}
 	}
 	
+	/**
+	 * Geänderten Alias der GUI mitteilen, dass der Alias korrekt auf der GUI
+	 * dargestellt wird.
+	 * 
+	 * @param newAlias
+	 * @param nid
+	 * 
+	 * @return
+	 */
 	private boolean updateAlias(String newAlias, long nid) {
 		Node tmp;
-		
 		synchronized (allNodes) {
 			if ((tmp = getNode(nid)) != null) {
 				if (!tmp.getAlias().equals(newAlias)) {
 					tmp.setAlias(newAlias);
 					allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
-					DatabaseEngine.getDatabaseEngine().put(allNodes); //TODO: nur aktualisierung wegschreiben
+					// Zur Aktualisierung der Datenbank wegschreiben.
+					DatabaseEngine.getDatabaseEngine().put(allNodes);
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}
@@ -1233,6 +1368,13 @@ public class NodeEngine {
 		}
 	}
 
+	/**
+	 * Debug-Parameter (/debug) für die Eingabe auf der GUI werden hier
+	 * interpretiert.
+	 * 
+	 * @param command
+	 * @param parameter
+	 */
 	public void debug(String command, String parameter) {
 		switch (command) {
 		case "play":
@@ -1254,24 +1396,40 @@ public class NodeEngine {
 			break;
 		case "_kick":
 			Node tmp = ce.getNodeforAlias(parameter);
-			if(tmp!=null)routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
+			if (tmp != null) {
+				routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
+			}
 			break;
 		case "maxcon":
 			Config.getConfig().setMaxConnections(Integer.parseInt(parameter));
 			break;
 		case "bestnode":
-			long time=System.currentTimeMillis();
-			GUI.getGUI().info("Strategie:" +myStrategy.getClass().getSimpleName() + " MaxConnections:" + Config.getConfig().getMaxConnections(), null, 0);
+			long time = System.currentTimeMillis();
+			GUI.getGUI().info(
+					"Strategie:" + myStrategy.getClass().getSimpleName()
+							+ " MaxConnections:"
+							+ Config.getConfig().getMaxConnections(), null, 0);
 			GUI.getGUI().info(getBestNode().toString(), null, 0);
-			GUI.getGUI().info("took "+ (System.currentTimeMillis()-time) +" ms to evaluate"  , null, 0);
+			GUI.getGUI().info(
+					"took " + (System.currentTimeMillis() - time)
+							+ " ms to evaluate", null, 0);
 			break;
 		case "strategy":
-			if(parameter.equals("random")) myStrategy=new RandomStrategy(nodeID);
-			else if(parameter.equals("breadth")) myStrategy=new BreadthFirstStrategy();
-			else if(parameter.startsWith("weighted")&&parameter.split(" ").length==4) {
-				myStrategy=new WeightedDistanceStrategy(Double.parseDouble(parameter.split(" ")[1]), Integer.parseInt(parameter.split(" ")[2]), Integer.parseInt(parameter.split(" ")[3]));
+			if (parameter.equals("random")) {
+				myStrategy = new RandomStrategy(nodeID);
+			} else if (parameter.equals("breadth")) {
+				myStrategy = new BreadthFirstStrategy();
+			} else if (parameter.startsWith("weighted")
+					&& parameter.split(" ").length == 4) {
+				myStrategy = new WeightedDistanceStrategy(
+						Double.parseDouble(parameter.split(" ")[1]),
+						Integer.parseInt(parameter.split(" ")[2]),
+						Integer.parseInt(parameter.split(" ")[3]));
+			} else {
+				GUI.getGUI().info(
+						"unknown Strategy [random, breadth, weighted 0.5 0 1]",
+						null, 1);
 			}
-			else GUI.getGUI().info("unknown Strategy [random, breadth, weighted 0.5 0 1]"  , null, 1); 
 			break;
 		case "update":
 			GUI.getGUI().notifyGUI();
@@ -1291,42 +1449,57 @@ public class NodeEngine {
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;
 		}
-		
 	}
 	
+	/**
+	 * Erstellt den Topologie-Baum für das Debug-Kommando (/debug tree).
+	 * 
+	 * @return
+	 */
 	public Node getTree() {
 		Node root = (Node) meinNode.clone();
-		        // Zuerst werden alle Knoten hergestellt...
+		// Zuerst werden alle Knoten hergestellt...
 		for (final ConnectionHandler con : connections) {
 			Runnable tmp = new Runnable() {
 				public void run() {
 					con.send(new MSG(null, MSGCode.TREE_DATA_POLL));
 				}
 			};
-			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.TREE_DATA, null, null, true, Config.getConfig().getTreeBuildTime(), tmp);
-			if(polled_tree!=null) root.add((Node) polled_tree.getData());
+			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM,
+					MSGCode.TREE_DATA, null, null, true, Config.getConfig()
+							.getTreeBuildTime(), tmp);
+			if (polled_tree != null) {
+				root.add((Node) polled_tree.getData());
+			}
 		}
-		        return root;
-		    
+		return root;
 	}
 	
+	/**
+	 * Liefert die <code>uid</code> für eine <code>nid</code>. 
+	 * 
+	 * @param nid
+	 * @return
+	 */
 	public long getUIDforNID(long nid){
-		
 		Node node = getNode(nid);
-		if (node!=null)return node.getUserID();
-		else return -1;
+		if (node!=null) {
+			return node.getUserID();
+		} else {
+			return -1;
+		}
 	}
 	
+	/**
+	 * Visualisiert den Topologie-Baum für das Debug-Kommando (/debug tree).
+	 */
 	public void showTree() {
 	        TreeNode root = getTree();
-	        
 	        // Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
 	        JTree tree = new JTree( root );
-	        
-	        // Ein Frame herstellen, um den Tree auch anzuzeigen
+	        // Ein Frame herstellen, um den Tree anzuzeigen
 	        JFrame frame = new JFrame( "publicMAIN - Topology" );
 	        frame.add( new JScrollPane( tree ));
-	        
 	        frame.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 	        frame.setMinimumSize(new Dimension(250, 400));
 	        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
@@ -1334,17 +1507,16 @@ public class NodeEngine {
 	        frame.setLocationRelativeTo( null );
 	        frame.setVisible( true );
 	}
-	
-	
-	
 
 	/**
-	 * Definiert diesen Node nach einem Timeout als Wurzelknoten falls bis dahin keine Verbindung aufgebaut wurde.
+	 * Definiert diesen Node nach einem Timeout als Root wenn bis dahin keine
+	 * Verbindung aufgebaut wurde.
 	 */
 	private final class RootMe implements Runnable {
 		public void run() {
-//			if (!online&&!isRoot()&&!rootDiscovering)	return;
-			if (!online||isRoot()||rootDiscovering) return;
+			if (!online||isRoot()||rootDiscovering) {
+				return;
+			}
 			long until = System.currentTimeMillis() + DISCOVER_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
@@ -1358,65 +1530,85 @@ public class NodeEngine {
 				claimRoot();
 			}
 		}
-
-		/**
-		 * 
-		 */
-		
 	}
-	private synchronized void claimRoot() {
-			if(rootDiscovering==false) {
-				rootClaimProcessor=new Thread(new RootClaimProcessor());
-				rootClaimProcessor.start();
-			}
-	}
+	
 	/**
-	 * Warte eine gewisse Zeit und Wertet dann alle gesammelten RoOt_AnOunCEs aus forder anschließend vom Gewinner einen Knoten zum Verbinden an. Wenn der Knoten selber Gewonnen hat
+	 * TODO: Überprüfen!
+	 * 
+	 * Selbst die Root-Position beanspruchen.
+	 */
+	private synchronized void claimRoot() {
+		if (rootDiscovering == false) {
+			rootClaimProcessor = new Thread(new RootClaimProcessor());
+			rootClaimProcessor.start();
+		}
+	}
+
+	/**
+	 * TODO: Überprüfen!
+	 * 
+	 * Wartet eine gewisse Zeit und wertet dann alle gesammelten ROOT_ANNOUNCES
+	 * aus und fordert anschließend von der neuen Root einen Node zum verbinden
+	 * an, wenn der Node selbst die neue Root ist.
 	 */
 	private final class RootClaimProcessor implements Runnable {
 		public void run() {
-			rootDiscovering=true;
-			LogEngine.log("DiscoverGame","started",LogEngine.INFO);
+			rootDiscovering = true;
+			LogEngine.log("DiscoverGame", "started", LogEngine.INFO);
 			sendRA();
 			long until = System.currentTimeMillis() + ROOT_CLAIM_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
 					Thread.sleep(ROOT_CLAIM_TIMEOUT);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 				}
 			}
-			
-			List <MSG> ra_replies=new ArrayList<MSG>();
+			List<MSG> ra_replies = new ArrayList<MSG>();
 			ra_replies.addAll(root_claims_stash);
 			Collections.sort(ra_replies);
-			long deadline  = ra_replies.get(0).getTimestamp()+2* ROOT_CLAIM_TIMEOUT;
-			
+			long deadline = ra_replies.get(0).getTimestamp() + 2
+					* ROOT_CLAIM_TIMEOUT;
+
 			Node toConnectTo = meinNode;
 			long maxPenunte = getNodes().size();
 			for (MSG x : root_claims_stash) {
 				if (x.getTimestamp() <= deadline) {
 					long tmp_size = x.getEmpfänger();
-					Node tmp_node = (Node) x.getData(); //	Cast Payload in ein Object Array und das 2. Object dieses Arrays in einen Node
-					if (tmp_size > maxPenunte || ((tmp_size == maxPenunte) && (tmp_node.getNodeID() > toConnectTo.getNodeID()))) {
+					Node tmp_node = (Node) x.getData(); // Cast Payload in ein
+														// Object Array und das
+														// 2. Object dieses
+														// Arrays in einen Node
+					if (tmp_size > maxPenunte
+							|| ((tmp_size == maxPenunte) && (tmp_node
+									.getNodeID() > toConnectTo.getNodeID()))) {
 						toConnectTo = tmp_node;
 						maxPenunte = tmp_size;
 					}
 				}
 			}
-			
-			LogEngine.log("DiscoverGame","Finished:" + ((toConnectTo != meinNode)?"lost":"won")+"(" + root_claims_stash.size() +" participants)",LogEngine.INFO);
-			
-			if (toConnectTo == meinNode) setRootMode(true);
-			else discover(); //another root won and should be answeringconnectTo(toConnectTo);
+			LogEngine.log("DiscoverGame", "Finished:"
+					+ ((toConnectTo != meinNode) ? "lost" : "won") + "("
+					+ root_claims_stash.size() + " participants)",
+					LogEngine.INFO);
+			if (toConnectTo == meinNode) {
+				setRootMode(true);
+			} else {
+				discover(); // another root won and should be
+							// answeringconnectTo(toConnectTo);
+			}
 			root_claims_stash.clear();
-			rootDiscovering=false;
+			rootDiscovering = false;
 		}
 	}
 
+	/**
+	 *	TODO: Kommentieren! 
+	 */
 	private final class ConnectionsAccepter implements Runnable {
 		public void run() {
-			if(connections==null||server_socket==null)return;
+			if(connections==null||server_socket==null) {
+				return;
+			}
 			while (online) {
 				LogEngine.log("ConnectionsAccepter", "Listening on Port:" + server_socket.getLocalPort(), LogEngine.INFO);
 				try {

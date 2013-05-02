@@ -184,4 +184,4 @@ CREATE OR REPLACE VIEW `db_publicmain`.`v_pullALL_t_settings` AS SELECT * FROM t
 DROP VIEW IF EXISTS `db_publicmain`.`v_searchInHistory` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_searchInHistory`;
 USE `db_publicmain`;
-CREATE  OR REPLACE VIEW `db_publicmain`.`v_searchInHistory` AS SELECT fk_t_users_userID_sender 'userID_Sender', fk_t_users_userID_empfaenger 'userID_Recipient', timestmp 'time', t1.displayName 'sender', t2.displayName 'recipient', txt 'message', fk_t_groups_groupName 'group' FROM t_messages as t1 left join t_users as t2 on fk_t_users_userID_sender = userID AND fk_t_users_userID_empfaenger = userID WHERE fk_t_msgtype_id is null;
+CREATE OR REPLACE VIEW `db_publicmain`.`v_searchInHistory` AS SELECT fk_t_users_userID_sender 'userID_Sender', fk_t_users_userID_empfaenger 'userID_Recipient', timestmp 'time', t1.displayName 'sender', t2.displayName 'recipient', txt 'message', fk_t_groups_groupName 'group' FROM t_messages as t1 left join t_users as t2 on fk_t_users_userID_empfaenger = userID WHERE fk_t_msgtype_id is null ORDER BY time;

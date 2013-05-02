@@ -63,8 +63,13 @@ public class DatabaseEngine {
 	}
 	
 	public void writeConfig(){
-		localDB.writeAllSettingsToDB(Config.getConfig());
-	}
+		Runnable runnable = new Runnable() {
+			public void run() {
+				localDB.writeAllSettingsToDB(Config.getConfig());
+			}
+		};
+		new Thread(runnable).start();
+		}
 	
 	public synchronized static DatabaseEngine getDatabaseEngine() {
 		if(me==null) new DatabaseEngine();
@@ -233,8 +238,9 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
 	public JTable selectMSGsByAlias(String alias,GregorianCalendar begin, GregorianCalendar end,String text) {
-		ResultSet tmp;
+		ResultSet tmpRS;
 
+		
 		String para_uid	=null;
 		String para_alias	=(alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
 		String para_group	=null;
@@ -244,15 +250,16 @@ public class DatabaseEngine {
 		
 		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
-		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
-		else tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		if (para_begin<para_end) tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		else tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
 
-		if(tmp!=null){
+		if(tmpRS!=null){
 
-
+//			getResultInStringArray(tmpRS);
+			
 			try {
 //				return new JTable(buildTableModel(tmp));
-				return buildTable(tmp);
+				return buildTable(tmpRS);
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 
@@ -262,7 +269,47 @@ public class DatabaseEngine {
 		return allMSGs();
 
 	}
+	
+	public void printüberschriften(DatabaseDaten parameterObject){
+		for (String über: parameterObject.spaltenüberschriften) {				
+		System.out.println(über);	
+		}
+		
+	}
 
+
+	private static DatabaseDaten getResultData(ResultSet rs) throws SQLException{
+		
+		 ResultSetMetaData metaData = rs.getMetaData();
+
+		    // names of columns
+		 int columnCount = metaData.getColumnCount();
+		 String[] spaüb= new String[columnCount];
+		    for (int column = 1; column <= columnCount; column++) {
+		        spaüb[column-1]= metaData.getColumnName(column);
+		    }
+
+		    // data of the table
+		    rs.last();
+		    int rows = rs.getRow();
+		    rs.beforeFirst();
+		    
+		    String[][] stringdata = new String[rows][columnCount];
+		    while (rs.next()) {
+		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+		        	Object zelle = rs.getObject(columnIndex);
+					stringdata[rs.getRow()-1][columnIndex-1]=(zelle!=null)?zelle.toString():"";
+		        }
+		    }
+		    
+		    return new DatabaseDaten(spaüb, stringdata);
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
@@ -360,65 +407,67 @@ public class DatabaseEngine {
 	
 	public static JTable buildTable(ResultSet rs) throws SQLException{
 
-		    ResultSetMetaData metaData = rs.getMetaData();
-
-		    // names of columns
-		    int columnCount = metaData.getColumnCount();
-		    String[] columnNames = new String[columnCount];
-		    for (int column = 1; column <= columnCount; column++) {
-		        columnNames[column-1]=metaData.getColumnName(column);
-		    }
-		    System.out.println(columnNames);
-		    
-
-		    // data of the table
-		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		    while (rs.next()) {
-		        Vector<Object> vector = new Vector<Object>();
-		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-		            vector.add(rs.getObject(columnIndex));
-		        }
-		        data.add(vector);
-		    }
-//		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
-//		    tblModel.setColumnIdentifiers(colHdrs);
-		    
-		    data.toArray();
-		    Object [][] array = new Object[data.size()][columnCount];
-		    int i  =0;
-		    for (Vector<Object> tmp : data) {
-			    array[i++]=tmp.toArray();
-		}
-		  
-		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
-		    tmod.setColumnIdentifiers(columnNames);
-		    JTable tmp = new JTable(tmod);
-		    
-		    return tmp;
+//		    ResultSetMetaData metaData = rs.getMetaData();
+//
+//		    // names of columns
+//		    int columnCount = metaData.getColumnCount();
+//		    String[] columnNames = new String[columnCount];
+//		    for (int column = 1; column <= columnCount; column++) {
+//		        columnNames[column-1]=metaData.getColumnName(column);
+//		    }
+//		    System.out.println(columnNames);
+//		    
+//
+//		    // data of the table
+//		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+//		    while (rs.next()) {
+//		        Vector<Object> vector = new Vector<Object>();
+//		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+//		            vector.add(rs.getObject(columnIndex));
+//		        }
+//		        data.add(vector);
+//		    }
+////		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
+////		    tblModel.setColumnIdentifiers(colHdrs);
+//		    
+//		    data.toArray();
+//		    Object [][] array = new Object[data.size()][columnCount];
+//		    int i  =0;
+//		    for (Vector<Object> tmp : data) {
+//			    array[i++]=tmp.toArray();
+//		}
+//		  
+//		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
+//		    tmod.setColumnIdentifiers(columnNames);
+//		    JTable tmp = new JTable(tmod);
+//		    
+//		    return tmp;
+		return new JTable(buildTableModel(rs));
 		
 	}
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
-
-	    ResultSetMetaData metaData = rs.getMetaData();
-
-	    // names of columns
-	    Vector<String> columnNames = new Vector<String>();
-	    int columnCount = metaData.getColumnCount();
-	    for (int column = 1; column <= columnCount; column++) {
-	        columnNames.add(metaData.getColumnName(column));
-	    }
-
-	    // data of the table
-	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-	    while (rs.next()) {
-	        Vector<Object> vector = new Vector<Object>();
-	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-	            vector.add(rs.getObject(columnIndex));
-	        }
-	        data.add(vector);
-	    }
-
-	    return new DefaultTableModel(data, columnNames);
+		DatabaseDaten tmp = getResultData(rs);
+		
+		//	    ResultSetMetaData metaData = rs.getMetaData();
+//
+//	    // names of columns
+//	    Vector<String> columnNames = new Vector<String>();
+//	    int columnCount = metaData.getColumnCount();
+//	    for (int column = 1; column <= columnCount; column++) {
+//	        columnNames.add(metaData.getColumnName(column));
+//	    }
+//
+//	    // data of the table
+//	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+//	    while (rs.next()) {
+//	        Vector<Object> vector = new Vector<Object>();
+//	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+//	            vector.add(rs.getObject(columnIndex));
+//	        }
+//	        data.add(vector);
+//	    }
+//
+	    return new DefaultTableModel(tmp.zelleninhalt,tmp.spaltenüberschriften);
 
 	}
 

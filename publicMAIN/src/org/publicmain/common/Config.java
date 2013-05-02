@@ -9,6 +9,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 
+import javax.swing.SwingUtilities;
+
 import org.publicmain.sql.DatabaseEngine;
 
 
@@ -42,7 +44,7 @@ public class Config {
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
 		
-		if(de!=null) de.writeConfig();				//TODO: hier ne Alternative überlegen da es sonst NuppointerExceptions in der LocDB gibt da diese die uID aus der CE haben will die´s noch nicht gibt oder wie oder was!!!
+		if(de!=null) de.writeConfig();				
 		me.savetoDisk();
 	}
 	
@@ -190,7 +192,7 @@ public class Config {
 	
 
 	private void savetoDisk(){
-		new Thread(new Runnable() {
+		Runnable target = new Runnable() {
 			public void run() {
 				try (final FileOutputStream fos = new FileOutputStream(
 						user_conf)) {
@@ -204,10 +206,8 @@ public class Config {
 							LogEngine.WARNING);
 				}
 			}
-		}).start();
+		};
+		new Thread(target).start();
 	}
-
-
-
 }
 

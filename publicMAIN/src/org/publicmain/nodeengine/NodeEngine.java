@@ -110,8 +110,9 @@ public class NodeEngine {
 	 */
 	public NodeEngine(ChatEngine parent) throws IOException {
 
-		allNodes = new HashSet<Node>();
+		allNodes = Collections.synchronizedSet(new HashSet<Node>());
 		connections = new CopyOnWriteArrayList<ConnectionHandler>();
+		
 
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
 
@@ -287,7 +288,6 @@ public class NodeEngine {
 	 * @param nachricht
 	 */
 	private void sendmutlicast(MSG nachricht) {
-		DatabaseEngine.getDatabaseEngine().put(nachricht);
 		multi_socket.sendmutlicast(nachricht);
 	}
 
@@ -300,7 +300,6 @@ public class NodeEngine {
 	 * @param target
 	 */
 	private void sendunicast(MSG msg, Node target) {
-		DatabaseEngine.getDatabaseEngine().put(msg);
 		multi_socket.sendunicast(msg, target);
 	}
 	
@@ -310,8 +309,6 @@ public class NodeEngine {
 	 * @param nachricht
 	 */
 	public void sendtcp(MSG nachricht) {
-		DatabaseEngine.getDatabaseEngine().put(nachricht);
-
 		if (hasParent()) {
 			sendroot(nachricht);
 		}
@@ -330,7 +327,6 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
-
 		if (hasParent() && root_connection != ch) {
 			root_connection.send(msg);
 		}
@@ -347,8 +343,6 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendchild(MSG msg, ConnectionHandler ch) {
-		DatabaseEngine.getDatabaseEngine().put(msg);
-
 		for (ConnectionHandler x : connections) {
 			if (x != ch || ch == null) {
 				x.send(msg);
@@ -623,6 +617,9 @@ public class NodeEngine {
 		try {
 			root_connection = ConnectionHandler.connectTo(knoten);
 			if (root_connection != null) {
+				
+				List<Node> newALLnodes = WeightedDistanceStrategy.returnAllNodes(getTree());
+				allnodes_set(newALLnodes);
 				setRootMode(false);
 				setGroup(myGroups);
 				sendroot(new MSG(getMe()));
@@ -1380,6 +1377,9 @@ public class NodeEngine {
 	 */
 	public void debug(String command, String parameter) {
 		switch (command) {
+		case "ra":
+			sendRA();
+			break;
 		case "play":
 			Help.playSound(parameter);
 			break;

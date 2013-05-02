@@ -18,7 +18,6 @@ public class KnotenKanal extends Kanal {
 
 	/**
 	 * Nachricht zu dem instanzierten Knotenkanal hinzufügen
-	 *   
 	 */
 	public boolean add(MSG nachricht) {
 		 
@@ -33,5 +32,4 @@ public class KnotenKanal extends Kanal {
 		}
 		return false;
 	}
-
 }

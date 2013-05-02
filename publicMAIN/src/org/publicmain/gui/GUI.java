@@ -359,6 +359,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		int index = jTabbedPane.indexOfComponent(cw);
 		if (index >= 0)
 			jTabbedPane.setSelectedIndex(index);
+		cw.focusEingabefeld();
 	}
 	
 	/**
@@ -511,12 +512,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param msg, String die Nachricht
 	 */
 	void privSend(long empfUID, String msg) {
-		ChatWindow tmpCW = getCW(empfUID);
-		if(tmpCW == null){
-			tmpCW = new ChatWindow(empfUID);
-			addPrivCW(empfUID, false);
+		if(empfUID!=ce.getUserID()){
+			ce.send_private(empfUID, msg);
+		} else {
+			info("Message to yourself, is not allowed", null, 2);
 		}
-		ce.send_private(empfUID, msg);
 	}
 
 	/**
@@ -711,9 +711,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
-			Node tmp_node = ce.getNodeForNID(tmp.getSender());
-			me.addPrivCW(tmp_node.getUserID(), false);
-			ce.put(tmp);
+			Node tmp_node =null;
+			if(tmp.getSender()!=ce.getMyNodeID())tmp_node = ce.getNodeForNID(tmp.getSender());
+			else if (tmp.getEmpfänger()!=ce.getMyNodeID())tmp_node = ce.getNodeForNID(tmp.getEmpfänger());
+			if(tmp_node!=null){
+				me.addPrivCW(tmp_node.getUserID(), false);
+				ce.put(tmp);
+			}
 		}
 	}
 

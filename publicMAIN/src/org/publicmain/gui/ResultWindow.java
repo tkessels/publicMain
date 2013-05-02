@@ -126,7 +126,5 @@ public class ResultWindow extends JDialog {
 		} catch (BadLocationException | IOException e) {
 			LogEngine.log(e);
 		}
-		
-		msgTextPane.setCaretPosition(htmlDoc.getLength());
 	}
 }

@@ -780,6 +780,9 @@ public class NodeEngine {
 		
 		if (angler.check(paket)) return;
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
+		if(ce.is_ignored(paket.getSender())) {
+			return;
+		}
 		else {
 			switch (paket.getTyp()) {
 			case PRIVATE:

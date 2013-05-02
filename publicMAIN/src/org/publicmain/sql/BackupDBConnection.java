@@ -18,13 +18,17 @@ public class BackupDBConnection {
 	private Statement 	stmt;
 	private int 		backUpDBStatus;
 	private long 		warteZeitInSec;
+	private boolean		successfulConnected;
+	private int 		maxVersuche;
 	
 	private BackupDBConnection() {
 		
-		this.backUpDBStatus		= 0;									// Status: 11 als user Verbunden, 13 use DB als backupPublicMain
+		this.backUpDBStatus		= 0;									// Status: 1 verbunden und bereit
 		this.warteZeitInSec 	= 10;
+		this.maxVersuche 		= 5;
+		this.successfulConnected = false;
 		
-		connectToBackupDBServer();
+//		connectToBackupDBServer();
 		
 	}
 	// Verbindungsdaten
@@ -61,32 +65,42 @@ public class BackupDBConnection {
 	// push & pull für ResultSets
 	
 	private synchronized boolean connectToBackupDBServer(){
-		try {
-			System.out.println(Config.getConfig().getBackupDBUser());
-			System.out.println(Config.getConfig().getBackupDBPw());
-			con = DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort(), Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
-			stmt = con.createStatement();
-			LogEngine.log(this, "DB-ServerVerbindung als " + Config.getConfig().getBackupDBUser() + " hergestellt ", LogEngine.INFO);
-			backUpDBStatus = 91;
-			return true;
-		} catch (SQLException e) {
-			try {
-				Thread.sleep(warteZeitInSec * 1000);
-			} catch (InterruptedException e1) {
-				LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+		new Thread(new Runnable() {
+			int versuche = 0;
+			public void run() {
+				while ((versuche < maxVersuche) && (backUpDBStatus == 0)) {
+					try {
+						con = DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort(), Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
+						stmt = con.createStatement();
+						LogEngine.log("BackupDBConnection", "DB-BackupServerConnection as " + Config.getConfig().getBackupDBUser() + " successful", LogEngine.INFO);
+						backUpDBStatus = 91;
+						successfulConnected = true;
+					} catch (SQLException e) {
+						try {
+							Thread.sleep(warteZeitInSec * 1000);
+						} catch (InterruptedException e1) {
+							LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+						}
+						versuche ++;
+						backUpDBStatus = 0;
+						LogEngine.log(this, "Error while connecting to BackupDB. Try again in:" + warteZeitInSec + " " + versuche+1 + "/"+ maxVersuche + e.getMessage(), LogEngine.ERROR);
+						successfulConnected = false;
+					}
+				}
 			}
-			backUpDBStatus = 0;
-			LogEngine.log(this, "Error while connecting to BackupDB " + e.getMessage(), LogEngine.ERROR);
-		}
 		
-		return false;
+		}).start();	
+		if(!successfulConnected){
+			LogEngine.log(this, "Connecting to BackupDB failt - will not try again", LogEngine.ERROR);
+		}
+		return successfulConnected;
 	}
 	
 	public ResultSet pull_settings(){
 		
 		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
 			try {
-				return stmt.executeQuery("SELECT * FROM v_searchInHistory WHERE fk_t_backupUser_username LIKE '" + Config.getConfig().getBackupDBChoosenUsername() + "'");
+				return stmt.executeQuery("SELECT * FROM v_searchInHistory WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while pulling settings from backupDB " + e.getMessage(), LogEngine.ERROR );
 			}
@@ -158,11 +172,11 @@ public class BackupDBConnection {
 		long myID = getMyID();
 		if(myID !=-1){
 			try {
-				PreparedStatement prp = con.prepareStatement("Insert ignore into t_settings(settingsKey, settingsValue, fk_t_backupUser_username) values(?,?,?)");
+				PreparedStatement prp = con.prepareStatement("Insert ignore into t_settings(settingsKey, settingsValue, fk_t_backupUser_backupUserID_2) values(?,?,?)");
 				while (tmp_settings.next()){
 					prp.setString(1, tmp_settings.getString(1));
-					prp.setLong(2, tmp_settings.getLong(2));
-					prp.setString(3, tmp_settings.getString(3));
+					prp.setString(2, tmp_settings.getString(3));
+					prp.setLong(3, getMyID());
 					prp.addBatch();
 				}
 				prp.executeBatch();

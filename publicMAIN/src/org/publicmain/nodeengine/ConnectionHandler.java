@@ -36,6 +36,7 @@ public class ConnectionHandler {
 	private volatile ConnectionHandler	me;
 	private String				hostname;
 	private long					latency				= Integer.MAX_VALUE;
+	private Hook				hookmanager;
 
 	private Thread				pakets_rein_hol_bot	= new Thread(new Reciever());
 	private Thread				pingpongBot			= new Thread(new Pinger());
@@ -58,7 +59,9 @@ public class ConnectionHandler {
 				if (tmp_socket != null && tmp_socket.isConnected()) break; // wenn eine Verbindung mit einer der IPs des  Knotenaufgebaut wurden konnte. Hör auf
 			}
 		}
-		return new ConnectionHandler(tmp_socket);
+		ConnectionHandler tmp =new ConnectionHandler(tmp_socket);
+		tmp.host_node=knoten;
+		return tmp; 
 	}
 	
 	/**
@@ -72,6 +75,7 @@ public class ConnectionHandler {
 		ne = NodeEngine.getNE();
 		children = new HashSet<Node>();
 		groups = new HashSet<String>();
+		hookmanager=new Hook();
 		line = underlying;
 		line.setTcpNoDelay(true);
 		line.setKeepAlive(true);
@@ -314,6 +318,7 @@ public class ConnectionHandler {
 
 					if (readObject != null && readObject instanceof MSG) {
 						MSG tmp = (MSG) readObject;
+						
 						if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
 							switch (tmp.getCode()) {
 							case ECHO_REQUEST:

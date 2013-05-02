@@ -100,6 +100,7 @@ public class NodeEngine {
 	// Der Thread sammelt und wertet ROOT_ANNOUNCES aus, er wird beim Empfang
 	// oder Versand eines ROOT_ANNOUNCE gestartet.
 	private Thread rootClaimProcessor;
+	private Thread neMaintainer;
 	private BestNodeStrategy myStrategy; 
 	
 	/**
@@ -130,9 +131,25 @@ public class NodeEngine {
 		allNodes.add(meinNode);
 		DatabaseEngine.getDatabaseEngine().put(meinNode);
 
-		myStrategy = new WeightedDistanceStrategy(1, 0, 0);
+		myStrategy = new BreadthFirstStrategy();
 
 		connectionsAcceptBot.start();
+		
+		neMaintainer = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(online) {
+					if(isRoot())sendRA();
+					if(hasChildren())pollChilds();
+					try {
+						Thread.sleep(Config.getConfig().getPingInterval());
+					} catch (InterruptedException e) {
+					}
+					
+				}
+			}
+		});;
+		neMaintainer.start();
 
 		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
 
@@ -576,6 +593,7 @@ public class NodeEngine {
 			allNodes.clear();
 			allNodes.add(getMe());
 			allNodes.addAll(getChilds());
+			pollChilds();
 			allNodes.notifyAll();
 		}
 		if (hasParent()) {
@@ -587,11 +605,9 @@ public class NodeEngine {
 //	/**
 //	 * Kommentar!
 //	 */
-//	private void pollChilds() {
-//		for (ConnectionHandler x : connections) {
-//			x.send(new MSG(null, MSGCode.POLL_CHILDNODES));
-//		}
-//	}
+	private void pollChilds() {
+		sendchild(new MSG(null, MSGCode.POLL_CHILDNODES), null);
+	}
 
 	/**
 	 * Getter für ein Set, vom Typ Nodes, aller ChildNodes.
@@ -624,6 +640,7 @@ public class NodeEngine {
 				setGroup(myGroups);
 				sendroot(new MSG(getMe()));
 				sendroot(new MSG(myGroups, MSGCode.GROUP_REPLY));
+				sendroot(new MSG(getNodes(), MSGCode.REPORT_CHILDNODES));
 				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
 				sendroot(new MSG(null, MSGCode.GROUP_POLL));
 			}
@@ -672,7 +689,6 @@ public class NodeEngine {
 			root_connection = null;
 			if (online) {
 				updateNodes();
-				//setGroup(myGroups); //FIXME: prüfen wo myGroups=allGroups den meisten macht.
 				discover();
 			}
 		}
@@ -763,6 +779,9 @@ public class NodeEngine {
 						tmp.getBackupDBDatabasename());
 				Config.write();
 				break;
+			case BACKUP_SERVER_DISCOVER:
+				break;
+				
 			default:
 				LogEngine.log(this, "handling [MC]:undefined", paket);
 			}
@@ -801,6 +820,7 @@ public class NodeEngine {
 				DatabaseEngine.getDatabaseEngine().put(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
+					
 					allnodes_add((Node) paket.getData());
 					sendtcpexcept(paket, quelle);
 					break;
@@ -815,10 +835,8 @@ public class NodeEngine {
 					break;
 				case POLL_CHILDNODES:
 					if (quelle == root_connection) {
-						Set<Node> tmp = new HashSet<Node>();
-						for (ConnectionHandler x : connections)
-							tmp.addAll(x.getChildren());
-						sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
+						sendroot(new MSG(getChilds(), MSGCode.REPORT_CHILDNODES));
+						pollChilds();
 					}
 					break;
 				case REPORT_CHILDNODES:

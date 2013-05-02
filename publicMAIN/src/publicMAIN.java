@@ -49,8 +49,7 @@ public class publicMAIN {
 			// sollte ein strukturierte und kontrollierter Start formuliert
 			// werden der die Module in der richtigen Reihenfolge startet.
 		} else {
-			JOptionPane
-					.showMessageDialog(
+			JOptionPane.showMessageDialog(
 							null,
 							"Could not start publicMAIN\nAn instance is already running!",
 							"publicMAIN", JOptionPane.ERROR_MESSAGE,

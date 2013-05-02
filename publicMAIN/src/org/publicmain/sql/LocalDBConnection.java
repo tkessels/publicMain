@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package org.publicmain.sql;
 
 import java.awt.DisplayMode;

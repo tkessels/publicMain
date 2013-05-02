@@ -37,17 +37,20 @@ public class Backupserver {
 		System.setProperty("appname", "pmBackupServer");
 		String username="root";
 		String password="";
+		String clientUsername = "backupPublicMain";
+		String clientPassword = "backupPublicMain";
 		String port="3306";
 		String databasename="db_publicMain_backup";
 		String ip=Node.getMyIPs().get(0).getHostAddress();
 		
 		//if available load settings from file
-		if(Config.getConfig().getBackupDBUser()!=null)	username				=	Config.getConfig().getBackupDBUser(); 
-		if(Config.getConfig().getBackupDBPw()!=null)	password				=	Config.getConfig().getBackupDBPw(); 
-		if(Config.getConfig().getBackupDBIP()!=null)		ip						=	Config.getConfig().getBackupDBIP(); 
+//		if(Config.getConfig().getBackupDBUser()!=null)	username				=	Config.getConfig().getBackupDBUser(); 
+//		if(Config.getConfig().getBackupDBPw()!=null)	password				=	Config.getConfig().getBackupDBPw(); 
+//		if(Config.getConfig().getBackupDBIP()!=null)		ip						=	Config.getConfig().getBackupDBIP(); 
 		if(Config.getConfig().getBackupDBPort()!=null)	port						=	Config.getConfig().getBackupDBPort(); 
 		if(Config.getConfig().getBackupDBDatabasename()!=null)	databasename	=	Config.getConfig().getBackupDBDatabasename(); 
 
+		//GRANT ALL PRIVILEGES ON * . * TO  'backupPublicMain'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
 		
 		Random x = new Random(System.currentTimeMillis());
 		long nid = x.nextLong();
@@ -111,8 +114,8 @@ public class Backupserver {
 					
 					if (!ip.equals(Config.getConfig().getBackupDBIP()))Config.getConfig().setBackupDBIP(ip);
 					if (!port.equals(Config.getConfig().getBackupDBPort()))Config.getConfig().setBackupDBPort(port);
-					if (!username.equals(Config.getConfig().getBackupDBUser()))Config.getConfig().setBackupDBUser(username);
-					if (!password.equals(Config.getConfig().getBackupDBPw()))Config.getConfig().setBackupDBPw(password);
+					if (!clientUsername.equals(Config.getConfig().getBackupDBUser()))Config.getConfig().setBackupDBUser(clientUsername);
+					if (!clientPassword.equals(Config.getConfig().getBackupDBPw()))Config.getConfig().setBackupDBPw(clientPassword);
 					if (!databasename.equals(Config.getConfig().getBackupDBDatabasename()))Config.getConfig().setBackupDBDatabasename(databasename);
 					Config.write();
 					System.out.println("BackupServer is Running:");
@@ -171,7 +174,7 @@ public class Backupserver {
 		System.err.println("\nNot provided parameters will be set to default values!\n");
 		System.err.println("Example:");
 		System.err.println("	java Backupserver -u admin --pass secret -n db1");
-		System.err.println("		Will setup the backupserver for a local Database ("+ip+":3306) with user \"root\" and empty password ");
+		System.err.println("		Will setup the backupserver for a local Database ("+ip+":"+Config.getConfig().getBackupDBPort()+") with user \""+Config.getConfig().getBackupDBUser()+"\" and empty password ");
 		System.exit(1);
 	}
 	
@@ -202,39 +205,63 @@ public class Backupserver {
 	
 	private static boolean createDatabase(String ip, String port, String username, String password) {
 		String databasename = Config.getConfig().getBackupDBDatabasename();
+		synchronized (stmt) {
+			try {
+				stmt.execute("use " + databasename);
+				return true;
+			} catch (SQLException e) {
+				String read=null;
+				try (BufferedReader in = new BufferedReader(new FileReader(Help.getFile("create_BackupDB.sql")))){
+					while((read = in.readLine()) != null) {
+						while (!read.endsWith(";") && !read.endsWith("--")){
+							read = read + in.readLine();
+						}
+						stmt.execute(read);
+					}
+					stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_msgType`;");
+					stmt.addBatch("CREATE PROCEDURE `db_publicmain_backup`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
+					
+					//Hier wird die Tabelle t_msgType automatisch befüllt!
+					for (MSGCode c : MSGCode.values()){
+						stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
+					}
+					stmt.executeBatch();
+					createClientUser();
+					return true;
+				} catch (FileNotFoundException e1) {
+					LogEngine.log("Error caused by reading create_BackupDB.sql: " + e1.getMessage(), LogEngine.ERROR);
+					return false;
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					LogEngine.log("Error caused executing a sql statment: " + e1.getMessage(), LogEngine.ERROR);
+				}
+				return false;
+			}
+		}
+	}
+	
+	private static boolean createClientUser(){
 		try {
-			stmt.execute("use " + databasename);
+			stmt.addBatch("CREATE USER 'backupPublicMain' IDENTIFIED BY 'backupPublicMain'");
+//			stmt.addBatch("GRANT ALL ON `db_publicmain_backup`.* TO 'backupPublicMain'");
+			stmt.addBatch("GRANT ALL PRIVILEGES ON * . * TO  'backupPublicMain'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0");
+			stmt.executeBatch();
 			return true;
 		} catch (SQLException e) {
-			String read=null;
-			try (BufferedReader in = new BufferedReader(new FileReader(Help.getFile("create_BackupDB.sql")))){
-				while((read = in.readLine()) != null) {
-					while (!read.endsWith(";") && !read.endsWith("--")){
-						read = read + in.readLine();
-					}
-					stmt.execute(read);
-				}
-				stmt.addBatch("DROP procedure IF EXISTS `db_publicmain`.`p_t_msgType`;");
-				stmt.addBatch("CREATE PROCEDURE `db_publicmain_backup`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
-				
-				//Hier wird die Tabelle t_msgType automatisch befüllt!
-				for (MSGCode c : MSGCode.values()){
-					stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
-				}
-				stmt.executeBatch();
-				return true;
-			} catch (FileNotFoundException e1) {
-				LogEngine.log("Error caused by reading create_BackupDB.sql: " + e1.getMessage(), LogEngine.ERROR);
-				return false;
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (SQLException e1) {
-				LogEngine.log("Error caused executing a sql statment: " + e1.getMessage(), LogEngine.ERROR);
-			}
+			//Benutzer gab es evtl schonmal
 			return false;
 		}
-		//CreateScript auf der Database ausführen und true zurückliefern wenn erfolgreich!!!
-	}
+				
 
+				
+				
+		
+		
+		
+		
+		
+		
+	}
 }

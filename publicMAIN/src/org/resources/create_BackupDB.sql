@@ -127,11 +127,6 @@ DROP TABLE IF EXISTS `db_publicmain_backup`.`v_searchInHistory`;
 USE `db_publicmain_backup`;
 CREATE  OR REPLACE VIEW `db_publicmain_backup`.`v_searchInHistory` AS SELECT * FROM t_settings;
 
-DROP USER backupPublicMain;
-CREATE USER 'backupPublicMain' IDENTIFIED BY 'backupPublicMain';
-
-GRANT ALL ON `db_publicmain_backup`.* TO 'backupPublicMain';
-
 -- -----------------------------------------------------
 -- Data for table `db_publicmain_backup`.`t_dbVersion`
 -- -----------------------------------------------------

@@ -56,7 +56,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * TODO: Kommentieren!
+	 * Konstruktor für die ChatEngine.
 	 * 
 	 * @throws IOException
 	 */
@@ -115,7 +115,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Diese Methode liefert die eigene NodeID
+	 * Diese Methode liefert die eigene NodeID.
 	 * 
 	 * @return
 	 */
@@ -202,24 +202,24 @@ public class ChatEngine{
 		}
 	}
 
-	/**
-	 * NOT IMPLEMENTED YET
-	 * Gibt den Zustand der Übertragung einer Datei an
-	 * 
-	 * @param file_transfer_ID
-	 * @return <ul>
-	 *         <li><code>-1</code> Dateitransfer nicht möglich</li>
-	 *         <li><code>-2</code> Benutzer lehnt transfer ab</li>
-	 *         <li><code>0</code> - <code>100</code> Vortschritt der
-	 *         Datenübertragung in Prozent
-	 */
-	public int file_transfer_status(int file_transfer_ID) {
-		// TODO: CODE HERE
-		return 0;
-	}
+//	 Ggf. für die weitere Entwicklung benötigt.
+//	/**
+//	 * NOT IMPLEMENTED YET
+//	 * Gibt den Zustand der Übertragung einer Datei an
+//	 * 
+//	 * @param file_transfer_ID
+//	 * @return <ul>
+//	 *         <li><code>-1</code> Dateitransfer nicht möglich</li>
+//	 *         <li><code>-2</code> Benutzer lehnt transfer ab</li>
+//	 *         <li><code>0</code> - <code>100</code> Vortschritt der
+//	 *         Datenübertragung in Prozent
+//	 */
+//	public int file_transfer_status(int file_transfer_ID) {
+//		return 0;
+//	}
 
 	/**
-	 * Fragt ein Array alle User ab
+	 * Fragt ein Array alle User ab.
 	 * 
 	 * @return Array aller verbundener Nodes
 	 */
@@ -228,7 +228,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Beitritt zu einer Gruppe
+	 * Beitritt zu einer Gruppe.
 	 * 
 	 * @param gruppen_name
 	 *            Gruppennamen sind CaseInSensitiv und bestehen aus
@@ -244,7 +244,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Verlässt eine Gruppe wieder
+	 * Verlässt eine Gruppe wieder.
 	 * 
 	 * @param gruppen_name, Gruppennamen sind CaseInSensitiv und
 	 *            			bestehen aus alphanumerischen Zeichen
@@ -258,7 +258,7 @@ public class ChatEngine{
 	}
 
 	/**
-	 * Liefert eine Liste der verfügbaren Gruppenstrings
+	 * Liefert eine Liste der verfügbaren Gruppenstrings.
 	 * 
 	 * @return Array der verfügbaren Gruppenstrings
 	 */
@@ -273,9 +273,7 @@ public class ChatEngine{
 	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten.
 	 * 
 	 * @param parameterObject
-	 *            TODO
 	 * @param filename
-	 *            TODO
 	 * 
 	 * @return, abstraktes Fileobjekt zu speicherung einer Datei oder "null"
 	 *          wenn der Nutzer den Empfang ablehnt
@@ -353,7 +351,6 @@ public class ChatEngine{
 	
 	/**
 	 * Den Default-Kanal für eingehende, nicht zuordenbare Nachrichten registrieren.
-	 * TODO: Kommentar prüfen!
 	 * 
 	 * @param gui
 	 */
@@ -404,8 +401,9 @@ public class ChatEngine{
 	}
 
 	/**
-	 * TODO: Kommentar
-	 * 
+	 * Verteilt die Nachrichten auf die entsprechenden Kanäle. Wenn kein Kanal
+	 * für die Nachricht existiert werden die Nachrichten im DEFAULT CHANNEL
+	 * abgelegt.
 	 */
 	private final class MsgSorter implements Runnable {
 		public void run() {
@@ -418,7 +416,6 @@ public class ChatEngine{
 							if (x.add(tmp))
 								break;
 					} else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
-						// System.out.println("PRIVATE MSG");
 						boolean msgAssigned = false;
 						for (KnotenKanal y : private_channels) {
 							if (y.add(tmp)) {
@@ -426,8 +423,8 @@ public class ChatEngine{
 								break;
 							}
 						}
-						// Kein CW angemeldet um die Nachricht aufzunehmen sende
-						// es an GUI via DEFAULT CHANNEL
+						// Wenn kein ChatWindow registriert ist um die Nachricht
+						// aufzunehmen sende es an den DEFAULT CHANNEL.
 						if (!msgAssigned)
 							default_channel.add(tmp);
 					}
@@ -495,15 +492,17 @@ public class ChatEngine{
 				}
 			}
 			break;
-			
+
 		case "file":
-			GUI.getGUI().request_File(new FileTransferData(new File("C:\test.txt"), (long) (4000000000L * Math.random()),ne.getMe(), ne.getMe()));
+			GUI.getGUI().request_File(
+					new FileTransferData(new File("C:\test.txt"),
+							(long) (4000000000L * Math.random()), ne.getMe(),
+							ne.getMe()));
 
 		default:
 			ne.debug(command, parameter);
 			break;
 		}
-
 	}
 
 	/**
@@ -535,6 +534,5 @@ public class ChatEngine{
 				+ ((tmp.accepted) ? " accept " : " declined ")
 				+ "receiving File:\"" + tmp.datei.getName() + "\"";
 		GUI.getGUI().info(str, tmp.receiver.getUserID(), 0);
-
 	}
 }

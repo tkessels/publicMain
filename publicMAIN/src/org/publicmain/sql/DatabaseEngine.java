@@ -24,7 +24,6 @@ import javax.swing.table.DefaultTableModel;
 import org.publicmain.common.Config;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
-import org.publicmain.gui.SimpleTableDemo;
 import org.publicmain.nodeengine.NodeEngine;
 
 public class DatabaseEngine {
@@ -212,6 +211,8 @@ public class DatabaseEngine {
 		
 		if(tmpRS!=null){
 			try {
+				
+//				new SimpleTableDemo(new JTable(buildTableModel(tmpRS)));
 				return new JTable(buildTableModel(tmpRS));
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
@@ -389,7 +390,6 @@ public class DatabaseEngine {
 			    array[i++]=tmp.toArray();
 		}
 		  
-		    new SimpleTableDemo(columnNames,array);
 		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
 		    tmod.setColumnIdentifiers(columnNames);
 		    JTable tmp = new JTable(tmod);

@@ -49,6 +49,7 @@ import org.resources.Help;
  * @author ATRM
  * 
  */
+
 public class NodeEngine {
 	// Zeitspanne nach der ein Node die Suche nach anderen Nodes aufgibt und
 	// sich selbst zur Root erklärt.
@@ -167,8 +168,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * isConnected() gibt "true" zurück wenn die laufende Nodeengin hochgefahren
-	 * und mit anderen Nodes verbunden oder root ist, "false" wenn nicht.
+	 * Gibt <code>true</code> zurück wenn die laufende NodeEngine hochgefahren
+	 * und mit anderen Nodes verbunden oder Root ist, <code>false</code> wenn
+	 * nicht.
 	 */
 	private boolean hasChildren() {
 		return connections.size() > 0;
@@ -268,7 +270,7 @@ public class NodeEngine {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Sendet eine Nachricht an den übergeordneten Node, wenn einer existiert.
 	 * 
 	 * @param msg
 	 */
@@ -282,23 +284,27 @@ public class NodeEngine {
 	 * Versendet Daten vom Typ MSG an bestimmte Nodes oder gibt diese an
 	 * send_file() weiter. Hier wird geprüft ob die Dateigröße < 5MB (Aufruf der
 	 * send_file()) anderenfalls als Msg-Type Data
+	 * 
+	 * @param nachricht
 	 */
 	private void sendmutlicast(MSG nachricht) {
 		multi_socket.sendmutlicast(nachricht);
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Sendet auf dem Multicast-Socket ein Unicast-Paket.
 	 * 
 	 * @param msg
-	 * @param newRoot
+	 *            ist die Nachricht die verschickt werden soll (darf nicht
+	 *            größer 64KB sein)
+	 * @param target
 	 */
-	private void sendunicast(MSG msg, Node newRoot) {
-		multi_socket.sendunicast(msg, newRoot);
+	private void sendunicast(MSG msg, Node target) {
+		multi_socket.sendunicast(msg, target);
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Sendet eine Nachricht an alle angeschlossenen Verbindungen.
 	 * 
 	 * @param nachricht
 	 */
@@ -306,7 +312,6 @@ public class NodeEngine {
 		if (hasParent()) {
 			sendroot(nachricht);
 		}
-		// FIXME: Concurrent Modification Exception beim disconnecten
 		if (hasChildren()) {
 			for (ConnectionHandler x : connections) {
 				x.send(nachricht);
@@ -315,7 +320,8 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Sendet eine Nachricht an alle angeschlossenen Verbindungen, außer an die
+	 * mitgelieferte Verbindung.
 	 * 
 	 * @param msg
 	 * @param ch
@@ -330,7 +336,8 @@ public class NodeEngine {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Sendet eine Nachricht an alle angeschlossenen Child-Verbindungen, außer
+	 * an die mitgelieferte Verbindung.
 	 * 
 	 * @param msg
 	 * @param ch
@@ -509,7 +516,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Private Klasse zum Dateiempfang, wenn der Dateiempfang aktiviert ist.
 	 * 
 	 * @param data_paket
 	 */
@@ -622,6 +629,11 @@ public class NodeEngine {
 		}
 	}
 
+	/**
+	 * Informiert alle angeschlossenen Nodes über das unmittelbar bevorstehende
+	 * Herunterfahren, meldet sich bei den abonierten Gruppen ab und schliesst
+	 * den Multicast-Socket.
+	 */
 	@SuppressWarnings("deprecation")
 	public void disconnect() {
 		online = false;
@@ -646,7 +658,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Entfernt eine Verbindung wieder
+	 * Entfernt eine Verbindung wieder.
 	 * 
 	 * @param conn
 	 */
@@ -671,7 +683,9 @@ public class NodeEngine {
 		//updateNodes();
 	}
 
-
+	/**
+	 * Sendet eine ROOT_ANNOUNCE und initiert so die Neuverhandlung der Root.
+	 */
 	private void sendRA() {
 		MSG ra= new MSG(meinNode, MSGCode.ROOT_ANNOUNCE,getNodes().size());
 //		ra.setEmpfänger(getNodes().size());
@@ -679,6 +693,11 @@ public class NodeEngine {
 		root_claims_stash.add(ra);
 	}
 
+	/**
+	 * TODO: Kommentar! 
+	 * 
+	 * @param paket
+	 */
 	private void handleRootClaim(MSG paket) {
 		if(paket!=null) {
 			paket.reStamp(); //change timestamp to recieved time
@@ -688,48 +707,61 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird ausschließlich vom MulticastSocketHandler aufegrufen.
+	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird
+	 * ausschließlich vom MulticastSocketHandler aufegrufen.
 	 * 
 	 * @param paket
 	 *            Das empfangene MulticastPaket
 	 */
 	public void handleMulticast(MSG paket) {
 		LogEngine.log(this, "handling [MC]", paket);
-		if (angler.check(paket)) return;
+		if (angler.check(paket)) {
+			return;
+		}
 		if (online && (paket.getTyp() == NachrichtenTyp.SYSTEM)) {
 			switch (paket.getCode()) {
-				case ROOT_REPLY:
-					if (!hasParent())connectTo((Node) paket.getData());
-					break;
-				case ROOT_DISCOVERY:
-					if (isRoot()) sendDiscoverReply((Node) paket.getData());
-					break;
-				case ROOT_ANNOUNCE:
-					if (!hasParent()) handleRootClaim(paket);
-					break;
-				case NODE_LOOKUP:
-					if((long)paket.getData()==meinNode.getNodeID())sendroot(new MSG(meinNode));
-					break;
-				case ALIAS_UPDATE:
-					updateAlias((String) paket.getData(), paket.getSender());
-					break;
-				case CMD_RECONNECT:
-					long payload = (Long)paket.getData();
-					if((payload==nodeID)||(payload==-1337)) {
-						if (root_connection!=null)root_connection.close();
-					}
-					break;
-				case BACKUP_SERVER_OFFER:
-					ConfigData tmp = (ConfigData) paket.getData();
-					Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
-					Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
-					Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());
-					Config.getConfig().setBackupDBPw(tmp.getBackupDBPw());
-					Config.getConfig().setBackupDBDatabasename(tmp.getBackupDBDatabasename());
-					Config.write();
-					break;
-				default:
-					LogEngine.log(this, "handling [MC]:undefined", paket);
+			case ROOT_REPLY:
+				if (!hasParent()) {
+					connectTo((Node) paket.getData());
+				}
+				break;
+			case ROOT_DISCOVERY:
+				if (isRoot()) {
+					sendDiscoverReply((Node) paket.getData());
+				}
+				break;
+			case ROOT_ANNOUNCE:
+				if (!hasParent()) {
+					handleRootClaim(paket);
+				}
+				break;
+			case NODE_LOOKUP:
+				if ((long) paket.getData() == meinNode.getNodeID()) {
+					sendroot(new MSG(meinNode));
+				}
+				break;
+			case ALIAS_UPDATE:
+				updateAlias((String) paket.getData(), paket.getSender());
+				break;
+			case CMD_RECONNECT:
+				long payload = (Long) paket.getData();
+				if ((payload == nodeID) || (payload == -1337)) {
+					if (root_connection != null)
+						root_connection.close();
+				}
+				break;
+			case BACKUP_SERVER_OFFER:
+				ConfigData tmp = (ConfigData) paket.getData();
+				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
+				Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
+				Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());
+				Config.getConfig().setBackupDBPw(tmp.getBackupDBPw());
+				Config.getConfig().setBackupDBDatabasename(
+						tmp.getBackupDBDatabasename());
+				Config.write();
+				break;
+			default:
+				LogEngine.log(this, "handling [MC]:undefined", paket);
 			}
 		}
 	}
@@ -748,6 +780,9 @@ public class NodeEngine {
 		
 		if (angler.check(paket)) return;
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID))routesend(paket);
+		if(ce.is_ignored(paket.getSender())) {
+			return;
+		}
 		else {
 			switch (paket.getTyp()) {
 			case PRIVATE:

@@ -39,11 +39,10 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 
 /**
- * Diese Klasse stellt ein ChatWindow bereit
- * 
  * Diese Klasse stellt ein ChatWindow bereit, dieses enthält einen Bereich
  * in dem Nachrichten angezeigt werden, ein Feld zur Texteingabe sowie
  * einen Button um den Text zu senden.
+ * 
  * @author ATRM
  */
 @SuppressWarnings("serial")

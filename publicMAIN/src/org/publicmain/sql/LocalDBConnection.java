@@ -30,7 +30,6 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
-import org.publicmain.nodeengine.NodeEngine;
 import org.resources.Help;
 
 /**
@@ -63,7 +62,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 13;
+	private final static int LOCAL_DATABASE_VERSION = 14;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -619,69 +618,6 @@ public class LocalDBConnection {
 			}
 		}
 		return null;
-		
-//		if (isDBConnected){
-//			try {
-//				String tmpStmtStr = (
-//						"SELECT * " +
-//						"FROM " + chatLogTbl + " " +
-//						"WHERE timestamp BETWEEN '" + fromDateTime.getTime() + "' AND '" + toDateTime.getTime() + "'");
-//				if (!chosenNTyp.equals("ALL")){
-//					tmpStmtStr = tmpStmtStr + " AND typ = '" + chosenNTyp + "'";
-//				}
-//				if (!chosenAliasOrGrpName.equals("...type in here.")){
-//					//TODO: hier die übersetung von nr in string einbinden
-////					tmpStmtStr = tmpStmtStr + " AND ";
-//				}
-//				Statement searchStmt = con.createStatement();
-//				ResultSet rs = searchStmt.executeQuery(tmpStmtStr);
-//				
-//				
-//				
-//				//TODO bei mehrfachen aufruf muss das HTML-Doc wieder geleert werden!
-//				historyContentTxt.setText("");
-//				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<table>" + "<th><b>ID</b></th>"
-//						+ "<th><b>msgID</th>" + "<th><b>Timestamp</th>"
-//						+ "<th><b>Sender</th>" + "<th><b>Empfänger</th>" + "<th><b>Typ</th>"
-//						+ "<th><b>Gruppe</th>" + "<th><b>Daten</th>", 0, 0, null);
-//				while (rs.next()) {
-//					
-//					cal.setTimeInMillis(rs.getLong("timestamp"));
-//					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(),
-//							"<tr>" + "<td>" + rs.getInt("id") + "<td>"
-//									+ rs.getInt("msgID") + "<td>"
-//									+ splDateFormt.format(cal.getTime())+ "<td>"
-//									+ rs.getLong("sender") + "<td>"
-//									+ rs.getLong("empfaenger") + "<td>"
-//									+ rs.getString("typ") + "<td>"
-//									+ rs.getString("grp") + "<td>"
-//									+ rs.getString("data"), 0, 0, null);
-//					htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</tr>", 0, 0,
-//							null);
-//				}
-//				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "</table>", 0, 0,
-//						null);
-//			} catch (BadLocationException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			} catch (SQLException e) {
-//				e.printStackTrace();
-//			} 
-//		}else {
-//			JOptionPane.showMessageDialog(null,
-//	                "Für diese Operation ist eine Verbindung zum lokalen DB-Server zwingend notwendig",
-//	                "Hinweis",
-//	                JOptionPane.INFORMATION_MESSAGE);
-//			askForConnectionRetry = true;
-//			if (connectToLocDBServer()) {
-//				isDBConnected = true;
-//				searchInHistory(historyContentTxt, chosenNTyp, chosenAliasOrGrpName, fromDateTime, toDateTime,  htmlKit, htmlDoc);
-//				
-//			} else {
-//				//System.out.println("Erneuter versuch der Verbindungsherstellung erfolglos!");
-//			}
-//		}
 	}
 	
 	public void shutdownLocDB() {
@@ -710,5 +646,4 @@ public class LocalDBConnection {
 		}
 	}
 
-	
 }

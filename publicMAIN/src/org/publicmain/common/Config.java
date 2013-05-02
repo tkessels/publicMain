@@ -44,7 +44,7 @@ public class Config {
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
 		
-		if(de!=null) de.writeConfig();				//TODO: hier ne Alternative überlegen da es sonst NuppointerExceptions in der LocDB gibt da diese die uID aus der CE haben will die´s noch nicht gibt oder wie oder was!!!
+		if(de!=null) de.writeConfig();				
 		me.savetoDisk();
 	}
 	
@@ -209,8 +209,5 @@ public class Config {
 		};
 		new Thread(target).start();
 	}
-
-
-
 }
 

@@ -60,7 +60,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 20;
+	private final static int LOCAL_DATABASE_VERSION = 21;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -109,45 +109,46 @@ public class LocalDBConnection {
 
 		public void run() {
 			int versuche = 0;
-			while ((versuche < maxVersuche) && (dbStatus == 0)) { // hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
-				//TODO: Connect als user als erstes probieren!
-//				if(connectToLocDBServerAspublicMain() && correctLocDBVersion()){
-//				databaseEngine.go();
-//				LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
-//				} else {
+			//TODO: Connect als user als erstes probieren!
+			if(connectToLocDBServerAspublicMain() && correctLocDBVersion()){
+				databaseEngine.go();
+				LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+			} else {
+				while ((versuche < maxVersuche) && (dbStatus == 0)) { // hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
 					if(connectToLocDBServerAsRoot()){
 						versuche = 0;
 					} else {
 						versuche ++;
-//					}
-					
-				}
-			}
-			if(dbStatus >= 1){
-				try {
-					synchronized (stmt) {
-						stmt.executeQuery("use " + dbName);
 					}
-					if(!correctLocDBVersion()){
+				}
+				if(dbStatus >= 1){
+					try {
+						synchronized (stmt) {
+							stmt.executeQuery("use " + dbName);
+						}
+						if(!correctLocDBVersion()){
+							createDbAndTables();
+							run();
+						} else {
+							if (connectToLocDBServerAspublicMain()) {
+								dbStatus = 3;
+								databaseEngine.go();
+								LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+							}
+							else {
+								dbStatus = 0;
+								connectToLocDBServerAsRoot();
+								createDbAndTables();
+								run();
+							}
+						}
+					} catch (SQLException e1) {
 						createDbAndTables();
 						run();
-					} else {
-						if (connectToLocDBServerAspublicMain()) {
-							dbStatus = 3;
-							databaseEngine.go();
-							LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
-						}
-						else {
-							dbStatus = 0;
-							run();
-						}
 					}
-				} catch (SQLException e1) {
-					createDbAndTables();
-					run();
+				} else {
+					LogEngine.log(this,	versuche +". Versuch zum DB-Verbindungsaufbau fehlgeschlagen -> für Zugriff auf locDB sorgen und neu starten! ", LogEngine.ERROR);
 				}
-			} else {
-				LogEngine.log(this,	versuche +". Versuch zum DB-Verbindungsaufbau fehlgeschlagen -> für Zugriff auf locDB sorgen und neu starten! ", LogEngine.ERROR);
 			}
 		}
 	}
@@ -194,7 +195,7 @@ public class LocalDBConnection {
 			LogEngine.log(this, "DB-ServerVerbindung als "+ Config.getConfig().getLocalDBUser() + " hergestellt",LogEngine.INFO);
 			return true;
 		} catch (SQLException e) {
-			LogEngine.log(this,"Error while connecting as publicMain: " + e.getMessage(),LogEngine.ERROR);
+			LogEngine.log(this,"Couldn´t connect with user 'publicMain'",LogEngine.INFO);
 			dbStatus = 0;
 			return false;
 		}
@@ -239,9 +240,7 @@ public class LocalDBConnection {
 					while (!read.endsWith(";") && !read.endsWith("--")){
 						read = read + in.readLine();
 					}
-					synchronized (stmt) {
-						stmt.addBatch(read);
-					}
+					stmt.addBatch(read);
 				}
 				//INSERT PROCEDURES
 					
@@ -287,9 +286,6 @@ public class LocalDBConnection {
 					Config.getConfig().setLocalDBVersion(LOCAL_DATABASE_VERSION);
 					Config.write();
 					LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
-				
-				
-				
 				
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();

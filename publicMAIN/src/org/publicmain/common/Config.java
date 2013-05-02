@@ -176,14 +176,14 @@ public class Config {
 		tmp.setLocalDBVersion(0);
 		tmp.setLocalDBDatabasename("db_publicMain");
 		tmp.setLocalDBPort("3306");
-		tmp.setLocalDBUser("root");
-		tmp.setLocalDBPw("");
+		tmp.setLocalDBUser("publicMain");
+		tmp.setLocalDBPw("publicMain");
 		
 		// daten fuer externen DB-Backup-Server
 		tmp.setBackupDBDatabasename("db_publicMain_backup");
 		tmp.setBackupDBPort("3306");
-		tmp.setBackupDBUser("root");
-		tmp.setBackupDBPw("");
+		tmp.setBackupDBUser("backupPublicMain");
+		tmp.setBackupDBPw("backupPublicMain");
 		
 		return tmp;
 	}

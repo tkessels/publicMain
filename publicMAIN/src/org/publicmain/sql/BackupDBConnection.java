@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -27,11 +28,11 @@ public class BackupDBConnection {
 	
 	private Statement 	stmt;
 	private String 		backupServerUrl;
-	private String 		dbName;
 	private String 		backupRootUser;
 	private String 		backupUser;
-	private String 		rootPasswd;
 	private int 		dbVersion;
+	private int 		backUpDBStatus;
+	private long 		warteZeitInSec;
 	
 	// Verbindungsdaten
 	private Connection 	rootCon;
@@ -39,10 +40,12 @@ public class BackupDBConnection {
 	
 	private BackupDBConnection() {
 		
-		this.backupRootUser 	= "root";
-		this.rootPasswd			= "";
-		this.dbName 			= "db_backUpServer_publicMain";
+		this.backUpDBStatus		= 0;									// Status: 11 als user Verbunden, 13 use DB als backupPublicMain
+		this.warteZeitInSec 	= 10;
+
+		
 	}
+	
 	public static BackupDBConnection getBackupDBConnection() {
 		if (me == null) {
 			me = new BackupDBConnection();
@@ -54,64 +57,38 @@ public class BackupDBConnection {
 	
 	// push & pull für ResultSets
 	
-	
-	
-	
-	
-	public boolean create() {
-		String read=null;
-		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_backup_db.sql").toURI())))){
-			while((read = in.readLine()) != null) {
-				while (!read.endsWith(";") && !read.endsWith("--")){
-					read = read + in.readLine();
-				}
-				stmt.execute(read);
-			}
-			for (MSGCode c : MSGCode.values()){
-				stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
-			}
-			
-			stmt.executeBatch();
-			Config.getConfig().setLocalDBVersion(dbVersion);
-			Config.write();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+	private synchronized boolean connectToBackupDBServer(){
+		try {
+			rootCon = DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort(), Config.getConfig().getBackupDBChoosenUsername(), Config.getConfig().getBackupDBChoosenUserPassWord());
+			stmt = rootCon.createStatement();
+			LogEngine.log(this, "DB-ServerVerbindung als " + Config.getConfig().getBackupDBChoosenUsername() + " hergestellt ", LogEngine.INFO);
+			backUpDBStatus = 91;
+			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (URISyntaxException e2) {
-			e2.printStackTrace();
+			try {
+				Thread.sleep(warteZeitInSec * 1000);
+			} catch (InterruptedException e1) {
+				LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+			}
+			backUpDBStatus = 0;
+			LogEngine.log(this, "Error while connecting to BackupDB " + e.getMessage(), LogEngine.ERROR);
 		}
+		
 		return false;
 	}
 	
-	public void createNewUser(final JTextField statusTextField, final JTextField serverIPTextField, final JTextField userNameTextField, final JTextField passWordTextField){
-		Runnable tmp = new Runnable() {
-			private Connection rootCon;
-			private Statement stmt;
-
-			public void run() {
-				backupServerUrl	= "jdbc:mysql://" + serverIPTextField.getText() + ":3306/";
-				try {
-					statusTextField.setText("Versuche verbindung herzustellen!");
-					this.rootCon 	=  DriverManager.getConnection(backupServerUrl, backupRootUser, rootPasswd);
-					this.stmt 		= rootCon.createStatement();
-					
-					stmt.addBatch("create database if not exists " + dbName);
-					stmt.addBatch("use " + dbName);
-					statusTextField.setText("Lege User an!");
-					stmt.addBatch("CREATE USER" + userNameTextField.getText() + " IDENTIFIED BY PASSWORD " + passWordTextField.getText());
-					statusTextField.setText("Fertig!");
-				} catch (SQLException e) {
-					//TODO:
-					statusTextField.setText(e.getMessage());
-					LogEngine.log(this, "DB-Verbindung zu Backupserver fehlgeschlagen: " + e.getMessage(), LogEngine.ERROR);
-				}
-			}
-			
-		};
-		(new Thread(tmp)).start();
+	public ResultSet pullSettingsFromBackup(){
 		
+		
+//		if(backUpDBStatus >= 3) {
+//			return stmt.executeQuery("Select)
+//		}
+		
+		
+		return null;
 	}
+	
+	
+	
+	
 }

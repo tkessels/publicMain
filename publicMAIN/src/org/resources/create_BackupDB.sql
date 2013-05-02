@@ -112,6 +112,10 @@ ENGINE = InnoDB;
 
 USE `db_publicmain_backup` ;
 
+DROP USER backupPublicMain;
+CREATE USER 'backupPublicMain' IDENTIFIED BY 'backupPublicMain';
+
+GRANT ALL ON `db_publicmain_backup`.* TO 'backupPublicMain';
 -- -----------------------------------------------------
 -- Data for table `db_publicmain_backup`.`t_dbVersion`
 -- -----------------------------------------------------

@@ -50,6 +50,14 @@ public class BackupDBConnection {
 		return me;
 	}
 	
+	
+	
+	// push & pull für ResultSets
+	
+	
+	
+	
+	
 	public boolean create() {
 		String read=null;
 		try (BufferedReader in = new BufferedReader(new FileReader(new File(getClass().getResource("create_backup_db.sql").toURI())))){

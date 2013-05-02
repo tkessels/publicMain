@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -227,8 +228,13 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * erhalten hat, bei Aktivierung des ChatWindows aufhört zu blinken.
 	 */
 	void focusEingabefeld(){
-		this.eingabeFeld.requestFocusInWindow();
-		this.myTab.stopBlink();
+		Runnable tmp = new Runnable() {
+			public void run() {
+				ChatWindow.this.eingabeFeld.requestFocusInWindow();
+				ChatWindow.this.myTab.stopBlink();
+			}
+		};
+		SwingUtilities.invokeLater(tmp);
 	}
 	
 	/**

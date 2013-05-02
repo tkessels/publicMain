@@ -63,12 +63,7 @@ public class DatabaseEngine {
 	}
 	
 	public void writeConfig(){
-		Runnable runnable = new Runnable() {
-			public void run() {
 				localDB.writeAllSettingsToDB(Config.getConfig());
-			}
-		};
-		new Thread(runnable).start();
 		}
 	
 	public synchronized static DatabaseEngine getDatabaseEngine() {

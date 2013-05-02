@@ -41,5 +41,4 @@ public class GruppenKanal extends Kanal {
 		}
 		return false;
 	}
-
 }

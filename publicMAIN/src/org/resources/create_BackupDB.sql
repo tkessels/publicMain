@@ -55,12 +55,12 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_messages` (
   `displayName` VARCHAR(45) NOT NULL ,
   `fk_t_users_userID_empfaenger` BIGINT(20) NULL DEFAULT NULL ,
   `fk_t_msgType_ID` INT NULL DEFAULT NULL ,
-  `t_backupUser_backupUserID` BIGINT NOT NULL ,
+  `fk_t_backupUser_backupUserID` BIGINT NOT NULL ,
   PRIMARY KEY (`msgID`, `timestmp`, `fk_t_users_userID_sender`) ,
   INDEX `fk_t_messages_t_user1_idx` (`fk_t_users_userID_sender` ASC) ,
   INDEX `fk_t_messages_t_user2_idx` (`fk_t_users_userID_empfaenger` ASC) ,
   INDEX `fk_t_msgType_ID` (`fk_t_msgType_ID` ASC) ,
-  INDEX `fk_t_messages_t_backupUser1_idx` (`t_backupUser_backupUserID` ASC) ,
+  INDEX `fk_t_backupUser_backupUserID` (`fk_t_backupUser_backupUserID` ASC) ,
   CONSTRAINT `fk_t_user_userID_sender`
     FOREIGN KEY (`fk_t_users_userID_sender` )
     REFERENCES `db_publicmain_backup`.`t_users` (`userID` )
@@ -77,7 +77,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_messages` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_t_messages_t_backupUser1`
-    FOREIGN KEY (`t_backupUser_backupUserID` )
+    FOREIGN KEY (`fk_t_backupUser_backupUserID` )
     REFERENCES `db_publicmain_backup`.`t_backupUser` (`backupUserID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
@@ -92,12 +92,12 @@ DROP TABLE IF EXISTS `db_publicmain_backup`.`t_settings` ;
 CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_settings` (
   `settingsKey` VARCHAR(45) NOT NULL ,
   `settingsValue` VARCHAR(45) NOT NULL ,
-  `fk_t_backupUser_username` VARCHAR(45) NOT NULL ,
+  `fk_t_backupUser_backupUserID_2` BIGINT NOT NULL ,
   PRIMARY KEY (`settingsKey`) ,
-  INDEX `fk_t_settings_t_backupUser1_idx` (`fk_t_backupUser_username` ASC) ,
-  CONSTRAINT `fk_t_backupUser_username`
-    FOREIGN KEY (`fk_t_backupUser_username` )
-    REFERENCES `db_publicmain_backup`.`t_backupUser` (`username` )
+  INDEX `fk_t_settings_t_backupUser1_idx` (`fk_t_backupUser_backupUserID_2` ASC) ,
+  CONSTRAINT `fk_t_backupUser_backupUserID_2`
+    FOREIGN KEY (`fk_t_backupUser_backupUserID_2` )
+    REFERENCES `db_publicmain_backup`.`t_backupUser` (`backupUserID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -117,7 +117,7 @@ USE `db_publicmain_backup` ;
 -- -----------------------------------------------------
 -- Placeholder table for view `db_publicmain_backup`.`v_searchInHistory`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_publicmain_backup`.`v_searchInHistory` (`settingsKey` INT, `settingsValue` INT, `fk_t_backupUser_username` INT);
+CREATE TABLE IF NOT EXISTS `db_publicmain_backup`.`v_searchInHistory` (`settingsKey` INT, `settingsValue` INT, `fk_t_backupUser_backupUserID_2` INT);
 
 -- -----------------------------------------------------
 -- View `db_publicmain_backup`.`v_searchInHistory`

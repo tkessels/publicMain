@@ -256,6 +256,7 @@ public class LocalDBConnection {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (SQLException e) {
+			dbStatus = 0;
 			LogEngine.log(this, e.getMessage(), LogEngine.ERROR);
 			e.printStackTrace();
 		}
@@ -535,7 +536,7 @@ public class LocalDBConnection {
 		}
 	}
 
-	public synchronized void writeAllSettingsToDB(final ConfigData settings) { //DEADLock
+	public void writeAllSettingsToDB(final ConfigData settings) { //DEADLock
 		if (ceReadyForWritingSettings){
 			new Thread(new Runnable() {
 				public void run() {
@@ -589,7 +590,7 @@ public class LocalDBConnection {
 				prepState.append("SELECT * from v_searchInHistory WHERE ");
 				if(userID!=null)prepState.append("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
 				if(alias != null)prepState.append("(sender LIKE ? OR recipient LIKE ?) AND");
-				if(groupName!=null)prepState.append("group LIKE ? AND ");
+				if(groupName!=null)prepState.append("`group` LIKE ? AND ");
 				prepState.append("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
 				System.out.println(prepState);
 				searchInHistStmt = con.prepareStatement(prepState.toString());

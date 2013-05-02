@@ -269,62 +269,40 @@ public class DatabaseEngine {
 		return allMSGs();
 
 	}
-
 	
-	private String[][] getResultInStringArray(ResultSet tmpRS){
-		String[][] rohData = null;
-		int columnCount = 0;
-		int rowCount = 0;
-		
-		
-		try {
-			columnCount = tmpRS.getMetaData().getColumnCount();
-			tmpRS.last();
-			rowCount = tmpRS.getRow();
-			tmpRS.beforeFirst();
-			rohData = new String[rowCount][columnCount];
-			
-			// Überschriften befüllen
-			for (int ib = 1; ib < columnCount; ib++){
-				rohData[0][ib] = tmpRS.getMetaData().getColumnName(ib);
-			}
-			// Daten befüllen
-			for (int ia = 0; ia < columnCount; ia++){
-				for (int ib = 0; ib-1 < rowCount; ib++){
-					tmpRS.next();
-					rohData[ia][ib] = tmpRS.getNString(rohData[0][ib]);
-					
-				}
-				
-			System.out.println(rohData.toString());
-				
-				
-				
-				
-			}
-			
-			
-			
-			
-			return rohData;
-			
-			
-			
-			
-			
-			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public void printüberschriften(DatabaseDaten parameterObject){
+		for (String über: parameterObject.spaltenüberschriften) {				
+		System.out.println(über);	
 		}
 		
+	}
+
+
+	private static DatabaseDaten getResultData(ResultSet rs) throws SQLException{
 		
-		return rohData;
-		
-		
-		
-		
-		
+		 ResultSetMetaData metaData = rs.getMetaData();
+
+		    // names of columns
+		 int columnCount = metaData.getColumnCount();
+		 String[] spaüb= new String[columnCount];
+		    for (int column = 1; column <= columnCount; column++) {
+		        spaüb[column-1]= metaData.getColumnName(column);
+		    }
+
+		    // data of the table
+		    rs.last();
+		    int rows = rs.getRow();
+		    rs.beforeFirst();
+		    
+		    String[][] stringdata = new String[rows][columnCount];
+		    while (rs.next()) {
+		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+		        	Object zelle = rs.getObject(columnIndex);
+					stringdata[rs.getRow()-1][columnIndex-1]=(zelle!=null)?zelle.toString():"";
+		        }
+		    }
+		    
+		    return new DatabaseDaten(spaüb, stringdata);
 	}
 	
 	
@@ -429,65 +407,67 @@ public class DatabaseEngine {
 	
 	public static JTable buildTable(ResultSet rs) throws SQLException{
 
-		    ResultSetMetaData metaData = rs.getMetaData();
-
-		    // names of columns
-		    int columnCount = metaData.getColumnCount();
-		    String[] columnNames = new String[columnCount];
-		    for (int column = 1; column <= columnCount; column++) {
-		        columnNames[column-1]=metaData.getColumnName(column);
-		    }
-		    System.out.println(columnNames);
-		    
-
-		    // data of the table
-		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		    while (rs.next()) {
-		        Vector<Object> vector = new Vector<Object>();
-		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-		            vector.add(rs.getObject(columnIndex));
-		        }
-		        data.add(vector);
-		    }
-//		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
-//		    tblModel.setColumnIdentifiers(colHdrs);
-		    
-		    data.toArray();
-		    Object [][] array = new Object[data.size()][columnCount];
-		    int i  =0;
-		    for (Vector<Object> tmp : data) {
-			    array[i++]=tmp.toArray();
-		}
-		  
-		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
-		    tmod.setColumnIdentifiers(columnNames);
-		    JTable tmp = new JTable(tmod);
-		    
-		    return tmp;
+//		    ResultSetMetaData metaData = rs.getMetaData();
+//
+//		    // names of columns
+//		    int columnCount = metaData.getColumnCount();
+//		    String[] columnNames = new String[columnCount];
+//		    for (int column = 1; column <= columnCount; column++) {
+//		        columnNames[column-1]=metaData.getColumnName(column);
+//		    }
+//		    System.out.println(columnNames);
+//		    
+//
+//		    // data of the table
+//		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+//		    while (rs.next()) {
+//		        Vector<Object> vector = new Vector<Object>();
+//		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+//		            vector.add(rs.getObject(columnIndex));
+//		        }
+//		        data.add(vector);
+//		    }
+////		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
+////		    tblModel.setColumnIdentifiers(colHdrs);
+//		    
+//		    data.toArray();
+//		    Object [][] array = new Object[data.size()][columnCount];
+//		    int i  =0;
+//		    for (Vector<Object> tmp : data) {
+//			    array[i++]=tmp.toArray();
+//		}
+//		  
+//		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
+//		    tmod.setColumnIdentifiers(columnNames);
+//		    JTable tmp = new JTable(tmod);
+//		    
+//		    return tmp;
+		return new JTable(buildTableModel(rs));
 		
 	}
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
-
-	    ResultSetMetaData metaData = rs.getMetaData();
-
-	    // names of columns
-	    Vector<String> columnNames = new Vector<String>();
-	    int columnCount = metaData.getColumnCount();
-	    for (int column = 1; column <= columnCount; column++) {
-	        columnNames.add(metaData.getColumnName(column));
-	    }
-
-	    // data of the table
-	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-	    while (rs.next()) {
-	        Vector<Object> vector = new Vector<Object>();
-	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-	            vector.add(rs.getObject(columnIndex));
-	        }
-	        data.add(vector);
-	    }
-
-	    return new DefaultTableModel(data, columnNames);
+		DatabaseDaten tmp = getResultData(rs);
+		
+		//	    ResultSetMetaData metaData = rs.getMetaData();
+//
+//	    // names of columns
+//	    Vector<String> columnNames = new Vector<String>();
+//	    int columnCount = metaData.getColumnCount();
+//	    for (int column = 1; column <= columnCount; column++) {
+//	        columnNames.add(metaData.getColumnName(column));
+//	    }
+//
+//	    // data of the table
+//	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+//	    while (rs.next()) {
+//	        Vector<Object> vector = new Vector<Object>();
+//	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+//	            vector.add(rs.getObject(columnIndex));
+//	        }
+//	        data.add(vector);
+//	    }
+//
+	    return new DefaultTableModel(tmp.zelleninhalt,tmp.spaltenüberschriften);
 
 	}
 

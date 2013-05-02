@@ -30,7 +30,7 @@ public class ResultWindow extends JDialog {
 		this.resultTable = result;
 		this.scroller = new JScrollPane(resultTable);
 		
-		this.resultTable.setPreferredScrollableViewportSize(new Dimension(500, 70));
+//		this.resultTable.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		this.resultTable.setFillsViewportHeight(true);
 		this.resultTable.getModel().addTableModelListener(new TableModelListener() {
 			
@@ -45,7 +45,7 @@ public class ResultWindow extends JDialog {
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setTitle("Found " + resultTable.getRowCount() + " messages");
 		this.setIconImage(Help.getIcon("pM_Logo.png",64).getImage());
-		this.setMinimumSize(new Dimension(750, 200));
+//		this.setMinimumSize(new Dimension(750, 200));
 		this.pack();
 		this.setLocationRelativeTo(null);
 		 JButton autoSizeButton = new JButton("Auto-size columns");
@@ -69,7 +69,6 @@ public class ResultWindow extends JDialog {
         });
 		 */
 	}
-	
-	
+
 	
 }

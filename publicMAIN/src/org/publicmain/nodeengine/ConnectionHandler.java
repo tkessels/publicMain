@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,7 +62,7 @@ public class ConnectionHandler {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Konstruktor zum erstellen eines ConnectionHandlers um einen bestehenden Socket.
 	 * 
 	 * @param underlying
 	 * @throws IOException

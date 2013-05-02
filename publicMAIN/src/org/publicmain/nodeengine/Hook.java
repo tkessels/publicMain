@@ -115,7 +115,8 @@ public class Hook {
 	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 * @param paket
-	 *            TODO: paket-Kommentar!
+	 *            Die Nachricht die gesendet werden soll wenn der Hook
+	 *            registriert ist
 	 * 
 	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
@@ -151,7 +152,7 @@ public class Hook {
 	 * @param nid
 	 *            NodeID des Absenders
 	 * @param payload
-	 *            TODO: payload-Kommentar - von eben kopieren!
+	 *            Daten die das Paket trägt
 	 * @param filter
 	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
 	 *            NodeEngine ausgeschlossen werden soll.
@@ -164,7 +165,8 @@ public class Hook {
 	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 * @param dothat
-	 *            TODO: dothat-Kommentar!
+	 *            das Runnable welches gestartet werden soll wenn der Hook
+	 *            registriert ist
 	 * 
 	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
@@ -246,7 +248,7 @@ public class Hook {
 	}
 
 	/**
-	 * Eigene toString-Methode
+	 * Eigene toString-Methode.
 	 */
 	public String toString() {
 		return allHooks.toString();
@@ -254,9 +256,8 @@ public class Hook {
 	
 	
 	/**
-	 * TODO: Ausformulieren, dass ungefähr klar wird was hier passiert!
-	 * 
-	 * Interne Klasse für Parameter Kapsel und Semaphore. 
+	 * Klasse für die Filtereinstellungen und als Semaphore für die blockierenden
+	 * Aufrufe.
 	 */
 	private class Haken {
 		// Filterinformationen
@@ -264,13 +265,14 @@ public class Hook {
 		private MSGCode code;
 		private Long sender;
 		private Object payload;
-		// private Long reciever;
-		// private String gruppe;
+//		 Ggf. für die weitere Entwicklung benötigt.
+//		 private Long reciever;
+//		 private String gruppe;
 		private boolean filter;
 		private MSG hookedMSG;
 
 		/**
-		 * Erzeugt einen Haken der die angegebennen Paramter matched 
+		 * Erzeugt einen Haken der die angegebennen Paramter matched .
 		 * 
 		 * @param typ Nachrichtentyp der betrachtet werden soll
 		 * @param code Nachrichtencode der betrachtet werden soll
@@ -285,8 +287,9 @@ public class Hook {
 			this.code = code;
 			this.sender = sender;
 			this.payload = payload;
-			// this.reciever = reciever;
-			// this.gruppe = gruppe;
+//			 Ggf. für die weitere Entwicklung benötigt.
+//			 this.reciever = reciever;
+//			 this.gruppe = gruppe;
 			this.filter = filter;
 		}
 		
@@ -297,15 +300,15 @@ public class Hook {
 		 * @return true wenn es einen passenden Hacken gibt und dieser wünscht das die Nachricht entfernt wird
 		 */
 		private synchronized boolean check(MSG x) {
-			// System.out.println(allHooks);
 			boolean typ_check = (typ == null) || typ == x.getTyp();
 			boolean code_check = (code == null) || code.equals(x.getCode());
 			boolean sender_check = (sender == null)
 					|| sender.equals(x.getSender());
 			boolean payload_check = (payload == null)
 					|| payload.equals(x.getData());
-			// boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
-			// boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
+//			 Ggf. für die weitere Entwicklung benötigt.
+//			 boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
+//			 boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
 
 			if (typ_check && code_check && sender_check && payload_check) {// &&reciever_check&&gruppe_check)
 																			// {

@@ -26,27 +26,29 @@ public class publicMAIN {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
-		if(Config.getLock()){
+		if (Config.getLock()) {
 			DatabaseEngine.getDatabaseEngine();
-			if(Config.getConfig().getUserID() == null){
+			if (Config.getConfig().getUserID() == null) {
 				MulticastConnectionHandler.getMC().discoverBUS();
-				//TODO: hier darauf warten bis nutzer daten eingegeben und "submit" gedrückt hat. also zum Beispiel ein boolean im Startwindwo überprüfen
-				//TODO: Will werte bei Submit-Click im Startwindow in config speichern...wie? ;-)
+				// TODO: hier darauf warten bis nutzer daten eingegeben und
+				// "submit" gedrückt hat. also zum Beispiel ein boolean im
+				// Startwindwo überprüfen
+				// TODO: Will Werte bei Submit-Klick im StartWindow in der
+				// Config speichern...wie? ;-)
 				boolean tom = StartWindow.getStartWindow();
 				if (tom) {
 					// Help.playSound("logon.wav");
 					GUI.getGUI();
 				}
-			}else {
+			} else {
 				// if autopull = true dann pull
 				// Help.playSound("logon.wav");
 				GUI.getGUI();
 			}
-			// Mir gefälltnicht das hier die Kontrolle weggegeben wird. Es
-			// sollte ein strukturierte und Kontrollierter Start formuliert
-			// werden der die Module in der richtigen Reihenfolge startet
-		}
-		else{
+			// Mir gefällt nicht das hier die Kontrolle weggegeben wird. Es
+			// sollte ein strukturierte und kontrollierter Start formuliert
+			// werden der die Module in der richtigen Reihenfolge startet.
+		} else {
 			JOptionPane
 					.showMessageDialog(
 							null,
@@ -57,6 +59,5 @@ public class publicMAIN {
 					.log("Could not start publicMAIN An instance is already running!",
 							LogEngine.ERROR);
 		}
-		
 	}
 }

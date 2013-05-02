@@ -1,8 +1,5 @@
 package org.publicmain.chatengine;
-import java.util.Iterator;
 import java.util.Observable;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.publicmain.common.MSG;
 
@@ -84,6 +81,9 @@ public abstract class Kanal extends Observable {
 		return (this.referenz.equals(vergleich));
 	}
 
+	/**
+	 * Eigene toString-Methode.
+	 */
 	public String toString() {
 		return referenz.toString();
 	}

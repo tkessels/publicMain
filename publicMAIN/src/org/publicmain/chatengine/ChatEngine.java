@@ -395,10 +395,8 @@ public class ChatEngine{
 	 * @param nachricht, die neue Nachricht
 	 */
 	public void put(MSG nachricht) {
-		if (!ignored.contains(nachricht.getSender())) {
 			inbox.add(nachricht);
 			DatabaseEngine.getDatabaseEngine().put(nachricht);
-		}
 	}
 
 	/**

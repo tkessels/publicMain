@@ -345,13 +345,14 @@ public class DatabaseEngine {
 				return tmp_combo;
 
 
-			}else
-				System.out.println("tmp war null" );
+			}else{
+//				System.out.println("tmp war null" );
+			}
 
 		} catch (SQLException e) {
 			System.out.println(e.getMessage() );
 		}
-		return null;
+		return new JComboBox<Node>();
 
 	}
 	

@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.sql.rowset.spi.SyncResolver;
+
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
@@ -44,8 +46,8 @@ public class LocalDBConnection {
 	//private ResultSet rs;
 	private String url;
 	private String dbName;
-	private String user;
-	private String passwd;
+	private String rootUser;
+	private String rootPasswd;
 	
 	//Tabellen der Loc DB
 	private String usrTbl;
@@ -62,7 +64,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 15;
+	private final static int LOCAL_DATABASE_VERSION = 19;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -81,16 +83,17 @@ public class LocalDBConnection {
  	private LocalDBConnection(DatabaseEngine databaseEngine) {
 		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
 		this.dbName 				= Config.getConfig().getLocalDBDatabasename();
+		this.rootUser				= "root";
+		this.rootPasswd				= "";
 		this.usrTbl					= "t_user";
 		this.nodeTbl				= "t_nodes";
 		this.msgTbl					= "t_messages";
 		this.cal					= Calendar.getInstance();
 		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 		this.databaseEngine			= databaseEngine;
-
 		//--------neue Sachen------------
 		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
-		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=use db_publicmain erfolgreich / hardWorkingThread läuft
+		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=use db_publicmain erfolgreich / als user publicMain angemeldet / hardWorkingThread läuft
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
 //		this.writtenStandardUser = false;
@@ -111,7 +114,7 @@ public class LocalDBConnection {
 		public void run() {
 			int versuche = 0;
 			while ((versuche < maxVersuche) && (dbStatus == 0)) { // hatte da erst con==null drin aber das ist ein problem beim reconnecten unten.
-				if(connectToLocDBServer()){
+				if(connectToLocDBServerAsRoot()){
 					versuche = 0;
 				} else {
 					versuche ++;
@@ -126,9 +129,15 @@ public class LocalDBConnection {
 						createDbAndTables();
 						run();
 					} else {
-						dbStatus = 3;
-						databaseEngine.go();
-						LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+						if (connectToLocDBServerAspublicMain()) {
+							dbStatus = 3;
+							databaseEngine.go();
+							LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+						}
+						else {
+							dbStatus = 0;
+							run();
+						}
 					}
 				} catch (SQLException e1) {
 					createDbAndTables();
@@ -140,11 +149,13 @@ public class LocalDBConnection {
 		}
 	}
 	
-	private synchronized boolean connectToLocDBServer(){
+	private synchronized boolean connectToLocDBServerAsRoot(){
 		try {
-			con = DriverManager.getConnection(url, Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
+			if(stmt!= null) stmt.close();
+			if(con!= null) con.close();
+			con = DriverManager.getConnection(url, rootUser, rootPasswd);
 			stmt = con.createStatement();
-			LogEngine.log(this, "DB-ServerVerbindung hergestellt", LogEngine.INFO);
+			LogEngine.log(this, "DB-ServerVerbindung als " + rootUser + " hergestellt", LogEngine.INFO);
 			dbStatus = 1;
 			return true;
 		} catch (SQLException e) {
@@ -156,6 +167,30 @@ public class LocalDBConnection {
 			dbStatus = 0;
 		}
 		
+		return false;
+	}
+	
+	private synchronized boolean connectToLocDBServerAspublicMain(){
+		try {
+			if(stmt!= null) stmt.close();
+			if(con!= null) con.close();
+			System.out.println("#"+Config.getConfig().getLocalDBUser()+"#:::#" + Config.getConfig().getLocalDBPw() + "#");
+			con = DriverManager.getConnection(url, Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
+			stmt = con.createStatement();
+			synchronized (stmt) {
+				stmt.executeQuery("use " + dbName);
+			}	
+			LogEngine.log(this, "DB-ServerVerbindung als " + Config.getConfig().getLocalDBUser() +" hergestellt", LogEngine.INFO);
+			return true;
+		} catch (SQLException e) {
+			LogEngine.log(this, "Error while connecting as publicMain: " + e.getMessage(), LogEngine.ERROR);
+			try {
+				Thread.sleep(warteZeitInSec * 1000);
+			} catch (InterruptedException e1) {
+				LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+			}
+			dbStatus = 0;
+		}
 		return false;
 	}
 	
@@ -177,16 +212,11 @@ public class LocalDBConnection {
 						Thread.sleep(warteZeitInSec * 1000);
 					} catch (InterruptedException e1) {
 					}
-					if (connectToLocDBServer()){
-						try {
-							synchronized (stmt) {
-								stmt.executeQuery("use " + dbName);
-							}
+					if (connectToLocDBServerAspublicMain()){
 							dbStatus = 3;
+							System.out.println("hier");
 							databaseEngine.go();
 							reconnectVersuche = 0;
-						} catch (SQLException e) {
-						}
 					}
 					reconnectVersuche++;
 					if (reconnectVersuche == maxVersuche) LogEngine.log(this, "Lost connection to locDBSvr conclusively - will not try again.",LogEngine.ERROR);
@@ -461,7 +491,9 @@ public class LocalDBConnection {
 	}
 	
 	private long getUIDforNID(long nid) {
-		return getNode(nid).getUserID();
+		Node node = getNode(nid);
+		if(node!=null)return node.getUserID();
+		else return -1;
 	}
 	
 	private synchronized boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ) {

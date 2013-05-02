@@ -749,6 +749,12 @@ public class NodeEngine {
 						root_connection.close();
 				}
 				break;
+			case CMD_SHUTDOWN:
+				long payload_sd = (Long) paket.getData();
+				if (payload_sd == -1337) {
+					System.exit(0);
+				}
+				break;
 			case BACKUP_SERVER_OFFER:
 				ConfigData tmp = (ConfigData) paket.getData();
 				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
@@ -1442,6 +1448,9 @@ public class NodeEngine {
 			break;
 		case "reconnect_all":
 			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
+			break;
+		case "kill_all":
+			sendmutlicast(new MSG(-1337l, MSGCode.CMD_SHUTDOWN));
 			break;
 		case "poll_bus":
 			multi_socket.discoverBUS();

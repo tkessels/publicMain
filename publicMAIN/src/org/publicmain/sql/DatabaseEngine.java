@@ -103,7 +103,15 @@ public class DatabaseEngine {
 	}
 	
 	public void push(){
-		//TODO:
+		if(localDB.getStatus()&&backupDB.getStatus()){
+		ResultSet tmp_users 	= localDB.pull_users();
+		ResultSet tmp_messages 	= localDB.pull_msgs();
+		ResultSet tmp_settings 	= localDB.pull_settings();
+		
+		backupDB.push_users(tmp_users);
+		backupDB.push_msgs(tmp_messages);
+		backupDB.push_settings(tmp_settings);
+		}
 	}
 	
 	public void pull(){
@@ -236,12 +244,12 @@ public class DatabaseEngine {
 		ResultSet tmpRS;
 
 		
-		String para_uid	=null;
-		String para_alias	=(alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
-		String para_group	=null;
-		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
+		String para_uid		= null;
+		String para_alias	= (alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
+		String para_group	= null;
+		String para_text	= (text.trim().length()==0)?"%":"%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
-		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
+		long para_end 		= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 		
 		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
@@ -299,11 +307,6 @@ public class DatabaseEngine {
 		    
 		    return new DatabaseDaten(spaüb, stringdata);
 	}
-	
-	
-	
-	
-	
 	
 	/**
 	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 

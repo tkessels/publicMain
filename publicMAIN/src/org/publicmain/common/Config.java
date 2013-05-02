@@ -9,6 +9,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 
+import javax.swing.SwingUtilities;
+
 import org.publicmain.sql.DatabaseEngine;
 
 
@@ -190,7 +192,7 @@ public class Config {
 	
 
 	private void savetoDisk(){
-		new Thread(new Runnable() {
+		Runnable target = new Runnable() {
 			public void run() {
 				try (final FileOutputStream fos = new FileOutputStream(
 						user_conf)) {
@@ -204,7 +206,8 @@ public class Config {
 							LogEngine.WARNING);
 				}
 			}
-		}).start();
+		};
+		new Thread(target).start();
 	}
 
 

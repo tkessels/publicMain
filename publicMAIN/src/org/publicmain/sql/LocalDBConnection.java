@@ -536,7 +536,7 @@ public class LocalDBConnection {
 		}
 	}
 
-	public synchronized void writeAllSettingsToDB(final ConfigData settings) {
+	public synchronized void writeAllSettingsToDB(final ConfigData settings) { //DEADLock
 		if (ceReadyForWritingSettings){
 			new Thread(new Runnable() {
 				public void run() {

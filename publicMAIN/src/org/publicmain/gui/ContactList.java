@@ -182,7 +182,7 @@ public class ContactList extends JWindow {
 //					if(source.getModel().getClass().getSimpleName().startsWith("User")){
 					if(o instanceof Node){
 						Node tmp = (Node)o;
-						PopupUser popupUsr = new PopupUser(tmp.getAlias(), new popupListener(tmp.getAlias()));
+						PopupUser popupUsr = new PopupUser(new popupListener(tmp.getAlias()));
 						popupUsr.show(source, e.getX(), e.getY());
 					}
 					if(source.getModel().getClass().getSimpleName().startsWith("Group")){
@@ -205,7 +205,10 @@ public class ContactList extends JWindow {
 		private JMenuItem info;
 		private JMenuItem changeAlias;
 		
-		public PopupUser(String user, ActionListener popupListener){
+		public PopupUser(ActionListener popupListener){
+			String user=users.getSelectedValue().getAlias();
+			long userID = users.getSelectedValue().getUserID();
+
 			this.whisper = new JMenuItem("whisper to " + user);
 			this.sendFile = new JMenuItem("send File to " + user);
 			this.ignore = new JMenuItem("ignore " + user);
@@ -220,16 +223,17 @@ public class ContactList extends JWindow {
 			this.info.addActionListener(popupListener);
 			this.changeAlias.addActionListener(popupListener);
 			
-			if (!(users.getSelectedValue().getUserID()==ChatEngine.getCE().getUserID())) {
+			if (!(userID==ChatEngine.getCE().getUserID())) {
 				this.add(whisper);
 				this.add(new Separator());
 				this.add(sendFile);
 				this.add(new Separator());
-				this.add(ignore);
-				this.add(unignore);
+				if(!ChatEngine.getCE().is_uid_ignored(userID)) this.add(ignore);
+				else this.add(unignore);
 				this.add(new Separator());
 			} else {
 				this.add(changeAlias);
+//				this.add()
 			}
 			this.add(info);
 		}

@@ -749,12 +749,6 @@ public class NodeEngine {
 						root_connection.close();
 				}
 				break;
-			case CMD_SHUTDOWN:
-				long payload_sd = (Long) paket.getData();
-				if (payload_sd == -1337) {
-					System.exit(0);
-				}
-				break;
 			case BACKUP_SERVER_OFFER:
 				ConfigData tmp = (ConfigData) paket.getData();
 				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
@@ -784,24 +778,20 @@ public class NodeEngine {
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		
 		if (angler.check(paket)) {
 			return;
 		}
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID)) {
 			routesend(paket);
 		}
-		if(ce.is_ignored(paket.getSender())) {
-			return;
-		}
 		else {
 			switch (paket.getTyp()) {
 			case PRIVATE:
-				ce.put(paket);
+				if(!ce.is_ignored(paket.getSender())) ce.put(paket);
 				break;
 			case GROUP:
 				groupRouteSend(paket,quelle);
-				ce.put(paket);
+				if(!ce.is_ignored(paket.getSender())) ce.put(paket);
 				break;
 			case SYSTEM:
 				DatabaseEngine.getDatabaseEngine().put(paket);
@@ -872,10 +862,10 @@ public class NodeEngine {
 					break;
 				case FILE_TCP_REQUEST:
 					FileTransferData tmp = (FileTransferData) paket.getData();
-					recieve_file(tmp);
+					if(!ce.is_ignored(paket.getSender())) recieve_file(tmp);
 					break;
 				case FILE_RECIEVED:
-					ce.inform((FileTransferData) paket.getData());
+					if(!ce.is_ignored(paket.getSender())) ce.inform((FileTransferData) paket.getData());
 					break;
 				case NODE_LOOKUP:
 					Node tmp_node = null;
@@ -917,7 +907,7 @@ public class NodeEngine {
 				if (paket.getEmpfänger() != nodeID) {
 					routesend(paket);
 				} else {
-					recieve_file(paket);
+					if(!ce.is_ignored(paket.getSender())) recieve_file(paket);
 				}
 				break;
 			default:
@@ -1448,9 +1438,6 @@ public class NodeEngine {
 			break;
 		case "reconnect_all":
 			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
-			break;
-		case "kill_all":
-			sendmutlicast(new MSG(-1337l, MSGCode.CMD_SHUTDOWN));
 			break;
 		case "poll_bus":
 			multi_socket.discoverBUS();

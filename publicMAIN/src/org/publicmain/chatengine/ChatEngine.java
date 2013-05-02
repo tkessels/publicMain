@@ -292,7 +292,7 @@ public class ChatEngine{
 	 */
 	public boolean ignore_user(long uid) {
 		if (uid != userID) {
-			return ignored.add(getNodeForUID(uid).getNodeID());
+			return ignored.add(uid);
 		}
 		return false;
 	}
@@ -307,7 +307,7 @@ public class ChatEngine{
 	 * @param uid
 	 */
 	public boolean unignore_user(long uid) {
-		return ignored.remove(getNodeForUID(uid).getNodeID());
+		return ignored.remove(uid);
 	}
 
 	/**
@@ -524,7 +524,21 @@ public class ChatEngine{
 	 * @return
 	 */
 	public boolean is_ignored(long nodeID) {
-		return ignored.contains(nodeID);
+		Node tmp = ce.getNodeForNID(nodeID);
+		if(tmp!=null){
+			return ignored.contains(tmp.getUserID());
+		}
+		return false;
+	}
+	/**
+	 * Prüfen ob uid auf der ignored-Liste steht und ein entsprechendes boolean
+	 * zurückliefern.
+	 * 
+	 * @param uid
+	 * @return
+	 */
+	public boolean is_uid_ignored(long uid) {
+		return ignored.contains(uid);
 	}
 
 	/**

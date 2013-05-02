@@ -232,8 +232,9 @@ public class DatabaseEngine {
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
 	public JTable selectMSGsByAlias(String alias,GregorianCalendar begin, GregorianCalendar end,String text) {
-		ResultSet tmp;
+		ResultSet tmpRS;
 
+		
 		String para_uid	=null;
 		String para_alias	=(alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
 		String para_group	=null;
@@ -243,15 +244,16 @@ public class DatabaseEngine {
 		
 		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
-		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
-		else tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		if (para_begin<para_end) tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		else tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
 
-		if(tmp!=null){
+		if(tmpRS!=null){
 
-
+			getResultInStringArray(tmpRS);
+			
 			try {
 //				return new JTable(buildTableModel(tmp));
-				return buildTable(tmp);
+				return buildTable(tmpRS);
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 
@@ -262,6 +264,68 @@ public class DatabaseEngine {
 
 	}
 
+	
+	private String[][] getResultInStringArray(ResultSet tmpRS){
+		String[][] rohData = null;
+		int columnCount = 0;
+		int rowCount = 0;
+		
+		
+		try {
+			columnCount = tmpRS.getMetaData().getColumnCount();
+			tmpRS.last();
+			rowCount = tmpRS.getRow();
+			tmpRS.beforeFirst();
+			rohData = new String[rowCount][columnCount];
+			
+			// Überschriften befüllen
+			for (int ib = 1; ib < columnCount; ib++){
+				rohData[0][ib] = tmpRS.getMetaData().getColumnName(ib);
+			}
+			// Daten befüllen
+			for (int ia = 0; ia < columnCount; ia++){
+				for (int ib = 0; ib-1 < rowCount; ib++){
+					tmpRS.next();
+					rohData[ia][ib] = tmpRS.getNString(rohData[0][ib]);
+					
+				}
+				
+			System.out.println(rohData.toString());
+				
+				
+				
+				
+			}
+			
+			
+			
+			
+			return rohData;
+			
+			
+			
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return rohData;
+		
+		
+		
+		
+		
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.

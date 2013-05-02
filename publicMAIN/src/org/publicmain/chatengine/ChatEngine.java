@@ -105,6 +105,7 @@ public class ChatEngine{
 		alias = alias.toLowerCase();
 		for (Node x : getUsers()) {
 			if (x.getAlias().toLowerCase().startsWith(alias)) {
+				if(x.getAlias().equals(alias))return x;
 				tmp.add(x);
 			}
 		}

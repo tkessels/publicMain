@@ -1,7 +1,3 @@
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
-
 DROP SCHEMA IF EXISTS `db_publicmain_backup` ;
 CREATE SCHEMA IF NOT EXISTS `db_publicmain_backup` DEFAULT CHARACTER SET utf8 ;
 USE `db_publicmain_backup` ;
@@ -104,9 +100,23 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_settings` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+-- -----------------------------------------------------
+-- Table `db_publicmain_backup`.`t_dbVersion`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `db_publicmain_backup`.`t_dbVersion` ;
+
+CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_dbVersion` (
+  `dbVersion` INT NOT NULL )
+ENGINE = InnoDB;
+
 USE `db_publicmain_backup` ;
 
+-- -----------------------------------------------------
+-- Data for table `db_publicmain_backup`.`t_dbVersion`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `db_publicmain_backup`;
+INSERT INTO `db_publicmain_backup`.`t_dbVersion` (`dbVersion`) VALUES (1);
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+COMMIT;

@@ -164,7 +164,7 @@ public class ChatEngine{
 	public void send_private(long uid, String text) {
 		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(), text);
 		put(tmp);
-		//ne.sendtcp(tmp);
+		if(GUI.getGUI().isAFK())GUI.getGUI().afk();
 		ne.routesend(tmp);
 	}
 
@@ -178,7 +178,7 @@ public class ChatEngine{
 	public void send_group(String group, String text) {
 		MSG tmp = new MSG(group, text);
 		put(tmp);
-		//ne.sendtcp(tmp);
+		if(GUI.getGUI().isAFK())GUI.getGUI().afk();
 		ne.groupRouteSend(tmp, null);
 	}
 	
@@ -397,6 +397,10 @@ public class ChatEngine{
 	public void put(MSG nachricht) {
 			inbox.add(nachricht);
 			DatabaseEngine.getDatabaseEngine().put(nachricht);
+			if(GUI.getGUI().isAFK() && (nachricht.getTyp()==NachrichtenTyp.PRIVATE)){
+				MSG tmp = new MSG(ce.getNodeForUID(getNodeForNID(nachricht.getSender()).getUserID()).getNodeID(), "I'm <b>a</b>way <b>f</b>rom <b>k</b>eyboard");
+				ne.routesend(tmp);
+			}
 	}
 
 	/**

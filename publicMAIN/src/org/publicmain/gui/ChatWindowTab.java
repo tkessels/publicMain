@@ -16,7 +16,8 @@ import javax.swing.JTabbedPane;
 import org.resources.Help;
 
 /**
- * @author ABerthold
+ * Diese Klasse
+ * @author ATRM
  *
  */
 public class ChatWindowTab extends JPanel implements MouseListener{

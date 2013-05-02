@@ -77,14 +77,15 @@ public class BackupDBConnection {
 		return false;
 	}
 	
-	public ResultSet pullSettingsFromBackup(){
+	public ResultSet pull_settings(){
 		
-		
-//		if(backUpDBStatus >= 3) {
-//			return stmt.executeQuery("Select)
-//		}
-		
-		
+		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
+			try {
+				return stmt.executeQuery("SELECT * FROM v_searchInHistory WHERE fk_t_backupUser_username LIKE '" + Config.getConfig().getBackupDBChoosenUsername() + "'");
+			} catch (SQLException e) {
+				LogEngine.log(this, "Error while pulling settings from backupDB " + e.getMessage(), LogEngine.ERROR );
+			}
+		}
 		return null;
 	}
 	public void push_msgs(ResultSet tmp_messages) {

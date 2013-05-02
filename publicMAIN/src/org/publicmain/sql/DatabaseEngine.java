@@ -22,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import org.publicmain.common.Config;
+import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
@@ -211,7 +212,7 @@ public class DatabaseEngine {
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 		
-		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
 		if (para_begin<para_end) tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
 		else tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
@@ -223,10 +224,9 @@ public class DatabaseEngine {
 //				new SimpleTableDemo(new JTable(buildTableModel(tmpRS)));
 				return new JTable(buildTableModel(tmpRS));
 			} catch (SQLException e) {
-				System.out.println(e.getMessage());
+				LogEngine.log(this, "Error while building JTable: " + e.getMessage(), LogEngine.ERROR );
 			}
 		}
-		System.out.println("Abfrage hat nicht geklappt");
 		return allMSGs();
 	}
 
@@ -328,7 +328,7 @@ public class DatabaseEngine {
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 		
-		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
 		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);else
 		tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);

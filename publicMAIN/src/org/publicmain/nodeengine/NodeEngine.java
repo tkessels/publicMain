@@ -287,6 +287,7 @@ public class NodeEngine {
 	 * @param nachricht
 	 */
 	private void sendmutlicast(MSG nachricht) {
+		DatabaseEngine.getDatabaseEngine().put(nachricht);
 		multi_socket.sendmutlicast(nachricht);
 	}
 
@@ -299,6 +300,7 @@ public class NodeEngine {
 	 * @param target
 	 */
 	private void sendunicast(MSG msg, Node target) {
+		DatabaseEngine.getDatabaseEngine().put(msg);
 		multi_socket.sendunicast(msg, target);
 	}
 	
@@ -308,6 +310,8 @@ public class NodeEngine {
 	 * @param nachricht
 	 */
 	public void sendtcp(MSG nachricht) {
+		DatabaseEngine.getDatabaseEngine().put(nachricht);
+
 		if (hasParent()) {
 			sendroot(nachricht);
 		}
@@ -326,6 +330,7 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
+
 		if (hasParent() && root_connection != ch) {
 			root_connection.send(msg);
 		}
@@ -342,6 +347,8 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendchild(MSG msg, ConnectionHandler ch) {
+		DatabaseEngine.getDatabaseEngine().put(msg);
+
 		for (ConnectionHandler x : connections) {
 			if (x != ch || ch == null) {
 				x.send(msg);

@@ -1,16 +1,15 @@
 package org.publicmain.sql;
 
-import java.awt.DisplayMode;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -20,9 +19,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import javax.sql.rowset.spi.SyncResolver;
-
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
@@ -64,7 +60,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 19;
+	private final static int LOCAL_DATABASE_VERSION = 20;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
@@ -174,7 +170,6 @@ public class LocalDBConnection {
 		try {
 			if(stmt!= null) stmt.close();
 			if(con!= null) con.close();
-			System.out.println("#"+Config.getConfig().getLocalDBUser()+"#:::#" + Config.getConfig().getLocalDBPw() + "#");
 			con = DriverManager.getConnection(url, Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
 			stmt = con.createStatement();
 			synchronized (stmt) {
@@ -214,7 +209,6 @@ public class LocalDBConnection {
 					}
 					if (connectToLocDBServerAspublicMain()){
 							dbStatus = 3;
-							System.out.println("hier");
 							databaseEngine.go();
 							reconnectVersuche = 0;
 					}
@@ -497,52 +491,48 @@ public class LocalDBConnection {
 	}
 	
 	private synchronized boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ) {
-		StringBuffer saveMsgStmt = new StringBuffer();
-		if (typ == NachrichtenTyp.GROUP) {
-			// fügt Nachicht hinzu
-			saveMsgStmt.append("CALL p_t_messages_saveGroupMessage(");
-			saveMsgStmt.append(id + ",");
-			saveMsgStmt.append(timestamp + ",");
-			saveMsgStmt.append(uid_sender + ",");
-			saveMsgStmt.append("'" + data + "',");
-			saveMsgStmt.append("'" + group + "')");
-		}
-		else if (typ == NachrichtenTyp.PRIVATE) {
-			// fügt Nachicht hinzu
-			saveMsgStmt.append("CALL p_t_messages_savePrivateMessage(");
-			saveMsgStmt.append(id + ",");
-			saveMsgStmt.append(timestamp + ",");
-			saveMsgStmt.append(uid_sender + ",");
-			saveMsgStmt.append("'" + data + "',");
-			saveMsgStmt.append(uid_empfänger + ")");
-		} else if (typ == NachrichtenTyp.SYSTEM) {
-			String toWriteUID_empfänger = String.valueOf(uid_empfänger);
-			if (uid_empfänger == -1) {
-				toWriteUID_empfänger = "null";
+		PreparedStatement prpstmt=null;
+		try {
+			if (typ == NachrichtenTyp.GROUP) {
+				// fügt Nachicht hinzu
+				prpstmt = con.prepareStatement("CALL p_t_messages_saveGroupMessage(?,?,?,?,?)");
+				prpstmt.setLong(1, id);
+				prpstmt.setLong(2, timestamp);
+				prpstmt.setLong(3, uid_sender);
+				prpstmt.setString(4, data.toString());
+				prpstmt.setString(5, group);
 			}
-			// fügt Nachicht hinzu
-			saveMsgStmt.append("CALL p_t_messages_saveSystemMessage(");
-			saveMsgStmt.append(id + ",");
-			saveMsgStmt.append(timestamp + ",");
-			saveMsgStmt.append(uid_sender + ",");
-			saveMsgStmt.append(toWriteUID_empfänger + ",");
-			saveMsgStmt.append(code.ordinal() + ")");
-		} else
-			return true;
+			else if (typ == NachrichtenTyp.PRIVATE) {
+				//			// fügt Nachicht hinzu
+				prpstmt = con.prepareStatement("CALL p_t_messages_savePrivateMessage(?,?,?,?,?)");
+				prpstmt.setLong(1, id);
+				prpstmt.setLong(2, timestamp);
+				prpstmt.setLong(3, uid_sender);
+				prpstmt.setString(4, data.toString());
+				prpstmt.setLong(5, uid_empfänger);
+			} else if (typ == NachrichtenTyp.SYSTEM) {
+				prpstmt = con.prepareStatement("CALL p_t_messages_saveSystemMessage(?,?,?,?,?)");
+				prpstmt.setLong(1, id);
+				prpstmt.setLong(2, timestamp);
+				prpstmt.setLong(3, uid_sender);
+				if(uid_empfänger>=0)prpstmt.setLong(4,uid_empfänger);
+				else prpstmt.setNull(4, java.sql.Types.BIGINT);
+				prpstmt.setInt(5, code.ordinal());
 
-		if (saveMsgStmt.length() > 0) { // && saveGrpStmt.length() > 0){
-			synchronized (stmt) {
-				try {
-					stmt.execute(saveMsgStmt.toString());
-					return true;
-				} catch (Exception e) {
-					dbStatus = 0;
-					LogEngine.log(this, "Fehler beim schreiben von: " + saveMsgStmt.toString() + " " + e.getMessage(), LogEngine.ERROR);
-					return false;
-					// hier falls während der schreibvorgänge die verbind
-					// verloren geht.
+			} else	return true;
+			
+			if (prpstmt!=null) {
+				synchronized (stmt) {
+					prpstmt.execute();
 				}
 			}
+		} catch (Exception e) {
+			dbStatus = 0;
+			e.printStackTrace();
+			LogEngine.log(this, "Fehler beim schreiben von: " + ((prpstmt!=null)?prpstmt.toString():"") + " " + e.getMessage(), LogEngine.ERROR);
+			return false;
+			// hier falls während der schreibvorgänge die verbind
+			// verloren geht.
 		}
 		return true;
 	}
@@ -604,9 +594,10 @@ public class LocalDBConnection {
 	public boolean deleteAllMsgs () {
 		try {
 			synchronized (stmt) {
-				return stmt.execute("DELETE * FROM " + msgTbl);
+				return stmt.execute("DELETE FROM " + msgTbl);
 			}
 		} catch (SQLException e) {
+			LogEngine.log(this, "Error while delMsgs: " + e.getMessage(), LogEngine.ERROR);
 			dbStatus = 0;
 			return false;
 		}
@@ -624,7 +615,6 @@ public class LocalDBConnection {
 				if(alias != null)prepState.append("(sender LIKE ? OR recipient LIKE ?) AND");
 				if(groupName!=null)prepState.append("`group` LIKE ? AND ");
 				prepState.append("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
-				System.out.println(prepState);
 				searchInHistStmt = con.prepareStatement(prepState.toString());
 //				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
 				//test
@@ -641,7 +631,6 @@ public class LocalDBConnection {
 				searchInHistStmt.setLong(part++, begin);
 				searchInHistStmt.setLong(part++, end);
 				searchInHistStmt.setString(part++, msgTxt);
-				System.out.println(searchInHistStmt.toString());
 				return searchInHistStmt.executeQuery();
 				
 			} catch (SQLException e) {

@@ -1,6 +1,9 @@
 package org.publicmain.common;
+
 /**
- *	Enum der möglichen Nachrichtentypen 
+ *	Enum der möglichen Nachrichtentypen
+ *
+ * @author ATRM
  */
 
 public enum NachrichtenTyp {

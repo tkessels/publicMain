@@ -329,7 +329,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				// AwayFromKeyboard aktivieren/deaktivieren
 				else if (eingabe.equals("/afk")) {
 					this.gui.afk();
-					info("Status aus AFK gesetzt.");
 				}
 				// Das Programm beenden
 				else if (eingabe.equals("/exit")) {

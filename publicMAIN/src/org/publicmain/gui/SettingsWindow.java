@@ -309,15 +309,22 @@ public class SettingsWindow extends JDialog{
 			}
 		}
 		
-		if(!portLocalDBTextField.getText().equals(Config.getConfig().getLocalDBPort())){
-			Config.getConfig().setLocalDBPort(portLocalDBTextField.getText());
-			changes = true;
+		if (portLocalDBTextField.getText().length()>1)
+		{
+			String tmp_port = new String(portLocalDBTextField.getText());
+			if (!tmp_port.equals(Config.getConfig().getLocalDBPort())) {
+				Config.getConfig().setLocalDBPort(portLocalDBTextField.getText());
+				changes = true;
+			}
 		}
-		if(!userLocalDBTextField.getText().equals(Config.getConfig().getLocalDBUser())){
-			Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
-			changes = true;
+		if (userLocalDBTextField.getText().length()>1)
+		{
+			String tmp_user = new String(userLocalDBTextField.getText());
+			if (!tmp_user.equals(Config.getConfig().getLocalDBUser())) {
+				Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
+				changes = true;
+			}
 		}
-		
 		if(pwLocalDBPasswordField.getPassword().length>1)
 		{
 			String tmp_password = new String(pwLocalDBPasswordField.getPassword());
@@ -335,16 +342,23 @@ public class SettingsWindow extends JDialog{
 				changes = true;
 			}
 		}
-		if(!portBackupTextField.getText().equals(Config.getConfig().getBackupDBPort())){
-			Config.getConfig().setBackupDBPort(portBackupTextField.getText());
-			changes = true;
+		if (portBackupTextField.getText().length()>1)
+		{
+			String tmp_port = new String(portBackupTextField.getText());
+			if (!tmp_port.equals(Config.getConfig().getBackupDBPort())){
+				Config.getConfig().setBackupDBPort(
+						portBackupTextField.getText());
+				changes = true;
+			}
 		}
-		
-		if(!userBackupTextField.getText().equals(Config.getConfig().getBackupDBUser())){
-			Config.getConfig().setBackupDBUser(userBackupTextField.getText());
-			changes = true;
+		if (userBackupTextField.getText().length()>1)
+		{
+			String tmp_user = new String(userBackupTextField.getText());
+			if (!tmp_user.equals(Config.getConfig().getBackupDBUser())) {
+				Config.getConfig().setBackupDBUser(userBackupTextField.getText());
+				changes = true;
+			}
 		}
-		
 		if(pwBackPasswordField.getPassword().length>1)
 		{
 			String tmp_password = new String(pwBackPasswordField.getPassword());

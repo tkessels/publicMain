@@ -24,7 +24,7 @@ public class BackupDBConnection {
 		this.backUpDBStatus		= 0;									// Status: 11 als user Verbunden, 13 use DB als backupPublicMain
 		this.warteZeitInSec 	= 10;
 		
-//		connectToBackupDBServer();
+		connectToBackupDBServer();
 		
 	}
 	// Verbindungsdaten
@@ -62,9 +62,11 @@ public class BackupDBConnection {
 	
 	private synchronized boolean connectToBackupDBServer(){
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort(), Config.getConfig().getBackupDBChoosenUsername(), Config.getConfig().getBackupDBChoosenUserPassWord());
+			System.out.println(Config.getConfig().getBackupDBUser());
+			System.out.println(Config.getConfig().getBackupDBPw());
+			con = DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort(), Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 			stmt = con.createStatement();
-			LogEngine.log(this, "DB-ServerVerbindung als " + Config.getConfig().getBackupDBChoosenUsername() + " hergestellt ", LogEngine.INFO);
+			LogEngine.log(this, "DB-ServerVerbindung als " + Config.getConfig().getBackupDBUser() + " hergestellt ", LogEngine.INFO);
 			backUpDBStatus = 91;
 			return true;
 		} catch (SQLException e) {

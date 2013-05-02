@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -113,5 +114,23 @@ public class BackupDBConnection {
 		};
 		(new Thread(tmp)).start();
 		
+	}
+	public void push_msgs(ResultSet tmp_messages) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void push_users(ResultSet tmp_users) {
+		// TODO Auto-generated method stub
+		
+	}
+	public void push_settings(ResultSet tmp_settings) {
+		// TODO Auto-generated method stub
+		
+	}
+	public boolean getStatus() {
+		//returns true if Backupserver is connected and User in config is present
+		//Displays a Dialog for Userdata if Connection is present but Userdata not
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

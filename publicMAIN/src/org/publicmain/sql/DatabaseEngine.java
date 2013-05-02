@@ -103,7 +103,15 @@ public class DatabaseEngine {
 	}
 	
 	public void push(){
-		//TODO:
+		if(localDB.getStatus()&&backupDB.getStatus()){
+		ResultSet tmp_users 	= localDB.pull_users();
+		ResultSet tmp_messages 	= localDB.pull_msgs();
+		ResultSet tmp_settings 	= localDB.pull_settings();
+		
+		backupDB.push_users(tmp_users);
+		backupDB.push_msgs(tmp_messages);
+		backupDB.push_settings(tmp_settings);
+		}
 	}
 	
 	public void pull(){

@@ -461,7 +461,9 @@ public class LocalDBConnection {
 	}
 	
 	private long getUIDforNID(long nid) {
-		return getNode(nid).getUserID();
+		Node node = getNode(nid);
+		if(node!=null)return node.getUserID();
+		else return -1;
 	}
 	
 	private synchronized boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ) {

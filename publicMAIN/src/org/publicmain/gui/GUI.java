@@ -444,11 +444,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public void afk(){
 		if(afkStatus){
 			afkStatus = false;
-			info("You are <b>online</b>", null, 2);
+			info("You are <b>online</b>!", null, 2);
 		} else {
 			afkStatus = true;
-			info("You are <b>A</b>way <b>F</b>rom <b>K</b>eyboard", null, 2);
+			info("You are <b>A</b>way <b>F</b>rom <b>K</b>eyboard!", null, 2);
 		}
+		this.notifyGUI();
 	}
 	
 	/**
@@ -580,6 +581,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	boolean ignoreUser(long uid) {
 		if(ce.ignore_user(uid)) {
 			notifyGUI();
+			info(ce.getNodeForUID(uid).getAlias() + " is <b>ignored!</b>", null, 2);
 			return true;
 		}
 		return false;
@@ -594,6 +596,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	boolean unignoreUser(long uid) {
 		if(ce.unignore_user(uid)) {
 			notifyGUI();
+			info(ce.getNodeForUID(uid).getAlias() + " is <b>unignored!</b>", null, 2);
 			return true;
 		}
 		return false;

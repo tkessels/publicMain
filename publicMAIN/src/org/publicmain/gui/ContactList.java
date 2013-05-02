@@ -328,6 +328,9 @@ public class ContactList extends JWindow {
 			if (ChatEngine.getCE().is_ignored(tmp.getNodeID())){
 				setText(cutText[0] + " (ignored)");
 				setForeground(Color.RED);
+			} else if(ChatEngine.getCE().getMyNodeID()==tmp.getNodeID() && GUI.getGUI().isAFK()){
+				setText(cutText[0] + " (afk)");
+				setForeground(Color.GRAY);
 			}
 			else if (ChatEngine.getCE().getMyNodeID() == tmp
 					.getNodeID())

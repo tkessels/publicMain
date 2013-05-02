@@ -3,13 +3,11 @@ package org.publicmain.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,12 +41,12 @@ import org.publicmain.sql.DatabaseEngine;
 import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
 
-
 /**
  * @author ATRM
  * 
  */
 
+@SuppressWarnings("serial")
 public class GUI extends JFrame implements Observer, ChangeListener {
 
 	private final int NAME_LENGTH = Config.getConfig().getMaxGroupLength();
@@ -688,6 +686,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param filename
 	 * @return File
 	 */
+	@SuppressWarnings("deprecation")
 	public File request_File(FileTransferData fr) {
 		final long timeout = Config.getConfig().getFileTransferTimeout() - 1000;
 		String dateiname = fr.datei.getName();

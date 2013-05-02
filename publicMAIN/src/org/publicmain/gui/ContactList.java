@@ -204,17 +204,19 @@ public class ContactList extends JWindow {
 		private JMenuItem unignore;
 		private JMenuItem info;
 		private JMenuItem changeAlias;
+		private JMenuItem afkStatus;
 		
 		public PopupUser(ActionListener popupListener){
 			String user=users.getSelectedValue().getAlias();
 			long userID = users.getSelectedValue().getUserID();
 
-			this.whisper = new JMenuItem("whisper to " + user);
-			this.sendFile = new JMenuItem("send File to " + user);
-			this.ignore = new JMenuItem("ignore " + user);
-			this.unignore = new JMenuItem("unignore " + user);
-			this.info = new JMenuItem("info's about " + user);
+			this.whisper 	 = new JMenuItem("whisper to " + user);
+			this.sendFile 	 = new JMenuItem("send File to " + user);
+			this.ignore 	 = new JMenuItem("ignore " + user);
+			this.unignore	 = new JMenuItem("unignore " + user);
+			this.info 		 = new JMenuItem("info's about " + user);
 			this.changeAlias = new JMenuItem("change Alias");
+			this.afkStatus	 = new JMenuItem("AFK (on/off)");
 			
 			this.whisper.addActionListener(popupListener);
 			this.sendFile.addActionListener(popupListener);
@@ -222,18 +224,22 @@ public class ContactList extends JWindow {
 			this.unignore.addActionListener(popupListener);
 			this.info.addActionListener(popupListener);
 			this.changeAlias.addActionListener(popupListener);
+			this.afkStatus.addActionListener(popupListener);
 			
 			if (!(userID==ChatEngine.getCE().getUserID())) {
 				this.add(whisper);
 				this.add(new Separator());
 				this.add(sendFile);
 				this.add(new Separator());
-				if(!ChatEngine.getCE().is_uid_ignored(userID)) this.add(ignore);
-				else this.add(unignore);
+				if(!ChatEngine.getCE().is_uid_ignored(userID)){
+					this.add(ignore);
+				} else {
+					this.add(unignore);
+				}
 				this.add(new Separator());
 			} else {
 				this.add(changeAlias);
-//				this.add()
+				this.add(afkStatus);
 			}
 			this.add(info);
 		}
@@ -293,6 +299,9 @@ public class ContactList extends JWindow {
 			}
 			else if(source.getText().startsWith("send")){
 				GUI.getGUI().sendFile(users.getSelectedValue().getUserID());
+			}
+			else if(source.getText().startsWith("AFK")){
+				GUI.getGUI().afk();
 			}
 			else if(source.getText().startsWith("change")){
 				String tmpAlias = null;

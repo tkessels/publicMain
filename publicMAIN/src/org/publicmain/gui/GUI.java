@@ -444,7 +444,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * auf true wenn false
 	 */
 	public void afk(){
-		this.afkStatus =! this.afkStatus;
+		if(afkStatus){
+			afkStatus = false;
+			info("You are <b>online</b>", null, 2);
+		} else {
+			afkStatus = true;
+			info("You are <b>A</b>way <b>F</b>rom <b>K</b>eyboard", null, 2);
+		}
 	}
 	
 	/**

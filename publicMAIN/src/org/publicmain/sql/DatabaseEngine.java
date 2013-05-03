@@ -64,7 +64,7 @@ public class DatabaseEngine {
 	}
 	
 	public void writeConfig(){
-				localDB.writeAllSettingsToDB(Config.getConfig());
+				if(localDB.getStatus())localDB.writeAllSettingsToDB(Config.getConfig());
 		}
 	
 	public synchronized static DatabaseEngine getDatabaseEngine() {
@@ -110,7 +110,6 @@ public class DatabaseEngine {
 		ResultSet tmp_messages 	= localDB.pull_msgs();
 		backupDB.push_msgs(tmp_messages);
 		ResultSet tmp_settings 	= localDB.pull_settings();
-		
 		backupDB.push_settings(tmp_settings);
 		}
 	}

@@ -38,6 +38,7 @@ public class SettingsWindow extends JDialog{
 	private JPanel		cardUser;
 	private JPanel		cardDB;
 	private JPanel		cardPushPull;
+	private CardLayout     cardsPanelLayout;
 	
 	private JPanel 		userSettingsPanel;
 	private JLabel 		aliasLabel;
@@ -82,8 +83,29 @@ public class SettingsWindow extends JDialog{
 	private JButton		acceptBtn;
 	private JButton		cancelBtn;
 
-	public SettingsWindow() {
+
+	public SettingsWindow(String card, boolean modal) {
 		this.me = this;
+		constructWindowContent();
+		
+		this.setVisible(true);
+	}
+	
+	private SettingsWindow() {
+		this.me = this;
+		constructWindowContent();
+		this.setVisible(true);
+	}
+	
+	public void showTab(String tabname) {
+		cardsPanelLayout.show(cardsPanel, tabname);
+	}
+
+
+	/**
+	 * erstellt alle Fenster elemente
+	 */
+	private void constructWindowContent() {
 		this.setResizable(false);
 		this.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
@@ -91,10 +113,14 @@ public class SettingsWindow extends JDialog{
 		
 		this.cardButtonsPanel		 = new JPanel(new GridLayout(1,3));
 		this.userBtn				 = new JToggleButton("User", Help.getIcon("userSettingsSym.png",10,16), true);
+		this.userBtn.setActionCommand("User");
 		this.databaseBtn			 = new JToggleButton("DB", Help.getIcon("dbSettingsSym.png",12,16), false);
+		this.databaseBtn.setActionCommand("DB");
 		this.pushPullBtn			 = new JToggleButton("Push/Pull", false);
+		this.pushPullBtn.setActionCommand("Push/Pull");
 		this.btnGrp					 = new ButtonGroup();
-		this.cardsPanel				 = new JPanel(new CardLayout());
+		this.cardsPanelLayout 	= new CardLayout();
+		this.cardsPanel			 = new JPanel(cardsPanelLayout);
 		this.cardUser				 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		this.cardDB					 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		this.cardPushPull			 = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -147,9 +173,9 @@ public class SettingsWindow extends JDialog{
 		this.btnGrp.add(databaseBtn);
 		this.btnGrp.add(pushPullBtn);
 		
-		this.userBtn.addActionListener(new CardButtonController(cardsPanel));
-		this.databaseBtn.addActionListener(new CardButtonController(cardsPanel));
-		this.pushPullBtn.addActionListener(new CardButtonController(cardsPanel));
+		this.userBtn.addActionListener(new CardButtonController());
+		this.databaseBtn.addActionListener(new CardButtonController());
+		this.pushPullBtn.addActionListener(new CardButtonController());
 		this.resetBtn.addActionListener(new SettingButtonController());
 		this.acceptBtn.addActionListener(new SettingButtonController());
 		this.cancelBtn.addActionListener(new SettingButtonController());
@@ -246,7 +272,8 @@ public class SettingsWindow extends JDialog{
 		
 		this.setTitle("Settings");
 		this.setModal(false);
-		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+//		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
@@ -256,17 +283,17 @@ public class SettingsWindow extends JDialog{
 		
 		this.getDefaults();
 		this.setLocationRelativeTo(null);
-		this.setVisible(true);
+
 	}
-	
 	
 	public static void closeThis(){
 		if(me!=null)me.dispose();
 	}
 
-	public static void showThis(){
+	public synchronized static SettingsWindow get(){
 		if(me==null) new SettingsWindow();
-		me.setVisible(true);
+		return me;
+		
 	}
 	
 	private void getDefaults(){
@@ -311,7 +338,7 @@ public class SettingsWindow extends JDialog{
 			changes = true;
 		}
 		
-		if (!userPushPullTextField.getText().equals(""))
+		if (!userPushPullTextField.getText().equals("") || (Config.getConfig().getBackupDBChoosenUsername() != null))
 		{
 			String tmpUserPushPull = userPushPullTextField.getText();
 			if (!tmpUserPushPull.equals(Config.getConfig().getBackupDBChoosenUsername())) {
@@ -319,7 +346,7 @@ public class SettingsWindow extends JDialog{
 				changes = true;
 			}
 		}
-		if(pwPushPullPasswordField.getPassword().length>1)
+		if((pwPushPullPasswordField.getPassword().length != 0) || (Config.getConfig().getBackupDBChoosenUserPassWord() != null))
 		{
 			String tmp_password = new String(pwPushPullPasswordField.getPassword());
 			if(!tmp_password.equals(Config.getConfig().getBackupDBChoosenUserPassWord())) {
@@ -394,16 +421,8 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	class CardButtonController implements ActionListener{
-
-		private JPanel ref;
-		
-		public CardButtonController(JPanel ref){
-			this.ref = ref;
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			CardLayout card = (CardLayout) ref.getLayout();
-			card.show( ref, ((JToggleButton)e.getSource()).getText() );
+		public void actionPerformed(final ActionEvent e) {
+			cardsPanelLayout.show(cardsPanel, e.getActionCommand());
 		}
 	}
 	
@@ -418,10 +437,12 @@ public class SettingsWindow extends JDialog{
 				break;
 			case "Accept" :
 				acceptSettings();
-				closeThis();
+				dispose();
+//				closeThis();
 				break;
 			case "Cancel" :
-				closeThis();
+				dispose();
+//				closeThis();
 				break;
 			}
 		}

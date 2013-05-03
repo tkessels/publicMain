@@ -834,7 +834,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			case "Settings":
 				SettingsWindow.showThis();
 				break;
-
 			case "Push History":
 				DatabaseEngine.getDatabaseEngine().push();
 				break;

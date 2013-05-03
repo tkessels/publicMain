@@ -474,6 +474,17 @@ public class DatabaseEngine {
 			transporter.notify();
 		}
 	}
+
+	public int createUser(String username, String password) {
+		if(backupDB.getStatus()){
+			if(backupDB.createUser(username, password)){
+				return 2;
+			}
+			return 1;
+		}
+		return 0;
+		
+	}
 	
 
 }

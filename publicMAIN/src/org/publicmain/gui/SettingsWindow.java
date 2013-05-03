@@ -20,6 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 import org.publicmain.common.Config;
+import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 public class SettingsWindow extends JDialog{
@@ -31,10 +32,12 @@ public class SettingsWindow extends JDialog{
 	private JPanel		cardButtonsPanel;
 	private JToggleButton userBtn;
 	private JToggleButton databaseBtn;
+	private JToggleButton pushPullBtn;
 	private ButtonGroup btnGrp;
 	private JPanel		cardsPanel;
 	private JPanel		cardUser;
 	private JPanel		cardDB;
+	private JPanel		cardPushPull;
 	
 	private JPanel 		userSettingsPanel;
 	private JLabel 		aliasLabel;
@@ -61,6 +64,8 @@ public class SettingsWindow extends JDialog{
 	private JTextField	userPushPullTextField;
 	private JLabel		pwPushPullLabel;
 	private JPasswordField pwPushPullPasswordField;
+	private JLabel		createPushPullLabel;
+	private JButton		createPushPullBtn;
 	
 	private JPanel		backupDBPanel;
 	private JLabel		ipBackupLabel;
@@ -84,13 +89,15 @@ public class SettingsWindow extends JDialog{
 		
 		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
 		
-		this.cardButtonsPanel		 = new JPanel(new GridLayout(1,2));
+		this.cardButtonsPanel		 = new JPanel(new GridLayout(1,3));
 		this.userBtn				 = new JToggleButton("User", Help.getIcon("userSettingsSym.png",10,16), true);
 		this.databaseBtn			 = new JToggleButton("Database", Help.getIcon("dbSettingsSym.png",12,16), false);
+		this.pushPullBtn			 = new JToggleButton("Push/Pull", false);
 		this.btnGrp					 = new ButtonGroup();
 		this.cardsPanel				 = new JPanel(new CardLayout());
 		this.cardUser				 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		this.cardDB					 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		this.cardPushPull			 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		
 		this.userSettingsPanel		 = new JPanel(new GridLayout(2,2));
 		this.aliasLabel				 = new JLabel("Alias");
@@ -112,11 +119,13 @@ public class SettingsWindow extends JDialog{
 		this.pwLocalDBLabel			 = new JLabel("Password");
 		this.pwLocalDBPasswordField	 = new JPasswordField();
 		
-		this.pushPullPanel 			 = new JPanel(new GridLayout(2,2));
+		this.pushPullPanel 			 = new JPanel(new GridLayout(3,2));
 		this.userPushPullLabel 		 = new JLabel("Username");
 		this.userPushPullTextField	 = new JTextField();
 		this.pwPushPullLabel 		 = new JLabel("Password");
 		this.pwPushPullPasswordField = new JPasswordField();
+		this.createPushPullLabel	 = new JLabel("click for new");
+		this.createPushPullBtn		 = new JButton("Create");
 		
 		this.backupDBPanel 			 = new JPanel(new GridLayout(4,2));
 		this.ipBackupLabel 			 = new JLabel("IP address");
@@ -136,17 +145,21 @@ public class SettingsWindow extends JDialog{
 		
 		this.btnGrp.add(userBtn);
 		this.btnGrp.add(databaseBtn);
+		this.btnGrp.add(pushPullBtn);
 		
 		this.userBtn.addActionListener(new CardButtonController(cardsPanel));
 		this.databaseBtn.addActionListener(new CardButtonController(cardsPanel));
+		this.pushPullBtn.addActionListener(new CardButtonController(cardsPanel));
 		this.resetBtn.addActionListener(new SettingButtonController());
 		this.acceptBtn.addActionListener(new SettingButtonController());
 		this.cancelBtn.addActionListener(new SettingButtonController());
+		this.createPushPullBtn.addActionListener(new PushPullButtonController());
 		
 		this.cardButtonsPanel.setPreferredSize(new Dimension(230,25));
 		this.cardButtonsPanel.setBackground(Color.WHITE);
 		this.cardButtonsPanel.add(userBtn);
 		this.cardButtonsPanel.add(databaseBtn);
+		this.cardButtonsPanel.add(pushPullBtn);
 		
 		this.cardUser.setPreferredSize(new Dimension(230,62));
 		this.cardUser.setBackground(Color.WHITE);
@@ -156,8 +169,11 @@ public class SettingsWindow extends JDialog{
 		this.cardDB.setPreferredSize(new Dimension(230,62));
 		this.cardDB.setBackground(Color.WHITE);
 		this.cardDB.add(localDBPanel);
-		this.cardDB.add(pushPullPanel);
 		this.cardDB.add(backupDBPanel);
+		
+		this.cardPushPull.setPreferredSize(new Dimension(230,62));
+		this.cardPushPull.setBackground(Color.WHITE);
+		this.cardPushPull.add(pushPullPanel);
 		
 		this.userSettingsPanel.setBorder(BorderFactory.createTitledBorder("User"));
 		this.userSettingsPanel.setPreferredSize(new Dimension(230,62));
@@ -189,12 +205,14 @@ public class SettingsWindow extends JDialog{
 		this.localDBPanel.add(pwLocalDBPasswordField);
 		
 		this.pushPullPanel.setBorder(BorderFactory.createTitledBorder("push/pull to backup DB"));
-		this.pushPullPanel.setPreferredSize(new Dimension(230,62));
+		this.pushPullPanel.setPreferredSize(new Dimension(230,80));
 		this.pushPullPanel.setBackground(Color.WHITE);
 		this.pushPullPanel.add(userPushPullLabel);
 		this.pushPullPanel.add(userPushPullTextField);
 		this.pushPullPanel.add(pwPushPullLabel);
 		this.pushPullPanel.add(pwPushPullPasswordField);
+		this.pushPullPanel.add(createPushPullLabel);
+		this.pushPullPanel.add(createPushPullBtn);
 		
 		this.backupDBPanel.setBorder(BorderFactory.createTitledBorder("backup database"));
 		this.backupDBPanel.setPreferredSize(new Dimension(230,100));
@@ -212,6 +230,7 @@ public class SettingsWindow extends JDialog{
 		this.cardsPanel.setBackground(Color.WHITE);
 		this.cardsPanel.add(cardUser, "User");
 		this.cardsPanel.add(cardDB, "Database");
+		this.cardsPanel.add(cardPushPull, "Push/Pull");
 		
 		this.buttonPanel.setPreferredSize(new Dimension(230,25));
 		this.buttonPanel.setBackground(Color.WHITE);
@@ -403,6 +422,21 @@ public class SettingsWindow extends JDialog{
 				break;
 			case "Cancel" :
 				closeThis();
+				break;
+			}
+		}
+		
+	}
+	class PushPullButtonController implements ActionListener{
+		
+		public void actionPerformed(ActionEvent e) {
+			JButton source = (JButton)e.getSource();
+			
+			switch(source.getText()){
+			case "Create" :
+				String username="";
+				String password="";
+				DatabaseEngine.getDatabaseEngine().createUser(username, password);
 				break;
 			}
 		}

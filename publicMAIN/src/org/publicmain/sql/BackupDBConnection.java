@@ -224,14 +224,22 @@ public class BackupDBConnection {
 		return false;
 	}
 	
+	private synchronized boolean userexists(String userName) throws SQLException{
+				PreparedStatement prp = con.prepareStatement("Select backupUserID from t_backupUser where username like ?");
+				prp.setString(1, userName);
+				return prp.execute();
+	}
+	
 	public synchronized boolean createUser (String usrName, String passwd){
 		try {
+			if(!userexists(usrName)){
 			PreparedStatement prp = con.prepareStatement("Insert into t_backupUser(username,password) values(?,?)");
 			prp.setString(1, usrName);
 			prp.setString(2, passwd);
 			prp.execute();
 			prp.close();
 			return true;
+			}
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
 		}

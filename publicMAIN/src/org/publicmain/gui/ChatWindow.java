@@ -273,7 +273,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		return !this.isPrivCW;
 	} //eom isGroup()
 	
-	
 	/**
 	 * Diese Methode schreibt eine Info in den Nachrichtenbereich.
 	 * 
@@ -423,7 +422,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.eingabeFeld.setText( "" );
 		}
 	} //eom actionPerformed()
-
 
 	/**
 	 * Diese Methode gibt Informationen über einen Nutzer aus.
@@ -666,7 +664,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			}
 		}
 	}//eoc MouseListenerImplementation
-
 
 	
 	/**

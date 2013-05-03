@@ -104,7 +104,7 @@ public class DatabaseEngine {
 	}
 	
 	public void push(){
-		if(localDB.getStatus()&&backupDB.getStatus()){
+		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 		backupDB.push_users(localDB.pull_users());
 		backupDB.push_msgs(localDB.pull_msgs());
 		backupDB.push_settings(localDB.pull_settings());
@@ -112,7 +112,7 @@ public class DatabaseEngine {
 	}
 	
 	public void pull(){
-		if(localDB.getStatus()&&backupDB.getStatus()){
+		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 		localDB.push_users(backupDB.pull_users());
 		localDB.push_msgs(backupDB.pull_msgs());
 		localDB.push_settings(backupDB.pull_settings());
@@ -476,7 +476,7 @@ public class DatabaseEngine {
 	}
 
 	public int createUser(String username, String password) {
-		if(backupDB.getStatus()){
+		if(backupDB.getStatus()>=1){
 			if(backupDB.createUser(username, password)){
 				return 2;
 			}

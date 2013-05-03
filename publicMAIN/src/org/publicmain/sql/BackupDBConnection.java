@@ -50,7 +50,7 @@ public class BackupDBConnection {
 		String username = Config.getConfig().getBackupDBChoosenUsername();
 		String password = Config.getConfig().getBackupDBChoosenUserPassWord();
 		long tmpID=-1;
-		synchronized (stmt) {
+//		synchronized (stmt) {
 			try {
 				PreparedStatement prp = getCon().prepareStatement("Select backupUserID from t_backupUser where username like ? and password like ?");
 				prp.setString(1, username);
@@ -62,7 +62,7 @@ public class BackupDBConnection {
 				return -1;
 			}
 			return tmpID;
-		}
+//		}
 	
 	}
 
@@ -236,15 +236,17 @@ public class BackupDBConnection {
 	
 	
 	
-	public boolean getStatus() {
-		//returns true if Backupserver is connected and User in config is present
-		//Displays a Dialog for Userdata if Connection is present but Userdata not
-		// TODO Auto-generated method stub
-		if (backUpDBStatus >= 3){
-			return true;
+	public int getStatus() {
+		try {
+			getCon();
+			//level 1
+			long id = getMyID();
+			if (id!=-1) return 2;
+			return 1;
+			
+		} catch (SQLException e) {
+			return 0;
 		}
-		connectToBackupDBServer();
-		return false;
 	}
 	
 	private synchronized boolean userexists(String userName) throws SQLException{

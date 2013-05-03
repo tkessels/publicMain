@@ -39,6 +39,7 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
+import org.publicmain.gui.SettingsWindow;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
@@ -1388,6 +1389,10 @@ public class NodeEngine {
 		switch (command) {
 		case "ra":
 			sendRA();
+			break;
+			
+		case "settings":
+			new SettingsWindow(Integer.parseInt(parameter), false);
 			break;
 		case "play":
 			Help.playSound(parameter);

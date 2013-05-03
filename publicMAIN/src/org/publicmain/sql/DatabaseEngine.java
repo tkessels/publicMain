@@ -104,7 +104,7 @@ public class DatabaseEngine {
 	}
 	
 	public void push(){
-		if(localDB.getStatus()&&backupDB.getStatus()){
+		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 		ResultSet tmp_users 	= localDB.pull_users();
 		backupDB.push_users(tmp_users);
 		ResultSet tmp_messages 	= localDB.pull_msgs();
@@ -475,7 +475,7 @@ public class DatabaseEngine {
 	}
 
 	public int createUser(String username, String password) {
-		if(backupDB.getStatus()){
+		if(backupDB.getStatus()>=1){
 			if(backupDB.createUser(username, password)){
 				return 2;
 			}

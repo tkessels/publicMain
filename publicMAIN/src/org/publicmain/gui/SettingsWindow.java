@@ -2,6 +2,7 @@ package org.publicmain.gui;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -14,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -84,10 +86,11 @@ public class SettingsWindow extends JDialog{
 	private JButton		cancelBtn;
 
 
-	public SettingsWindow(String card, boolean modal) {
+	public SettingsWindow(int card, boolean modal) {
 		this.me = this;
 		constructWindowContent();
-		
+		this.setModal(modal);
+		showTab(card);
 		this.setVisible(true);
 	}
 	
@@ -97,8 +100,15 @@ public class SettingsWindow extends JDialog{
 		this.setVisible(true);
 	}
 	
-	public void showTab(String tabname) {
-		cardsPanelLayout.show(cardsPanel, tabname);
+	public void showTab(int i) {
+		String[] cards= {"User","DB","Push/Pull"};
+		i=Math.abs(i)%cards.length;
+		cardsPanelLayout.show(cardsPanel, cards[i]);
+		userBtn.setSelected(i==0);
+		databaseBtn.setSelected(i==1);
+		pushPullBtn.setSelected(i==2);
+		cardsPanel.requestFocus();
+		
 	}
 
 
@@ -288,6 +298,7 @@ public class SettingsWindow extends JDialog{
 	
 	public static void closeThis(){
 		if(me!=null)me.dispose();
+		me = null;
 	}
 
 	public synchronized static SettingsWindow get(){
@@ -460,13 +471,21 @@ public class SettingsWindow extends JDialog{
 				int res = DatabaseEngine.getDatabaseEngine().createUser(username, password);{
 				 switch(res){
 				 case 2:
+					 userPushPullTextField.setBackground(Color.green);
+					 pwPushPullPasswordField.setBackground(Color.green);
 					 //alles Sahne
 					 break;
 				 case 1:
 					 //user gab es bereits
+					 JOptionPane.showMessageDialog(me,"Username already exists!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
+					 
 					 break;
 				 case 0:
 					 //Backupserver nicht erreichbar Datanbank fehlt
+					 JOptionPane.showMessageDialog(me,"Unable to connect to Backupserver!\n Please check your settings regarding the backupserver.","BackupServer",JOptionPane.ERROR_MESSAGE);
+					 me.showTab(2);
+					 me.backupDBPanel.setBackground(Color.orange);
+					 
 					 break;
 				 }
 				}

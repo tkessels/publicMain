@@ -109,7 +109,7 @@ public class BackupDBConnection {
 		
 		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
 			try {
-				return stmt.executeQuery("SELECT * FROM v_searchInHistory WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
+				return stmt.executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while pulling settings from backupDB " + e.getMessage(), LogEngine.ERROR );
 			}
@@ -117,13 +117,36 @@ public class BackupDBConnection {
 		return null;
 	}
 	
+	public ResultSet pull_users(){
+		
+		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
+			try {
+				return stmt.executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
+			} catch (SQLException e) {
+				LogEngine.log(this, "Error while pulling users from backupDB " + e.getMessage(), LogEngine.ERROR );
+			}
+		}
+		return null;
+	}
+	
+	public ResultSet pull_msgs(){
+		
+		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
+			try {
+				return stmt.executeQuery("SELECT * FROM t_messages WHERE fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
+			} catch (SQLException e) {
+				LogEngine.log(this, "Error while pulling messages from backupDB " + e.getMessage(), LogEngine.ERROR );
+			}
+		}
+		return null;
+	}
 	
 	
 	public synchronized boolean push_msgs(ResultSet tmp_messages) {
 		long myID = getMyID();
 		if(myID !=-1){
 			try {
-				PreparedStatement prp = getCon().prepareStatement("Insert ignore into t_messages(fk_t_backupUser_backupUserID,msgID , timestmp, fk_t_users_userID_sender, displayName, groupName, fk_t_users_userID_empfaenger, txt,  fk_t_msgType_ID) values(?,?,?,?,?,?,?,?,?)");
+				PreparedStatement prp = getCon().prepareStatement("Insert ignore into t_messages(fk_t_backupUser_backupUserID, msgID, timestmp, fk_t_users_userID_sender, displayName, groupName, fk_t_users_userID_empfaenger, txt,  fk_t_msgType_ID) values(?,?,?,?,?,?,?,?,?)");
 				while (tmp_messages.next()){
 					prp.setLong(1, myID);
 					prp.setInt(2,tmp_messages.getInt(1));

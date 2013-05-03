@@ -105,28 +105,18 @@ public class DatabaseEngine {
 	
 	public void push(){
 		if(localDB.getStatus()&&backupDB.getStatus()){
-		ResultSet tmp_users 	= localDB.pull_users();
-		backupDB.push_users(tmp_users);
-		ResultSet tmp_messages 	= localDB.pull_msgs();
-		backupDB.push_msgs(tmp_messages);
-		ResultSet tmp_settings 	= localDB.pull_settings();
-		backupDB.push_settings(tmp_settings);
+		backupDB.push_users(localDB.pull_users());
+		backupDB.push_msgs(localDB.pull_msgs());
+		backupDB.push_settings(localDB.pull_settings());
 		}
 	}
 	
 	public void pull(){
-		
-		
-		
-		
-		
-		
-		//TODO: HILFE
-		
-		
-		
-		
-		
+		if(localDB.getStatus()&&backupDB.getStatus()){
+		localDB.push_users(backupDB.pull_users());
+		localDB.push_msgs(backupDB.pull_msgs());
+		localDB.push_settings(backupDB.pull_settings());
+		}
 	}
 	
 	private final class DPTransportBot implements Runnable {

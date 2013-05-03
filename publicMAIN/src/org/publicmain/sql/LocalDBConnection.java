@@ -10,15 +10,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
@@ -318,7 +314,7 @@ public class LocalDBConnection {
 					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_settings_saveSettings` (IN newSettingsKey VARCHAR(45),IN newFk_t_users_userID_3 BIGINT(20), IN newSettingsValue VARCHAR(100)) BEGIN INSERT INTO t_settings (settingsKey, fk_t_users_userID_3, settingsValue) VALUES (newsettingsKey, newFk_t_users_userID_3, newSettingsValue) ON DUPLICATE KEY UPDATE fk_t_users_userID_3=VALUES(fk_t_users_userID_3), settingsValue=VALUES(settingsValue); END;");
 					//PUSH PROCEDURES
 					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_pushMessages`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_pushMessages` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20),IN newDisplayName VARCHAR(200), IN newTxt VARCHAR(200),  IN newFk_t_users_userID_empfaenger BIGINT(20), IN newFk_t_groups_groupName VARCHAR(20), IN newFk_t_msgType_ID INT) BEGIN	INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, DisplayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID) VALUES (msgID, timestmp, fk_t_users_userID_sender, displayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID); END;");
+					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_pushMessages` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20),IN newDisplayName VARCHAR(200), IN newTxt VARCHAR(200),  IN newFk_t_users_userID_empfaenger BIGINT(20), IN newFk_t_groups_groupName VARCHAR(20), IN newFk_t_msgType_ID INT) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, displayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newDisplayName, newTxt, newFk_t_users_userID_empfaenger, newFk_t_groups_groupName, newFk_t_msgType_ID);END;");
 					
 					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_pushUsers`;");
 					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_pushUsers` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45)) BEGIN INSERT IGNORE INTO t_users (userID, displayName, userName) VALUES (newUserID,newDisplayName,newUserName); END;");
@@ -425,22 +421,40 @@ public class LocalDBConnection {
 		if (dbStatus >=3 &&  msgRS != null){
 			try {
 				synchronized (stmt) {
-				while (msgRS.next()){
-					StringBuffer pushMsgStmt = new StringBuffer();
-					pushMsgStmt.append("CALL p_t_messages_pushMessages(");
-					pushMsgStmt.append(msgRS.getInt("msgID") + ",");
-					pushMsgStmt.append(msgRS.getLong("timestmp") + ",");
-					pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_sender") + ",");
-					pushMsgStmt.append("'" + msgRS.getString("displayName") + "',");
-					pushMsgStmt.append("'" + msgRS.getString("txt") + "',");
-					pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_empfaenger") + ",");
-					pushMsgStmt.append("'" + msgRS.getString("fk_t_groups_groupName") + "',");
-					pushMsgStmt.append(msgRS.getInt("fk_t_msgType_ID") + ")");
-					
-					stmt.addBatch(pushMsgStmt.toString());
-				}
-				stmt.executeBatch();
-				return true;
+					PreparedStatement prp = con.prepareStatement("CALL p_t_messages_pushMessages(?,?,?,?,?,?,?,?)");
+					while (msgRS.next()){
+						prp.setInt(1, msgRS.getInt(1));
+						prp.setLong(2, msgRS.getLong(2));
+						prp.setLong(3, msgRS.getLong(3));
+						prp.setString(4, msgRS.getString(6));
+						prp.setString(5, msgRS.getString(5));
+						
+						long tmp = msgRS.getLong(7);
+						if(msgRS.wasNull()){
+							 prp.setNull(6, java.sql.Types.BIGINT);
+						}else{
+							prp.setLong(6, tmp);
+						}
+						prp.setString(7, msgRS.getString(4));
+						prp.setInt(8, msgRS.getInt(8));
+						prp.addBatch();
+						
+//						StringBuffer pushMsgStmt = new StringBuffer();
+//						pushMsgStmt.append("CALL p_t_messages_pushMessages(");
+//						pushMsgStmt.append(msgRS.getInt("msgID") + ",");
+//						pushMsgStmt.append(msgRS.getLong("timestmp") + ",");
+//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_sender") + ",");
+//						pushMsgStmt.append("'" + msgRS.getString("displayName") + "',");
+//						pushMsgStmt.append("'" + msgRS.getString("txt") + "',");
+//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_empfaenger") + ",");
+//						pushMsgStmt.append("'" + msgRS.getString("groupName") + "',");
+//						pushMsgStmt.append(msgRS.getInt("fk_t_msgType_ID") + ")");
+//						System.out.println(pushMsgStmt.toString());
+//						stmt.addBatch(pushMsgStmt.toString());
+					}
+					prp.executeBatch();
+					prp.close();
+					return true;
 				}
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while executing 'push_msgs': " + e.getMessage(), LogEngine.ERROR);
@@ -450,6 +464,24 @@ public class LocalDBConnection {
 		return false;
 	}
 	
+	public boolean push_settings(ResultSet tmp_settings){
+		if (dbStatus >=3 &&  tmp_settings != null){
+			try {
+				PreparedStatement prp = con.prepareStatement("CALL p_t_settings_saveSettings(?,?,?)");
+				while (tmp_settings.next()){
+					prp.setString(1, tmp_settings.getString(1));
+					prp.setLong(2, ChatEngine.getCE().getUserID());
+					prp.setString(3, tmp_settings.getString(3));
+					prp.addBatch();
+				}
+				prp.executeBatch();
+				prp.close();
+			} catch (SQLException e) {
+				LogEngine.log(this, e);
+			}
+		}
+		return false;
+	}
 	/**
 	 * Diese Methode speichert alle user in der LocDB indem es eine procedure aufruft
 	 * @param usrRS zu speicherndes ResultSet
@@ -473,7 +505,7 @@ public class LocalDBConnection {
 				return true;
 				}
 			} catch (SQLException e) {
-				LogEngine.log(this, "Error while executing 'push_msgs': " + e.getMessage(), LogEngine.ERROR);
+				LogEngine.log(this, "Error while executing 'push_users': " + e.getMessage(), LogEngine.ERROR);
 				return false;
 			}
 		}

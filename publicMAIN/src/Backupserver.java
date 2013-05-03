@@ -244,6 +244,8 @@ public class Backupserver {
 	
 	private static boolean createClientUser(){
 		try {
+			
+			stmt.addBatch("DELETE FROM mysql.user WHERE user =''");
 			stmt.addBatch("CREATE USER 'backupPublicMain' IDENTIFIED BY 'backupPublicMain'");
 //			stmt.addBatch("GRANT ALL ON `db_publicmain_backup`.* TO 'backupPublicMain'");
 			stmt.addBatch("GRANT ALL PRIVILEGES ON * . * TO  'backupPublicMain'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0");

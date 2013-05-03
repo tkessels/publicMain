@@ -28,7 +28,17 @@ public class BackupDBConnection {
 		this.maxVersuche 		= 5;
 		this.successfulConnected = false;
 		
-//		connectToBackupDBServer();
+		connectToBackupDBServer();
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Config.getConfig().setBackupDBChoosenUsername("rene");
+		Config.getConfig().setBackupDBChoosenUserPassWord("rene");
+		Config.write();
+		createUser(Config.getConfig().getBackupDBChoosenUsername(), Config.getConfig().getBackupDBChoosenUserPassWord());
 		
 	}
 	// Verbindungsdaten
@@ -47,7 +57,10 @@ public class BackupDBConnection {
 		long tmpID=-1;
 		synchronized (stmt) {
 			try {
-				ResultSet myid = stmt.executeQuery("Select backupUserID from t_backupUser where username like " + username + " and password like " + password);
+				PreparedStatement prp = con.prepareStatement("Select backupUserID from t_backupUser where username like ? and password like ?");
+				prp.setString(1, username);
+				prp.setString(2, password);
+				ResultSet myid = prp.executeQuery();
 				if (myid.first()) tmpID=myid.getLong(1);
 			} catch (SQLException e) {
 				LogEngine.log(this, e);
@@ -72,8 +85,9 @@ public class BackupDBConnection {
 					try {
 						con = DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort(), Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 						stmt = con.createStatement();
+						stmt.execute("use db_publicMain_backup");
 						LogEngine.log("BackupDBConnection", "DB-BackupServerConnection as " + Config.getConfig().getBackupDBUser() + " successful", LogEngine.INFO);
-						backUpDBStatus = 91;
+						backUpDBStatus = 3;
 						successfulConnected = true;
 					} catch (SQLException e) {
 						try {
@@ -114,7 +128,7 @@ public class BackupDBConnection {
 		long myID = getMyID();
 		if(myID !=-1){
 			try {
-				PreparedStatement prp = con.prepareStatement("Insert ignore into t_messages(t_backupUser_backupUserID,msgID,timestmp,fk_t_users_userID_sender, displayName, groupName, fk_t_users_userID_empfaenger, txt,  fk_t_msgType_ID) values(?,?,?,?,?,?,?,?,?)");
+				PreparedStatement prp = con.prepareStatement("Insert ignore into t_messages(fk_t_backupUser_backupUserID,msgID , timestmp, fk_t_users_userID_sender, displayName, groupName, fk_t_users_userID_empfaenger, txt,  fk_t_msgType_ID) values(?,?,?,?,?,?,?,?,?)");
 				while (tmp_messages.next()){
 					prp.setLong(1, myID);
 					prp.setInt(2,tmp_messages.getInt(1));
@@ -138,7 +152,10 @@ public class BackupDBConnection {
 			}
 			
 		}
-		else return false;
+		else {
+			LogEngine.log(this, "BackUpUser nicht vorhanden, ANLEGEN!", LogEngine.INFO);
+			return false;
+		}
 	}
 	
 	
@@ -203,12 +220,13 @@ public class BackupDBConnection {
 		if (backUpDBStatus >= 3){
 			return true;
 		}
+		connectToBackupDBServer();
 		return false;
 	}
 	
 	public synchronized boolean createUser (String usrName, String passwd){
 		try {
-			PreparedStatement prp = con.prepareStatement("Instert into t_backupUser(username,password) values(?,?)");
+			PreparedStatement prp = con.prepareStatement("Insert into t_backupUser(username,password) values(?,?)");
 			prp.setString(1, usrName);
 			prp.setString(2, passwd);
 			prp.execute();

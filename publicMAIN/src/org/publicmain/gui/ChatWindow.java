@@ -54,6 +54,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	private GUI gui;
 	private ChatWindowTab myTab;
 	
+	private String fontFamily;
+	private int fontSize;
+	
 	private JTextPane msgTextPane;
 	private HTMLEditorKit htmlKit;
 	private HTMLDocument htmlDoc;
@@ -139,7 +142,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.msgTextScroller= new JScrollPane( msgTextPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 		this.eingabeFeld 	= new JTextField();
 		this.eingBereichPanel= new JPanel( new BorderLayout() );
-		this.keyHistory		=new History( eingabeFeld );
+		this.keyHistory		= new History( eingabeFeld );
+		this.fontFamily		= "Arial";
+		this.fontSize		= 8;
+
 
 		// Konfiguration des Bereiches für Nachrichten (msgTextPane)
 		this.msgTextPane.setEditable( false );
@@ -467,6 +473,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param msg (MSG) übergebene Nachricht
 	 */
 	private void printMSG( MSG msg ) {
+		this.fontFamily		= Config.getConfig().getFontFamily();
+		this.fontSize		= Config.getConfig().getFontSize();
 		String color = "black";
 		Node sender = ChatEngine.getCE().getNodeForNID( msg.getSender() );
 		String senderalias = ( sender != null ) ? sender.getAlias() : "unknown";
@@ -481,7 +489,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				color = "red";
 			}
 			try {
-				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), "<font color='" + color + "'>System: " + ( String ) msg.getData() + "</font>", 0, 0, null );
+				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), 
+						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='" + color + "'>System: " + ( String ) msg.getData() + "</font>", 0, 0, null );
 			} catch ( BadLocationException | IOException e ) {
 				LogEngine.log( e );
 			}
@@ -493,7 +502,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				color = "#0970A4";
 			}
 			try {
-				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), "<font color='" + color + "'>" + senderalias +": </font><font color='black'>" + ( String ) msg.getData() + "</font>", 0, 0, null );
+				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), 
+						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='" + color + "'>" + senderalias +": </font>" +
+						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='black'>" + ( String ) msg.getData() + "</font>", 0, 0, null );
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}
@@ -505,7 +516,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				color = "#19A6F1";
 			}
 			try {
-				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), "<font color='" + color + "'>" + senderalias + ": </font><font color='black'>" + ( String ) msg.getData() + "</font>", 0, 0, null );
+				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), 
+						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='" + color + "'>" + senderalias + ": </font>" +
+						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='black'>" + ( String ) msg.getData() + "</font>", 0, 0, null );
 			} catch ( BadLocationException | IOException e ) {
 				LogEngine.log(e);
 			}

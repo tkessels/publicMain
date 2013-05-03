@@ -2,24 +2,30 @@ package org.publicmain.gui;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.publicmain.common.Config;
 import org.publicmain.sql.DatabaseEngine;
@@ -53,6 +59,14 @@ public class SettingsWindow extends JDialog{
 	private JCheckBox	grpMsgCheckBox;
 	private JLabel		privMsgLabel;
 	private JCheckBox	privMsgCheckBox;
+	
+	private JPanel				fontChooserPanel;
+	private JLabel				fontChooserLabel;
+	private GraphicsEnvironment ge; 
+	private List<String> 		fontNames;
+	private JComboBox<String>	fontChooserComboBox;
+	private JLabel				fontSizeLabel;
+	private JSlider				fontSizeSlider;
 	
 	private JPanel		localDBPanel;
 	private JLabel		portLocalDBLabel;
@@ -129,8 +143,8 @@ public class SettingsWindow extends JDialog{
 		this.pushPullBtn			 = new JToggleButton("Push/Pull", false);
 		this.pushPullBtn.setActionCommand("Push/Pull");
 		this.btnGrp					 = new ButtonGroup();
-		this.cardsPanelLayout 	= new CardLayout();
-		this.cardsPanel			 = new JPanel(cardsPanelLayout);
+		this.cardsPanelLayout 		 = new CardLayout();
+		this.cardsPanel				 = new JPanel(cardsPanelLayout);
 		this.cardUser				 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		this.cardDB					 = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		this.cardPushPull			 = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -146,6 +160,16 @@ public class SettingsWindow extends JDialog{
 		this.grpMsgCheckBox			 = new JCheckBox();
 		this.privMsgLabel			 = new JLabel("Private messages");
 		this.privMsgCheckBox		 = new JCheckBox();
+		
+		this.ge  = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		String[] fontNames = ge.getAvailableFontFamilyNames();
+		Arrays.sort(fontNames);
+		this.fontNames 				= Arrays.asList(fontNames);
+		this.fontChooserPanel		= new JPanel(new GridLayout(2, 2));
+		this.fontChooserLabel		= new JLabel("Font family");
+		this.fontChooserComboBox	= new JComboBox<String>(fontNames);
+		this.fontSizeSlider	 		= new JSlider(0, 20, 3);
+		this.fontSizeLabel			= new JLabel("Font size               " + fontSizeSlider.getValue());
 		
 		this.localDBPanel			 = new JPanel(new GridLayout(3,2));
 		this.portLocalDBLabel		 = new JLabel("Port");
@@ -189,6 +213,7 @@ public class SettingsWindow extends JDialog{
 		this.resetBtn.addActionListener(new SettingButtonController());
 		this.acceptBtn.addActionListener(new SettingButtonController());
 		this.cancelBtn.addActionListener(new SettingButtonController());
+		this.fontSizeSlider.addChangeListener(new FontSizeSliderController());
 		this.createPushPullBtn.addActionListener(new PushPullButtonController());
 		
 		this.cardButtonsPanel.setPreferredSize(new Dimension(230,25));
@@ -201,6 +226,7 @@ public class SettingsWindow extends JDialog{
 		this.cardUser.setBackground(Color.WHITE);
 		this.cardUser.add(userSettingsPanel);
 		this.cardUser.add(trayIconNotificationPanel);
+		this.cardUser.add(fontChooserPanel);
 		
 		this.cardDB.setPreferredSize(new Dimension(230,62));
 		this.cardDB.setBackground(Color.WHITE);
@@ -229,6 +255,16 @@ public class SettingsWindow extends JDialog{
 		this.trayIconNotificationPanel.add(grpMsgCheckBox);
 		this.trayIconNotificationPanel.add(privMsgLabel);
 		this.trayIconNotificationPanel.add(privMsgCheckBox);
+		
+		this.fontChooserPanel.setBorder(BorderFactory.createTitledBorder("Font settings"));
+		this.fontChooserPanel.setPreferredSize(new Dimension(230, 62));
+		this.fontChooserPanel.setBackground(Color.WHITE);
+		this.fontChooserComboBox.setBackground(Color.WHITE);
+		this.fontSizeSlider.setBackground(Color.WHITE);
+		this.fontChooserPanel.add(fontChooserLabel);
+		this.fontChooserPanel.add(fontChooserComboBox);
+		this.fontChooserPanel.add(fontSizeLabel);
+		this.fontChooserPanel.add(fontSizeSlider);
 		
 		this.localDBPanel.setBorder(BorderFactory.createTitledBorder("local database"));
 		this.localDBPanel.setPreferredSize(new Dimension(230,82));
@@ -314,6 +350,9 @@ public class SettingsWindow extends JDialog{
 		this.grpMsgCheckBox.setSelected(Config.getConfig().getNotifyGroup());
 		this.privMsgCheckBox.setSelected(Config.getConfig().getNotifyPrivate());
 		
+		this.fontChooserComboBox.setSelectedItem(Config.getConfig().getFontFamily());
+		this.fontSizeSlider.setValue(Config.getConfig().getFontSize());
+		
 		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
 		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
 		
@@ -346,6 +385,15 @@ public class SettingsWindow extends JDialog{
 		}
 		if(Config.getConfig().getNotifyPrivate() != privMsgCheckBox.isSelected()){
 			Config.getConfig().setNotifyPrivate(privMsgCheckBox.isSelected());
+			changes = true;
+		}
+		
+		if(!fontChooserComboBox.getSelectedItem().equals(Config.getConfig().getFontFamily())){
+			Config.getConfig().setFontFamily((String)fontChooserComboBox.getSelectedItem());
+			changes = true;
+		}
+		if(fontSizeSlider.getValue() != Config.getConfig().getFontSize()){
+			Config.getConfig().setFontSize(fontSizeSlider.getValue());
 			changes = true;
 		}
 		
@@ -459,6 +507,17 @@ public class SettingsWindow extends JDialog{
 		}
 		
 	}
+	class FontSizeSliderController implements ChangeListener{
+
+		/* (non-Javadoc)
+		 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+		 */
+		public void stateChanged(ChangeEvent e) {
+			fontSizeLabel.setText("Font size               " + fontSizeSlider.getValue());
+		}
+		
+}
+
 	class PushPullButtonController implements ActionListener{
 		
 		public void actionPerformed(ActionEvent e) {

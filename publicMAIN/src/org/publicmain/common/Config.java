@@ -206,6 +206,8 @@ public class Config {
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
 		tmp.setMaxEingabefeldLength(200);
+		tmp.setFontFamily("Arial");
+		tmp.setFontSize(3);
 		tmp.setNamePattern("((([-_]?)([a-zA-Z0-9öäüÖÄÜßéá♥])+))+([-_])?");
 		tmp.setNotifyGroup(false);
 		tmp.setNotifyPrivate(false);

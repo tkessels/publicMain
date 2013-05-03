@@ -206,6 +206,14 @@ public class ConfigData extends Properties {
 		return Integer.parseInt(this.getProperty("gui.max_eingabefeld_length"));
 	}
 	
+	public String getFontFamily() {
+		return this.getProperty("gui.font_family");
+	}
+	
+	public int getFontSize() {
+		return Integer.parseInt(this.getProperty("gui.font_size"));
+	}
+	
 	public void setLogVerbosity(int verbosity) {
 		this.setProperty("log.verbosity", String.valueOf(verbosity));
 	}
@@ -234,6 +242,15 @@ public class ConfigData extends Properties {
 	public void setMaxEingabefeldLength(int lenght) {
 		this.setProperty("gui.max_eingabefeld_length", String.valueOf(lenght));
 	}
+	
+	public void setFontFamily(String font_family) {
+		this.setProperty("gui.font_family", font_family);
+	}
+	
+	public void setFontSize(int fontSize){
+		this.setProperty("gui.font_size", String.valueOf(fontSize));
+	}
+
 
 	/**
 	 * Einstellungen für die lokale Datenbank

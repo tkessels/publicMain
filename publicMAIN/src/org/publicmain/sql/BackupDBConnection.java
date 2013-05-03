@@ -35,10 +35,10 @@ public class BackupDBConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Config.getConfig().setBackupDBChoosenUsername("rene");
-		Config.getConfig().setBackupDBChoosenUserPassWord("rene");
+		//Config.getConfig().setBackupDBChoosenUsername("rene");
+		//Config.getConfig().setBackupDBChoosenUserPassWord("rene");
 		Config.write();
-		createUser(Config.getConfig().getBackupDBChoosenUsername(), Config.getConfig().getBackupDBChoosenUserPassWord());
+		//createUser(Config.getConfig().getBackupDBChoosenUsername(), Config.getConfig().getBackupDBChoosenUserPassWord());
 		
 	}
 	// Verbindungsdaten

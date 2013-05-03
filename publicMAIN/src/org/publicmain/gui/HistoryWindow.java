@@ -317,27 +317,22 @@ public class HistoryWindow extends JDialog{
 	class HistoryButtonController implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
-//			JButton source = (JButton)e.getSource();
 			switch(e.getActionCommand()){
 			case "Search" :
 
 				Date value = (Date) beginSpinner.getValue();
 				if(beginGregCal!=null){
-					System.out.println(beginGregCal);
 					beginGregCal.set(Calendar.HOUR_OF_DAY,value.getHours() );
 					beginGregCal.set(Calendar.MINUTE,value.getMinutes() );
 					System.out.println(beginGregCal);
 				}
 				if(endGregCal!=null){
 					value = (Date) endSpinner.getValue();
-					System.out.println(endGregCal);
 					endGregCal.set(Calendar.HOUR_OF_DAY,value.getHours() );
 					endGregCal.set(Calendar.MINUTE,value.getMinutes() );
 					System.out.println(endGregCal);
 				}
-//				beginGregCal.set(beginGregCal.get(Calendar.YEAR), beginGregCal.get(Calendar.MONTH), beginGregCal.get(Calendar.DATE), , minute)
 				JTable selectMSGsByUser = null;
-				System.out.println(e.getSource().getClass().getSimpleName());
 				switch(activeCard){
 				case "User":
 					long uid;
@@ -354,7 +349,9 @@ public class HistoryWindow extends JDialog{
 				default:
 				}
 				
-				if(selectMSGsByUser!=null)new ResultWindow(selectMSGsByUser);
+				if(selectMSGsByUser!=null){
+					new ResultWindow(selectMSGsByUser);
+				}
 				
 				
 				break;

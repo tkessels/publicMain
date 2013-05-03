@@ -1417,14 +1417,9 @@ public class NodeEngine {
 			break;
 		case "bestnode":
 			long time = System.currentTimeMillis();
-			GUI.getGUI().info(
-					"Strategie:" + myStrategy.getClass().getSimpleName()
-							+ " MaxConnections:"
-							+ Config.getConfig().getMaxConnections(), null, 0);
+			GUI.getGUI().info("Strategie:" + myStrategy.getClass().getSimpleName()+ " MaxConnections:"+ Config.getConfig().getMaxConnections(), null, 0);
 			GUI.getGUI().info(getBestNode().toString(), null, 0);
-			GUI.getGUI().info(
-					"took " + (System.currentTimeMillis() - time)
-							+ " ms to evaluate", null, 0);
+			GUI.getGUI().info("took " + (System.currentTimeMillis() - time)+ " ms to evaluate", null, 0);
 			break;
 		case "strategy":
 			if (parameter.equals("random")) {
@@ -1457,6 +1452,7 @@ public class NodeEngine {
 			break;
 		case "poll_bus":
 			multi_socket.discoverBUS();
+			break;
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;

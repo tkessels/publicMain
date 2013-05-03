@@ -185,7 +185,7 @@ public class Config {
 		tmp.setMCTTL(10);
 		tmp.setDiscoverTimeout(200);
 		tmp.setRootClaimTimeout(200);
-		tmp.setMaxConnections(5);
+		tmp.setMaxConnections(3);
 		tmp.setTreeBuildTime(1000);
 		tmp.setPingInterval(30000);
 		tmp.setPingEnabled(false);

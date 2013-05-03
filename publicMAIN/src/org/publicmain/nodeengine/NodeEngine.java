@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -135,20 +136,7 @@ public class NodeEngine {
 
 		connectionsAcceptBot.start();
 		
-		neMaintainer = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while(online) {
-					if(isRoot())sendRA();
-					if(hasChildren())pollChilds();
-					try {
-						Thread.sleep(Config.getConfig().getPingInterval());
-					} catch (InterruptedException e) {
-					}
-					
-				}
-			}
-		});;
+		neMaintainer = new Thread(new Maintainer());;
 		neMaintainer.start();
 
 		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
@@ -835,7 +823,10 @@ public class NodeEngine {
 					break;
 				case POLL_CHILDNODES:
 					if (quelle == root_connection) {
-						sendroot(new MSG(getChilds(), MSGCode.REPORT_CHILDNODES));
+//						sendroot(new MSG(getChilds(), MSGCode.REPORT_CHILDNODES));
+						sendroot(new MSG(Arrays.asList(meinNode), MSGCode.REPORT_CHILDNODES));
+						sendroot(new MSG(meinNode, MSGCode.NODE_UPDATE));
+						
 						pollChilds();
 					}
 					break;
@@ -1527,6 +1518,23 @@ public class NodeEngine {
 	        frame.pack();
 	        frame.setLocationRelativeTo( null );
 	        frame.setVisible( true );
+	}
+
+	private final class Maintainer implements Runnable {
+		@Override
+		public void run() {
+			while(online) {
+				if(isRoot())sendRA();
+				if(isRoot())pollChilds();
+				else sendroot(new MSG(meinNode));
+				try {
+					Thread.sleep(Config.getConfig().getPingInterval());
+				} catch (InterruptedException e) {
+				}
+				
+				
+			}
+		}
 	}
 
 	/**

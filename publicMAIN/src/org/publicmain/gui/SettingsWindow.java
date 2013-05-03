@@ -124,7 +124,7 @@ public class SettingsWindow extends JDialog{
 		this.userPushPullTextField	 = new JTextField();
 		this.pwPushPullLabel 		 = new JLabel("Password");
 		this.pwPushPullPasswordField = new JPasswordField();
-		this.createPushPullLabel	 = new JLabel("click for new");
+		this.createPushPullLabel	 = new JLabel("Generate account");
 		this.createPushPullBtn		 = new JButton("Create");
 		
 		this.backupDBPanel 			 = new JPanel(new GridLayout(4,2));

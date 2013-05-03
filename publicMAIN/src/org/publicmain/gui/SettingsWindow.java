@@ -91,7 +91,7 @@ public class SettingsWindow extends JDialog{
 		
 		this.cardButtonsPanel		 = new JPanel(new GridLayout(1,3));
 		this.userBtn				 = new JToggleButton("User", Help.getIcon("userSettingsSym.png",10,16), true);
-		this.databaseBtn			 = new JToggleButton("Database", Help.getIcon("dbSettingsSym.png",12,16), false);
+		this.databaseBtn			 = new JToggleButton("DB", Help.getIcon("dbSettingsSym.png",12,16), false);
 		this.pushPullBtn			 = new JToggleButton("Push/Pull", false);
 		this.btnGrp					 = new ButtonGroup();
 		this.cardsPanel				 = new JPanel(new CardLayout());
@@ -229,7 +229,7 @@ public class SettingsWindow extends JDialog{
 		this.cardsPanel.setPreferredSize(new Dimension(230, 270));
 		this.cardsPanel.setBackground(Color.WHITE);
 		this.cardsPanel.add(cardUser, "User");
-		this.cardsPanel.add(cardDB, "Database");
+		this.cardsPanel.add(cardDB, "DB");
 		this.cardsPanel.add(cardPushPull, "Push/Pull");
 		
 		this.buttonPanel.setPreferredSize(new Dimension(230,25));

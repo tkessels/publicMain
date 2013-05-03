@@ -193,7 +193,7 @@ public class BackupDBConnection {
 				while (tmp_settings.next()){
 					prp.setString(1, tmp_settings.getString(1));
 					prp.setString(2, tmp_settings.getString(3));
-					prp.setLong(3, getMyID());
+					prp.setLong(3, myID);
 					prp.addBatch();
 				}
 				prp.executeBatch();

@@ -110,7 +110,6 @@ public class DatabaseEngine {
 		ResultSet tmp_messages 	= localDB.pull_msgs();
 		backupDB.push_msgs(tmp_messages);
 		ResultSet tmp_settings 	= localDB.pull_settings();
-		
 		backupDB.push_settings(tmp_settings);
 		}
 	}

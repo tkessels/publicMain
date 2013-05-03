@@ -97,16 +97,16 @@ public class BackupDBConnection {
 						}
 						versuche ++;
 						backUpDBStatus = 0;
-						LogEngine.log(this, "Error while connecting to BackupDB. Try again in:" + warteZeitInSec + " " + versuche+1 + "/"+ maxVersuche + e.getMessage(), LogEngine.ERROR);
+						LogEngine.log(this, "Error while connecting to BackupDB. Try again in:" + warteZeitInSec + " " + versuche + "/"+ maxVersuche + e.getMessage(), LogEngine.ERROR);
 						successfulConnected = false;
 					}
+				}
+				if(!successfulConnected){
+					LogEngine.log(this, "Connecting to BackupDB failt - will not try again", LogEngine.ERROR);
 				}
 			}
 		
 		}).start();	
-		if(!successfulConnected){
-			LogEngine.log(this, "Connecting to BackupDB failt - will not try again", LogEngine.ERROR);
-		}
 		return successfulConnected;
 	}
 	

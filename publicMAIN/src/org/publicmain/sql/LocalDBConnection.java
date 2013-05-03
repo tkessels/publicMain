@@ -346,12 +346,8 @@ public class LocalDBConnection {
 				LogEngine.log(this, e.getMessage(), LogEngine.ERROR);
 				e.printStackTrace();
 			}
-			
 			try {
-				stmt.execute("DELETE FROM mysql.user WHERE user =''");
-			} catch (SQLException e) {
-			}
-			try {
+				stmt.addBatch("DELETE FROM mysql.user WHERE user =''");
 				stmt.addBatch("CREATE USER '" + Config.getConfig().getLocalDBUser() + "' IDENTIFIED BY '" + Config.getConfig().getLocalDBPw() + "'");
 				stmt.addBatch("GRANT ALL PRIVILEGES ON * . * TO  '" + Config.getConfig().getLocalDBUser() + "'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0");
 				stmt.executeBatch();

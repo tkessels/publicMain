@@ -116,7 +116,18 @@ public class DatabaseEngine {
 	}
 	
 	public void pull(){
+		
+		
+		
+		
+		
+		
 		//TODO: HILFE
+		
+		
+		
+		
+		
 	}
 	
 	private final class DPTransportBot implements Runnable {

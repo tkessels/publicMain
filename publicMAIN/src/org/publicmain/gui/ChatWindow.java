@@ -33,6 +33,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.chatengine.ChatEngine;
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -70,7 +71,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	
 	private boolean onlineState;
 	private Thread onlineStateSetter;
-	//TODO: den helptext auslagern (externe String Klasse oder in Datei)
+	// dieser "kurze" String ist für die Ausgabe der /help in Tabellenform 
 	private String helptext="<br><table color='#05405E'>" +
 			"<tr><td colspan='3'><b>Command</b></td><td><b>Description</b></td></tr>" +
 			"<tr><td colspan='3'>/clear</td><td>clear screen</td></tr>" +
@@ -147,8 +148,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.msgTextPane.setDocument( htmlDoc );
 
 		// Konfiguration des Eingabefeldes (eingabeFeld)
-		//TODO: später über ConfigureDatei
-		this.eingabeFeld.setDocument( new SetMaxText( 200 ) );
+		this.eingabeFeld.setDocument( new SetMaxText( Config.getConfig().getMaxEingabefeldLength() ) );
 
 		// benötigte Listener für das Eingabefeld (eingabeFeld) hinzufügen
 		this.eingabeFeld.addKeyListener( new History( eingabeFeld ) );
@@ -273,7 +273,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		return !this.isPrivCW;
 	} //eom isGroup()
 	
-	
 	/**
 	 * Diese Methode schreibt eine Info in den Nachrichtenbereich.
 	 * 
@@ -283,7 +282,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param text (String) übergebene Nachricht 
 	 */
 	void info( String text ){
-		putMSG( new MSG( text, MSGCode.CW_INFO_TEXT ) );
+		this.printMSG( new MSG( text, MSGCode.CW_INFO_TEXT ) );
 	} //eom info( String text )
 	
 	/**
@@ -295,7 +294,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param text (String) übergebene Nachricht 
 	 */
 	void warn( String text ){
-		putMSG( new MSG( text, MSGCode.CW_WARNING_TEXT ) );
+		this.printMSG( new MSG( text, MSGCode.CW_WARNING_TEXT ) );
 	} //eom warn( String text )
 	
 	/**
@@ -307,7 +306,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @param text (String) übergebene Nachricht 
 	 */
 	void error( String text ){
-		putMSG( new MSG( text, MSGCode.CW_ERROR_TEXT ) );
+		this.printMSG( new MSG( text, MSGCode.CW_ERROR_TEXT ) );
 	} //eom error( String text )
 	
 	/* (non-Javadoc)
@@ -412,12 +411,10 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 			// Standardvorgehensweise für Nachrichten
 			// Private Nachrichten
 			else if ( isPrivate() ) {
-				//TODO:ggf. eingabe durch Methode filtern
 				this.gui.privSend( userID, eingabe );
 			}
 			// Gruppennachrichten
 			else {
-				//TODO: ggf. eingabe durch Methode filtern
 				this.gui.groupSend( gruppe, eingabe );
 						}
 		// Speichen in Befehlshistory und leeren des Eingabefeldes (eingabeFeld)
@@ -425,7 +422,6 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		this.eingabeFeld.setText( "" );
 		}
 	} //eom actionPerformed()
-
 
 	/**
 	 * Diese Methode gibt Informationen über einen Nutzer aus.
@@ -456,17 +452,9 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 		MSG tmpMSG = ( MSG ) msg;
 		this.gui.msgToTray( tmpMSG );
-		putMSG( tmpMSG );
+		this.printMSG( tmpMSG );
 		LogEngine.log( this, "ausgabe", tmpMSG );
 	} //eom update( Observable sourceChannel, Object msg )
-	
-	/**
-	 * @param msg
-	 */
-	//TODO: Diese Methode kann evtl gelöscht werden und printMSG() verwendet werden
-	private void putMSG( MSG msg ){
-		this.printMSG( msg );
-	} //eom putMSG( MSG msg )
 	
 	/**
 	 * Diese Methode benachrichtigt den Nutzer über den Nachrichtenbereich
@@ -533,17 +521,18 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	//TODO: Kommentar
 	public boolean equals( Object obj ) {
 		if ( obj != null ) {
-			if (	gruppe != null && gruppe.equals( obj ) ){
+			if ( gruppe != null && gruppe.equals( obj ) ){
 				return true;
 			}
 			if ( userID != null && userID.equals( obj ) ){
 				return true;
 			}
 			if ( obj instanceof ChatWindow ) {
+				// übergebenes Object (obj) in ChatWindow casten und in tmp Variable (other) speichern
 				ChatWindow other = ( ChatWindow ) obj;
+				// übergebenes Object (jetzt ChatWindow) ungleich dem vergleichenden ChatWindow dann false
 				if ( other.isPrivCW != isPrivCW ){
 					return false;
 				}
@@ -553,6 +542,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				if ( other.userID != userID ){
 					return false;
 				}
+				// ansonsten true
 				return true;
 			}
 		}
@@ -561,10 +551,14 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	
 	
 	/**
-	 *
+	 * Diese Klasse stellt einen Listener für Drag&Drop bereit.
+	 * 
+	 * Diese Klasse stellt einen Listener (Adapter) für ein DropTarget bereit.
+	 * Wird verwendet um eine Datei per Drag&Drop an einen User (privater Chat) zu
+	 * versenden.
+	 * 
 	 * @author ATRM
 	 */
-	//TODO: Kommentar
 	private final class DropTargetListenerImplementation extends DropTargetAdapter {
 		/* (non-Javadoc)
 		 * @see java.awt.dnd.DropTargetListener#drop(java.awt.dnd.DropTargetDropEvent)
@@ -572,6 +566,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		public void drop( DropTargetDropEvent event ) {
 			event.acceptDrop( DnDConstants.ACTION_COPY );
 	        try {
+	        	// nur möglich für privaten Chat
 	        	if( isPrivCW ){
 	        		List<File> files = ( List<File> )event.getTransferable().getTransferData( DataFlavor.javaFileListFlavor );
 					if( files.size() == 1 ) {
@@ -579,6 +574,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 					} else {
 						warn( "Only single files can be transfered" );
 					}
+				// falls versucht wird an Gruppe zu senden wird Fehlermeldung ausgegeben
 				} else {
 					warn( "You dropped some files into a GroupChat.... Don't do that!" );
 				}
@@ -591,42 +587,50 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 
 	/**
+	 * Diese Klasse stellt einen Thread zur Verfügung.
+	 * 
+	 * Diese Klasse stellt einen Thread zur Verfügung welcher das ChatWindow je nach
+	 * Onlinestatus des Chatpartners unterschiedlich gestaltet.
+	 * 
 	 * @author ATRM
 	 */
-	//TODO: Kommentar
 	private final class RunnableImplementation implements Runnable {
 		/* (non-Javadoc)
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
 		public void run() {
-			while(true){
-				if (isPrivCW) {
-					if (gui.getNodeForUID(userID) == null) {
+			while( true ){
+				// nur nötig für privaten Chat, da Gruppenchat kein Onlinestatus hat
+				if ( isPrivCW ) {
+					// Chatpartner ist offline
+					if ( gui.getNodeForUID( userID ) == null ) {
 						onlineState = false;
 						myTab.setOffline();
-						eingabeFeld.setEnabled(false);
-						sendenBtn.setForeground(Color.GRAY);
-						sendenBtn.setEnabled(false);
+						eingabeFeld.setEnabled( false );
+						sendenBtn.setForeground( Color.GRAY );
+						sendenBtn.setEnabled( false );
+					// Chatpartner ist online
 					} else {
 						onlineState = true;
 						myTab.setOnline();
 						myTab.updateAlias();
-						eingabeFeld.setEnabled(true);
-						sendenBtn.setForeground(Color.BLACK);
-						sendenBtn.setEnabled(true);
+						eingabeFeld.setEnabled( true );
+						sendenBtn.setForeground( Color.BLACK );
+						sendenBtn.setEnabled( true );
 					}
-					synchronized (ChatEngine.getCE().getUsers()) {
+					// warte bis sich was tut
+					synchronized ( ChatEngine.getCE().getUsers() ) {
 						try {
 							ChatEngine.getCE().getUsers().wait();
-						} catch (InterruptedException e) {
-							LogEngine.log(e);
+						} catch ( InterruptedException e ) {
+							LogEngine.log( e );
 						}
 					}
 				}
 			}
-		}
-	}
+		} //eom run()
+	} //eoc RunnableImplementation
 
 
 	/**
@@ -643,61 +647,85 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		/* (non-Javadoc)
 		 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
 		 */
-		public void mouseExited(MouseEvent e) {
-			JButton source = (JButton) e.getSource();
-			if(onlineState){
-				source.setForeground(Color.BLACK);
+		public void mouseExited( MouseEvent e ) {
+			JButton source = ( JButton )e.getSource();
+			if( onlineState ){
+				source.setForeground( Color.BLACK );
 			}
 		}
 
 		/* (non-Javadoc)
 		 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
 		 */
-		public void mouseEntered(MouseEvent e) {
-			JButton source = (JButton) e.getSource();
-			if(onlineState){
-				source.setForeground(new Color(255, 130, 13));
+		public void mouseEntered( MouseEvent e ) {
+			JButton source = ( JButton)e.getSource();
+			if( onlineState ){
+				source.setForeground( new Color( 255, 130, 13 ) );
 			}
 		}
-	}
-
+	}//eoc MouseListenerImplementation
 
 	
 	/**
+	 * Diese Klasse ermöglicht den Nutzer Nachrichten und Befehle schnell zu wiederholen
+	 * 
+	 * Diese Klasse stellt den Nutzer eine History für Nachrichten und Befehle bereit auf
+	 * welche mit den Pfeiltasten Oben/Unten zugegriffen werden kann.
+	 * 
 	 * @author ATRM
 	 */
-	//TODO: Kommentar und prüfen ob Funktionsfähig
 	private class History extends KeyAdapter{
 
-			private ArrayList<String> eingabeHistorie;
-			private int eingabeAktuell;
-			
-			public History(JTextField target) {
-				eingabeHistorie=new ArrayList<String>();
-				eingabeAktuell=0;
-				target.addKeyListener(this);
-			}
+		private ArrayList<String> eingabeHistorie;
+		private int eingabeAktuell;
+		
+		/**
+		 * Konstruktor für die History.
+		 * 
+		 * Diese Konstruktor erstellt die History und legt eine neue ArrayList vom Typ
+		 * String an um Befehle aufzunehmen. Außerdem wird ein Befehlszähler erstellt
+		 * der bei 0 startet. Als Parameter wird das Eingabefeld (target) übergeben für
+		 * das die History gelten soll.
+		 * 
+		 * @param target
+		 */
+		public History( JTextField target ) {
+			eingabeHistorie = new ArrayList<String>();
+			eingabeAktuell = 0;
+			target.addKeyListener( this );
+		}//eom History( JTextFiel target)
 
-			public void add(String eingabe) {
-				eingabeHistorie.add(eingabe);
-				eingabeAktuell = eingabeHistorie.size();
-			}
+		/**
+		 * Diese Methode ermöglicht das Hinzufügen von Befehlen.
+		 * 
+		 * Diese Methode fügt einen eingegeben String (eingabe) zu der History hinzu und
+		 * setzt den Befehlszähler auf size() der ArrayList.
+		 * 
+		 * @param eingabe
+		 */
+		public void add( String eingabe ) {
+			eingabeHistorie.add( eingabe );
+			eingabeAktuell = eingabeHistorie.size();
+		}//eom add( String eingabe )
 
-			public void keyPressed(KeyEvent arg0) {
-				JTextField tmp = (JTextField) arg0.getSource();
-				// Aktion für Pfeiltaste nach oben (KeyCode 38)
-				if (arg0.getKeyCode() == 38 && eingabeAktuell > 0) {
-					eingabeAktuell--;
-					tmp.setText(eingabeHistorie.get(eingabeAktuell));
-				// Aktion für Pfeiltaste nach unten (KeyCode 40)
-				} else if (arg0.getKeyCode() == 40 && eingabeAktuell < eingabeHistorie.size()) {
-					eingabeAktuell++;
-					if (eingabeAktuell < eingabeHistorie.size()) {
-						tmp.setText(eingabeHistorie.get(eingabeAktuell));
-					} else
-						tmp.setText("");
-				} else {
-				}
-		}
-	}
-}
+		/* (non-Javadoc)
+		 * @see java.awt.event.KeyAdapter#keyPressed(java.awt.event.KeyEvent)
+		 */
+		public void keyPressed( KeyEvent arg0 ) {
+			JTextField tmp = ( JTextField ) arg0.getSource();
+			// Aktion für Pfeiltaste nach oben ( KeyCode 38 )
+			if ( ( arg0.getKeyCode() == 38 ) && ( eingabeAktuell > 0 ) ) {
+				eingabeAktuell--;
+				tmp.setText( eingabeHistorie.get( eingabeAktuell ) );
+			// Aktion für Pfeiltaste nach unten ( KeyCode 40 )
+			} else if ( ( arg0.getKeyCode() == 40 ) && ( eingabeAktuell < eingabeHistorie.size() ) ) {
+				eingabeAktuell++;
+				if ( eingabeAktuell < eingabeHistorie.size() ) {
+					tmp.setText( eingabeHistorie.get( eingabeAktuell ) );
+				} else
+					tmp.setText( "" );
+			} else {
+			}
+		} //eom keyPressed( KeyEvent arg0 )
+	} //eoc History
+} //eoc ChatWindow

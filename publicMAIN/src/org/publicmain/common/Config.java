@@ -10,7 +10,7 @@ import java.nio.channels.FileLock;
 import org.publicmain.sql.DatabaseEngine;
 
 /**
- * Diese Klasse enthält wichtige Konfigurationsdaten zur Anwendung.
+ * Diese Klasse enthï¿½lt wichtige Konfigurationsdaten zur Anwendung.
  * 
  * @author ATRM
  * 
@@ -34,7 +34,7 @@ public class Config {
 	private ConfigData settings;
 
 	/**
-	 * Getter welcher die aktuelle Konfiguration zurückliefert.
+	 * Getter welcher die aktuelle Konfiguration zurï¿½ckliefert.
 	 * 
 	 * @return
 	 */
@@ -82,7 +82,7 @@ public class Config {
 	}
 	
 	/**
-	 * Melde die Datenbank für Schreibvorgänge an der Konfiguration an.
+	 * Melde die Datenbank fï¿½r Schreibvorgï¿½nge an der Konfiguration an.
 	 * 
 	 * @param databaseengine
 	 */
@@ -131,7 +131,7 @@ public class Config {
 	}
 
 	/**
-	 * Standart-Konstruktor für die Config-Klasse.
+	 * Standart-Konstruktor fï¿½r die Config-Klasse.
 	 */
 	private Config() {
 		me = this;
@@ -142,7 +142,7 @@ public class Config {
 						+ ((system_conf.exists()) ? "S" : "0") + "|"
 						+ ((user_conf.exists()) ? "U" : "0") + "]",
 				LogEngine.INFO);
-		// Versuche die System-Einstellungen vom JAR zu überladen
+		// Versuche die System-Einstellungen vom JAR zu ï¿½berladen
 		if (system_conf.canRead()) {
 			try (FileInputStream in = new FileInputStream(system_conf)) {
 				ConfigData system = new ConfigData(settings);
@@ -157,7 +157,7 @@ public class Config {
 			}
 		}
 		ConfigData user = new ConfigData(settings);
-		// Versuche die Benutzer-Einstellungen aus AppData zu überladen
+		// Versuche die Benutzer-Einstellungen aus AppData zu ï¿½berladen
 		if (user_conf.canRead()) {
 			try (FileInputStream in = new FileInputStream(user_conf)) {
 				user.load(in);
@@ -205,6 +205,7 @@ public class Config {
 		tmp.setLogVerbosity(4);
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
+		tmp.setMaxEingabefeldLength(200);
 		tmp.setNamePattern("((([-_]?)([a-zA-Z0-9Ã¶Ã¤Ã¼Ã–Ã„ÃœÃŸÃ©Ã¡â™¥])+))+([-_])?");
 		tmp.setNotifyGroup(false);
 		tmp.setNotifyPrivate(false);

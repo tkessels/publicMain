@@ -30,25 +30,20 @@ public class Backupserver {
 	private final static  int BACKUP_DATABASE_VERSION = 12345;
 	private static Connection con;
 	private static Statement stmt;
+	private static String local_username= "root";
+	private static String local_password="";
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		System.setProperty("appname", "pmBackupServer");
-		String username="root";
-		String password="";
-		String clientUsername = "backupPublicMain";
-		String clientPassword = "backupPublicMain";
-		String port="3306";
-		String databasename="db_publicMain_backup";
+		String username = Config.getConfig().getBackupDBUser();
+		String password = Config.getConfig().getBackupDBPw();
+		String port=Config.getConfig().getLocalDBPort();
+		String databasename=Config.getConfig().getBackupDBDatabasename();
 		String ip=Node.getMyIPs().get(0).getHostAddress();
 		
 		//if available load settings from file
-//		if(Config.getConfig().getBackupDBUser()!=null)	username				=	Config.getConfig().getBackupDBUser(); 
-//		if(Config.getConfig().getBackupDBPw()!=null)	password				=	Config.getConfig().getBackupDBPw(); 
-//		if(Config.getConfig().getBackupDBIP()!=null)		ip						=	Config.getConfig().getBackupDBIP(); 
-		if(Config.getConfig().getBackupDBPort()!=null)	port						=	Config.getConfig().getBackupDBPort(); 
-		if(Config.getConfig().getBackupDBDatabasename()!=null)	databasename	=	Config.getConfig().getBackupDBDatabasename(); 
 
 		//GRANT ALL PRIVILEGES ON * . * TO  'backupPublicMain'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
 		
@@ -64,11 +59,11 @@ public class Backupserver {
 					switch (args[i]) {
 					case "-u":
 					case "--user":
-						username=args[i+1];
+						local_username=args[i+1];
 						break;
 					case "-p":
 					case "--pass":
-						password=args[i+1];
+						local_password=args[i+1];
 						break;
 					case "-s":
 					case "--server":
@@ -100,9 +95,9 @@ public class Backupserver {
 			
 		
 		//test for local mySQL Server
-		if(checkConnection(ip,port,username,password)) {
+		if(checkConnection(ip,port,local_username,local_password)) {
 			//test version of pm-Database on mySQL server OR create it 
-			if(checkVersion(ip,port,username,password) || createDatabase(ip, port, username, password)) {
+			if(checkVersion(ip,port,local_username,local_password) || createDatabase(ip, port, local_username, local_password)) {
 				
 				//everything is fine start offering backupserver
 				try (MulticastSocket backupserver = new MulticastSocket(Config.getConfig().getMCPort())){
@@ -114,8 +109,8 @@ public class Backupserver {
 					
 					if (!ip.equals(Config.getConfig().getBackupDBIP()))Config.getConfig().setBackupDBIP(ip);
 					if (!port.equals(Config.getConfig().getBackupDBPort()))Config.getConfig().setBackupDBPort(port);
-					if (!clientUsername.equals(Config.getConfig().getBackupDBUser()))Config.getConfig().setBackupDBUser(clientUsername);
-					if (!clientPassword.equals(Config.getConfig().getBackupDBPw()))Config.getConfig().setBackupDBPw(clientPassword);
+					if (!username.equals(Config.getConfig().getBackupDBUser()))Config.getConfig().setBackupDBUser(username);
+					if (!password.equals(Config.getConfig().getBackupDBPw()))Config.getConfig().setBackupDBPw(password);
 					if (!databasename.equals(Config.getConfig().getBackupDBDatabasename()))Config.getConfig().setBackupDBDatabasename(databasename);
 					Config.write();
 					System.out.println("BackupServer is Running:");
@@ -154,8 +149,8 @@ public class Backupserver {
 		}else {
 			System.err.println("Could not connect to given Database. Shutting down!");
 			System.err.println("server\t\t:" + ip+":"+port);
-			System.err.println("user\t\t\t:" + username);
-			System.err.println("password\t:" + password);
+			System.err.println("user\t\t\t:" + local_username);
+			System.err.println("password\t:" + local_password);
 			System.err.println("database\t\t:" + Config.getConfig().getBackupDBDatabasename());
 			System.exit(1);
 		}
@@ -174,7 +169,8 @@ public class Backupserver {
 		System.err.println("\nNot provided parameters will be set to default values!\n");
 		System.err.println("Example:");
 		System.err.println("	java Backupserver -u admin --pass secret -n db1");
-		System.err.println("		Will setup the backupserver for a local Database ("+ip+":"+Config.getConfig().getBackupDBPort()+") with user \""+Config.getConfig().getBackupDBUser()+"\" and empty password ");
+		System.err.println("		Will setup the backupserver for a local Database ("+ip+":"+Config.getConfig().getBackupDBPort()+") with user \""+Config.getConfig().getBackupDBUser()+"\" and password:\""+Config.getConfig().getBackupDBPw()+"\" ");
+		System.err.println("		Necessary databases and users will be created if database is localy reachable with user:" +local_username + " password:"+local_password  );
 		System.exit(1);
 	}
 	

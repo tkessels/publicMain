@@ -202,6 +202,10 @@ public class ConfigData extends Properties {
 				.parseBoolean(this.getProperty("gui.tray_notify_private"));
 	}
 
+	public int getMaxEingabefeldLength() {
+		return Integer.parseInt(this.getProperty("gui.max_eingabefeld_length"));
+	}
+	
 	public void setLogVerbosity(int verbosity) {
 		this.setProperty("log.verbosity", String.valueOf(verbosity));
 	}
@@ -225,6 +229,10 @@ public class ConfigData extends Properties {
 	public void setNotifyPrivate(boolean private_notify) {
 		this.setProperty("gui.tray_notify_private",
 				String.valueOf(private_notify));
+	}
+	
+	public void setMaxEingabefeldLength(int lenght) {
+		this.setProperty("gui.max_eingabefeld_length", String.valueOf(lenght));
 	}
 
 	/**

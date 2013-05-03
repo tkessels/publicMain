@@ -434,9 +434,21 @@ public class SettingsWindow extends JDialog{
 			
 			switch(source.getText()){
 			case "Create" :
-				String username="";
-				String password="";
-				DatabaseEngine.getDatabaseEngine().createUser(username, password);
+				String username=userPushPullTextField.getText();
+				String password=pwPushPullPasswordField.getText();
+				int res = DatabaseEngine.getDatabaseEngine().createUser(username, password);{
+				 switch(res){
+				 case 2:
+					 //alles Sahne
+					 break;
+				 case 1:
+					 //user gab es bereits
+					 break;
+				 case 0:
+					 //Backupserver nicht erreichbar Datanbank fehlt
+					 break;
+				 }
+				}
 				break;
 			}
 		}

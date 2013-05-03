@@ -136,7 +136,12 @@ public class BackupDBConnection {
 					prp.setLong(4,tmp_messages.getLong(3));
 					prp.setString(5, tmp_messages.getString(4));
 					prp.setString(6, tmp_messages.getString(7));
-					prp.setLong(7, tmp_messages.getLong(6));
+					long tmp = tmp_messages.getLong(6);
+					if(tmp_messages.wasNull()){
+						 prp.setNull(7, java.sql.Types.BIGINT);
+					}else{
+						prp.setLong(7, tmp);
+					}
 					prp.setString(8,tmp_messages.getString(5));
 					prp.setInt(9,tmp_messages.getInt(8));
 					prp.addBatch();
@@ -242,6 +247,9 @@ public class BackupDBConnection {
 			prp.execute();
 			prp.close();
 			return true;
+			}
+			else{
+				LogEngine.log(this, "BackupUser already exists",LogEngine.ERROR);
 			}
 		} catch (SQLException e) {
 			LogEngine.log(this, e);

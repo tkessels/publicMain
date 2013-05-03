@@ -79,7 +79,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_messages` (
   CONSTRAINT `fk_t_messages_t_backupUser1`
     FOREIGN KEY (`fk_t_backupUser_backupUserID` )
     REFERENCES `db_publicmain_backup`.`t_backupUser` (`backupUserID` )
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -98,7 +98,7 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_settings` (
   CONSTRAINT `fk_t_backupUser_backupUserID_2`
     FOREIGN KEY (`fk_t_backupUser_backupUserID_2` )
     REFERENCES `db_publicmain_backup`.`t_backupUser` (`backupUserID` )
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 

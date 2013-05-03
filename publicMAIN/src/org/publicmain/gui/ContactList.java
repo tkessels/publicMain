@@ -214,13 +214,13 @@ public class ContactList extends JWindow {
 			String user=users.getSelectedValue().getAlias();
 			long userID = users.getSelectedValue().getUserID();
 
-			this.whisper 	 = new JMenuItem("whisper to " + user);
-			this.sendFile 	 = new JMenuItem("send File to " + user);
-			this.ignore 	 = new JMenuItem("ignore " + user);
-			this.unignore	 = new JMenuItem("unignore " + user);
-			this.info 		 = new JMenuItem("info's about " + user);
-			this.changeAlias = new JMenuItem("change Alias");
-			this.afkStatus	 = new JMenuItem("AFK (on/off)");
+			this.whisper 	 = new JMenuItem("whisper to " + user, Help.getIcon("whisperSym.png",14,16));
+			this.sendFile 	 = new JMenuItem("send File to " + user, Help.getIcon("sendFileSym.png",14,16));
+			this.ignore 	 = new JMenuItem("ignore " + user, Help.getIcon("ignoreSym.png",12,16));
+			this.unignore	 = new JMenuItem("unignore " + user, Help.getIcon("unignoreSym.png",14,16));
+			this.info 		 = new JMenuItem("info's about " + user, Help.getIcon("infoSym.png"));
+			this.changeAlias = new JMenuItem("change Alias", Help.getIcon("changeAliasSym.png",14,16));
+			this.afkStatus	 = new JMenuItem("AFK (on/off)", Help.getIcon("afkSym.png",16,12));
 			
 			this.whisper.addActionListener(popupListener);
 			this.sendFile.addActionListener(popupListener);
@@ -258,8 +258,8 @@ public class ContactList extends JWindow {
 		
 		public PopupGroup(String group, ActionListener popupListener){
 			this.group = group;
-			this.join = new JMenuItem("join " + group);
-			this.leave = new JMenuItem("leave " + group);
+			this.join = new JMenuItem("join " + group, Help.getIcon("joinGrpSym.png"));
+			this.leave = new JMenuItem("leave " + group, Help.getIcon("leaveGrpSym.png"));
 			
 			this.join.addActionListener(popupListener);
 			this.leave.addActionListener(popupListener);

@@ -227,7 +227,10 @@ public class BackupDBConnection {
 	private synchronized boolean userexists(String userName) throws SQLException{
 				PreparedStatement prp = con.prepareStatement("Select backupUserID from t_backupUser where username like ?");
 				prp.setString(1, userName);
-				return prp.execute();
+				ResultSet tmp_rs= prp.executeQuery();
+				boolean tmp = (tmp_rs.next());
+				prp.close();
+				return tmp;
 	}
 	
 	public synchronized boolean createUser (String usrName, String passwd){

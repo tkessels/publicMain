@@ -34,7 +34,7 @@ public class Config {
 	private ConfigData settings;
 
 	/**
-	 * Getter welcher die aktuelle Konfiguration zurücliefert.
+	 * Getter welcher die aktuelle Konfiguration zurückliefert.
 	 * 
 	 * @return
 	 */
@@ -46,17 +46,17 @@ public class Config {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Schreibt die Konfiguration auf die Festplatte.
 	 */
 	@SuppressWarnings("static-access")
 	public static synchronized void write() {
-		if (me==null) {
+		if (me == null) {
 			me = new Config();
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
-		if(de!=null) {
+		if (de != null) {
 			de.writeConfig();
-		}				
+		}
 		me.savetoDisk();
 	}
 	
@@ -82,7 +82,7 @@ public class Config {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Melde die Datenbank für Schreibvorgänge an der Konfiguration an.
 	 * 
 	 * @param databaseengine
 	 */
@@ -91,39 +91,47 @@ public class Config {
 	}
 	
 	/**
-	 * Method tries to Lock a file <code>pm.loc</code> in Users <code>APPDATA\publicMAIN</code> folder. And returns result as boolen.
-	 * It also adds a shutdown hook to the VM to remove Lock from File if Program exits.
-	 * @return <code>true</code> if File could be locked <code>false</code> if File has already been locked
+	 * Method tries to Lock a file <code>pm.loc</code> in Users
+	 * <code>APPDATA\publicMAIN</code> folder. And returns result as boolen. It
+	 * also adds a shutdown hook to the VM to remove Lock from File if Program
+	 * exits.
+	 * 
+	 * @return <code>true</code> if File could be locked <code>false</code> if
+	 *         File has already been locked
 	 */
 	public static boolean getLock() {
-        try {
-            if(!loc_file.getParentFile().exists()) {
+		try {
+			if (!loc_file.getParentFile().exists()) {
 				loc_file.getParentFile().mkdirs();
 			}
-            final RandomAccessFile randomAccessFile = new RandomAccessFile(loc_file, "rw");
-            final FileLock fileLock = randomAccessFile.getChannel().tryLock();
-            if (fileLock != null) {
-                Runtime.getRuntime().addShutdownHook(new Thread() {
-                    public void run() {
-                        try {
-                            fileLock.release();
-                            randomAccessFile.close();
-                            loc_file.delete();
-                        } catch (Exception e) {
-                            LogEngine.log("ShutdownHook","Unable to remove lock file: " + loc_file, LogEngine.ERROR);
-                        }
-                    }
-                });
-                return true;
-            }
-        } catch (Exception e) {
-        	LogEngine.log("Config","Unable to create and/or lock file: " + loc_file, LogEngine.ERROR);
-        }
-        return false;
-    }
+			final RandomAccessFile randomAccessFile = new RandomAccessFile(
+					loc_file, "rw");
+			final FileLock fileLock = randomAccessFile.getChannel().tryLock();
+			if (fileLock != null) {
+				Runtime.getRuntime().addShutdownHook(new Thread() {
+					public void run() {
+						try {
+							fileLock.release();
+							randomAccessFile.close();
+							loc_file.delete();
+						} catch (Exception e) {
+							LogEngine.log("ShutdownHook",
+									"Unable to remove lock file: " + loc_file,
+									LogEngine.ERROR);
+						}
+					}
+				});
+				return true;
+			}
+		} catch (Exception e) {
+			LogEngine.log("Config", "Unable to create and/or lock file: "
+					+ loc_file, LogEngine.ERROR);
+		}
+		return false;
+	}
 
 	/**
-	 * Standart-Konstruktor für die Config-Klasse. 
+	 * Standart-Konstruktor für die Config-Klasse.
 	 */
 	private Config() {
 		me = this;
@@ -167,9 +175,8 @@ public class Config {
 				LogEngine.log(this, "default config could not be read. reason:"
 						+ e.getMessage(), LogEngine.WARNING);
 			}
-		}		
+		}
 	}
-
 	
 	/**
 	 * Die Methode liefert die Standart-Einstellungen der Anwendung
@@ -207,7 +214,6 @@ public class Config {
 		tmp.setLocalDBPort("3306");
 		tmp.setLocalDBUser("publicMain");
 		tmp.setLocalDBPw("publicMain");
-		
 		// daten fuer externen DB-Backup-Server
 		tmp.setBackupDBDatabasename("db_publicMain_backup");
 		tmp.setBackupDBPort("3306");
@@ -219,7 +225,7 @@ public class Config {
 	/**
 	 * Einstellungen in einem Thread als Datei auf die Festplatte speichern.
 	 */
-	private void savetoDisk(){
+	private void savetoDisk() {
 		Runnable target = new Runnable() {
 			public void run() {
 				try (final FileOutputStream fos = new FileOutputStream(
@@ -238,4 +244,3 @@ public class Config {
 		new Thread(target).start();
 	}
 }
-

@@ -61,12 +61,12 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_messages` (
   INDEX `fk_t_messages_t_user2_idx` (`fk_t_users_userID_empfaenger` ASC) ,
   INDEX `fk_t_msgType_ID` (`fk_t_msgType_ID` ASC) ,
   INDEX `fk_t_backupUser_backupUserID` (`fk_t_backupUser_backupUserID` ASC) ,
-  CONSTRAINT `fk_t_user_userID_sender`
+  CONSTRAINT `fk_t_users_userID_sender`
     FOREIGN KEY (`fk_t_users_userID_sender` )
     REFERENCES `db_publicmain_backup`.`t_users` (`userID` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_t_user_userID_empfaenger`
+  CONSTRAINT `fk_t_users_userID_empfaenger`
     FOREIGN KEY (`fk_t_users_userID_empfaenger` )
     REFERENCES `db_publicmain_backup`.`t_users` (`userID` )
     ON DELETE NO ACTION
@@ -93,8 +93,8 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_settings` (
   `settingsKey` VARCHAR(45) NOT NULL ,
   `settingsValue` VARCHAR(45) NOT NULL ,
   `fk_t_backupUser_backupUserID_2` BIGINT NOT NULL ,
-  PRIMARY KEY (`settingsKey`) ,
   INDEX `fk_t_settings_t_backupUser1_idx` (`fk_t_backupUser_backupUserID_2` ASC) ,
+  PRIMARY KEY (`fk_t_backupUser_backupUserID_2`) ,
   CONSTRAINT `fk_t_backupUser_backupUserID_2`
     FOREIGN KEY (`fk_t_backupUser_backupUserID_2` )
     REFERENCES `db_publicmain_backup`.`t_backupUser` (`backupUserID` )

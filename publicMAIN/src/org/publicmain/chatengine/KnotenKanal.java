@@ -3,6 +3,8 @@ package org.publicmain.chatengine;
 import org.publicmain.common.MSG;
 
 /**
+ * Der KnotenKanal erweitert die abstrakte Klasse Kanal. 
+ * 
  * @author ATRM
  * 
  */
@@ -10,7 +12,7 @@ import org.publicmain.common.MSG;
 public class KnotenKanal extends Kanal {
 
 	/**
-	 * TODO: Kommentar
+	 * Konstruktor der abgeleiteten Klasse.
 	 */
 	public KnotenKanal(long node) {
 		super(node);

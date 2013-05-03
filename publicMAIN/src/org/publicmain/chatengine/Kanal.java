@@ -63,7 +63,7 @@ public abstract class Kanal extends Observable {
 //	}
 
 	/**
-	 * TODO: Kommentar
+	 * Generiert einen Hashwert von diesem Kanal.
 	 */
 	public int hashCode() {
 		final int prime = 31;
@@ -74,7 +74,8 @@ public abstract class Kanal extends Observable {
 	}
 
 	/**
-	 * TODO: Kommentar
+	 * Diese Methode überläd equals-Methode um die Kanalzuordnung prüfen zu
+	 * können.
 	 */
 	public boolean equals(Object obj) {
 		return referenz.equals(obj);
@@ -89,7 +90,8 @@ public abstract class Kanal extends Observable {
 	}
 
 	/**
-	 * TODO: Kommentar
+	 * Benutzt die equals-Methode um die Kanalzuordnung prüfen zu können und
+	 * liefert entsprechend <code>true</code> oder <code>false</code> zurück.
 	 */
 	public boolean is(Object vergleich) {
 		return (this.referenz.equals(vergleich));

@@ -59,7 +59,7 @@ public enum MSGCode {
 	private String description;
 
 	/**
-	 * TODO: Kommentar!
+	 * Liefert einen MSGCode für eine Description.
 	 * 
 	 * @param description
 	 */
@@ -68,7 +68,7 @@ public enum MSGCode {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Liefert eine Description.
 	 * 
 	 * @return
 	 */

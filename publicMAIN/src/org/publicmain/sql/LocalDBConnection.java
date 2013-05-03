@@ -34,12 +34,14 @@ import org.resources.Help;
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
  * Sie legt weiterhin alle zwingend notwendigen Datenbanken(1) und Tabellen an.
  */
+/**
+ * @author rpfaffner
+ *
+ */
 public class LocalDBConnection {
 
 	private Connection con;
 	private Statement stmt;
-	private PreparedStatement checkoutHistoryPrpStmt;
-	//private ResultSet rs;
 	private String url;
 	private String dbName;
 	private String rootUser;
@@ -49,13 +51,10 @@ public class LocalDBConnection {
 	private String usrTbl;
 	private String nodeTbl;
 	private String msgTbl;
-	private Calendar cal;
-	private SimpleDateFormat splDateFormt;
 	private Set<Node> allnodes = Collections.synchronizedSet(new HashSet<Node>());
 	
 	
 	//--------neue Sachen------------
-	private BlockingQueue<MSG> locDBInbox;
 	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=DB und Tabellen angelegt 3=mit db verbunden
 	private int maxVersuche;
 	private long warteZeitInSec;
@@ -76,6 +75,11 @@ public class LocalDBConnection {
 		}
 	}
 	
+	
+ 	/**
+ 	 * Constructor der LocDBConnection
+ 	 * @param databaseEngine
+ 	 */
  	private LocalDBConnection(DatabaseEngine databaseEngine) {
 		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
 		this.dbName 				= Config.getConfig().getLocalDBDatabasename();
@@ -84,11 +88,8 @@ public class LocalDBConnection {
 		this.usrTbl					= "t_user";
 		this.nodeTbl				= "t_nodes";
 		this.msgTbl					= "t_messages";
-		this.cal					= Calendar.getInstance();
-		this.splDateFormt			= new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 		this.databaseEngine			= databaseEngine;
 		//--------neue Sachen------------
-		this.locDBInbox = new LinkedBlockingQueue<MSG>();;
 		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=use db_publicmain erfolgreich / als user publicMain angemeldet / hardWorkingThread läuft
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
@@ -98,6 +99,14 @@ public class LocalDBConnection {
 		//--------neue Sachen ende------------
 		connectToDBThread.start();
 	}
+ 	
+ 	
+ 	
+	/**
+	 * Factorymethode für die LocDBConnection
+	 * @param databaseEngine
+	 * @return instanz der LocDBConnection
+	 */
 	public static LocalDBConnection getDBConnection(DatabaseEngine databaseEngine) {
 		if (me == null) {
 			me = new LocalDBConnection(databaseEngine);
@@ -105,11 +114,19 @@ public class LocalDBConnection {
 		return me;
 	}
 
+	
+	
+	/**
+	 * Ist für den ersten Verbindungsaufbau verantwortlich.
+	 * Prüft den Status der DB durch Abfragen.
+	 * Lässt DB und notwendige Benutzer anlegen.
+	 * TODO: braucht eine komplette Überarbeitung da durch verschachtelungen und erweiterungen mit der Zeit unübersichtlich
+	 * TODO: Statusprüfmethode -> SWITCH-CASE zur abarbeitung der aufgaben. NEED MORE TIME!
+	 */
 	private class firstConnectToLocDBServerBot implements Runnable { // wird nur vom Construktor aufgerufen
 
 		public void run() {
 			int versuche = 0;
-			//TODO: Connect als user als erstes probieren!
 			if(connectToLocDBServerAspublicMain() && correctLocDBVersion()){
 				databaseEngine.go();
 				LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
@@ -153,6 +170,11 @@ public class LocalDBConnection {
 		}
 	}
 	
+	/**
+	 * Die Methode prüft ob die in der Config geschriebene DB-Version mit der in dieser Klasse befindlichen DB-Version überein stimmt 
+	 * @return true = DB-Version korrekt.
+	 * @return false = DB-Version !korrekt.
+	 */
 	private boolean correctLocDBVersion (){
 		if(Config.getConfig().getLocalDBVersion() == LOCAL_DATABASE_VERSION){
 			return true;
@@ -162,6 +184,11 @@ public class LocalDBConnection {
 	
 	
 	
+	/**
+	 * Diese Methode stellt eine Verbindung als root zum DB-Server her
+	 *	@return true = erfolgreich.
+	 * 	@return false = fehlgeschlagen.
+	 */
 	private synchronized boolean connectToLocDBServerAsRoot(){
 		try {
 			if(stmt!= null) stmt.close();
@@ -182,6 +209,12 @@ public class LocalDBConnection {
 		}
 	}
 	
+	
+	/**
+	 * Diese Methode stellt eine Verbindung mit in der Config angegebenen Benutzer zum DB-Server her
+	 *	@return true = erfolgreich.
+	 * 	@return false = fehlgeschlagen.
+	 */
 	private synchronized boolean connectToLocDBServerAspublicMain() {
 		try {
 			if (stmt != null) stmt.close();
@@ -201,6 +234,11 @@ public class LocalDBConnection {
 		}
 	}
 	
+	/**
+	 * Diese öffentliche Methode repräsentiert den Status der DB nach 'Außen'
+	 *	@return true = DB berreit zum schreiben.
+	 * 	@return false = DB !berreit zum schreiben.
+	 */
 	public boolean getStatus(){
 		if (dbStatus==3){
 			return true;
@@ -209,6 +247,12 @@ public class LocalDBConnection {
 		}
 	}
 	
+	/**
+	 * Wird ein Verbindungsabbruch zur DB festgestellt wird diese Methode zum reconnect gentuzt
+	 * @param reconnectVersuche: repräsentiert den Zahlenwert des aktuellen Versuches wird bei jedem erfolglosen Versuch erhöht
+	 * 
+	 * Methode wartet festgelegte Zeit zwischen den Versuchen, welche durch einen maximalwert begrenzt sind 
+	 */
 	public void reconnectToLocDBServer(){
 		new Thread(new Runnable() {
 			public void run() {
@@ -232,6 +276,12 @@ public class LocalDBConnection {
 		
 	}
 	
+	
+	/**
+	 * Diese Methode erstellt die Datenbank aus einem create-script,
+	 * legt alle Procedures und Trigger an,
+	 * legt alle notwenigen Benutzer an. 
+	 */
 	private void createDbAndTables (){	// wird nur vom Construktor aufgerufen
 		String read=null;
 		synchronized (stmt) {
@@ -298,8 +348,8 @@ public class LocalDBConnection {
 			}
 			
 			try {
-				stmt.addBatch("CREATE USER 'publicMain' IDENTIFIED BY 'publicMain'");
-				stmt.addBatch("GRANT ALL PRIVILEGES ON * . * TO  'publicMain'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0");
+				stmt.addBatch("CREATE USER '" + Config.getConfig().getLocalDBUser() + "' IDENTIFIED BY '" + Config.getConfig().getLocalDBPw() + "'");
+				stmt.addBatch("GRANT ALL PRIVILEGES ON * . * TO  '" + Config.getConfig().getLocalDBUser() + "'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0");
 				stmt.executeBatch();
 			} catch (SQLException e) {
 			}
@@ -308,6 +358,9 @@ public class LocalDBConnection {
 	}
 	
 		
+	/**
+	 * @return fragt die View 'v_pullAll_t_messages' ab und gibt das Ergebniss als ResultSet zurück
+	 */
 	public ResultSet pull_msgs(){
 		if (dbStatus >= 3){
 			synchronized (stmt) {
@@ -323,6 +376,9 @@ public class LocalDBConnection {
 		return null;
 	}
 	
+	/**
+	 * @return fragt die View 'v_pullAll_t_users' ab und gibt das Ergebniss als ResultSet zurück
+	 */
 	public ResultSet pull_users() {
 		if (dbStatus >= 3) {
 			synchronized (stmt) {
@@ -338,6 +394,9 @@ public class LocalDBConnection {
 		return null;
 	}
 
+	/**
+	 * @return fragt die View 'v_pullALL_t_settings' ab und gibt das Ergebniss als ResultSet zurück
+	 */
 	public ResultSet pull_settings() {
 		if (dbStatus >= 3) {
 			synchronized (stmt) {
@@ -354,6 +413,14 @@ public class LocalDBConnection {
 		return null;
 	}
 	
+	
+	
+	/**
+	 * Diese Methode speichert alle Nachichten in der LocDB indem es eine procedure aufruft
+	 * @param msgRS zu speicherndes ResultSet
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt
+	 */
 	public boolean push_msgs(ResultSet msgRS){
 		if (dbStatus >=3 &&  msgRS != null){
 			try {
@@ -383,6 +450,12 @@ public class LocalDBConnection {
 		return false;
 	}
 	
+	/**
+	 * Diese Methode speichert alle user in der LocDB indem es eine procedure aufruft
+	 * @param usrRS zu speicherndes ResultSet
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt
+	 */
 	public boolean push_users(ResultSet usrRS){
 		if (dbStatus >=3 && usrRS != null){
 			try {
@@ -407,6 +480,15 @@ public class LocalDBConnection {
 		return false;
 	}
 	
+	
+	
+	
+	/**
+	 * Diese Methode schreibt eine Collection von Nodes unter aufruf einer procedure in die DB
+	 * @param allNodesFormDBE: Collection aller übergebnener Nodes
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt 
+	 */
 	public synchronized boolean writeAllUsersToDB(Collection<Node> allNodesFormDBE){
 		addnodez(allNodesFormDBE);
 		if (dbStatus >= 3){
@@ -447,6 +529,14 @@ public class LocalDBConnection {
 	}
 	//Settings werden ins beziehungsweise aus dem ConfigObjekt geladen nicht hier	
 	
+	
+	
+	/**
+	 * Diese Methode schreibt eine Collection von Groups unter aufruf einer procedure in die DB
+	 * @param groupsSet: Collection aller übergebnener Groups
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt 
+	 */
 	public synchronized boolean writeAllGroupsToDB(Collection<String> groupsSet){
 		if (dbStatus >= 3) {
 			if (groupsSet != null) {
@@ -477,6 +567,13 @@ public class LocalDBConnection {
 	}
 	
 	
+	/**
+	 * Verarbeitet einzelne Nachichten um sie zum schrieben in die DB vorzubereiten
+	 * @param m: übernimmt eine einzelne Nachricht
+	 * @return true: Nachricht entgegen genommen und verarbeitet
+	 * @return false: Fehler bei der Verarbeitung
+	 * Ruft 'writeMSG' mit auferbeiteten Daten auf.
+	 */
 	public synchronized boolean writeMsgToDB(MSG m) {
 		if (dbStatus >= 3) {
 			long uid_empfänger = -1;
@@ -496,6 +593,11 @@ public class LocalDBConnection {
 		return false;
 	}
 	
+	/**
+	 * Sucht node aus lokalem Nodes-Set
+	 * @param nid: ID des gesuchten Nodes
+	 * @return gibt gefundenen Node zurück / null wenn nicht gefunden
+	 */
 	private Node getNode(long nid){
 		synchronized (allnodes) {
 			for (Node node : allnodes) {
@@ -505,12 +607,31 @@ public class LocalDBConnection {
 		return null;
 	}
 	
+	/**
+	 * Wandelt NodeID in entsprechende UserID um
+	 * @param nid: gesuchte NodeID
+	 * @return gefundene UserID oder '-1' wenn nicht gefunden
+	 */
 	private long getUIDforNID(long nid) {
 		Node node = getNode(nid);
 		if(node!=null)return node.getUserID();
 		else return -1;
 	}
 	
+	
+	/**
+	 * Führt Schreibvorgang für alle Nachichten auf die LocDB unter benutzung verschiedener procedures durch
+	 * @param uid_empfänger: Zu schreibende uid des Empfängers der Nachicht
+	 * @param uid_sender: Zu schreibende uid des senders der Nachicht
+	 * @param data: Zu schreibender nachichtenText der Nachicht
+	 * @param code: Zu schreibende MsgCode der Nachicht
+	 * @param timestamp: Zu schreibende timestamp der Nachicht
+	 * @param id: Zu schreibende ID der Nachicht
+	 * @param group: Zu schreibende Gruppenzugehörigkeit der Nachicht
+	 * @param typ: Zu schreibender Typ der Nachicht
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt 
+	 */
 	private synchronized boolean writeMSG(long uid_empfänger, long uid_sender, Object data, MSGCode code, long timestamp, int id, String group, NachrichtenTyp typ) {
 		PreparedStatement prpstmt=null;
 		try {
@@ -559,6 +680,16 @@ public class LocalDBConnection {
 		return true;
 	}
 	
+	
+	/**
+	 * Diese Methode schreibt die Routinginformationen in die Datenbank
+	 * @param nIDZiel:	NodeID des Ziels
+	 * @param hostNameZiel: Hostname des Ziels
+	 * @param uIDZiel: userID des Ziels
+	 * @param nIDGateWay: nodeID des zu nutzenden Gateways
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt 
+	 */
 	public synchronized boolean writeRoutingTableToDB(Long nIDZiel, String hostNameZiel, Long uIDZiel, Long nIDGateWay) {
 		StringBuffer saveNodeStmt = new StringBuffer();
 		if (dbStatus >= 3){
@@ -580,6 +711,10 @@ public class LocalDBConnection {
 		}
 	}
 
+	/**
+	 * Diese Methode schreibt alle übergebenen Einstellungen in die DB
+	 * @param settings:	übergebene Einstellung vom Typ ConfigData
+	 */
 	public void writeAllSettingsToDB(final ConfigData settings) { //DEADLock
 		if (ceReadyForWritingSettings){
 			new Thread(new Runnable() {
@@ -613,6 +748,11 @@ public class LocalDBConnection {
 		}
 	}
 	
+	/**
+	 * Löscht alle Nachichten aus der LocDB
+	 * @return true: Löschen hat geklappt
+	 * @return false: Löschen hat fehler verursacht
+	 */
 	public boolean deleteAllMsgs () {
 		try {
 			synchronized (stmt) {
@@ -625,6 +765,16 @@ public class LocalDBConnection {
 		}
 	}
 	
+	/**
+	 * Diese Methode ermöglicht die suche in der History auf der locDB
+	 * @param userID: 	gesuchte UserID
+	 * @param alias:	gesuchter Alias
+	 * @param groupName:gesuchter Gruppenname
+	 * @param begin:	gibt den TimeStamp an ab dem alle Nachichten gesucht werden sollen
+	 * @param end:		gibt den TimeStamp an bis zu dem alle Nachichten gesucht werden sollen
+	 * @param msgTxt:	gibt den gesuchten Nachichtentext an
+	 * @return: Resultset mit allen Treffern der suche oder 'null' wenn keine treffer oder Fehler
+	 */
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
 		if (dbStatus >= 3){
 			try {
@@ -664,6 +814,9 @@ public class LocalDBConnection {
 		return null;
 	}
 	
+	/**
+	 * Diese Methode schließt alle Verbindungen. 
+	 */
 	public void shutdownLocDB() {
 		// TODO alle verbindungen trennen
 		try {
@@ -684,10 +837,11 @@ public class LocalDBConnection {
 				LogEngine.log(LocalDBConnection.this,"Connection to LocDBServer closed",LogEngine.INFO);
 			}
 			
-			// TODO What else?
+
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
 		}
+		// TODO to extend
 	}
 
 }

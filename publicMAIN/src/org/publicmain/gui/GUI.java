@@ -826,8 +826,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}
 				break;
 			case "Search":
-				//				HistoryWindow.showThis();
-				new HistoryWindow();
+				if(DatabaseEngine.getDatabaseEngine().getStatusLocal())new HistoryWindow();
+				else {
+					new SettingsWindow(1, true);
+				}
 				break;
 			case "Delete":
 				if(JOptionPane.showConfirmDialog(me, "Do you really want to delete the local history?", "Delete local history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0){
@@ -838,10 +840,22 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				SettingsWindow.get().setVisible(true);
 				break;
 			case "Push History":
-				DatabaseEngine.getDatabaseEngine().push();
+				if(DatabaseEngine.getDatabaseEngine().getStatusLocal()) {
+					int statusBackup = DatabaseEngine.getDatabaseEngine().getStatusBackup();
+					if(statusBackup>=1) {
+						if (statusBackup>=2)DatabaseEngine.getDatabaseEngine().push();
+						else new SettingsWindow(2, true);
+					} else new SettingsWindow(1, true);
+				} else new SettingsWindow(1, true);
 				break;
 			case "Pull History":
-				DatabaseEngine.getDatabaseEngine().pull();
+				if(DatabaseEngine.getDatabaseEngine().getStatusLocal()) {
+					int statusBackup = DatabaseEngine.getDatabaseEngine().getStatusBackup();
+					if(statusBackup>=1) {
+						if (statusBackup>=2)DatabaseEngine.getDatabaseEngine().pull();
+						else new SettingsWindow(2, true);
+					} else new SettingsWindow(1, true);
+				} else new SettingsWindow(1, true);
 				break;
 			case "Delete History":
 				if(JOptionPane.showConfirmDialog(me, "Do you really want to delete the backup history?", "Delete backup history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0){

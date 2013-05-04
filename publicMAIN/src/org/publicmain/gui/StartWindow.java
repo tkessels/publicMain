@@ -225,16 +225,12 @@ public class StartWindow extends JFrame implements ActionListener{
 			String choosenBackupDBUserName = userNameTextField.getText().trim();
 			String choosenBackupDBPassword = passWordTextField.getText().trim();
 			
-//			String choosenBackupDBIP		= backupserverIPTextField.getText();
-			
 			Pattern nickNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			Matcher nickNameMatcher = nickNamePattern.matcher(choosenAlias);
 
 			Pattern choosenBackupDBUserNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			choosenBackupDBUserNamePattern.matcher(choosenBackupDBUserName);
 
-//			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
-//			Matcher choosenBackupDBIPMatcher = choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
 			
 
 			switch(evt.getActionCommand()){
@@ -296,8 +292,6 @@ public class StartWindow extends JFrame implements ActionListener{
 					tmp.addWindowListener(new WindowAdapter() {
 						@Override
 						public void windowClosed(WindowEvent e) {
-
-							System.out.println("2closed");
 							new Thread(new backupchecker()).start();
 						}
 					});

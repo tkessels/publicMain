@@ -14,11 +14,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
-import org.publicmain.common.ConfigData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
@@ -69,6 +69,11 @@ public class LocalDBConnection {
 			allnodes.removeAll(node);
 			allnodes.addAll(node);
 		}
+	}
+	private Connection getCon() throws SQLException {
+		
+//		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
+		return DriverManager.getConnection("jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/"+Config.getConfig().getLocalDBDatabasename()+"?connectTimeout=1000",Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
 	}
 
 
@@ -235,6 +240,16 @@ public class LocalDBConnection {
 			dbStatus = 0;
 			return false;
 		}
+	}
+	public int getStatus2() {
+		try {
+			getCon();
+			return 1;
+			//if Select Version = SysteVersion return 2;
+		} catch (Exception e) {
+			return 0;
+		}
+		
 	}
 
 	/**
@@ -766,7 +781,7 @@ public class LocalDBConnection {
 	 * Diese Methode schreibt alle übergebenen Einstellungen in die DB
 	 * @param settings:	übergebene Einstellung vom Typ ConfigData
 	 */
-	public void writeAllSettingsToDB(final ConfigData settings) { //DEADLock
+	public void writeAllSettingsToDB(final Properties settings) {
 		if (ceReadyForWritingSettings){
 			new Thread(new Runnable() {
 				public void run() {

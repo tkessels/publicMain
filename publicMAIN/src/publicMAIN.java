@@ -30,6 +30,7 @@ public class publicMAIN {
 			//			DatabaseEngine.getDatabaseEngine();
 
 			if (Config.getConfig().getUserID() == null) {
+				System.out.println(Config.getNonDefault());
 
 				MulticastConnectionHandler.getMC().discoverBUS();
 				boolean tom = StartWindow.getStartWindow();

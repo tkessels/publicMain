@@ -66,7 +66,7 @@ public class DatabaseEngine {
 
 	public void writeConfig(){
 		if(localDB.getStatus()) {
-			localDB.writeAllSettingsToDB(Config.getConfig());
+			localDB.writeAllSettingsToDB(Config.getNonDefault());
 		}
 	}
 
@@ -99,6 +99,10 @@ public class DatabaseEngine {
 	public void put(Node x){
 		node2Store.offer(x);
 	}
+	
+	public boolean isValid(String username, String password) {
+		return (backupDB.getIDfor(username, password)!=-1);
+	}
 
 	public void put(Collection<Node> x){
 		for (Node node : x) {
@@ -130,9 +134,9 @@ public class DatabaseEngine {
 		}
 	}
 
-	public int deleteBackupUserAccount() {
+	public int deleteBackupUserAccount(String username, String password) {
 		if(backupDB.getStatus()>=1){
-			if (backupDB.deleteUser())
+			if (backupDB.deleteUser(username,password))
 				return 2;
 			return 1;
 		}

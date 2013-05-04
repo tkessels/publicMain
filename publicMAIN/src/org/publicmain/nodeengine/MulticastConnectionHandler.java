@@ -69,12 +69,19 @@ public class MulticastConnectionHandler {
 	}
 
 	public synchronized void sendmutlicast(MSG nachricht) {
-		try {
-			multi_socket.send(msg2UDP(nachricht, MULTICAST_GROUP, MULTICAST_PORT));
-			LogEngine.log(this, "sende [MC]", nachricht);
-		} catch (Exception e) {
-			LogEngine.log(this, e);
+		if (isOpen()) {
+			try {
+				multi_socket.send(msg2UDP(nachricht, MULTICAST_GROUP, MULTICAST_PORT));
+				LogEngine.log(this, "sende [MC]", nachricht);
+			} catch (Exception e) {
+				LogEngine.log(this, e);
+			}
 		}
+		else LogEngine.log(this, "dropped [MC]", nachricht);
+	}
+	
+	public boolean isOpen() {
+		return (multi_socket.isConnected()&&!multi_socket.isClosed());
 	}
 
 	public void discoverBUS() {

@@ -1,4 +1,5 @@
 package org.publicmain.common;
+import java.io.PrintWriter;
 import java.sql.Time;
 import java.util.Arrays;
 
@@ -107,6 +108,10 @@ public class LogEngine {
 
 	public static void log(final ConnectionHandler quelle, final String action,final MSG paket) {
 		log(quelle.toString(), action, paket);
+	}
+
+	public static PrintWriter getLogWriter(String string) {
+		return new PrintWriter(System.err);
 	}
 
 

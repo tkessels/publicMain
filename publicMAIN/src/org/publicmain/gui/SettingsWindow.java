@@ -26,8 +26,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
@@ -346,6 +349,11 @@ public class SettingsWindow extends JDialog{
 		if(me!=null) {
 			me.dispose();
 		}
+		
+	}
+	@Override
+	public void dispose() {
+		super.dispose();
 		me = null;
 	}
 
@@ -356,6 +364,17 @@ public class SettingsWindow extends JDialog{
 		return me;
 
 	}
+	private void checkppuser() {
+		if(DatabaseEngine.getDatabaseEngine().isValid(userPushPullTextField.getText(), pwPushPullPasswordField.getText())) {
+			userPushPullTextField.setBackground(Color.green);
+			pwPushPullPasswordField.setBackground(Color.green);
+		}else {
+			userPushPullTextField.setBackground(Color.white);
+			pwPushPullPasswordField.setBackground(Color.white);
+		}
+		
+	}
+
 
 	private void getDefaults(){
 		this.aliasTextField.setText(Config.getConfig().getAlias());
@@ -366,12 +385,35 @@ public class SettingsWindow extends JDialog{
 
 		this.fontChooserComboBox.setSelectedItem(Config.getConfig().getFontFamily());
 		this.fontSizeSlider.setValue(Config.getConfig().getFontSize());
+		
+		
 
 		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
+		this.userPushPullTextField.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				checkppuser();
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkppuser();
+				
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				checkppuser();
+				
+			}
+		});
 		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
-		if (userPushPullTextField.getText().equals("")) {
-			this.deletePushPullBtn.setEnabled(false);
-		}
 		this.portLocalDBTextField.setText(Config.getConfig().getLocalDBPort());
 		this.userLocalDBTextField.setText(Config.getConfig().getLocalDBUser());
 		this.pwLocalDBPasswordField.setText(Config.getConfig().getLocalDBPw());
@@ -396,6 +438,14 @@ public class SettingsWindow extends JDialog{
 				localDBPanel.repaint();
 				pushPullPanel.repaint();
 				backupDBPanel.repaint();
+				if(i==2) {
+					userPushPullTextField.setBackground(Color.green);
+					pwPushPullPasswordField.setBackground(Color.green);
+				}else {
+					userPushPullTextField.setBackground(Color.white);
+					pwPushPullPasswordField.setBackground(Color.white);
+				}
+				
 			}
 		}).start();
 	}
@@ -444,7 +494,6 @@ public class SettingsWindow extends JDialog{
 			String tmp_password = new String(pwPushPullPasswordField.getPassword());
 			if(!tmp_password.equals(Config.getConfig().getBackupDBChoosenUserPassWord())) {
 				Config.getConfig().setBackupDBChoosenUserPassWord(tmp_password);
-//				deletePushPullBtn.setEnabled(true);
 				changes = true;
 			}
 		}
@@ -625,9 +674,13 @@ public class SettingsWindow extends JDialog{
 				int res = DatabaseEngine.getDatabaseEngine().createUser(username, password);{
 					switch(res){
 					case 3:
-						userPushPullTextField.setBackground(Color.green);
-						pwPushPullPasswordField.setBackground(Color.green);
-						Config.write();
+						SwingUtilities.invokeLater(
+						new Runnable() {
+							public void run() {
+								Config.write();
+								checkSettings();
+							}
+						});
 						DatabaseEngine.getDatabaseEngine().push();
 						//alles Sahne
 						break;
@@ -665,18 +718,26 @@ public class SettingsWindow extends JDialog{
 
 			switch(source.getText()){
 			case "Delete" :
-				userPushPullTextField.getText();
-				pwPushPullPasswordField.getText();
-				int res = DatabaseEngine.getDatabaseEngine().deleteBackupUserAccount();{
+				String username=userPushPullTextField.getText();
+				String password=pwPushPullPasswordField.getText();
+				int res = DatabaseEngine.getDatabaseEngine().deleteBackupUserAccount(username,password);{
 
 					switch(res){
 					case 2:
 						userPushPullTextField.setText("");
 						pwPushPullPasswordField.setText("");
+						
 						userPushPullTextField.setBackground(Color.WHITE);
 						pwPushPullPasswordField.setBackground(Color.WHITE);
-						Config.getConfig().clearBackupDBChoosenUser();		//TODO: einkommentieren sobald methode da!
-						deletePushPullBtn.setEnabled(false);
+						Config.getConfig().clearBackupDBChoosenUser();		
+						SwingUtilities.invokeLater(
+								new Runnable() {
+									public void run() {
+										Config.write();
+										checkSettings();
+									}
+								});
+						
 						JOptionPane.showMessageDialog(me,"User deleted!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
 						//alles Sahne
 						break;

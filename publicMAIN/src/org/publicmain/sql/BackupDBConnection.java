@@ -5,17 +5,24 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
+
+import javax.sql.rowset.CachedRowSet;
 
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
+
+import com.sun.rowset.CachedRowSetImpl;
 
 
 public class BackupDBConnection {
 
 	private static BackupDBConnection me;
 
-
+public BackupDBConnection() {
+//	DriverManager.setLogWriter(LogEngine.getLogWriter("Backupserver"));
+}
 
 
 	public static BackupDBConnection getBackupDBConnection() {
@@ -41,18 +48,29 @@ public class BackupDBConnection {
 	 */
 	public long getIDfor(String username, String password) {
 		long tmpID=-1;
+		PreparedStatement prp = null;
+		Connection x = null;
+		ResultSet myid = null;
 		try {
-			PreparedStatement prp = getCon().prepareStatement("Select backupUserID from t_backupUser where username like ? and password like ?");
+			x = getCon();
+			prp = x.prepareStatement("Select backupUserID from t_backupUser where username like ? and password like ?");
 			prp.setString(1, username);
 			prp.setString(2, password);
-			ResultSet myid = prp.executeQuery();
+			myid = prp.executeQuery();
 			if (myid.first()) {
 				tmpID=myid.getLong(1);
 			}
+			myid.close();
+			prp.close();
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
 			return -1;
+		}finally {
+				   try{myid.close();  }catch(Exception ignored){}
+				   try{prp.close();}catch(Exception ignored){}
+				   try{x.close();}catch(Exception ignored){}
 		}
+
 		return tmpID;
 	}
 
@@ -79,13 +97,26 @@ public class BackupDBConnection {
 		}
 	}
 
-	public ResultSet pull_msgs(){
+	public CachedRowSet pull_msgs(){
+		Connection con=null;
+		Statement stmt=null;
+		ResultSet rs = null;
 		try {
-			return getCon().createStatement().executeQuery("SELECT * FROM t_messages WHERE fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
+			long id = getMyID();
+			CachedRowSet tmp = new CachedRowSetImpl();
+			con = getCon();
+			stmt=con.createStatement();
+			rs=stmt.executeQuery("SELECT * FROM t_messages WHERE fk_t_backupUser_backupUserID LIKE '" + id + "'");
+			tmp.populate(rs);
+			return tmp;
 		} catch (SQLException e) {
 			LogEngine.log(this, "Error while pulling messages from backupDB " + e.getMessage(), LogEngine.ERROR );
 			return null;
-		}
+		}finally {
+			   try{rs.close();  }catch(Exception ignored){}
+			   try{stmt.close();}catch(Exception ignored){}
+			   try{con.close();}catch(Exception ignored){}
+	}
 	}
 
 
@@ -186,7 +217,8 @@ public class BackupDBConnection {
 
 	public int getStatus() {
 		try {
-			getCon();
+			Connection x = getCon();
+			x.close();
 			//level 1
 			long id = getMyID();
 			if (id!=-1) return 2;
@@ -252,10 +284,20 @@ public class BackupDBConnection {
 
 
 	public synchronized boolean deleteUser(){
+		String usrName = Config.getConfig().getBackupDBChoosenUsername();
+		String passwd = Config.getConfig().getBackupDBChoosenUserPassWord();
+		return deleteUser(usrName, passwd);
+	}
+
+
+	/**
+	 * @param usrName
+	 * @param passwd
+	 * @throws SQLException
+	 */
+	public boolean deleteUser(String usrName, String passwd){
+		long tmp = getIDfor(usrName, passwd);
 		try {
-			String usrName = Config.getConfig().getBackupDBChoosenUsername();
-			String passwd = Config.getConfig().getBackupDBChoosenUserPassWord();
-			long tmp = getMyID();
 			if(tmp!=-1){
 				PreparedStatement prp = getCon().prepareStatement("delete from t_backupUser where username = ?  and password = ?");
 				prp.setString(1, usrName);
@@ -269,12 +311,14 @@ public class BackupDBConnection {
 			}
 		} catch (SQLException e) {
 			LogEngine.log(this, e);
+
 		}
 		return false;
 	}
 
 
 	public Connection getCon() throws SQLException {
+		DriverManager.setLoginTimeout(0);
 		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 	}
 

@@ -15,15 +15,12 @@ public class BackupDBConnection {
 
 	private static BackupDBConnection me;
 	
-	private Statement 	stmt;
-	private int 		backUpDBStatus;
 //	private long 		warteZeitInSec;
 //	private boolean		successfulConnected;
 //	private int 		maxVersuche;
 	
 	private BackupDBConnection() {
 		
-		this.backUpDBStatus		= 0;									// Status: 1 verbunden und bereit
 //		this.warteZeitInSec 	= 10;
 //		this.maxVersuche 		= 5;
 //		this.successfulConnected = false;
@@ -106,39 +103,30 @@ public class BackupDBConnection {
 //	}
 	
 	public ResultSet pull_settings(){
-		
-		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
 			try {
-				return stmt.executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
+				return getCon().createStatement().executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while pulling settings from backupDB " + e.getMessage(), LogEngine.ERROR );
+				return null;
 			}
-		}
-		return null;
 	}
 	
 	public ResultSet pull_users(){
-		
-		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
 			try {
-				return stmt.executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
+				return getCon().createStatement().executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while pulling users from backupDB " + e.getMessage(), LogEngine.ERROR );
+				return null;
 			}
-		}
-		return null;
 	}
 	
 	public ResultSet pull_msgs(){
-		
-		if(backUpDBStatus >= 3 && Config.getConfig().getBackupDBChoosenUsername()!= null) {
 			try {
-				return stmt.executeQuery("SELECT * FROM t_messages WHERE fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
+				return getCon().createStatement().executeQuery("SELECT * FROM t_messages WHERE fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while pulling messages from backupDB " + e.getMessage(), LogEngine.ERROR );
+				return null;
 			}
-		}
-		return null;
 	}
 	
 	
@@ -212,7 +200,7 @@ public class BackupDBConnection {
 		long myID = getMyID();
 		if(myID !=-1){
 			try {
-				PreparedStatement prp = getCon().prepareStatement("Insert ignore into t_settings(settingsKey, settingsValue, fk_t_backupUser_backupUserID_2) values(?,?,?)");
+				PreparedStatement prp = getCon().prepareStatement("Insert into t_settings(settingsKey, settingsValue, fk_t_backupUser_backupUserID_2) values(?,?,?) ON DUPLICATE KEY UPDATE settingsKey=VALUES(settingsKey), settingsValue=VALUES(settingsValue), fk_t_backupUser_backupUserID_2=VALUES(fk_t_backupUser_backupUserID_2)");
 				while (tmp_settings.next()){
 					prp.setString(1, tmp_settings.getString(1));
 					prp.setString(2, tmp_settings.getString(3));

@@ -476,6 +476,7 @@ public class LocalDBConnection {
 				}
 				prp.executeBatch();
 				prp.close();
+				writeResultSetToSettings(tmp_settings);
 			} catch (SQLException e) {
 				LogEngine.log(this, e);
 			}
@@ -778,6 +779,27 @@ public class LocalDBConnection {
 				}
 			}).start();
 		}
+	}
+	
+	private void writeResultSetToSettings (ResultSet settingsRS){
+		try {
+			settingsRS.beforeFirst();
+			while (settingsRS.next()){
+				
+				if (settingsRS.getString(1).equals(Config.getConfig().getProperty("System.Version")) || settingsRS.getString(1).equals(Config.getConfig().getProperty("System.UserID"))){
+					// IGNORE
+				}
+				else {
+					Config.getConfig().put(settingsRS.getString(1), settingsRS.getString(3));
+				}
+			}
+			Config.write();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 	}
 	
 	/**

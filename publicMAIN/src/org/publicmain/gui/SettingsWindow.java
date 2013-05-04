@@ -28,6 +28,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.publicmain.common.Config;
+import org.publicmain.common.ConfigData;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
@@ -83,6 +84,8 @@ public class SettingsWindow extends JDialog{
 	private JPasswordField pwPushPullPasswordField;
 	private JLabel		createPushPullLabel;
 	private JButton		createPushPullBtn;
+	private JLabel		deletePushPullLabel;
+	private JButton		deletePushPullBtn;
 	
 	private JPanel		backupDBPanel;
 	private JLabel		ipBackupLabel;
@@ -179,13 +182,15 @@ public class SettingsWindow extends JDialog{
 		this.pwLocalDBLabel			 = new JLabel("Password");
 		this.pwLocalDBPasswordField	 = new JPasswordField();
 		
-		this.pushPullPanel 			 = new JPanel(new GridLayout(3,2));
+		this.pushPullPanel 			 = new JPanel(new GridLayout(4,2));
 		this.userPushPullLabel 		 = new JLabel("Username");
 		this.userPushPullTextField	 = new JTextField();
 		this.pwPushPullLabel 		 = new JLabel("Password");
 		this.pwPushPullPasswordField = new JPasswordField();
 		this.createPushPullLabel	 = new JLabel("Generate account");
 		this.createPushPullBtn		 = new JButton("Create");
+		this.deletePushPullLabel	 = new JLabel("Delete account");
+		this.deletePushPullBtn		 = new JButton("Delete");
 		
 		this.backupDBPanel 			 = new JPanel(new GridLayout(4,2));
 		this.ipBackupLabel 			 = new JLabel("IP address");
@@ -215,6 +220,7 @@ public class SettingsWindow extends JDialog{
 		this.cancelBtn.addActionListener(new SettingButtonController());
 		this.fontSizeSlider.addChangeListener(new FontSizeSliderController());
 		this.createPushPullBtn.addActionListener(new PushPullButtonController());
+		this.deletePushPullBtn.addActionListener(new DeleteButtonController());
 		
 		this.cardButtonsPanel.setPreferredSize(new Dimension(230,25));
 		this.cardButtonsPanel.setBackground(Color.WHITE);
@@ -277,7 +283,7 @@ public class SettingsWindow extends JDialog{
 		this.localDBPanel.add(pwLocalDBPasswordField);
 		
 		this.pushPullPanel.setBorder(BorderFactory.createTitledBorder("push/pull to backup DB"));
-		this.pushPullPanel.setPreferredSize(new Dimension(230,80));
+		this.pushPullPanel.setPreferredSize(new Dimension(230,106));
 		this.pushPullPanel.setBackground(Color.WHITE);
 		this.pushPullPanel.add(userPushPullLabel);
 		this.pushPullPanel.add(userPushPullTextField);
@@ -285,6 +291,8 @@ public class SettingsWindow extends JDialog{
 		this.pushPullPanel.add(pwPushPullPasswordField);
 		this.pushPullPanel.add(createPushPullLabel);
 		this.pushPullPanel.add(createPushPullBtn);
+		this.pushPullPanel.add(deletePushPullLabel);
+		this.pushPullPanel.add(deletePushPullBtn);
 		
 		this.backupDBPanel.setBorder(BorderFactory.createTitledBorder("backup database"));
 		this.backupDBPanel.setPreferredSize(new Dimension(230,100));
@@ -355,6 +363,8 @@ public class SettingsWindow extends JDialog{
 		
 		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
 		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
+		if (userPushPullTextField.getText().equals("")) this.deletePushPullBtn.setEnabled(false);
+		
 		
 		this.portLocalDBTextField.setText(Config.getConfig().getLocalDBPort());
 		this.userLocalDBTextField.setText(Config.getConfig().getLocalDBUser());
@@ -410,6 +420,7 @@ public class SettingsWindow extends JDialog{
 			String tmp_password = new String(pwPushPullPasswordField.getPassword());
 			if(!tmp_password.equals(Config.getConfig().getBackupDBChoosenUserPassWord())) {
 				Config.getConfig().setBackupDBChoosenUserPassWord(tmp_password);
+				deletePushPullBtn.setEnabled(true);
 				changes = true;
 			}
 		}
@@ -516,7 +527,7 @@ public class SettingsWindow extends JDialog{
 			fontSizeLabel.setText("Font size               " + fontSizeSlider.getValue());
 		}
 		
-}
+	}
 
 	class PushPullButtonController implements ActionListener{
 		
@@ -552,5 +563,43 @@ public class SettingsWindow extends JDialog{
 			}
 		}
 		
+	}
+	
+	class DeleteButtonController implements ActionListener{
+		
+		public void actionPerformed(ActionEvent e) {
+			JButton source = (JButton)e.getSource();
+			
+			switch(source.getText()){
+			case "Delete" :
+				String username=userPushPullTextField.getText();
+				String password=pwPushPullPasswordField.getText();
+				int res = DatabaseEngine.getDatabaseEngine().deleteBackupUserAccount();{
+
+				switch(res){
+				 case 2:
+					 userPushPullTextField.setText("");
+					 pwPushPullPasswordField.setText("");
+//					 Config.getConfig().clearBackupDBChoosenUser();		//TODO: einkommentieren sobald methode da!
+					 JOptionPane.showMessageDialog(me,"User deleted!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
+					 //alles Sahne
+					 break;
+				 case 1:
+					 //fehler beim Löschen des Nutzers
+					 JOptionPane.showMessageDialog(me,"Error while deleating choosen User!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
+					 
+					 break;
+				 case 0:
+					 //Backupserver nicht erreichbar Datanbank fehlt
+					 me.showTab(1);
+					 me.backupDBPanel.setBackground(Color.orange);
+					 JOptionPane.showMessageDialog(me,"Unable to connect to Backupserver!\n Please check your settings regarding the backupserver.","BackupServer",JOptionPane.ERROR_MESSAGE);
+					 
+					 break;
+				 }
+				}
+				break;
+			}
+		}
 	}
 }

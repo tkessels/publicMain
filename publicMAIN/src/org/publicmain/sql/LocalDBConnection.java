@@ -428,7 +428,6 @@ public class LocalDBConnection {
 						prp.setLong(3, msgRS.getLong(3));
 						prp.setString(4, msgRS.getString(6));
 						prp.setString(5, msgRS.getString(5));
-						
 						long tmp = msgRS.getLong(7);
 						if(msgRS.wasNull()){
 							 prp.setNull(6, java.sql.Types.BIGINT);
@@ -436,7 +435,12 @@ public class LocalDBConnection {
 							prp.setLong(6, tmp);
 						}
 						prp.setString(7, msgRS.getString(4));
-						prp.setInt(8, msgRS.getInt(8));
+						int tmpMsgID = msgRS.getInt(8);
+						if (msgRS.wasNull()){
+							prp.setNull(8, java.sql.Types.INTEGER);
+						} else {
+							prp.setInt(8, tmpMsgID);
+						}
 						prp.addBatch();
 						
 //						StringBuffer pushMsgStmt = new StringBuffer();

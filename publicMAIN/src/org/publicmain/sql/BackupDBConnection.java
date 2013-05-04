@@ -99,14 +99,19 @@ public class BackupDBConnection {
 					prp.setLong(4,tmp_messages.getLong(3));
 					prp.setString(5, tmp_messages.getString(4));
 					prp.setString(6, tmp_messages.getString(7));
-					long tmp = tmp_messages.getLong(6);
+					long tmpUIDReciever = tmp_messages.getLong(6);
 					if(tmp_messages.wasNull()){
 						 prp.setNull(7, java.sql.Types.BIGINT);
 					}else{
-						prp.setLong(7, tmp);
+						prp.setLong(7, tmpUIDReciever);
 					}
 					prp.setString(8,tmp_messages.getString(5));
-					prp.setInt(9,tmp_messages.getInt(8));
+					int tmp_msgID =tmp_messages.getInt(8);
+					if(tmp_messages.wasNull()){
+						prp.setNull(9, java.sql.Types.INTEGER);
+					} else {
+						prp.setInt(9,tmp_msgID);
+					}
 					prp.addBatch();
 				}
 				prp.executeBatch();
@@ -222,25 +227,18 @@ public class BackupDBConnection {
 		return false;
 	}
 	
-//	public synchronized boolean deleteAllMessages(){
-//		try {
-//			if(!userexists(usrName)){
-//			PreparedStatement prp = getCon().prepareStatement("Insert into t_backupUser(username,password) values(?,?)");
-//			prp.setString(1, usrName);
-//			prp.setString(2, passwd);
-//			prp.execute();
-//			prp.close();
-//			return true;
-//			}
-//			else{
-//				LogEngine.log(this, "BackupUser already exists",LogEngine.ERROR);
-//			}
-//		} catch (SQLException e) {
-//			LogEngine.log(this, e);
-//		}
-//		return false;
-//	}
-//	
+	public synchronized boolean deleteAllMessages(){
+		try {
+			PreparedStatement prp = getCon().prepareStatement("delete from t_messages where fk_t_backupUser_backupUserID = ?");
+			prp.setLong(1, getMyID());
+			prp.execute();
+			prp.close();
+		} catch (SQLException e) {
+			LogEngine.log(this, e);
+		}
+		return false;
+	}
+	
 	private Properties convertResultToConfig (ResultSet settingsRS){
 		Properties tmp = new Properties();
 		try {

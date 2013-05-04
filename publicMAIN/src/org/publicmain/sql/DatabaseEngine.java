@@ -116,8 +116,25 @@ public class DatabaseEngine {
 		localDB.deleteAllMsgs();
 	}
 	
-	public void deleteBackup() {
-//		TODO:Tell BackupServer to Drop users data
+	
+	
+	/**
+	 * Diese Methode führt nach Statusprüfung die Methode  deleteAllMessages() auf der backupDB aus. 
+	 */
+	public void deleteBackupMessages() {
+		if(backupDB.getStatus()==2){
+			backupDB.deleteAllMessages();
+		}
+	}
+
+	public int deleteBackupUserAccount() {
+		if(backupDB.getStatus()>=1){
+			if (backupDB.deleteUser()){
+				return 2;
+			}
+			return 1;
+		}
+		return 0;
 	}
 	
 	public void push(){

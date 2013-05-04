@@ -729,7 +729,7 @@ public class LocalDBConnection {
 	public synchronized boolean writeRoutingTableToDB(Long nIDZiel, String hostNameZiel, Long uIDZiel, Long nIDGateWay) {
 		StringBuffer saveNodeStmt = new StringBuffer();
 		if (dbStatus >= 3){
-			saveNodeStmt.append("p_t_nodes_saveNodes(");
+			saveNodeStmt.append("CALL p_t_nodes_saveNodes(");
 			saveNodeStmt.append(nIDZiel + ",");
 			saveNodeStmt.append("'" + hostNameZiel + "',");
 			saveNodeStmt.append(uIDZiel+ "',");

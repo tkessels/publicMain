@@ -45,8 +45,8 @@ public class StartWindow extends JFrame implements ActionListener{
 	private JLabel passWordLabel;
 	private JPasswordField passWordTextField;
 	private JTextField statusTextField;
-	private JLabel backupserverIPLabel;
-	private JTextField backupserverIPTextField;
+//	private JLabel backupserverIPLabel;
+//	private JTextField backupserverIPTextField;
 	private MouseListener txtFieldML;
 	
 	private GridBagConstraints c;
@@ -78,8 +78,8 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.passWordLabel				=	new JLabel("Password");
 		this.	passWordTextField		=	new JPasswordField();
 		this.	statusTextField			=	new JTextField();
-		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
-		this.	backupserverIPTextField	=	new JTextField();
+//		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
+//		this.	backupserverIPTextField	=	new JTextField();
 		this.txtFieldML = new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				nickNameTextField.setForeground(Color.BLACK);
@@ -94,7 +94,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.nickNameTextField.setActionCommand("GO");
 		this.nickNameTextField.addMouseListener(txtFieldML);
 		this.userNameTextField.addMouseListener(txtFieldML);
-		this.backupserverIPTextField.addMouseListener(txtFieldML);
+//		this.backupserverIPTextField.addMouseListener(txtFieldML);
 
 		
 		this.setTitle("Welcome!");
@@ -157,6 +157,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	private void changeStructure(JButton sourceButton){
 		statusTextField.setBackground(new Color(229, 195, 0));
 		statusTextField.setEditable(false);
+		statusTextField.setText("Checking  Backupserver availability...");
 		sourceButton.setText("PULL from Backup & GO");
 		sourceButton.setActionCommand("PULL from Backup & GO");
 		
@@ -188,12 +189,12 @@ public class StartWindow extends JFrame implements ActionListener{
 		c.gridx 	= 1;
 		this.add(passWordTextField, c);
 		
-		c.gridx 	= 0;
-		c.gridy 	= 8;
-		this.add(backupserverIPLabel, c);
+//		c.gridx 	= 0;
+//		c.gridy 	= 8;
+//		this.add(backupserverIPLabel, c);
 		
-		c.gridx 	= 1;
-		this.add(backupserverIPTextField, c);
+//		c.gridx 	= 1;
+//		this.add(backupserverIPTextField, c);
 		
 		c.gridx 	= 0;
 		c.gridy 	= 9;
@@ -205,8 +206,18 @@ public class StartWindow extends JFrame implements ActionListener{
 		c.gridwidth = 2;
 		this.add(sourceButton, c);
 		sourceButton.setVisible(true);
-		
 		this.pack();
+		new Thread(new Runnable() {
+			public void run() {
+				if (DatabaseEngine.getDatabaseEngine().getStatusBackup() >= 1){
+					statusTextField.setText("Backupserver available");
+					statusTextField.setBackground(Color.GREEN);
+				} else {
+					statusTextField.setText("Backupserver not available");
+					statusTextField.setBackground(Color.RED);
+				}
+			}
+		}).start();
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -216,7 +227,7 @@ public class StartWindow extends JFrame implements ActionListener{
 			String choosenBackupDBUserName = userNameTextField.getText().trim();
 			String choosenBackupDBPassword = passWordTextField.getText().trim();
 			
-			String choosenBackupDBIP		= backupserverIPTextField.getText();
+//			String choosenBackupDBIP		= backupserverIPTextField.getText();
 			
 			Pattern nickNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			Matcher nickNameMatcher = nickNamePattern.matcher(choosenAlias);
@@ -225,7 +236,7 @@ public class StartWindow extends JFrame implements ActionListener{
 			Matcher choosenBackupDBUserNameMatcher = choosenBackupDBUserNamePattern.matcher(choosenBackupDBUserName);
 			
 			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
-			Matcher choosenBackupDBIPMatcher = choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
+//			Matcher choosenBackupDBIPMatcher = choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
 			
 			switch(evt.getActionCommand()){
 				case "GO":

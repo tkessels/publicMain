@@ -33,9 +33,11 @@ public class StartWindow extends JFrame implements ActionListener{
 			if (DatabaseEngine.getDatabaseEngine().getStatusBackup() >= 1){
 				statusTextField.setText("Backupserver available");
 				statusTextField.setBackground(Color.GREEN);
+				pullButton.setText("PULL from Backup & GO");
 			} else {
 				statusTextField.setText("Backupserver not available");
 				statusTextField.setBackground(Color.RED);
+				pullButton.setText("Change Settings");
 			}
 		}
 	}
@@ -300,8 +302,6 @@ public class StartWindow extends JFrame implements ActionListener{
 						}
 					});
 				}
-
-
 				break;
 			}	
 		}

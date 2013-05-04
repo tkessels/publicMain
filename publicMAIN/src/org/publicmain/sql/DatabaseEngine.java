@@ -425,15 +425,6 @@ public class DatabaseEngine {
 
 			ResultSet tmp = localDB.pull_users();
 			if(tmp!=null){
-				//				ResultSetMetaData meta = tmp.getMetaData();
-
-				//				Vector<String> cols_title = new Vector<String>();
-				//				int columnCount = meta.getColumnCount();
-				//				for (int column = 1; column <= columnCount; column++) {
-				//					cols_title.add(meta.getColumnName(column));
-				//				}
-				//				System.out.println(cols_title);
-				//				
 				Vector<Node> nodes = new Vector<Node>();
 				Set <Node> testdata = new HashSet<Node>();
 
@@ -441,7 +432,6 @@ public class DatabaseEngine {
 					Node tmp_node = new Node(tmp.getLong(4),tmp.getLong(1),tmp.getString(3),tmp.getString(2),tmp.getString(5));
 					nodes.add(tmp_node);
 					testdata.add(tmp_node);
-					System.out.println(tmp_node.toString2());
 				}
 				DefaultComboBoxModel<Node> tobi = new DefaultComboBoxModel<Node>(nodes);
 				JComboBox<Node> tmp_combo = new JComboBox<Node>(tobi);

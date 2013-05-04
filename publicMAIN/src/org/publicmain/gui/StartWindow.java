@@ -83,7 +83,6 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.c 							= 	new GridBagConstraints();
 		this.set 						=	new Insets(5, 5, 5, 5);
 
-//		this.plsRunGUI					=	false;
 
 		//Die, die dann noch dazu kommen wenn man "Pull from Backup" clickt
 		this.wellcomeLabel2				=	new JLabel("For using backupserver enter Username, Password");

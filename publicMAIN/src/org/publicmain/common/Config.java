@@ -272,7 +272,6 @@ public class Config {
 		for (Object key : current.keySet()) {
 			if(!current.get(key).equals(defaults.get(key))) rueck.put(key, current.get(key));
 		}
-		System.out.println(rueck);
 		return rueck;
 		
 	}

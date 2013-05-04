@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -28,12 +29,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.publicmain.common.Config;
-import org.publicmain.common.ConfigData;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 public class SettingsWindow extends JDialog{
-	
+	private static final long serialVersionUID = 7576764930617798651L;
+
 	private static SettingsWindow me;
 				
 	private JLabel		banner;
@@ -104,7 +105,7 @@ public class SettingsWindow extends JDialog{
 
 
 	public SettingsWindow(int card, boolean modal) {
-		this.me = this;
+		SettingsWindow.me = this;
 		constructWindowContent();
 		this.setModal(modal);
 		showTab(card);
@@ -112,7 +113,7 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	private SettingsWindow() {
-		this.me = this;
+		SettingsWindow.me = this;
 		constructWindowContent();
 		this.setVisible(true);
 	}
@@ -135,6 +136,7 @@ public class SettingsWindow extends JDialog{
 	private void constructWindowContent() {
 		this.setResizable(false);
 		this.setLayout(new FlowLayout(FlowLayout.CENTER));
+		
 		
 		this.banner					 = new JLabel(Help.getIcon("textlogo.png",210,50));
 		
@@ -322,17 +324,15 @@ public class SettingsWindow extends JDialog{
 		this.add(cardButtonsPanel);
 		this.add(cardsPanel);
 		this.add(buttonPanel);
-
 		
 		this.setTitle("Settings");
-		this.setModal(false);
-//		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
-		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
-		this.setMaximumSize(new Dimension(250, GUI.getGUI().getHeight()));
-		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
+		
+		this.setMinimumSize(new Dimension(250, 400));
+		this.setMaximumSize(new Dimension(250, 400));
+		this.setPreferredSize(new Dimension(250, 400));
 		this.pack();
 		
 		this.getDefaults();
@@ -540,11 +540,20 @@ public class SettingsWindow extends JDialog{
 				String password=pwPushPullPasswordField.getText();
 				int res = DatabaseEngine.getDatabaseEngine().createUser(username, password);{
 				 switch(res){
-				 case 2:
+				 case 3:
 					 userPushPullTextField.setBackground(Color.green);
 					 pwPushPullPasswordField.setBackground(Color.green);
+					 Config.write();
+					 DatabaseEngine.getDatabaseEngine().push();
 					 //alles Sahne
 					 break;
+			
+				 case 2:
+					 userPushPullTextField.setBackground(Color.RED);
+					 pwPushPullPasswordField.setBackground(Color.RED);
+					 JOptionPane.showMessageDialog(me,"Username or Password dosn´t match requirements!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
+					 //Nutzername und Pwd entspricht nicht den anforderungen
+					 break;	 
 				 case 1:
 					 //user gab es bereits
 					 JOptionPane.showMessageDialog(me,"Username already exists!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
@@ -580,6 +589,8 @@ public class SettingsWindow extends JDialog{
 				 case 2:
 					 userPushPullTextField.setText("");
 					 pwPushPullPasswordField.setText("");
+					 userPushPullTextField.setBackground(Color.WHITE);
+					 pwPushPullPasswordField.setBackground(Color.WHITE);
 					 Config.getConfig().clearBackupDBChoosenUser();		//TODO: einkommentieren sobald methode da!
 					 deletePushPullBtn.setEnabled(false);
 					 JOptionPane.showMessageDialog(me,"User deleted!","BackupServer",JOptionPane.INFORMATION_MESSAGE);

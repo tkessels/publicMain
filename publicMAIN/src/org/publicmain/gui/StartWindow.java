@@ -274,6 +274,7 @@ public class StartWindow extends JFrame implements ActionListener{
 				} else {
 					//Database not there check settings
 					System.out.println("Database not there check settings");
+					new SettingsWindow(1, true);
 				}
 
 		

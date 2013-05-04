@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +27,18 @@ import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 public class StartWindow extends JFrame implements ActionListener{
+
+	private final class backupchecker implements Runnable {
+		public void run() {
+			if (DatabaseEngine.getDatabaseEngine().getStatusBackup() >= 1){
+				statusTextField.setText("Backupserver available");
+				statusTextField.setBackground(Color.GREEN);
+			} else {
+				statusTextField.setText("Backupserver not available");
+				statusTextField.setBackground(Color.RED);
+			}
+		}
+	}
 
 	private StartWindow instanz;
 	private JLabel welcomeLogo;
@@ -75,8 +89,8 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.passWordLabel				=	new JLabel("Password");
 		this.	passWordTextField		=	new JPasswordField();
 		this.	statusTextField			=	new JTextField();
-		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
-		this.	backupserverIPTextField	=	new JTextField();
+//		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
+//		this.	backupserverIPTextField	=	new JTextField();
 		this.txtFieldML = new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				nickNameTextField.setForeground(Color.BLACK);
@@ -91,7 +105,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.nickNameTextField.setActionCommand("GO");
 		this.nickNameTextField.addMouseListener(txtFieldML);
 		this.userNameTextField.addMouseListener(txtFieldML);
-		this.backupserverIPTextField.addMouseListener(txtFieldML);
+//		this.backupserverIPTextField.addMouseListener(txtFieldML);
 
 
 		this.setTitle("Welcome!");
@@ -154,6 +168,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	private void changeStructure(JButton sourceButton){
 		statusTextField.setBackground(new Color(229, 195, 0));
 		statusTextField.setEditable(false);
+		statusTextField.setText("Checking  Backupserver availability...");
 		sourceButton.setText("PULL from Backup & GO");
 		sourceButton.setActionCommand("PULL from Backup & GO");
 
@@ -185,12 +200,6 @@ public class StartWindow extends JFrame implements ActionListener{
 		c.gridx 	= 1;
 		this.add(passWordTextField, c);
 
-		c.gridx 	= 0;
-		c.gridy 	= 8;
-		this.add(backupserverIPLabel, c);
-
-		c.gridx 	= 1;
-		this.add(backupserverIPTextField, c);
 
 		c.gridx 	= 0;
 		c.gridy 	= 9;
@@ -204,6 +213,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		sourceButton.setVisible(true);
 
 		this.pack();
+		new Thread(new backupchecker()).start();
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -212,17 +222,18 @@ public class StartWindow extends JFrame implements ActionListener{
 			String choosenAlias = nickNameTextField.getText();
 			String choosenBackupDBUserName = userNameTextField.getText().trim();
 			String choosenBackupDBPassword = passWordTextField.getText().trim();
-
-			String choosenBackupDBIP		= backupserverIPTextField.getText();
-
+			
+//			String choosenBackupDBIP		= backupserverIPTextField.getText();
+			
 			Pattern nickNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			Matcher nickNameMatcher = nickNamePattern.matcher(choosenAlias);
 
 			Pattern choosenBackupDBUserNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			choosenBackupDBUserNamePattern.matcher(choosenBackupDBUserName);
 
-			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
-			choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
+//			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+//			Matcher choosenBackupDBIPMatcher = choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
+			
 
 			switch(evt.getActionCommand()){
 			case "GO":
@@ -247,7 +258,6 @@ public class StartWindow extends JFrame implements ActionListener{
 				break;
 
 			case "PULL from Backup & GO":						
-				System.out.println(DatabaseEngine.getDatabaseEngine().getStatusBackup());
 				if (DatabaseEngine.getDatabaseEngine().getStatusBackup()>=1) {
 					int config_result = DatabaseEngine.getDatabaseEngine().getConfig(choosenBackupDBUserName, choosenBackupDBPassword);
 					if (config_result == 2) {
@@ -259,19 +269,35 @@ public class StartWindow extends JFrame implements ActionListener{
 							this.setVisible(false);
 						} else {
 							// Fehler beim laden der config keine gültige USER ID gefunden
+							statusTextField.setText("Error while loading Settings couldn´t find USER ID");
+							statusTextField.setBackground(new Color(229, 195, 0));
 							System.out.println("Fehler beim laden der config keine gültige USER ID gefunden");
 						}
 					} else if (config_result == 1) {
 						// Fehler beim pullen der config (null) returned
+						statusTextField.setText("Error: No Settings saved.");
+						statusTextField.setBackground(new Color(229, 195, 0));
 						System.out.println("Fehler beim pullen der config (null) returned");
 					} else if (config_result == 0) {
 						// Angegebener nutzer exisitert nicht oder password falsch
+						statusTextField.setText("Error: User doesn´t exists or UN or PW wrong.");
+						statusTextField.setBackground(new Color(229, 195, 0));
 						System.out.println("Angegebener nutzer exisitert nicht oder password falsch");
 					}
 				} else {
 					//Database not there check settings
 					System.out.println("Database not there check settings");
-					new SettingsWindow(1, true);
+					statusTextField.setText("Backupserver not available");
+					statusTextField.setBackground(Color.RED);
+					SettingsWindow tmp = new SettingsWindow(1, true);
+					tmp.addWindowListener(new WindowAdapter() {
+						@Override
+						public void windowClosed(WindowEvent e) {
+
+							System.out.println("2closed");
+							new Thread(new backupchecker()).start();
+						}
+					});
 				}
 
 

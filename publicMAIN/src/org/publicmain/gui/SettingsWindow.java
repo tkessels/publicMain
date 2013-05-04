@@ -27,6 +27,7 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
@@ -369,8 +370,6 @@ public class SettingsWindow extends JDialog{
 		if (userPushPullTextField.getText().equals("")) {
 			this.deletePushPullBtn.setEnabled(false);
 		}
-
-
 		this.portLocalDBTextField.setText(Config.getConfig().getLocalDBPort());
 		this.userLocalDBTextField.setText(Config.getConfig().getLocalDBUser());
 		this.pwLocalDBPasswordField.setText(Config.getConfig().getLocalDBPw());
@@ -379,9 +378,27 @@ public class SettingsWindow extends JDialog{
 		this.portBackupTextField.setText(Config.getConfig().getBackupDBPort());
 		this.userBackupTextField.setText(Config.getConfig().getBackupDBUser());
 		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
+		
+		new Thread(new Runnable() {
+			public void run() {
+				checkSettings();
+			}
+		}).start();
+		
+		
+	}
+	
+	private void checkSettings() {
+		int i = DatabaseEngine.getDatabaseEngine().getStatusBackup();
+		if(!DatabaseEngine.getDatabaseEngine().getStatusLocal()) localDBPanel.setBackground(Color.orange);
+		if (i==1) pushPullPanel.setBackground(Color.orange);
+		if (i==0) backupDBPanel.setBackground(Color.orange);
+		localDBPanel.repaint();
+		pushPullPanel.repaint();
+		backupDBPanel.repaint();
 	}
 
-	private void acceptSettings(){
+	private void acceptSettings_old(){
 		boolean changes = false;
 
 		if(!aliasTextField.getText().equals(Config.getConfig().getAlias())){
@@ -425,7 +442,7 @@ public class SettingsWindow extends JDialog{
 			String tmp_password = new String(pwPushPullPasswordField.getPassword());
 			if(!tmp_password.equals(Config.getConfig().getBackupDBChoosenUserPassWord())) {
 				Config.getConfig().setBackupDBChoosenUserPassWord(tmp_password);
-				deletePushPullBtn.setEnabled(true);
+//				deletePushPullBtn.setEnabled(true);
 				changes = true;
 			}
 		}
@@ -494,7 +511,66 @@ public class SettingsWindow extends JDialog{
 			Config.write();
 		}
 	}
+	
+	private void acceptSettings(){
+			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
+			Config.getConfig().setNotifyGroup(grpMsgCheckBox.isSelected());
+			Config.getConfig().setNotifyPrivate(privMsgCheckBox.isSelected());
+			Config.getConfig().setFontFamily((String)fontChooserComboBox.getSelectedItem());
+			Config.getConfig().setFontSize(fontSizeSlider.getValue());
+			
+		String pushpulluser = userPushPullTextField.getText().trim();
+		if (!pushpulluser.equals(Config.getConfig().getBackupDBChoosenUsername()))
+		{
+			Config.getConfig().setBackupDBChoosenUsername(pushpulluser);
+		}
+		
+		String pushpullpass = pwPushPullPasswordField.getText().trim();
+		if(!pushpullpass.equals(Config.getConfig().getBackupDBChoosenUserPassWord()))
+		{
+			Config.getConfig().setBackupDBChoosenUserPassWord(pushpullpass);
+		}
+		
+		String localdbport = portLocalDBTextField.getText().trim();
+		if (!localdbport.equals(Config.getConfig().getLocalDBPort())) {
+			Config.getConfig().setLocalDBPort(localdbport);
+		}
+		
+		String localdbuser = userLocalDBTextField.getText().trim();
+		if (!localdbuser.equals(Config.getConfig().getLocalDBUser())) {
+			Config.getConfig().setLocalDBUser(localdbuser);
+		}
+		
+		String localdbpass = pwLocalDBPasswordField.getText().trim();
+		if(!localdbpass.equals(Config.getConfig().getLocalDBPw())) {
+			Config.getConfig().setLocalDBPw(localdbpass);
+		}
+		
+		String backupdbip = ipBackupTextField.getText().trim();
+		if (!backupdbip.equals(Config.getConfig().getBackupDBIP())) {
+			Config.getConfig().setBackupDBIP(backupdbip);
+		}
+		
+		String backupdbport = portBackupTextField.getText().trim();
+		if (!backupdbport.equals(Config.getConfig().getBackupDBPort())){
+				Config.getConfig().setBackupDBPort(backupdbport);
+		}
+		
+		String backupdbuser = userBackupTextField.getText().trim();
+		if (!backupdbuser.equals(Config.getConfig().getBackupDBUser())) {
+			Config.getConfig().setBackupDBUser(backupdbuser);
+		}
+		
+		String backupdbpass = pwBackPasswordField.getText().trim();
+		if(!backupdbpass.equals(Config.getConfig().getBackupDBPw())) {
+			Config.getConfig().setBackupDBPw(backupdbpass);
+		}
 
+		if(ChatEngine.getCE()!=null)GUI.getGUI().changeAlias(aliasTextField.getText().trim());
+	}
+
+	
+	
 	class CardButtonController implements ActionListener{
 		public void actionPerformed(final ActionEvent e) {
 			cardsPanelLayout.show(cardsPanel, e.getActionCommand());
@@ -556,7 +632,7 @@ public class SettingsWindow extends JDialog{
 					case 2:
 						userPushPullTextField.setBackground(Color.RED);
 						pwPushPullPasswordField.setBackground(Color.RED);
-						JOptionPane.showMessageDialog(me,"Username or Password dosn´t match requirements!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(me,"Username or Password doesn´t match requirements!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
 						//Nutzername und Pwd entspricht nicht den anforderungen
 						break;	 
 					case 1:

@@ -539,5 +539,9 @@ public class DatabaseEngine {
 
 	}
 
+	public boolean getStatusLocal() {
+		return localDB.getStatus();
+	}
+
 
 }

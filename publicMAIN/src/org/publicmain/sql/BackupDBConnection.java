@@ -17,16 +17,16 @@ public class BackupDBConnection {
 	
 	private Statement 	stmt;
 	private int 		backUpDBStatus;
-	private long 		warteZeitInSec;
-	private boolean		successfulConnected;
-	private int 		maxVersuche;
+//	private long 		warteZeitInSec;
+//	private boolean		successfulConnected;
+//	private int 		maxVersuche;
 	
 	private BackupDBConnection() {
 		
 		this.backUpDBStatus		= 0;									// Status: 1 verbunden und bereit
-		this.warteZeitInSec 	= 10;
-		this.maxVersuche 		= 5;
-		this.successfulConnected = false;
+//		this.warteZeitInSec 	= 10;
+//		this.maxVersuche 		= 5;
+//		this.successfulConnected = false;
 		
 		//connectToBackupDBServer();
 
@@ -46,11 +46,13 @@ public class BackupDBConnection {
 		return me;
 	}
 	
+	/**Versucht mit den in den Einstellungen hinterlegten Zugangsdaten die BackupserverID abzufragen
+	 * @return BackupUserID des Konfigurierten Push/Pull - Users oder <code>-1</code> wenn der User nicht existiert
+	 */
 	private long getMyID() {
 		String username = Config.getConfig().getBackupDBChoosenUsername();
 		String password = Config.getConfig().getBackupDBChoosenUserPassWord();
 		long tmpID=-1;
-//		synchronized (stmt) {
 			try {
 				PreparedStatement prp = getCon().prepareStatement("Select backupUserID from t_backupUser where username like ? and password like ?");
 				prp.setString(1, username);
@@ -62,8 +64,6 @@ public class BackupDBConnection {
 				return -1;
 			}
 			return tmpID;
-//		}
-	
 	}
 
 	
@@ -72,38 +72,38 @@ public class BackupDBConnection {
 	
 	// push & pull für ResultSets
 	
-	private synchronized boolean connectToBackupDBServer(){
-		new Thread(new Runnable() {
-			int versuche = 0;
-			public void run() {
-				while ((versuche < maxVersuche) && (backUpDBStatus == 0)) {
-					try {
-						
-						stmt = getCon().createStatement();
-						stmt.execute("use db_publicMain_backup");
-						LogEngine.log("BackupDBConnection", "DB-BackupServerConnection as " + Config.getConfig().getBackupDBUser() + " successful", LogEngine.INFO);
-						backUpDBStatus = 3;
-						successfulConnected = true;
-					} catch (SQLException e) {
-						try {
-							Thread.sleep(warteZeitInSec * 1000);
-						} catch (InterruptedException e1) {
-							LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
-						}
-						versuche ++;
-						backUpDBStatus = 0;
-						LogEngine.log(this, "Error while connecting to BackupDB. Try again in:" + warteZeitInSec + " " + versuche + "/"+ maxVersuche + e.getMessage(), LogEngine.ERROR);
-						successfulConnected = false;
-					}
-				}
-				if(!successfulConnected){
-					LogEngine.log(this, "Connecting to BackupDB failt - will not try again", LogEngine.ERROR);
-				}
-			}
-		
-		}).start();	
-		return successfulConnected;
-	}
+//	private synchronized boolean connectToBackupDBServer(){
+//		new Thread(new Runnable() {
+//			int versuche = 0;
+//			public void run() {
+//				while ((versuche < maxVersuche) && (backUpDBStatus == 0)) {
+//					try {
+//						
+//						stmt = getCon().createStatement();
+//						stmt.execute("use db_publicMain_backup");
+//						LogEngine.log("BackupDBConnection", "DB-BackupServerConnection as " + Config.getConfig().getBackupDBUser() + " successful", LogEngine.INFO);
+//						backUpDBStatus = 3;
+//						successfulConnected = true;
+//					} catch (SQLException e) {
+//						try {
+//							Thread.sleep(warteZeitInSec * 1000);
+//						} catch (InterruptedException e1) {
+//							LogEngine.log(this,"Fehler beim Warten: " + e1.getMessage(),LogEngine.ERROR);
+//						}
+//						versuche ++;
+//						backUpDBStatus = 0;
+//						LogEngine.log(this, "Error while connecting to BackupDB. Try again in:" + warteZeitInSec + " " + versuche + "/"+ maxVersuche + e.getMessage(), LogEngine.ERROR);
+//						successfulConnected = false;
+//					}
+//				}
+//				if(!successfulConnected){
+//					LogEngine.log(this, "Connecting to BackupDB failt - will not try again", LogEngine.ERROR);
+//				}
+//			}
+//		
+//		}).start();	
+//		return successfulConnected;
+//	}
 	
 	public ResultSet pull_settings(){
 		
@@ -275,11 +275,33 @@ public class BackupDBConnection {
 			LogEngine.log(this, e);
 		}
 		return false;
-		
+	}
+	
+	public synchronized boolean deleteUser(){
+		try {
+			String usrName = Config.getConfig().getBackupDBChoosenUsername();
+			String passwd = Config.getConfig().getBackupDBChoosenUserPassWord();
+			long tmp = getMyID();
+			if(tmp!=-1){
+				PreparedStatement prp = getCon().prepareStatement("delete from t_backupUser where username = ?  and password = ?");
+				prp.setString(1, usrName);
+				prp.setString(2, passwd);
+				prp.execute();
+				prp.close();
+				return true;
+			}
+			else{
+				LogEngine.log(this, "No such user or wrong password!",LogEngine.ERROR);
+			}
+		} catch (SQLException e) {
+			LogEngine.log(this, e);
+		}
+		return false;
 	}
 
+
 	public Connection getCon() throws SQLException {
-		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename(), Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
+		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 	}
 
 }

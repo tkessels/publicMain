@@ -541,9 +541,9 @@ public class SettingsWindow extends JDialog{
 					 break;
 				 case 0:
 					 //Backupserver nicht erreichbar Datanbank fehlt
-					 JOptionPane.showMessageDialog(me,"Unable to connect to Backupserver!\n Please check your settings regarding the backupserver.","BackupServer",JOptionPane.ERROR_MESSAGE);
-					 me.showTab(2);
+					 me.showTab(1);
 					 me.backupDBPanel.setBackground(Color.orange);
+					 JOptionPane.showMessageDialog(me,"Unable to connect to Backupserver!\n Please check your settings regarding the backupserver.","BackupServer",JOptionPane.ERROR_MESSAGE);
 					 
 					 break;
 				 }

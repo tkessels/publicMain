@@ -8,6 +8,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Arrays;
 import java.util.List;
 
@@ -194,9 +196,9 @@ public class SettingsWindow extends JDialog{
 		this.deletePushPullLabel	 = new JLabel("Delete account");
 		this.deletePushPullBtn		 = new JButton("Delete");
 
-		this.backupDBPanel 			 = new JPanel(new GridLayout(4,2));
-		this.ipBackupLabel 			 = new JLabel("IP address");
-		this.ipBackupTextField 		 = new JTextField();
+		this.backupDBPanel 		 = new JPanel(new GridLayout(4,2));
+		this.ipBackupLabel 		 = new JLabel("IP address");
+		this.ipBackupTextField 	 = new JTextField();
 		this.portBackupLabel 		 = new JLabel("Port");
 		this.portBackupTextField 	 = new JTextField();
 		this.userBackupLabel 		 = new JLabel("Username");
@@ -379,23 +381,23 @@ public class SettingsWindow extends JDialog{
 		this.userBackupTextField.setText(Config.getConfig().getBackupDBUser());
 		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
 		
-		new Thread(new Runnable() {
-			public void run() {
-				checkSettings();
-			}
-		}).start();
+                checkSettings();
 		
 		
 	}
 	
 	private void checkSettings() {
-		int i = DatabaseEngine.getDatabaseEngine().getStatusBackup();
-		if(!DatabaseEngine.getDatabaseEngine().getStatusLocal()) localDBPanel.setBackground(Color.orange);
-		if (i==1) pushPullPanel.setBackground(Color.orange);
-		if (i==0) backupDBPanel.setBackground(Color.orange);
-		localDBPanel.repaint();
-		pushPullPanel.repaint();
-		backupDBPanel.repaint();
+		new Thread(new Runnable() {
+			public void run() {
+				int i = DatabaseEngine.getDatabaseEngine().getStatusBackup();
+				localDBPanel.setBackground((DatabaseEngine.getDatabaseEngine().getStatusLocal())?Color.WHITE:Color.ORANGE);
+				pushPullPanel.setBackground((i == 1) ? Color.ORANGE : Color.WHITE);
+				backupDBPanel.setBackground((i == 0) ? Color.ORANGE : Color.WHITE);
+				localDBPanel.repaint();
+				pushPullPanel.repaint();
+				backupDBPanel.repaint();
+			}
+		}).start();
 	}
 
 	private void acceptSettings_old(){
@@ -567,6 +569,7 @@ public class SettingsWindow extends JDialog{
 		}
 
 		if(ChatEngine.getCE()!=null)GUI.getGUI().changeAlias(aliasTextField.getText().trim());
+		else Config.write();
 	}
 
 	

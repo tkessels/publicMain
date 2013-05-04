@@ -264,4 +264,15 @@ public class Config {
 		}
 		setConfig(imported);
 	}
+	
+	public static Properties getNonDefault() {
+		Properties rueck = new Properties();
+		ConfigData defaults = getSourceSettings();
+		ConfigData current = getConfig();
+		for (Object key : current.keySet()) {
+			if(current.get(key).equals(defaults.get(key))) rueck.put(key, current.get(key));
+		}
+		return rueck;
+		
+	}
 }

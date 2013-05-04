@@ -109,7 +109,7 @@ public class StartWindow extends JFrame implements ActionListener{
 
 
 		this.setTitle("Welcome!");
-		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
+		this.setIconImage(Help.getIcon("pM_Logo.png",64).getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(200, 180));
 

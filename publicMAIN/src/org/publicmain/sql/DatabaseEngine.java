@@ -108,7 +108,16 @@ public class DatabaseEngine {
 		if(backupDB.getStatus()==2){
 			backupDB.deleteAllMessages();
 		}
-//		TODO:Tell BackupServer to Drop users data
+	}
+
+	public int deleteBackupUserAccount() {
+		if(backupDB.getStatus()>=1){
+			if (backupDB.deleteUser()){
+				return 2;
+			}
+			return 1;
+		}
+		return 0;
 	}
 	
 	public void push(){

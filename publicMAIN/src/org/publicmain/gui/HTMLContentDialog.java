@@ -49,9 +49,9 @@ public class HTMLContentDialog extends JDialog {
 	 * @param htmlFile
 	 */
 	public HTMLContentDialog(String title, String icon, final String htmlFile) {
-		
+
 		htmlDialog = this;
-		
+
 		this.setTitle(title);
 		this.setModal(false);
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
@@ -59,13 +59,13 @@ public class HTMLContentDialog extends JDialog {
 		this.setIconImage(Help.getIcon(icon).getImage());
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
-		
-		
+
+
 		hlc = new HyperLinkController();
-		
+
 		htmlContentPane = new JTextPane();
 		htmlContentPane.addHyperlinkListener(hlc);
-		
+
 		this.sp = new JScrollPane(htmlContentPane, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		this.ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		this.gd = ge.getDefaultScreenDevice();
@@ -74,12 +74,12 @@ public class HTMLContentDialog extends JDialog {
 		htmlContentPane.setBackground(new Color(255, 255, 255));
 		htmlContentPane.setEditable(false);
 
-//		try {
-//			this.sound = Applet.newAudioClip(Help.class.getResource("fahrstuhl.mp3"));
-//		} catch (Exception e2) {
-//			System.out.println(e2.getMessage());
-//		}
-		
+		//		try {
+		//			this.sound = Applet.newAudioClip(Help.class.getResource("fahrstuhl.mp3"));
+		//		} catch (Exception e2) {
+		//			System.out.println(e2.getMessage());
+		//		}
+
 		/**
 		 * Dieser Thread läd das HTML-Dokument auf die htmlContentPane, ohne die Anwendung
 		 * zu blockieren.
@@ -96,18 +96,18 @@ public class HTMLContentDialog extends JDialog {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-		htmlDialog.add(sp, BorderLayout.CENTER);
-		htmlDialog.pack();
-		}}).start();
+				htmlDialog.add(sp, BorderLayout.CENTER);
+				htmlDialog.pack();
+			}}).start();
 		showIt();
 	}
-	
+
 	/**
 	 * Die Position des HTMLContentDialog festlegen und auf sichtbar setzen. 
 	 */
 	public void showIt() {
-		if ((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth()
-				+ this.getWidth() < dm.getWidth())) {
+		if (((GUI.getGUI().getLocation().x + GUI.getGUI().getWidth()
+				+ this.getWidth()) < dm.getWidth())) {
 			this.setLocation(GUI.getGUI().getLocation().x
 					+ GUI.getGUI().getWidth(), GUI.getGUI().getLocation().y);
 		} else {
@@ -119,7 +119,7 @@ public class HTMLContentDialog extends JDialog {
 			sound.start();
 		}
 	}
-	
+
 	/**
 	 * Den HTMLContentDialog ausblenden.
 	 * TODO: Überprüfen ob diese Methode genutzt wird!
@@ -130,20 +130,24 @@ public class HTMLContentDialog extends JDialog {
 			sound.stop();
 		}
 	}
-	
+
 	@Override
 	@Deprecated
 	public void hide() {
-		if(sound!=null)sound.stop();
+		if(sound!=null) {
+			sound.stop();
+		}
 		super.hide();
 	}
-	
+
 	@Override
 	public void dispose() {
-		if(sound!=null)sound.stop();
+		if(sound!=null) {
+			sound.stop();
+		}
 		super.dispose();
 	}
-	
-	
+
+
 }
 

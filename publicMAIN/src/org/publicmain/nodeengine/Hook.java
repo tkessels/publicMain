@@ -86,7 +86,7 @@ public class Hook {
 		remove(x);
 		return x.getHookedMSG();
 	}
-	
+
 	/**
 	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
 	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
@@ -136,7 +136,7 @@ public class Hook {
 		remove(x);
 		return x.getHookedMSG();
 	}
-	
+
 	/**
 	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
 	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
@@ -186,7 +186,7 @@ public class Hook {
 		remove(x);
 		return x.getHookedMSG();
 	}
-	
+
 	/**
 	 * Nicht blockierende Methode die für eine gewisse Zeit <code>timeout</code>
 	 * alle Nachrichten verwirft die den angegebennen Kriterien entspricht.
@@ -223,7 +223,7 @@ public class Hook {
 			}
 		}).start();
 	}
-	
+
 	/**
 	 * Diese Methode prüft ob einer der registrierten Haken auf das
 	 * mitgelieferte Paket passt und ob es bei passendem Haken noch
@@ -237,9 +237,9 @@ public class Hook {
 		boolean tmp = false;
 		for (Haken cur : allHooks) {
 			if (cur.check(paket)) {
-				if (onlyFirstMatch) {
+				if (onlyFirstMatch)
 					return cur.filter;
-				} else {
+				else {
 					tmp |= cur.filter;
 				}
 			}
@@ -253,8 +253,8 @@ public class Hook {
 	public String toString() {
 		return allHooks.toString();
 	}
-	
-	
+
+
 	/**
 	 * Klasse für die Filtereinstellungen und als Semaphore für die blockierenden
 	 * Aufrufe.
@@ -265,9 +265,9 @@ public class Hook {
 		private MSGCode code;
 		private Long sender;
 		private Object payload;
-//		 Ggf. für die weitere Entwicklung benötigt.
-//		 private Long reciever;
-//		 private String gruppe;
+		//		 Ggf. für die weitere Entwicklung benötigt.
+		//		 private Long reciever;
+		//		 private String gruppe;
 		private boolean filter;
 		private MSG hookedMSG;
 
@@ -287,12 +287,12 @@ public class Hook {
 			this.code = code;
 			this.sender = sender;
 			this.payload = payload;
-//			 Ggf. für die weitere Entwicklung benötigt.
-//			 this.reciever = reciever;
-//			 this.gruppe = gruppe;
+			//			 Ggf. für die weitere Entwicklung benötigt.
+			//			 this.reciever = reciever;
+			//			 this.gruppe = gruppe;
 			this.filter = filter;
 		}
-		
+
 		/**
 		 * Prüft alle registrierten Hacken und prüft ob einer der Hacken möchte, dass das Paket 
 		 * 
@@ -300,18 +300,18 @@ public class Hook {
 		 * @return true wenn es einen passenden Hacken gibt und dieser wünscht das die Nachricht entfernt wird
 		 */
 		private synchronized boolean check(MSG x) {
-			boolean typ_check = (typ == null) || typ == x.getTyp();
+			boolean typ_check = (typ == null) || (typ == x.getTyp());
 			boolean code_check = (code == null) || code.equals(x.getCode());
 			boolean sender_check = (sender == null)
 					|| sender.equals(x.getSender());
 			boolean payload_check = (payload == null)
 					|| payload.equals(x.getData());
-//			 Ggf. für die weitere Entwicklung benötigt.
-//			 boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
-//			 boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
+			//			 Ggf. für die weitere Entwicklung benötigt.
+			//			 boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
+			//			 boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
 
 			if (typ_check && code_check && sender_check && payload_check) {// &&reciever_check&&gruppe_check)
-																			// {
+				// {
 				LogEngine.log(this.toString(), "hooked", x);
 				hookedMSG = x;
 				this.notifyAll();

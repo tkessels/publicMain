@@ -13,8 +13,8 @@ import org.publicmain.common.MSG;
 public abstract class Kanal extends Observable {
 	protected final Object referenz;
 
-//	Ggf. für die weitere Entwicklung benötigt.
-//	protected TreeSet<MSG> messages = new TreeSet<MSG>();
+	//	Ggf. für die weitere Entwicklung benötigt.
+	//	protected TreeSet<MSG> messages = new TreeSet<MSG>();
 
 	/**
 	 * Abstrakte Methode zum hinzufügen einer Nachricht zu einem Kanal.
@@ -34,33 +34,33 @@ public abstract class Kanal extends Observable {
 		this.referenz = reference;
 	}
 
-//	 Ggf. für die weitere Entwicklung benötigt.
-//	/**
-//	 * Gibt die letzten x Nachrichten aus einem Kanal als Set zurück
-//	 * 
-//	 * @param count, die gewünschte Anzahl von Nachrichten
-//	 * @return, Set der x-Letzen Nachrichten
-//	 */
-//	public Set<MSG> getLastMSGs(int count) {
-//		if (messages.size() >= count) {
-//			Iterator<MSG> x = messages.descendingIterator();
-//			MSG last = messages.last();
-//			while (x.hasNext() && (count > 0)) {
-//				count--;
-//				last = ((MSG) x.next());
-//			}
-//			return messages.tailSet(last, true);
-//		}
-//		return messages;
-//	}
-	
-//	 Ggf. für die weitere Entwicklung benötigt.
-//	/**
-//	 * Löscht alle Nachrichten aus dem Kanal.
-//	 */
-//	public void purgeMSGs() {
-//		messages.clear();
-//	}
+	//	 Ggf. für die weitere Entwicklung benötigt.
+	//	/**
+	//	 * Gibt die letzten x Nachrichten aus einem Kanal als Set zurück
+	//	 * 
+	//	 * @param count, die gewünschte Anzahl von Nachrichten
+	//	 * @return, Set der x-Letzen Nachrichten
+	//	 */
+	//	public Set<MSG> getLastMSGs(int count) {
+	//		if (messages.size() >= count) {
+	//			Iterator<MSG> x = messages.descendingIterator();
+	//			MSG last = messages.last();
+	//			while (x.hasNext() && (count > 0)) {
+	//				count--;
+	//				last = ((MSG) x.next());
+	//			}
+	//			return messages.tailSet(last, true);
+	//		}
+	//		return messages;
+	//	}
+
+	//	 Ggf. für die weitere Entwicklung benötigt.
+	//	/**
+	//	 * Löscht alle Nachrichten aus dem Kanal.
+	//	 */
+	//	public void purgeMSGs() {
+	//		messages.clear();
+	//	}
 
 	/**
 	 * Generiert einen Hashwert von diesem Kanal.
@@ -68,7 +68,7 @@ public abstract class Kanal extends Observable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
+		result = (prime * result)
 				+ ((referenz == null) ? 0 : referenz.hashCode());
 		return result;
 	}

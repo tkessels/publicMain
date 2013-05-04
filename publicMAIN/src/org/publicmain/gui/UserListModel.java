@@ -1,17 +1,11 @@
 package org.publicmain.gui;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
-import javax.swing.SwingWorker;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
@@ -30,7 +24,7 @@ public class UserListModel extends AbstractListModel<Node>{
 	private static final long serialVersionUID = 3915185276474553682L;
 	private List<Node> users;
 	private Thread userListWriter;
-	
+
 	public UserListModel() {
 		users = new ArrayList<Node>();
 		this.userListWriter = new Thread(new Runnable() {
@@ -50,30 +44,30 @@ public class UserListModel extends AbstractListModel<Node>{
 				}
 			}
 		});
-    	userListWriter.start();
-    	
-	    Collections.sort(users, new Comparator<Node>() {
+		userListWriter.start();
+
+		Collections.sort(users, new Comparator<Node>() {
 
 			@Override
 			public int compare(Node o1, Node o2) {
 				return o1.getAlias().compareTo(o2.getAlias());
 			}
 		});
-    }
-    @Override
-    public int getSize() {
-    	return users.size();
-    }
-    
-    public boolean contains(String user){
-    	synchronized (users) {
-    		return users.contains(user);
+	}
+	@Override
+	public int getSize() {
+		return users.size();
+	}
+
+	public boolean contains(String user){
+		synchronized (users) {
+			return users.contains(user);
 		}
-    }
-    
-    @Override
-    public Node getElementAt(int index) {
-    	return users.get(index);
-    }
-    
+	}
+
+	@Override
+	public Node getElementAt(int index) {
+		return users.get(index);
+	}
+
 }

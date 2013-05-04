@@ -50,20 +50,23 @@ public class ConnectionHandler {
 	 * @param knoten
 	 * @throws IOException
 	 */
-	
+
 	public static ConnectionHandler connectTo(Node knoten) throws IOException{
 		Socket tmp_socket = null;
 		for (InetAddress x : knoten.getSockets()) {
 			if (!Node.getMyIPs().contains(x)) {
-					tmp_socket = new Socket(x.getHostAddress(),knoten.getServer_port());
-				if (tmp_socket != null && tmp_socket.isConnected()) break; // wenn eine Verbindung mit einer der IPs des  Knotenaufgebaut wurden konnte. Hör auf
+				tmp_socket = new Socket(x.getHostAddress(),knoten.getServer_port());
+				if ((tmp_socket != null) && tmp_socket.isConnected())
+				{
+					break; // wenn eine Verbindung mit einer der IPs des  Knotenaufgebaut wurden konnte. Hör auf
+				}
 			}
 		}
 		ConnectionHandler tmp =new ConnectionHandler(tmp_socket);
 		tmp.host_node=knoten;
 		return tmp; 
 	}
-	
+
 	/**
 	 * Konstruktor zum erstellen eines ConnectionHandlers um einen bestehenden Socket.
 	 * 
@@ -112,8 +115,9 @@ public class ConnectionHandler {
 				LogEngine.log(ConnectionHandler.this, "failure", paket);
 				System.out.println(e.getMessage());
 			}
-		} else
+		} else {
 			LogEngine.log(ConnectionHandler.this, "dropped", paket);
+		}
 	}
 
 	/**
@@ -123,7 +127,7 @@ public class ConnectionHandler {
 	 *         <code>false</code> wenn nicht
 	 */
 	public boolean isConnected() {
-		return (line != null && line.isConnected() && !line.isClosed());
+		return ((line != null) && line.isConnected() && !line.isClosed());
 	}
 
 	/**
@@ -134,7 +138,7 @@ public class ConnectionHandler {
 		send(new MSG(ne.getMe(), MSGCode.NODE_SHUTDOWN));
 		close();
 	}
-	
+
 	/**
 	 * Schliesst die ein- und ausgehenden Verbindungen. Drei try/catch-Blöcke um
 	 * zu verhindern, dass nicht bei der Ausführung der ersten Anweisung eine
@@ -160,7 +164,7 @@ public class ConnectionHandler {
 		pakets_rein_hol_bot = null;
 		ne.remove(this);
 	}
-	
+
 	/**
 	 * Eigene toString-Methode.
 	 */
@@ -168,14 +172,14 @@ public class ConnectionHandler {
 		return "ConnectionHandler [" + hostname + "]"
 				+ ((latency < 10000) ? "[" + latency + "]" : "");
 	}
-	
+
 	/**
 	 * Sendet ein ECHO_REQUEST Paket zum anderen Verbindungsende.
 	 */
 	private void ping() {
 		send(new MSG(null, MSGCode.ECHO_REQUEST));
 	}
-	
+
 	/**
 	 * 
 	 * Methode für das routen von Gruppen-Nachrichten. Diese Methode speichert
@@ -192,7 +196,7 @@ public class ConnectionHandler {
 			return groups.addAll(gruppe);
 		}
 	}
-	
+
 	/**
 	 * Entfernt eine Collection von Gruppen Strings von dieser Verbindung.
 	 * 
@@ -204,7 +208,7 @@ public class ConnectionHandler {
 			return groups.removeAll(gruppe);
 		}
 	}
-	
+
 	/**
 	 * Prüft ob der eigene Nodes weitere Child-Nodes hat und liefert
 	 * entsprechend <code>true</code> oder <code>false</code> zurück.
@@ -221,7 +225,7 @@ public class ConnectionHandler {
 		}
 
 	}			
-		
+
 	/**
 	 * Getter für die Gruppenliste, hier als Set von Strings.
 	 * 
@@ -232,7 +236,7 @@ public class ConnectionHandler {
 			return groups;
 		}
 	}
-	
+
 	/**
 	 * Sendet ein ECHO.RESPONSE.
 	 * 
@@ -256,7 +260,7 @@ public class ConnectionHandler {
 			return children;
 		}
 	}
-	
+
 	/**
 	 * Vergleichbar mit "route add" fügt diese Methode diese Verbindung als
 	 * Gateway für alle Nodes aus <code>toAdd</code> hinzu.
@@ -284,7 +288,7 @@ public class ConnectionHandler {
 			return children.removeAll(toRemove);
 		}
 	}
-	
+
 	/**
 	 * Aktuallisiert die Liste der über die Verbindung angebundenen Nodes.
 	 * 
@@ -299,7 +303,7 @@ public class ConnectionHandler {
 			children.clear();
 			children.addAll(toSet);
 			return (oldHash!=children.hashCode());
-			
+
 		}
 	}
 
@@ -311,14 +315,14 @@ public class ConnectionHandler {
 	class Reciever implements Runnable {
 		public void run() {
 
-			while (me != null && me.isConnected()) {
+			while ((me != null) && me.isConnected()) {
 				Object readObject = null;
 				try {
 					readObject = line_in.readUnshared();
 
-					if (readObject != null && readObject instanceof MSG) {
+					if ((readObject != null) && (readObject instanceof MSG)) {
 						MSG tmp = (MSG) readObject;
-						
+
 						if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
 							switch (tmp.getCode()) {
 							case ECHO_REQUEST:
@@ -326,7 +330,7 @@ public class ConnectionHandler {
 								break;
 							case ECHO_RESPONSE:
 								latency = System.currentTimeMillis()
-										- (Long) tmp.getData();
+								- (Long) tmp.getData();
 								break;
 							case NODE_UPDATE:
 								me.getChildren().add((Node) tmp.getData());
@@ -345,14 +349,15 @@ public class ConnectionHandler {
 							}
 
 						}
-					} else
+					} else {
 						LogEngine.log(me, "Empfangenes Objekt ist keine MSG");
+					}
 				} catch (ClassNotFoundException e) {
 					LogEngine.log("ConnectionHandler", e);
 				} catch (IOException e) {
 					LogEngine.log(e);
 					break; // wenn ein Empfangen vom Socket nicht mehr möglich
-							// ist -> Thread beenden
+					// ist -> Thread beenden
 				}
 			}
 			if(me!=null) {

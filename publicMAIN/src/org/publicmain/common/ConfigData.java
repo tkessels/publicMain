@@ -48,10 +48,10 @@ public class ConfigData extends Properties {
 		String uid = this.getProperty("System.UserID");
 		return (uid != null) ? Long.parseLong(uid) : null;
 	}
-	
+
 	public boolean isvalid() {
 		return (!"".equals(getAlias())&&(getUserID()!=null));
-		
+
 	}
 
 	public void setAlias(String alias) {
@@ -210,15 +210,15 @@ public class ConfigData extends Properties {
 	public int getMaxEingabefeldLength() {
 		return Integer.parseInt(this.getProperty("gui.max_eingabefeld_length"));
 	}
-	
+
 	public String getFontFamily() {
 		return this.getProperty("gui.font_family");
 	}
-	
+
 	public int getFontSize() {
 		return Integer.parseInt(this.getProperty("gui.font_size"));
 	}
-	
+
 	public void setLogVerbosity(int verbosity) {
 		this.setProperty("log.verbosity", String.valueOf(verbosity));
 	}
@@ -243,15 +243,15 @@ public class ConfigData extends Properties {
 		this.setProperty("gui.tray_notify_private",
 				String.valueOf(private_notify));
 	}
-	
+
 	public void setMaxEingabefeldLength(int lenght) {
 		this.setProperty("gui.max_eingabefeld_length", String.valueOf(lenght));
 	}
-	
+
 	public void setFontFamily(String font_family) {
 		this.setProperty("gui.font_family", font_family);
 	}
-	
+
 	public void setFontSize(int fontSize){
 		this.setProperty("gui.font_size", String.valueOf(fontSize));
 	}
@@ -286,18 +286,27 @@ public class ConfigData extends Properties {
 	}
 
 	public void setLocalDBDatabasename(String database_name) {
-		if(database_name.length()==0)this.remove("sql.local_db_databasename");
-		else this.setProperty("sql.local_db_databasename", database_name);
+		if(database_name.length()==0) {
+			this.remove("sql.local_db_databasename");
+		} else {
+			this.setProperty("sql.local_db_databasename", database_name);
+		}
 	}
 
 	public void setLocalDBPort(String port) {
-		if(port.length()==0) this.remove("sql.local_db_port");
-		else this.setProperty("sql.local_db_port", port);
+		if(port.length()==0) {
+			this.remove("sql.local_db_port");
+		} else {
+			this.setProperty("sql.local_db_port", port);
+		}
 	}
 
 	public void setLocalDBUser(String user_name) {
-		if(user_name.length()==0) this.remove("sql.local_db_user");
-		else this.setProperty("sql.local_db_user", user_name);
+		if(user_name.length()==0) {
+			this.remove("sql.local_db_user");
+		} else {
+			this.setProperty("sql.local_db_user", user_name);
+		}
 	}
 
 	public void setLocalDBPw(String user_password) {
@@ -337,18 +346,27 @@ public class ConfigData extends Properties {
 	}
 
 	public void setBackupDBDatabasename(String database_name) {
-		if(database_name.length()==0)this.remove("sql.backup_db_databasename");
-		else this.setProperty("sql.backup_db_databasename", database_name);
+		if(database_name.length()==0) {
+			this.remove("sql.backup_db_databasename");
+		} else {
+			this.setProperty("sql.backup_db_databasename", database_name);
+		}
 	}
 
 	public void setBackupDBPort(String port) {
-		if(port.length()==0)this.remove("sql.backup_db_port");
-		else this.setProperty("sql.backup_db_port", port);
+		if(port.length()==0) {
+			this.remove("sql.backup_db_port");
+		} else {
+			this.setProperty("sql.backup_db_port", port);
+		}
 	}
 
 	public void setBackupDBUser(String user_name) {
-		if(user_name.length()==0) this.remove("sql.backup_db_user");
-		else this.setProperty("sql.backup_db_user", user_name);
+		if(user_name.length()==0) {
+			this.remove("sql.backup_db_user");
+		} else {
+			this.setProperty("sql.backup_db_user", user_name);
+		}
 	}
 
 	public void setBackupDBPw(String user_password) {
@@ -366,13 +384,13 @@ public class ConfigData extends Properties {
 	public void setBackupDBChoosenUserPassWord(String userPassWord) {
 		this.setProperty("sql.backup_db_choosen_user_password", userPassWord);
 	}
-	
+
 	public void clearBackupDBChoosenUser() {
 		this.remove("sql.backup_db_choosen_username");
 		this.remove("sql.backup_db_choosen_user_password");
 	}
 
-	
 
-	
+
+
 }

@@ -45,7 +45,7 @@ public class ChatEngine{
 	private BlockingQueue<MSG> inbox;
 	// private Set<String> allGroups=new HashSet<String>();
 	private Set<String> myGroups = new HashSet<String>();
-	
+
 	/**
 	 * Liefert die laufende Instanz der ChatEngine
 	 * 
@@ -109,9 +109,8 @@ public class ChatEngine{
 				tmp.add(x);
 			}
 		}
-		if (tmp.size() == 1) {
+		if (tmp.size() == 1)
 			return ((Node) tmp.toArray()[0]);
-		}
 		return null;
 	}
 
@@ -149,7 +148,7 @@ public class ChatEngine{
 	 */
 	public void setAlias(String alias) {
 		this.alias = alias;
-		if (ne != null && ne.isOnline()) {
+		if ((ne != null) && ne.isOnline()) {
 			ne.updateAlias();
 		}
 	}
@@ -164,7 +163,9 @@ public class ChatEngine{
 	public void send_private(long uid, String text) {
 		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(), text);
 		put(tmp);
-		if(GUI.getGUI().isAFK())GUI.getGUI().afk();
+		if(GUI.getGUI().isAFK()) {
+			GUI.getGUI().afk();
+		}
 		ne.routesend(tmp);
 	}
 
@@ -178,10 +179,12 @@ public class ChatEngine{
 	public void send_group(String group, String text) {
 		MSG tmp = new MSG(group, text);
 		put(tmp);
-		if(GUI.getGUI().isAFK())GUI.getGUI().afk();
+		if(GUI.getGUI().isAFK()) {
+			GUI.getGUI().afk();
+		}
 		ne.groupRouteSend(tmp, null);
 	}
-	
+
 	/**
 	 * Weisst die ChatEngine an eine <code>Datei</code> an einen Nutzer mit der
 	 * entsprechenden <code>uid</code> zu schicken.
@@ -203,21 +206,21 @@ public class ChatEngine{
 		}
 	}
 
-//	 Ggf. für die weitere Entwicklung benötigt.
-//	/**
-//	 * NOT IMPLEMENTED YET
-//	 * Gibt den Zustand der Übertragung einer Datei an
-//	 * 
-//	 * @param file_transfer_ID
-//	 * @return <ul>
-//	 *         <li><code>-1</code> Dateitransfer nicht möglich</li>
-//	 *         <li><code>-2</code> Benutzer lehnt transfer ab</li>
-//	 *         <li><code>0</code> - <code>100</code> Vortschritt der
-//	 *         Datenübertragung in Prozent
-//	 */
-//	public int file_transfer_status(int file_transfer_ID) {
-//		return 0;
-//	}
+	//	 Ggf. für die weitere Entwicklung benötigt.
+	//	/**
+	//	 * NOT IMPLEMENTED YET
+	//	 * Gibt den Zustand der Übertragung einer Datei an
+	//	 * 
+	//	 * @param file_transfer_ID
+	//	 * @return <ul>
+	//	 *         <li><code>-1</code> Dateitransfer nicht möglich</li>
+	//	 *         <li><code>-2</code> Benutzer lehnt transfer ab</li>
+	//	 *         <li><code>0</code> - <code>100</code> Vortschritt der
+	//	 *         Datenübertragung in Prozent
+	//	 */
+	//	public int file_transfer_status(int file_transfer_ID) {
+	//		return 0;
+	//	}
 
 	/**
 	 * Fragt ein Array alle User ab.
@@ -291,9 +294,8 @@ public class ChatEngine{
 	 * @param uid
 	 */
 	public boolean ignore_user(long uid) {
-		if (uid != userID) {
+		if (uid != userID)
 			return ignored.add(uid);
-		}
 		return false;
 	}
 
@@ -349,7 +351,7 @@ public class ChatEngine{
 		tmp.addObserver(chatPanel);
 		private_channels.add(tmp);
 	}
-	
+
 	/**
 	 * Den Default-Kanal für eingehende, nicht zuordenbare Nachrichten registrieren.
 	 * 
@@ -369,7 +371,7 @@ public class ChatEngine{
 
 		for (Kanal x : group_channels) {
 			x.deleteObserver(chatPanel);
-			 // Wenn der Kanal leer ist.
+			// Wenn der Kanal leer ist.
 			if (x.countObservers() == 0) {
 				empty.add(x);
 				group_leave((String) x.referenz);
@@ -380,7 +382,7 @@ public class ChatEngine{
 		empty.clear();
 		for (Kanal x : private_channels) {
 			x.deleteObserver(chatPanel);
-			 // Wenn der Kanal leer ist.
+			// Wenn der Kanal leer ist.
 			if (x.countObservers() == 0) {
 				empty.add(x);
 			}
@@ -395,12 +397,12 @@ public class ChatEngine{
 	 * @param nachricht, die neue Nachricht
 	 */
 	public void put(MSG nachricht) {
-			inbox.add(nachricht);
-			DatabaseEngine.getDatabaseEngine().put(nachricht);
-			if(GUI.getGUI().isAFK() && (nachricht.getTyp()==NachrichtenTyp.PRIVATE)){
-				MSG tmp = new MSG(ce.getNodeForUID(getNodeForNID(nachricht.getSender()).getUserID()).getNodeID(), "I'm <b>a</b>way <b>f</b>rom <b>k</b>eyboard");
-				ne.routesend(tmp);
-			}
+		inbox.add(nachricht);
+		DatabaseEngine.getDatabaseEngine().put(nachricht);
+		if(GUI.getGUI().isAFK() && (nachricht.getTyp()==NachrichtenTyp.PRIVATE)){
+			MSG tmp = new MSG(ce.getNodeForUID(getNodeForNID(nachricht.getSender()).getUserID()).getNodeID(), "I'm <b>a</b>way <b>f</b>rom <b>k</b>eyboard");
+			ne.routesend(tmp);
+		}
 	}
 
 	/**
@@ -416,8 +418,9 @@ public class ChatEngine{
 					LogEngine.log("msgSorterBot", "sorting", tmp);
 					if (tmp.getTyp() == NachrichtenTyp.GROUP) {
 						for (Kanal x : group_channels)
-							if (x.add(tmp))
+							if (x.add(tmp)) {
 								break;
+							}
 					} else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
 						boolean msgAssigned = false;
 						for (KnotenKanal y : private_channels) {
@@ -428,8 +431,9 @@ public class ChatEngine{
 						}
 						// Wenn kein ChatWindow registriert ist um die Nachricht
 						// aufzunehmen sende es an den DEFAULT CHANNEL.
-						if (!msgAssigned)
+						if (!msgAssigned) {
 							default_channel.add(tmp);
+						}
 					}
 				} catch (InterruptedException e) {
 					// Unterbrochen beim Warten...
@@ -525,9 +529,8 @@ public class ChatEngine{
 	 */
 	public boolean is_ignored(long nodeID) {
 		Node tmp = ce.getNodeForNID(nodeID);
-		if(tmp!=null){
+		if(tmp!=null)
 			return ignored.contains(tmp.getUserID());
-		}
 		return false;
 	}
 	/**

@@ -4,11 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.MouseInfo;
-import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -27,7 +25,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
@@ -48,8 +45,8 @@ public class Kalender extends JDialog {
 	private JButton preMonthButton;
 	private JButton nxtMonthButton;
 	private boolean isBegin;
-	
-	
+
+
 	/**
 	 * Create the Kalendardialog ;)
 	 */
@@ -62,19 +59,19 @@ public class Kalender extends JDialog {
 		this.preMonthButton = new JButton("<");
 		this.nxtMonthButton = new JButton(">");
 		this.nowLabel = new JLabel( ( MONATSNAMEN[selectedMonth.get(Calendar.MONTH)] + " " + selectedMonth.get(Calendar.YEAR) ) );
-		
+
 		this.setLayout(new BorderLayout(1, 1));
 		this.setBackground(Color.WHITE);
-		
+
 		this.monthPanel.setBackground(Color.WHITE);
 		this.monthPanel.setBorder(new LineBorder(new Color(5,64,94), 1, true));
 		this.monthPanel.setLayout(new BorderLayout(0, 0));
-		
+
 		this.nowLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		this.nowLabel.setFont(new Font("Arial", Font.BOLD, 14));
 		this.nowLabel.setForeground(new Color(5,64,94));
-				
-		
+
+
 		this.preMonthButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectedMonth = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), (selectedMonth.get(Calendar.MONTH)-1), 1 ); //ein Monat runter
@@ -85,7 +82,7 @@ public class Kalender extends JDialog {
 				mPanel.validate();
 			}
 		});
-		
+
 		this.nxtMonthButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectedMonth = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), (selectedMonth.get(Calendar.MONTH)+1), 1 ); //ein Monat drauf
@@ -96,13 +93,13 @@ public class Kalender extends JDialog {
 				mPanel.validate();
 			}
 		});
-		
+
 		this.monthPanel.add(nowLabel, BorderLayout.CENTER);
 		this.monthPanel.add(preMonthButton, BorderLayout.WEST);
 		this.monthPanel.add(nxtMonthButton, BorderLayout.EAST);
-		
+
 		this.mPanel = new MonthPanel();
-		
+
 		this.add(monthPanel, BorderLayout.NORTH);
 		this.add(mPanel, BorderLayout.CENTER);
 
@@ -112,9 +109,9 @@ public class Kalender extends JDialog {
 		this.setVisible(true);
 		this.requestFocus();
 		addFL(this);
-		
+
 	}
-	
+
 	private void addFL(Component tmp){
 		if(tmp instanceof Container){
 			for (Component cur : ((Container) tmp).getComponents()) {
@@ -123,21 +120,23 @@ public class Kalender extends JDialog {
 		}
 		tmp.addFocusListener(new Disposer());
 	}
-	
-	
+
+
 	private final class Disposer extends FocusAdapter {
 		@Override
 		public void focusLost(FocusEvent e) {
 			Component other = e.getOppositeComponent();
 			if(other!=null){
-//			System.out.println(other.getClass().getSimpleName());
-			while (other.getParent()!=null) {
-				other = other.getParent();
-				if(other instanceof Kalender) break;
-			}
-			if(!(other instanceof Kalender)){
-				dispose();
-			}
+				//			System.out.println(other.getClass().getSimpleName());
+				while (other.getParent()!=null) {
+					other = other.getParent();
+					if(other instanceof Kalender) {
+						break;
+					}
+				}
+				if(!(other instanceof Kalender)){
+					dispose();
+				}
 			}
 		}
 	}
@@ -149,9 +148,9 @@ public class Kalender extends JDialog {
 	 *
 	 */
 	public class MonthPanel extends JPanel {
-	
+
 		private GregorianCalendar heute;
-		
+
 		/**
 		 * Konsruktor bau eine Monatsübersicht des gewählten Monats auf
 		 */
@@ -161,7 +160,7 @@ public class Kalender extends JDialog {
 			this.setBorder(new LineBorder(new Color(5,64,94), 1, true));
 			this.setLayout(new GridLayout(0, 7, 1, 1));
 			this.setBackground(Color.WHITE);
-			
+
 			//MO bis So schreiben
 			for (String tag : TAGENAMEN){ 
 				JLabel lbl = new JLabel(tag.substring(0, 2));
@@ -169,42 +168,45 @@ public class Kalender extends JDialog {
 				lbl.setForeground(new Color(5,64,94));
 				this.add(lbl);
 			}
-			
+
 			MonatsDaten dieserMonat = new MonatsDaten();
 			//tageOffset befüllen
 			for (int i = 1; i <= dieserMonat.getTageOffset(); i++){
 				this.add(new JLabel(""));
 			}
-			
+
 			//Monate mit kTagen(Buttons) befüllen
 			int tNr = 1;
 			for( final kTag t : dieserMonat.getMonat()){
 				t.setText(""+tNr); 
 				t.setForeground(new Color(5,64,94));
 				//heute markieren
-				if ( 	heute.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR) &&  //heute markieren
-						heute.get(Calendar.MONTH) == selectedMonth.get(Calendar.MONTH) &&
-						tNr == heute.get(Calendar.DAY_OF_MONTH)) {
+				if ( 	(heute.get(Calendar.YEAR) == selectedMonth.get(Calendar.YEAR)) &&  //heute markieren
+						(heute.get(Calendar.MONTH) == selectedMonth.get(Calendar.MONTH)) &&
+						(tNr == heute.get(Calendar.DAY_OF_MONTH))) {
 					t.setBorder(new LineBorder(new Color(255,133,18), 2, true)); 
 					t.setToolTipText("Heute");
 				}
-				
+
 				// Fallse feiertag, bezeichnung setzen und markieren
 				if ( t.getFeiertagBez() != null ){
 					t.setBorder(new LineBorder(Color.RED, 2, true)); 
 					t.setToolTipText(t.getFeiertagBez());
 				}
-				
+
 				//Aktionlistener für inDst hinzufügen
 				t.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						kTag source = (kTag)e.getSource();
 						System.out.println(source.getActionCommand());
-						if(isBegin)target.setBegin(source.getDate());
-						else target.setEnd(source.getDate());
-						
+						if(isBegin) {
+							target.setBegin(source.getDate());
+						} else {
+							target.setEnd(source.getDate());
+						}
+
 						dispose();
-						
+
 					}
 				});
 				tNr++;
@@ -212,7 +214,7 @@ public class Kalender extends JDialog {
 			}	
 		}
 	}
-	
+
 
 	/**
 	 * Enthält Daten alle des aktuell gewählten Monats
@@ -221,43 +223,45 @@ public class Kalender extends JDialog {
 	 * @author Volker
 	 *
 	 */
-	
+
 	private class MonatsDaten{
-		
+
 		private int tageOffset;
 		private GregorianCalendar ersterTag;
 		private int letzterTag;
 		private List<kTag> monat;
 		private GregorianCalendar buttondate;
-		
+
 		public MonatsDaten(){
 			this.ersterTag = new GregorianCalendar(selectedMonth.get(Calendar.YEAR), selectedMonth.get(Calendar.MONTH), 1 );
 			this.letzterTag = ersterTag.getActualMaximum(Calendar.DAY_OF_MONTH);
 			this.monat = new ArrayList<kTag>();
 			this.buttondate = new GregorianCalendar(ersterTag.get(Calendar.YEAR), ersterTag.get(Calendar.MONTH), ersterTag.get(Calendar.DAY_OF_MONTH));
-			
+
 			//wann ist der erste Montag - offSet
 			tageOffset = 7;
 			while( ersterTag.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY ) { //Sa=1 bis So=7
 				ersterTag.add(Calendar.DATE, 1);//ein Tag drauf
 				tageOffset--;
 			}
-			if (tageOffset ==7) tageOffset =0;
-						
+			if (tageOffset ==7) {
+				tageOffset =0;
+			}
+
 			for(int i = 0 ; i<letzterTag ; i++){
 				monat.add(new kTag(buttondate));
 				buttondate.roll(Calendar.DATE, true);
 			}
-			
+
 			//iCAl einlesen
 			try {
 				readICS(Help.getFile("Feiertage.ics"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
-		
+
 
 		public List<kTag> getMonat() {
 			return monat;
@@ -267,7 +271,7 @@ public class Kalender extends JDialog {
 		public int getTageOffset() {
 			return tageOffset;
 		}
-		
+
 		/**
 		 * liest eine ICal Datei und fügt Feiertage der Aktuellen Monatsliste / kTag hinzu
 		 * @param icsDatei
@@ -278,7 +282,10 @@ public class Kalender extends JDialog {
 			int day = 0;
 			String desc = null;
 			String zeile ="";
-			if (!icsDatei.exists()); //TODO runterladen
+			if (!icsDatei.exists())
+			{
+				; //TODO runterladen
+			}
 			try (BufferedReader bfr = new BufferedReader(new FileReader(icsDatei))){
 				while ((zeile=bfr.readLine()) !=null){
 					//datum finden
@@ -292,7 +299,7 @@ public class Kalender extends JDialog {
 						desc = zeile.substring(12);
 					}
 					//wenn jahr und monat passen, füge beschreibung zur liste hinzu
-					if ( ersterTag.get(Calendar.YEAR) == year  && ersterTag.get(Calendar.MONTH) == (month-1) ){
+					if ( (ersterTag.get(Calendar.YEAR) == year)  && (ersterTag.get(Calendar.MONTH) == (month-1)) ){
 						monat.get(day-1).setFeiertagBez(desc);
 					}
 				}
@@ -301,8 +308,8 @@ public class Kalender extends JDialog {
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Klasse erweitert JButton um 2 Variablen.
 	 * inDST - ob man in DST war
@@ -311,18 +318,18 @@ public class Kalender extends JDialog {
 	 *
 	 */
 	private class kTag extends JButton{
-		
+
 		private GregorianCalendar meinTag;
 		private DateFormat df;
 		private boolean inDST;
 		private String feiertagBez;
-		
+
 		public kTag(GregorianCalendar tag) {
-		    this.df = DateFormat.getDateInstance(DateFormat.SHORT);
+			this.df = DateFormat.getDateInstance(DateFormat.SHORT);
 			this.meinTag = (GregorianCalendar) tag.clone();
 			this.setActionCommand(df.format(meinTag.getTime()));
 		}
-		
+
 		public boolean isInDST() {
 			return inDST;
 		}
@@ -338,7 +345,7 @@ public class Kalender extends JDialog {
 		public GregorianCalendar getDate(){
 			return meinTag;
 		}
-		
+
 	}
 
 }

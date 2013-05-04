@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -71,7 +70,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this.code = code;
 		this.data = payload;
 	}
-	
+
 	public MSG(Object payload, MSGCode code, long recipient) {
 		this(payload,code);
 		this.empfänger=recipient;
@@ -95,7 +94,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this.data=text;
 	}
 
-/*
+	/*
 	public MSG(File datei, long nid) throws IOException {
 		this(NachrichtenTyp.DATA);
 		if(!datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
@@ -118,11 +117,11 @@ public class MSG implements Serializable,Comparable<MSG>{
 		setEmpfänger(nid);
 		group=datei.getName();
 	}
-	*/
+	 */
 	public MSG(FileTransferData tmp_FR) throws IOException {
 		this(NachrichtenTyp.DATA);
 		this.empfänger=tmp_FR.getReceiver_nid();
-		
+
 		if(! tmp_FR.datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		GZIPOutputStream zip = new GZIPOutputStream(bout);
@@ -131,7 +130,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		byte[] cup=new byte[64000];
 		int leng=-1;
 		while((leng=bis.read(cup))!=-1){
-				bos.write(cup,0,leng);
+			bos.write(cup,0,leng);
 		}
 		bos.flush();
 		zip.finish();
@@ -141,18 +140,18 @@ public class MSG implements Serializable,Comparable<MSG>{
 		tmp_data[0]=tmp_FR;
 		tmp_data[1]=bout.toByteArray();
 		data=tmp_data;
-//		setEmpfänger(tmp_FR.getReceiver_nid());
+		//		setEmpfänger(tmp_FR.getReceiver_nid());
 	}
 
 	public void save(File datei) throws IOException{
-		if(typ==NachrichtenTyp.DATA&&data!=null&&data instanceof Object[]&&((Object[])data).length==2&&((Object[])data)[0]instanceof FileTransferData&&((Object[])data)[1]instanceof byte[]){
+		if((typ==NachrichtenTyp.DATA)&&(data!=null)&&(data instanceof Object[])&&(((Object[])data).length==2)&&(((Object[])data)[0]instanceof FileTransferData)&&(((Object[])data)[1]instanceof byte[])){
 			byte[] tmp_data=(byte[]) ((Object[])data)[1];
-//			System.out.println(tmp_data.length);
+			//			System.out.println(tmp_data.length);
 
 			ByteArrayInputStream bais = new ByteArrayInputStream(tmp_data);
 			GZIPInputStream zip = new GZIPInputStream(bais);
 			BufferedInputStream bis = new BufferedInputStream(zip);
-			
+
 			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(datei));
 			byte[] cup=new byte[64000];
 			int leng=-1;
@@ -164,7 +163,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 		}
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -172,9 +171,9 @@ public class MSG implements Serializable,Comparable<MSG>{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + id;
-		result = prime * result + (int) (sender ^ (sender >>> 32));
-		result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+		result = (prime * result) + id;
+		result = (prime * result) + (int) (sender ^ (sender >>> 32));
+		result = (prime * result) + (int) (timestamp ^ (timestamp >>> 32));
 		return result;
 	}
 
@@ -210,7 +209,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 	public long getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public void reStamp() {
 		timestamp=System.currentTimeMillis();
 	}
@@ -226,7 +225,7 @@ public class MSG implements Serializable,Comparable<MSG>{
 	public Object getData() {
 		return data;
 	}
-	
+
 	public String getGroup() {
 		return group;
 	}
@@ -237,10 +236,10 @@ public class MSG implements Serializable,Comparable<MSG>{
 	/*public void setEmpfänger(long value) {
 		empfänger=value;
 	}
-*/
+	 */
 
-	
-	
+
+
 	@Override
 	public String toString() {
 		return "MSG [" + (typ != null ? "typ=" + typ + ", " : "")
@@ -262,13 +261,13 @@ public class MSG implements Serializable,Comparable<MSG>{
 		}
 		return bos.toByteArray();
 	}
-	
+
 	public static MSG getMSG(byte[] data){
 		try {
 			ObjectInputStream obin=new ObjectInputStream( new ByteArrayInputStream(data));
 			MSG tmp = (MSG)obin.readObject();
 			return tmp;
-			
+
 		} catch (Exception e) {
 			LogEngine.log("MSG.getMSG",e);
 		}
@@ -278,17 +277,17 @@ public class MSG implements Serializable,Comparable<MSG>{
 	@Override
 	public int compareTo(MSG o) {
 		if (this.getTimestamp() != o.getTimestamp())	return (this.getTimestamp() > o.getTimestamp()) ? 1 : -1;
-			else if (this.getSender() != o.getSender())	return (this.getSender() > o.getSender()) ? 1 : -1;
-			else if (this.getId() != o.getId())			return (this.getId() - o.getId());
-			return 0;
-		
+		else if (this.getSender() != o.getSender())	return (this.getSender() > o.getSender()) ? 1 : -1;
+		else if (this.getId() != o.getId())			return (this.getId() - o.getId());
+		return 0;
+
 	}
 
 	public void setGroup(String string) {
 		group=string;
 	}
-	
-	
-	
-	
+
+
+
+
 }

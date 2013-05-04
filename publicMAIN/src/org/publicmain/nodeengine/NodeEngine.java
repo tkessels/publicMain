@@ -104,7 +104,7 @@ public class NodeEngine {
 	private Thread rootClaimProcessor;
 	private Thread neMaintainer;
 	private BestNodeStrategy myStrategy; 
-	
+
 	/**
 	 * Konstruktor für die NodeEngine
 	 * 
@@ -115,7 +115,7 @@ public class NodeEngine {
 
 		allNodes = Collections.synchronizedSet(new HashSet<Node>());
 		connections = new CopyOnWriteArrayList<ConnectionHandler>();
-		
+
 
 		root_claims_stash = new LinkedBlockingQueue<MSG>();
 
@@ -136,7 +136,7 @@ public class NodeEngine {
 		myStrategy = new BreadthFirstStrategy();
 
 		connectionsAcceptBot.start();
-		
+
 		neMaintainer = new Thread(new Maintainer());;
 		neMaintainer.start();
 
@@ -144,7 +144,7 @@ public class NodeEngine {
 
 		discover();
 	}
-	
+
 	/**
 	 * Getter für die laufende Instanz der NodeEngine.
 	 * 
@@ -162,7 +162,7 @@ public class NodeEngine {
 	public Node getMe() {
 		return meinNode;
 	}
-	
+
 	/**
 	 * Getter für den optimalen Node zum anfügen eines weiteren, abhängig von
 	 * der gewählten Strategie.
@@ -209,9 +209,9 @@ public class NodeEngine {
 	 * @return boolean
 	 */
 	public boolean hasParent() {
-		return (root_connection != null && root_connection.isConnected());
+		return ((root_connection != null) && root_connection.isConnected());
 	}
-	
+
 	/**
 	 * Getter für ein Set von allen verbundenen Nodes.
 	 * 
@@ -237,18 +237,16 @@ public class NodeEngine {
 	public Node getNode(long nid) {
 		synchronized (allNodes) {
 			for (Node x : getNodes()) {
-				if (x.getNodeID() == nid) {
+				if (x.getNodeID() == nid)
 					return x;
-				}
 			}
-			if (isRoot()) {
+			if (isRoot())
 				return retrieve(nid);
-			} else {
+			else
 				return null;
-			}
 		}
 	}	
-	
+
 	/**
 	 * Liefert eine Node für eine bestimmte <code>uid</code>. 
 	 * 
@@ -258,14 +256,13 @@ public class NodeEngine {
 	public Node getNodeForUID(long uid){
 		synchronized (allNodes) {
 			for (Node x : getNodes()) {
-				if (x.getUserID() == uid) {
+				if (x.getUserID() == uid)
 					return x;
-				}
 			}
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Getter für ein Set, vom Typ String, für alle Gruppen.
 	 * 
@@ -274,7 +271,7 @@ public class NodeEngine {
 	public Set<String> getGroups() {
 		return allGroups;
 	}
-	
+
 	/**
 	 * Sendet eine Nachricht an den übergeordneten Node, wenn einer existiert.
 	 * 
@@ -308,7 +305,7 @@ public class NodeEngine {
 	private void sendunicast(MSG msg, Node target) {
 		multi_socket.sendunicast(msg, target);
 	}
-	
+
 	/**
 	 * Sendet eine Nachricht an alle angeschlossenen Verbindungen.
 	 * 
@@ -333,14 +330,14 @@ public class NodeEngine {
 	 * @param ch
 	 */
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
-		if (hasParent() && root_connection != ch) {
+		if (hasParent() && (root_connection != ch)) {
 			root_connection.send(msg);
 		}
 		if (hasChildren()) {
 			sendchild(msg, ch);
 		}
 	}
-	
+
 	/**
 	 * Sendet eine Nachricht an alle angeschlossenen Child-Verbindungen, außer
 	 * an die mitgelieferte Verbindung.
@@ -350,7 +347,7 @@ public class NodeEngine {
 	 */
 	private void sendchild(MSG msg, ConnectionHandler ch) {
 		for (ConnectionHandler x : connections) {
-			if (x != ch || ch == null) {
+			if ((x != ch) || (ch == null)) {
 				x.send(msg);
 			}
 		}
@@ -365,7 +362,7 @@ public class NodeEngine {
 	 */
 	public void send_file(final File datei, final long receiver) {
 		if (datei.isFile() && datei.exists() && datei.canRead()
-				&& datei.length() > 0) {
+				&& (datei.length() > 0)) {
 			new Thread(new Runnable() {
 				public void run() {
 					// Erstelle das Parameter Objekt für die Dateiübertragung
@@ -399,7 +396,7 @@ public class NodeEngine {
 												.getLocalPort();
 										tmp_FR.notify();
 									}
-									
+
 									// Server Close Thread
 									new Thread(new Runnable() {
 										public void run() {
@@ -411,26 +408,26 @@ public class NodeEngine {
 															tmp_FR.hashCode(),
 															true,
 															Config.getConfig()
-																	.getFileTransferTimeout());
+															.getFileTransferTimeout());
 											if (tmp_msg != null) {
 												try {
 													GUI.getGUI()
-															.info("User "
-																	+ tmp_FR.receiver
-																			.getAlias()
-																	+ "has denied recieving the file: "
-																	+ tmp_FR.datei
-																			.getName(),
-																	tmp_FR.receiver
-																			.getUserID(),
-																	0);
+													.info("User "
+															+ tmp_FR.receiver
+															.getAlias()
+															+ "has denied recieving the file: "
+															+ tmp_FR.datei
+															.getName(),
+															tmp_FR.receiver
+															.getUserID(),
+															0);
 													f_server.close();
 												} catch (IOException e) {
 												}
 											}
 										}
 									}).start();
-									
+
 									// Verbindung anbieten
 									client = f_server.accept();
 									try {
@@ -438,14 +435,14 @@ public class NodeEngine {
 									} catch (Exception e) {
 									}
 									// Übertragen
-									if (client != null && client.isConnected()
+									if ((client != null) && client.isConnected()
 											&& !client.isClosed()) {
 										BufferedOutputStream bos = new BufferedOutputStream(
 												client.getOutputStream());
 										long infoupdate = System
 												.currentTimeMillis()
 												+ Config.getConfig()
-														.getFileTransferInfoInterval();
+												.getFileTransferInfoInterval();
 										long transmitted = 0;
 										byte[] cup = new byte[65535];
 										int len = -1;
@@ -456,16 +453,16 @@ public class NodeEngine {
 												infoupdate = System
 														.currentTimeMillis()
 														+ Config.getConfig()
-																.getFileTransferInfoInterval();
+														.getFileTransferInfoInterval();
 												GUI.getGUI()
-														.info(tmp_FR.datei
-																.getName()
-																+ "("
-																+ ((transmitted * 100) / tmp_FR.size)
-																+ "%)",
-																tmp_FR.sender
-																		.getUserID(),
-																0);
+												.info(tmp_FR.datei
+														.getName()
+														+ "("
+														+ ((transmitted * 100) / tmp_FR.size)
+														+ "%)",
+														tmp_FR.sender
+														.getUserID(),
+														0);
 											}
 										}
 										bos.flush();
@@ -473,7 +470,7 @@ public class NodeEngine {
 
 										GUI.getGUI().info(
 												tmp_FR.datei.getName()
-														+ " Done",
+												+ " Done",
 												tmp_FR.sender.getUserID(), 0);
 									}
 									// Ergebnis melden
@@ -484,21 +481,21 @@ public class NodeEngine {
 									LogEngine.log("FileTransfer", "Timed Out",
 											LogEngine.ERROR);
 									GUI.getGUI()
-											.info("User "
-													+ tmp_FR.receiver
-															.getAlias()
-													+ " has not answered in time. Connection Timedout",
-													tmp_FR.receiver.getUserID(),
-													0);
+									.info("User "
+											+ tmp_FR.receiver
+											.getAlias()
+											+ " has not answered in time. Connection Timedout",
+											tmp_FR.receiver.getUserID(),
+											0);
 								} catch (SocketException e) {
 									LogEngine.log("FileTransfer", "Aborted",
 											LogEngine.ERROR);
 								} catch (IOException e) {
 									LogEngine.log("FileTransfer", e);
 									GUI.getGUI()
-											.info("Transmission-Error, if this keeps happening buy a USB-Stick",
-													tmp_FR.receiver.getUserID(),
-													0);
+									.info("Transmission-Error, if this keeps happening buy a USB-Stick",
+											tmp_FR.receiver.getUserID(),
+											0);
 								}
 							}
 						}).start();
@@ -506,8 +503,9 @@ public class NodeEngine {
 						// Warten bis der Server-Thread fertig ist...
 						synchronized (tmp_FR) {
 							try {
-								if (tmp_FR.server_port == -2)
+								if (tmp_FR.server_port == -2) {
 									tmp_FR.wait();
+								}
 							} catch (InterruptedException e) {
 							}
 						}
@@ -590,10 +588,10 @@ public class NodeEngine {
 		}
 	}
 
-// Ggf. für die weitere Entwicklung benötigt.
-//	/**
-//	 * Kommentar!
-//	 */
+	// Ggf. für die weitere Entwicklung benötigt.
+	//	/**
+	//	 * Kommentar!
+	//	 */
 	private void pollChilds() {
 		sendchild(new MSG(null, MSGCode.POLL_CHILDNODES), null);
 	}
@@ -605,8 +603,9 @@ public class NodeEngine {
 	 */
 	private Set<Node> getChilds() {
 		Set<Node> rück = new HashSet<Node>();
-		for (ConnectionHandler x : connections)
+		for (ConnectionHandler x : connections) {
 			rück.addAll(x.getChildren());
+		}
 		return rück;
 	}
 
@@ -622,7 +621,7 @@ public class NodeEngine {
 		try {
 			root_connection = ConnectionHandler.connectTo(knoten);
 			if (root_connection != null) {
-				
+
 				List<Node> newALLnodes = WeightedDistanceStrategy.returnAllNodes(getTree());
 				allnodes_set(newALLnodes);
 				setRootMode(false);
@@ -647,16 +646,20 @@ public class NodeEngine {
 	public void disconnect() {
 		online = false;
 		connectionsAcceptBot.stop();
-//		multicastRecieverBot.stop();
+		//		multicastRecieverBot.stop();
 		sendtcp(new MSG(meinNode, MSGCode.NODE_SHUTDOWN));
 		sendroot(new MSG(myGroups,MSGCode.GROUP_LEAVE));
-		if(root_connection!=null)root_connection.disconnect();
+		if(root_connection!=null) {
+			root_connection.disconnect();
+		}
 		for (final ConnectionHandler con : connections)
+		{
 			(new Thread(new Runnable() {
 				public void run() {
 					con.disconnect();
 				}
 			})).start();// Threadded Disconnect für jede Leitung
+		}
 		multi_socket.close();
 		try {
 			server_socket.close();
@@ -723,9 +726,8 @@ public class NodeEngine {
 	 */
 	public void handleMulticast(MSG paket) {
 		LogEngine.log(this, "handling [MC]", paket);
-		if (angler.check(paket)) {
+		if (angler.check(paket))
 			return;
-		}
 		if (online && (paket.getTyp() == NachrichtenTyp.SYSTEM)) {
 			switch (paket.getCode()) {
 			case ROOT_REPLY:
@@ -754,8 +756,9 @@ public class NodeEngine {
 			case CMD_RECONNECT:
 				long payload = (Long) paket.getData();
 				if ((payload == nodeID) || (payload == -1337)) {
-					if (root_connection != null)
+					if (root_connection != null) {
 						root_connection.close();
+					}
 				}
 				break;
 			case BACKUP_SERVER_OFFER:
@@ -770,7 +773,7 @@ public class NodeEngine {
 				break;
 			case BACKUP_SERVER_DISCOVER:
 				break;
-				
+
 			default:
 				LogEngine.log(this, "handling [MC]:undefined", paket);
 			}
@@ -790,26 +793,29 @@ public class NodeEngine {
 	@SuppressWarnings("unchecked")
 	public void handle(MSG paket, ConnectionHandler quelle) {
 		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		if (angler.check(paket)) {
+		if (angler.check(paket))
 			return;
-		}
 		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != nodeID)) {
 			routesend(paket);
 		}
 		else {
 			switch (paket.getTyp()) {
 			case PRIVATE:
-				if(!ce.is_ignored(paket.getSender())) ce.put(paket);
+				if(!ce.is_ignored(paket.getSender())) {
+					ce.put(paket);
+				}
 				break;
 			case GROUP:
 				groupRouteSend(paket,quelle);
-				if(!ce.is_ignored(paket.getSender())) ce.put(paket);
+				if(!ce.is_ignored(paket.getSender())) {
+					ce.put(paket);
+				}
 				break;
 			case SYSTEM:
 				DatabaseEngine.getDatabaseEngine().put(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
-					
+
 					allnodes_add((Node) paket.getData());
 					sendtcpexcept(paket, quelle);
 					break;
@@ -824,10 +830,10 @@ public class NodeEngine {
 					break;
 				case POLL_CHILDNODES:
 					if (quelle == root_connection) {
-//						sendroot(new MSG(getChilds(), MSGCode.REPORT_CHILDNODES));
+						//						sendroot(new MSG(getChilds(), MSGCode.REPORT_CHILDNODES));
 						sendroot(new MSG(Arrays.asList(meinNode), MSGCode.REPORT_CHILDNODES));
 						sendroot(new MSG(meinNode, MSGCode.NODE_UPDATE));
-						
+
 						pollChilds();
 					}
 					break;
@@ -876,10 +882,14 @@ public class NodeEngine {
 					break;
 				case FILE_TCP_REQUEST:
 					FileTransferData tmp = (FileTransferData) paket.getData();
-					if(!ce.is_ignored(paket.getSender())) recieve_file(tmp);
+					if(!ce.is_ignored(paket.getSender())) {
+						recieve_file(tmp);
+					}
 					break;
 				case FILE_RECIEVED:
-					if(!ce.is_ignored(paket.getSender())) ce.inform((FileTransferData) paket.getData());
+					if(!ce.is_ignored(paket.getSender())) {
+						ce.inform((FileTransferData) paket.getData());
+					}
 					break;
 				case NODE_LOOKUP:
 					Node tmp_node = null;
@@ -921,14 +931,16 @@ public class NodeEngine {
 				if (paket.getEmpfänger() != nodeID) {
 					routesend(paket);
 				} else {
-					if(!ce.is_ignored(paket.getSender())) recieve_file(paket);
+					if(!ce.is_ignored(paket.getSender())) {
+						recieve_file(paket);
+					}
 				}
 				break;
 			default:
 			}
 		}
 	}
-	
+
 	/**
 	 * TODO: Überprüfen, ausformulieren!
 	 * Verwaltung des Dateiempfang, abhängig von der Konfiguration des Benutzers.  
@@ -937,59 +949,59 @@ public class NodeEngine {
 	 */
 	private void recieve_file(final FileTransferData tmp) {
 		if(!Config.getConfig().getDisableFileTransfer()) {
-		new Thread(new Runnable() {
-			public void run() {
-				long until = System.currentTimeMillis()+Config.getConfig().getFileTransferTimeout()-1000;
-				final File destination = ce.request_File(tmp);
-				if(System.currentTimeMillis()<until) {
-				tmp.accepted = (destination != null);
-				MSG reply;
-				if(tmp.accepted) {
-					reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
-				} else {
-					reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid());
-				}
-				routesend(reply);
-				if (destination != null) {
-					Socket data_con = null;
-					for (InetAddress ip : tmp.sender.getSockets()) {
-						if (!meinNode.getSockets().contains(ip)) {
-							try {
-								data_con = new Socket(ip, tmp.server_port);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+			new Thread(new Runnable() {
+				public void run() {
+					long until = (System.currentTimeMillis()+Config.getConfig().getFileTransferTimeout())-1000;
+					final File destination = ce.request_File(tmp);
+					if(System.currentTimeMillis()<until) {
+						tmp.accepted = (destination != null);
+						MSG reply;
+						if(tmp.accepted) {
+							reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
+						} else {
+							reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid());
 						}
-					}
-					if (data_con != null) {
-						try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
-							long infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
-							long transmitted=0;
-							byte[] cup = new byte[65535];
-							int len = -1;
-							while ((len = bis.read(cup)) != -1) {
-								bos.write(cup, 0, len);
-								transmitted+=len;
-								if(System.currentTimeMillis()>infoupdate) {
-									infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
-									GUI.getGUI().info(tmp.datei.getName()+"("+((transmitted*100)/tmp.size)+"%)", tmp.sender.getUserID(), 0);
+						routesend(reply);
+						if (destination != null) {
+							Socket data_con = null;
+							for (InetAddress ip : tmp.sender.getSockets()) {
+								if (!meinNode.getSockets().contains(ip)) {
+									try {
+										data_con = new Socket(ip, tmp.server_port);
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
 								}
 							}
-							bos.flush();
-							bos.close();
-							data_con.close();
-							GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
+							if (data_con != null) {
+								try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
+									long infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
+									long transmitted=0;
+									byte[] cup = new byte[65535];
+									int len = -1;
+									while ((len = bis.read(cup)) != -1) {
+										bos.write(cup, 0, len);
+										transmitted+=len;
+										if(System.currentTimeMillis()>infoupdate) {
+											infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
+											GUI.getGUI().info(tmp.datei.getName()+"("+((transmitted*100)/tmp.size)+"%)", tmp.sender.getUserID(), 0);
+										}
+									}
+									bos.flush();
+									bos.close();
+									data_con.close();
+									GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
+								}
+								catch (SocketException e) {
+									GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
+								}
+								catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
 						}
-						catch (SocketException e) {
-							GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
-						}
-						catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}}
-		}).start();
+					}}
+			}).start();
 		}
 		else {
 			tmp.accepted=false;
@@ -1029,7 +1041,7 @@ public class NodeEngine {
 			}
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar!
 	 * 
@@ -1100,39 +1112,39 @@ public class NodeEngine {
 		}
 	}
 
-// Ggf. für die weitere Entwicklung benötigt.
-// 
-//	/**
-//	 * Entfernt einen Benutzer aus der Liste.
-//	 * 
-//	 * @param data
-//	 */
-//	private void allnodes_remove(Node data) {
-//		synchronized (allNodes) {
-//			int hash = allNodes.hashCode();
-//			allNodes.remove(data);
-//			if (allNodes.hashCode() != hash) {
-//				allNodes.notifyAll();
-//			}
-//		}
-//	}
+	// Ggf. für die weitere Entwicklung benötigt.
+	// 
+	//	/**
+	//	 * Entfernt einen Benutzer aus der Liste.
+	//	 * 
+	//	 * @param data
+	//	 */
+	//	private void allnodes_remove(Node data) {
+	//		synchronized (allNodes) {
+	//			int hash = allNodes.hashCode();
+	//			allNodes.remove(data);
+	//			if (allNodes.hashCode() != hash) {
+	//				allNodes.notifyAll();
+	//			}
+	//		}
+	//	}
 
-// Ggf. für die weitere Entwicklung benötigt.
-//	/**
-//	 * Fügt einen Benutzer der Liste hinzu.
-//	 * 
-//	 * @param data
-//	 */
-//	private void allnodes_add(Collection<Node> data) {
-//		synchronized (allNodes) {
-//			int hash = allNodes.hashCode();
-//			allNodes.addAll(data);
-//			if (allNodes.hashCode() != hash) {
-//				allNodes.notifyAll();
-//			}
-//		}
-//	}
-	
+	// Ggf. für die weitere Entwicklung benötigt.
+	//	/**
+	//	 * Fügt einen Benutzer der Liste hinzu.
+	//	 * 
+	//	 * @param data
+	//	 */
+	//	private void allnodes_add(Collection<Node> data) {
+	//		synchronized (allNodes) {
+	//			int hash = allNodes.hashCode();
+	//			allNodes.addAll(data);
+	//			if (allNodes.hashCode() != hash) {
+	//				allNodes.notifyAll();
+	//			}
+	//		}
+	//	}
+
 	/**
 	 * TODO: Kommentar!
 	 * 
@@ -1148,7 +1160,7 @@ public class NodeEngine {
 			DatabaseEngine.getDatabaseEngine().put(data);
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar!
 	 * 
@@ -1166,7 +1178,7 @@ public class NodeEngine {
 		}
 		DatabaseEngine.getDatabaseEngine().put(data);
 	}
-	
+
 	/**
 	 * Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und
 	 * versucht ihn neu zu verbinden zu lassen falls die Verbindung fehl
@@ -1178,15 +1190,15 @@ public class NodeEngine {
 	 *         nicht gefunden wurde.
 	 */
 	private Node retrieve(long nid) {
-			sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
-			MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,null,false,1000);
-			if (x != null) {
-				return (Node) x.getData();
-			} else {
-				LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
-				sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
-				return null;
-			}
+		sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
+		MSG x = angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,null,false,1000);
+		if (x != null)
+			return (Node) x.getData();
+		else {
+			LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
+			sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
+			return null;
+		}
 	}
 
 	/**
@@ -1197,9 +1209,11 @@ public class NodeEngine {
 	private void setRootMode(boolean rootmode) {
 		this.rootMode = rootmode;
 		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
-		if(rootmode) setGroup(myGroups) ;
+		if(rootmode) {
+			setGroup(myGroups) ;
+		}
 	}
-	
+
 	/**
 	 * Getter für die eigene <code>nid</code>.
 	 * 
@@ -1230,7 +1244,7 @@ public class NodeEngine {
 	public void leaveGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
 		updateMyGroups();
 	}
-	
+
 	/**
 	 * TODO: Kommentar!
 	 * 
@@ -1244,7 +1258,7 @@ public class NodeEngine {
 			return x;
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar! 
 	 * 
@@ -1257,7 +1271,7 @@ public class NodeEngine {
 			allGroups.notifyAll();
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar! 
 	 * 
@@ -1266,9 +1280,9 @@ public class NodeEngine {
 	 */
 	public boolean addGroup(Collection<String> groups) {
 		synchronized (allGroups) {
-		boolean x = allGroups.addAll(groups);
-		allGroups.notifyAll();
-		return x;
+			boolean x = allGroups.addAll(groups);
+			allGroups.notifyAll();
+			return x;
 		}
 	}
 
@@ -1283,7 +1297,7 @@ public class NodeEngine {
 			return myGroups.remove(gruppen_name);
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar! 
 	 * 
@@ -1295,7 +1309,7 @@ public class NodeEngine {
 			return myGroups.add(gruppen_name);
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar! 
 	 * 
@@ -1320,17 +1334,17 @@ public class NodeEngine {
 			updateAlias(alias,nodeID);
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar! 
 	 */
 	public void pathPing(){
 		for (Node cur : getNodes()) {
 			GUI.getGUI().info(cur.toString() + ":" +pathPing(cur), null, 0);
-			
+
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar! 
 	 * 
@@ -1344,13 +1358,12 @@ public class NodeEngine {
 			MSG paket = new MSG(currentTimeMillis, MSGCode.PATH_PING_REQUEST,remote.getNodeID());
 			MSG response = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.PATH_PING_RESPONSE, remote.getNodeID(),currentTimeMillis, true, 1000,paket);
 			if(response==null)return -1;
-			else {
+			else
 				return (System.currentTimeMillis()-currentTimeMillis);
-			}
-			
+
 		}
 	}
-	
+
 	/**
 	 * Geänderten Alias der GUI mitteilen, dass der Alias korrekt auf der GUI
 	 * dargestellt wird.
@@ -1390,7 +1403,7 @@ public class NodeEngine {
 		case "ra":
 			sendRA();
 			break;
-			
+
 		case "settings":
 			new SettingsWindow(Integer.parseInt(parameter), false);
 			break;
@@ -1432,7 +1445,7 @@ public class NodeEngine {
 			} else if (parameter.equals("breadth")) {
 				myStrategy = new BreadthFirstStrategy();
 			} else if (parameter.startsWith("weighted")
-					&& parameter.split(" ").length == 4) {
+					&& (parameter.split(" ").length == 4)) {
 				myStrategy = new WeightedDistanceStrategy(
 						Double.parseDouble(parameter.split(" ")[1]),
 						Integer.parseInt(parameter.split(" ")[2]),
@@ -1463,7 +1476,7 @@ public class NodeEngine {
 			break;
 		}
 	}
-	
+
 	/**
 	 * Erstellt den Topologie-Baum für das Debug-Kommando (/debug tree).
 	 * 
@@ -1480,14 +1493,14 @@ public class NodeEngine {
 			};
 			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM,
 					MSGCode.TREE_DATA, null, null, true, Config.getConfig()
-							.getTreeBuildTime(), tmp);
+					.getTreeBuildTime(), tmp);
 			if (polled_tree != null) {
 				root.add((Node) polled_tree.getData());
 			}
 		}
 		return root;
 	}
-	
+
 	/**
 	 * Liefert die <code>uid</code> für eine <code>nid</code>. 
 	 * 
@@ -1496,44 +1509,48 @@ public class NodeEngine {
 	 */
 	public long getUIDforNID(long nid){
 		Node node = getNode(nid);
-		if (node!=null) {
+		if (node!=null)
 			return node.getUserID();
-		} else {
+		else
 			return -1;
-		}
 	}
-	
+
 	/**
 	 * Visualisiert den Topologie-Baum für das Debug-Kommando (/debug tree).
 	 */
 	public void showTree() {
-	        TreeNode root = getTree();
-	        // Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
-	        JTree tree = new JTree( root );
-	        // Ein Frame herstellen, um den Tree anzuzeigen
-	        JFrame frame = new JFrame( "publicMAIN - Topology" );
-	        frame.add( new JScrollPane( tree ));
-	        frame.setIconImage(Help.getIcon("pM_Logo.png").getImage());
-	        frame.setMinimumSize(new Dimension(250, 400));
-	        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-	        frame.pack();
-	        frame.setLocationRelativeTo( null );
-	        frame.setVisible( true );
+		TreeNode root = getTree();
+		// Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
+		JTree tree = new JTree( root );
+		// Ein Frame herstellen, um den Tree anzuzeigen
+		JFrame frame = new JFrame( "publicMAIN - Topology" );
+		frame.add( new JScrollPane( tree ));
+		frame.setIconImage(Help.getIcon("pM_Logo.png").getImage());
+		frame.setMinimumSize(new Dimension(250, 400));
+		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+		frame.pack();
+		frame.setLocationRelativeTo( null );
+		frame.setVisible( true );
 	}
 
 	private final class Maintainer implements Runnable {
 		@Override
 		public void run() {
 			while(online) {
-				if(isRoot())sendRA();
-				if(isRoot())pollChilds();
-				else sendroot(new MSG(meinNode));
+				if(isRoot()) {
+					sendRA();
+				}
+				if(isRoot()) {
+					pollChilds();
+				} else {
+					sendroot(new MSG(meinNode));
+				}
 				try {
 					Thread.sleep(Config.getConfig().getPingInterval());
 				} catch (InterruptedException e) {
 				}
-				
-				
+
+
 			}
 		}
 	}
@@ -1544,9 +1561,8 @@ public class NodeEngine {
 	 */
 	private final class RootMe implements Runnable {
 		public void run() {
-			if (!online||isRoot()||rootDiscovering) {
+			if (!online||isRoot()||rootDiscovering)
 				return;
-			}
 			long until = System.currentTimeMillis() + DISCOVER_TIMEOUT;
 			while (System.currentTimeMillis() < until) {
 				try {
@@ -1561,7 +1577,7 @@ public class NodeEngine {
 			}
 		}
 	}
-	
+
 	/**
 	 * TODO: Überprüfen!
 	 * 
@@ -1596,8 +1612,8 @@ public class NodeEngine {
 			List<MSG> ra_replies = new ArrayList<MSG>();
 			ra_replies.addAll(root_claims_stash);
 			Collections.sort(ra_replies);
-			long deadline = ra_replies.get(0).getTimestamp() + 2
-					* ROOT_CLAIM_TIMEOUT;
+			long deadline = ra_replies.get(0).getTimestamp() + (2
+					* ROOT_CLAIM_TIMEOUT);
 
 			Node toConnectTo = meinNode;
 			long maxPenunte = getNodes().size();
@@ -1605,10 +1621,10 @@ public class NodeEngine {
 				if (x.getTimestamp() <= deadline) {
 					long tmp_size = x.getEmpfänger();
 					Node tmp_node = (Node) x.getData(); // Cast Payload in ein
-														// Object Array und das
-														// 2. Object dieses
-														// Arrays in einen Node
-					if (tmp_size > maxPenunte
+					// Object Array und das
+					// 2. Object dieses
+					// Arrays in einen Node
+					if ((tmp_size > maxPenunte)
 							|| ((tmp_size == maxPenunte) && (tmp_node
 									.getNodeID() > toConnectTo.getNodeID()))) {
 						toConnectTo = tmp_node;
@@ -1624,7 +1640,7 @@ public class NodeEngine {
 				setRootMode(true);
 			} else {
 				discover(); // another root won and should be
-							// answeringconnectTo(toConnectTo);
+				// answeringconnectTo(toConnectTo);
 			}
 			root_claims_stash.clear();
 			rootDiscovering = false;
@@ -1636,9 +1652,8 @@ public class NodeEngine {
 	 */
 	private final class ConnectionsAccepter implements Runnable {
 		public void run() {
-			if(connections==null||server_socket==null) {
+			if((connections==null)||(server_socket==null))
 				return;
-			}
 			while (online) {
 				LogEngine.log("ConnectionsAccepter", "Listening on Port:" + server_socket.getLocalPort(), LogEngine.INFO);
 				try {

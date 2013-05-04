@@ -7,15 +7,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,7 +34,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	private JTextField nickNameTextField;
 	private JButton goButton;
 	private JButton pullButton;
-	
+
 	private JLabel wellcomeLabel2;
 	private JLabel wellcomeLabel3;
 	private JLabel userNameLabel;
@@ -48,14 +45,14 @@ public class StartWindow extends JFrame implements ActionListener{
 //	private JLabel backupserverIPLabel;
 //	private JTextField backupserverIPTextField;
 	private MouseListener txtFieldML;
-	
+
 	private GridBagConstraints c;
 	private Insets set;
 
 	private boolean plsRunGUI;
-	
+
 	private StartWindow() {
-		
+
 		instanz =this;
 		this.welcomeLogo				= 	new JLabel(Help.getIcon("textlogo.png",307,78));
 		this.welcomeLabel1				=	new JLabel("Enter your Nick and push \"GO\" if you just want to chat.");
@@ -67,9 +64,9 @@ public class StartWindow extends JFrame implements ActionListener{
 
 		this.c 							= 	new GridBagConstraints();
 		this.set 						=	new Insets(5, 5, 5, 5);
-		
+
 		this.plsRunGUI					=	false;
-		
+
 		//Die, die dann noch dazu kommen wenn man "Pull from Backup" clickt
 		this.wellcomeLabel2				=	new JLabel("For using backupserver enter Username, Password");
 		this.wellcomeLabel3				=	new JLabel("and the IP of your backupserver");
@@ -96,47 +93,47 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.userNameTextField.addMouseListener(txtFieldML);
 //		this.backupserverIPTextField.addMouseListener(txtFieldML);
 
-		
+
 		this.setTitle("Welcome!");
 		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 		this.setMinimumSize(new Dimension(200, 180));
-		
+
 		this.setLayout(new GridBagLayout());
 		c.insets 	= set;
 		c.fill 		= GridBagConstraints.HORIZONTAL;
 		c.anchor	= GridBagConstraints.LINE_START;
-		
+
 		// hinzufügen der Komponenten zum this
 		c.gridx 	= 0;
 		c.gridy 	= 0;
 		c.gridwidth = 2;
 		this.add(welcomeLogo ,c);
-		
+
 		c.gridy 	= 1;
 		this.add(welcomeLabel1, c);
-		
+
 		c.gridy 	= 2;
 		c.gridwidth = 1;
 		this.add(nickNameLabel, c);
-		
+
 		c.gridx 	= 1;
 		this.add(nickNameTextField, c);
-		
+
 		c.gridx 	= 0;
 		c.gridy 	= 3;
 		this.add(goButton, c);
-		
+
 		c.gridx 	= 1;
 		this.add(pullButton, c);
-		
+
 		this.pack();
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
-	
+
 	private synchronized boolean bla(){
 		try {
 			this.wait();
@@ -153,39 +150,39 @@ public class StartWindow extends JFrame implements ActionListener{
 		me.dispose();
 		return x;
 	}
-	
+
 	private void changeStructure(JButton sourceButton){
 		statusTextField.setBackground(new Color(229, 195, 0));
 		statusTextField.setEditable(false);
 		statusTextField.setText("Checking  Backupserver availability...");
 		sourceButton.setText("PULL from Backup & GO");
 		sourceButton.setActionCommand("PULL from Backup & GO");
-		
+
 		c.gridx 	= 0;
 		c.gridy 	= 3;
 		c.gridwidth = 2;
 		this.add(goButton, c);
-		
+
 		c.gridy 	= 4;
 		c.gridx 	= 0;
 		c.gridwidth = 2;
 		this.add(wellcomeLabel2, c);
-		
+
 		c.gridy 	= 5;
 		this.add(wellcomeLabel3, c);
-		
+
 		c.gridx 	= 0;
 		c.gridy 	= 6;
 		c.gridwidth = 1;
 		this.add(userNameLabel, c);
-		
+
 		c.gridx 	= 1;
 		this.add(userNameTextField, c);
-		
+
 		c.gridx 	= 0;
 		c.gridy 	= 7;
 		this.add(passWordLabel, c);
-		
+
 		c.gridx 	= 1;
 		this.add(passWordTextField, c);
 		
@@ -200,12 +197,13 @@ public class StartWindow extends JFrame implements ActionListener{
 		c.gridy 	= 9;
 		c.gridwidth = 2;
 		this.add(statusTextField, c);
-		
+
 		c.gridx 	= 0;
 		c.gridy 	= 10;
 		c.gridwidth = 2;
 		this.add(sourceButton, c);
 		sourceButton.setVisible(true);
+
 		this.pack();
 		new Thread(new Runnable() {
 			public void run() {
@@ -231,37 +229,38 @@ public class StartWindow extends JFrame implements ActionListener{
 			
 			Pattern nickNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
 			Matcher nickNameMatcher = nickNamePattern.matcher(choosenAlias);
-			
+
 			Pattern choosenBackupDBUserNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
-			Matcher choosenBackupDBUserNameMatcher = choosenBackupDBUserNamePattern.matcher(choosenBackupDBUserName);
-			
-			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+			choosenBackupDBUserNamePattern.matcher(choosenBackupDBUserName);
+
+//			Pattern choosenBackupDBIPPattern = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
 //			Matcher choosenBackupDBIPMatcher = choosenBackupDBIPPattern.matcher(choosenBackupDBIP);
 			
+
 			switch(evt.getActionCommand()){
-				case "GO":
-					if (choosenAlias.equals("") || !nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
-						nickNameTextField.setForeground(Color.RED);
-						nickNameTextField.setText("Not allowed characters or nick to long!");
-					} else {
-						Config.getConfig().setUserID(userID);
-						Config.getConfig().setAlias(choosenAlias);
-						Config.write();
-						plsRunGUI = true;
-						synchronized (instanz) {
-							this.notifyAll();
-						}
-						this.setVisible(false);
+			case "GO":
+				if (choosenAlias.equals("") || !nickNameMatcher.find() || (choosenAlias.length() > Config.getConfig().getMaxAliasLength())){
+					nickNameTextField.setForeground(Color.RED);
+					nickNameTextField.setText("Not allowed characters or nick to long!");
+				} else {
+					Config.getConfig().setUserID(userID);
+					Config.getConfig().setAlias(choosenAlias);
+					Config.write();
+					plsRunGUI = true;
+					synchronized (instanz) {
+						this.notifyAll();
 					}
-					break;
-					
-				case "PULL from Backup":
-					JButton sourceButton = (JButton)evt.getSource();
-					changeStructure(sourceButton);
+					this.setVisible(false);
+				}
 				break;
-				
-				case "PULL from Backup & GO":						
-					System.out.println(DatabaseEngine.getDatabaseEngine().getStatusBackup());
+
+			case "PULL from Backup":
+				JButton sourceButton = (JButton)evt.getSource();
+				changeStructure(sourceButton);
+				break;
+
+			case "PULL from Backup & GO":						
+				System.out.println(DatabaseEngine.getDatabaseEngine().getStatusBackup());
 				if (DatabaseEngine.getDatabaseEngine().getStatusBackup()>=1) {
 					int config_result = DatabaseEngine.getDatabaseEngine().getConfig(choosenBackupDBUserName, choosenBackupDBPassword);
 					if (config_result == 2) {
@@ -273,21 +272,30 @@ public class StartWindow extends JFrame implements ActionListener{
 							this.setVisible(false);
 						} else {
 							// Fehler beim laden der config keine gültige USER ID gefunden
+							statusTextField.setText("Error while loading Settings couldn´t find USER ID");
+							statusTextField.setBackground(new Color(229, 195, 0));
 							System.out.println("Fehler beim laden der config keine gültige USER ID gefunden");
 						}
 					} else if (config_result == 1) {
 						// Fehler beim pullen der config (null) returned
+						statusTextField.setText("Error: No Settings saved.");
+						statusTextField.setBackground(new Color(229, 195, 0));
 						System.out.println("Fehler beim pullen der config (null) returned");
 					} else if (config_result == 0) {
 						// Angegebener nutzer exisitert nicht oder password falsch
+						statusTextField.setText("Error: User doesn´t exists or UN or PW wrong.");
+						statusTextField.setBackground(new Color(229, 195, 0));
 						System.out.println("Angegebener nutzer exisitert nicht oder password falsch");
 					}
 				} else {
 					//Database not there check settings
 					System.out.println("Database not there check settings");
+					statusTextField.setText("Backupserver not available");
+					statusTextField.setBackground(Color.RED);
+					new SettingsWindow(1, true);
 				}
 
-		
+
 				break;
 			}	
 		}

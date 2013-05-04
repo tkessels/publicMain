@@ -6,8 +6,8 @@ import java.net.URI;
 import java.net.URL;
 
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 
 import org.publicmain.common.LogEngine;
 
@@ -29,7 +29,7 @@ public class HyperLinkController implements HyperlinkListener {
 			}
 		}
 	}
-	
+
 	/**
 	 * Diese Klasse erhält die zu öffnende URI und öffnet diese mit dem Systembrowser.
 	 * 
@@ -37,9 +37,9 @@ public class HyperLinkController implements HyperlinkListener {
 	 * @throws IOException
 	 */
 	public static void openWebpage(URI uri) throws IOException {
-	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-	            desktop.browse(uri);
-	    }
+		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+		if ((desktop != null) && desktop.isSupported(Desktop.Action.BROWSE)) {
+			desktop.browse(uri);
+		}
 	}
 }

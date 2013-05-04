@@ -27,14 +27,12 @@ public class publicMAIN {
 	 */
 	public static void main(String[] args) throws IOException {
 		if (Config.getLock()) {
-			DatabaseEngine.getDatabaseEngine();
+			
+//			DatabaseEngine.getDatabaseEngine();
+			
 			if (Config.getConfig().getUserID() == null) {
+				
 				MulticastConnectionHandler.getMC().discoverBUS();
-				// TODO: hier darauf warten bis nutzer daten eingegeben und
-				// "submit" gedrückt hat. also zum Beispiel ein boolean im
-				// Startwindwo überprüfen
-				// TODO: Will Werte bei Submit-Klick im StartWindow in der
-				// Config speichern...wie? ;-)
 				boolean tom = StartWindow.getStartWindow();
 				if (tom) {
 					// Help.playSound("logon.wav");

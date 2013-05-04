@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
@@ -66,6 +67,22 @@ public class DatabaseEngine {
 	public void writeConfig(){
 				if(localDB.getStatus())localDB.writeAllSettingsToDB(Config.getConfig());
 		}
+	
+	
+	public int getConfig(String user, String password) {
+		//load config
+		try {
+			Properties tmp = backupDB.getConfig(user, password);
+			if (tmp!=null) { //load worked
+				Config.importConfig(tmp);
+				return 2;
+			}else {
+				return 1; //load did return nothing
+			}
+		} catch (IllegalArgumentException e) {
+			return 0;
+		}
+	}
 	
 	public synchronized static DatabaseEngine getDatabaseEngine() {
 		if(me==null) new DatabaseEngine();
@@ -278,6 +295,10 @@ public class DatabaseEngine {
 		System.out.println(über);	
 		}
 		
+	}
+	
+	public int getStatusBackup() {
+		return backupDB.getStatus();
 	}
 
 

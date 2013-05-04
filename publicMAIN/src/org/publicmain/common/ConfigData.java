@@ -48,6 +48,11 @@ public class ConfigData extends Properties {
 		String uid = this.getProperty("System.UserID");
 		return (uid != null) ? Long.parseLong(uid) : null;
 	}
+	
+	public boolean isvalid() {
+		return (!"".equals(getAlias())&&(getUserID()!=null));
+		
+	}
 
 	public void setAlias(String alias) {
 		this.setProperty("System.alias", alias);
@@ -361,6 +366,13 @@ public class ConfigData extends Properties {
 	public void setBackupDBChoosenUserPassWord(String userPassWord) {
 		this.setProperty("sql.backup_db_choosen_user_password", userPassWord);
 	}
+	
+	public void clearBackupDBChoosenUser() {
+		this.remove("sql.backup_db_choosen_username");
+		this.remove("sql.backup_db_choosen_user_password");
+	}
+
+	
 
 	
 }

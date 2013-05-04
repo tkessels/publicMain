@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
+import java.util.Properties;
 
+import org.publicmain.gui.SettingsWindow;
 import org.publicmain.sql.DatabaseEngine;
 
 /**
@@ -43,6 +45,12 @@ public class Config {
 			me = new Config();
 		}
 		return me.settings;
+	}
+	public static synchronized ConfigData setConfig(ConfigData newConfig) {
+		if (me == null) {
+			me = new Config();
+		}
+		return me.settings=newConfig;
 	}
 
 	/**
@@ -245,5 +253,13 @@ public class Config {
 			}
 		};
 		new Thread(target).start();
+	}
+
+	public static void importConfig(Properties tmp) {
+		ConfigData imported = new ConfigData(getConfig());
+		for (Object key : tmp.keySet()) {
+			if(tmp.get(key)!=null)imported.put(key, tmp.get(key));
+			}
+		setConfig(imported);
 	}
 }

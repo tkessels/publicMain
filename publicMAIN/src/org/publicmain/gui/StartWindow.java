@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
+import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 public class StartWindow extends JFrame implements ActionListener{
@@ -142,7 +143,8 @@ public class StartWindow extends JFrame implements ActionListener{
 		} catch (InterruptedException e) {
 			LogEngine.log(this, "Fehler in der syncorinized Methode" + e.getMessage(), LogEngine.ERROR);
 		}
-		return plsRunGUI;
+		//CONFIG VALID?
+		return Config.getConfig().isvalid();
 	}
 
 	public static boolean getStartWindow(){
@@ -209,11 +211,11 @@ public class StartWindow extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent evt) {
 		synchronized (instanz) {
-			//TODO: evtl. boolean setezen dessen status in ner methode aus der Starterklasse abgerufen werden kann.
 			long userID = (long) (Math.random() * Long.MAX_VALUE);
 			String choosenAlias = nickNameTextField.getText();
-			String choosenBackupDBUserName = userNameTextField.getText();
-			int choosenBackupDBUserPwdHash	= passWordTextField.getPassword().hashCode();
+			String choosenBackupDBUserName = userNameTextField.getText().trim();
+			String choosenBackupDBPassword = passWordTextField.getText().trim();
+			
 			String choosenBackupDBIP		= backupserverIPTextField.getText();
 			
 			Pattern nickNamePattern = Pattern.compile(Config.getConfig().getNamePattern());
@@ -247,39 +249,34 @@ public class StartWindow extends JFrame implements ActionListener{
 					changeStructure(sourceButton);
 				break;
 				
-				case "PULL from Backup & GO":						//Vorsicht...ist ein bissl undurchsichtig! Ist der selbe Button wie "oben" nur wurde der Text
-					//umbenannt und neu positioniert. Daher trifft ein anderer case im (selben) Buttoncontroller zu.
-					//TODO Hier noch die restlichen werte implementieren
-					//TODO hier noch abfangen, wenn pw leer
-					boolean checkOk = true;
-					if (choosenAlias.equals("") || nickNameMatcher.find() || choosenAlias.length() > Config.getConfig().getMaxAliasLength()){
-						nickNameTextField.setForeground(Color.RED);
-						nickNameTextField.setText("Not allowed characters or nick to long!");
-						checkOk = false;
-					} 					
-					if (choosenBackupDBUserNameMatcher.find()){
-						userNameTextField.setForeground(Color.RED);
-						userNameTextField.setText("Not allowed characters!");
-						checkOk = false;
-					} 
-					if (!choosenBackupDBIPMatcher.find()){
-						backupserverIPTextField.setForeground(Color.RED);
-						backupserverIPTextField.setText("no valid IP-Address");
-						checkOk = false;
-					} 
-					if (checkOk){
-						Config.getConfig().setAlias(choosenAlias);
-						Config.getConfig().setUserID(userID);
-						Config.getConfig().setBackupDBChoosenUsername(choosenBackupDBUserName);
-						Config.getConfig().setBackupDBChoosenUserPassWord(String.valueOf(choosenBackupDBUserPwdHash));
-						Config.getConfig().setBackupDBIP(choosenBackupDBIP);
-						Config.write();
-						plsRunGUI = true;
-						synchronized (instanz) {
-							this.notifyAll();
+				case "PULL from Backup & GO":						
+					System.out.println(DatabaseEngine.getDatabaseEngine().getStatusBackup());
+				if (DatabaseEngine.getDatabaseEngine().getStatusBackup()>=1) {
+					int config_result = DatabaseEngine.getDatabaseEngine().getConfig(choosenBackupDBUserName, choosenBackupDBPassword);
+					if (config_result == 2) {
+						if (Config.getConfig().isvalid()) {
+							plsRunGUI = true;
+							synchronized (instanz) {
+								this.notifyAll();
+							}
+							this.setVisible(false);
+						} else {
+							// Fehler beim laden der config keine gültige USER ID gefunden
+							System.out.println("Fehler beim laden der config keine gültige USER ID gefunden");
 						}
-						this.setVisible(false);
+					} else if (config_result == 1) {
+						// Fehler beim pullen der config (null) returned
+						System.out.println("Fehler beim pullen der config (null) returned");
+					} else if (config_result == 0) {
+						// Angegebener nutzer exisitert nicht oder password falsch
+						System.out.println("Angegebener nutzer exisitert nicht oder password falsch");
 					}
+				} else {
+					//Database not there check settings
+					System.out.println("Database not there check settings");
+				}
+
+		
 				break;
 			}	
 		}

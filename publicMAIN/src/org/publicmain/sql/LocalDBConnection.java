@@ -417,8 +417,6 @@ public class LocalDBConnection {
 		return null;
 	}
 
-
-
 	/**
 	 * Diese Methode speichert alle Nachichten in der LocDB indem es eine procedure aufruft
 	 * @param msgRS zu speicherndes ResultSet
@@ -476,6 +474,12 @@ public class LocalDBConnection {
 		return false;
 	}
 
+	/**
+	 * Diese Methode speichert alle Einstellungen in der LocDB indem es eine procedure aufruft
+	 * @param tmp_settings zu speicherndes ResultSet
+	 * @return true: Speichern hat geklappt
+	 * @return false: Speichern hat !geklappt
+	 */
 	public boolean push_settings(ResultSet tmp_settings){
 		if ((dbStatus >=3) &&  (tmp_settings != null)){
 			try {
@@ -740,7 +744,7 @@ public class LocalDBConnection {
 	public synchronized boolean writeRoutingTableToDB(Long nIDZiel, String hostNameZiel, Long uIDZiel, Long nIDGateWay) {
 		StringBuffer saveNodeStmt = new StringBuffer();
 		if (dbStatus >= 3){
-			saveNodeStmt.append("p_t_nodes_saveNodes(");
+			saveNodeStmt.append("CALL p_t_nodes_saveNodes(");
 			saveNodeStmt.append(nIDZiel + ",");
 			saveNodeStmt.append("'" + hostNameZiel + "',");
 			saveNodeStmt.append(uIDZiel+ "',");

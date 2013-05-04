@@ -184,10 +184,6 @@ public class BackupDBConnection {
 		return true;
 	}
 
-
-
-
-
 	public int getStatus() {
 		try {
 			getCon();

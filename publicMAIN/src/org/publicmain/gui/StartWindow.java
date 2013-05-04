@@ -56,8 +56,8 @@ public class StartWindow extends JFrame implements ActionListener{
 	private JLabel passWordLabel;
 	private JPasswordField passWordTextField;
 	private JTextField statusTextField;
-	private JLabel backupserverIPLabel;
-	private JTextField backupserverIPTextField;
+//	private JLabel backupserverIPLabel;
+//	private JTextField backupserverIPTextField;
 	private MouseListener txtFieldML;
 
 	private GridBagConstraints c;
@@ -200,7 +200,6 @@ public class StartWindow extends JFrame implements ActionListener{
 		c.gridx 	= 1;
 		this.add(passWordTextField, c);
 
-
 		c.gridx 	= 0;
 		c.gridy 	= 9;
 		c.gridwidth = 2;
@@ -213,6 +212,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		sourceButton.setVisible(true);
 
 		this.pack();
+
 		new Thread(new backupchecker()).start();
 	}
 
@@ -289,6 +289,7 @@ public class StartWindow extends JFrame implements ActionListener{
 					System.out.println("Database not there check settings");
 					statusTextField.setText("Backupserver not available");
 					statusTextField.setBackground(Color.RED);
+
 					SettingsWindow tmp = new SettingsWindow(1, true);
 					tmp.addWindowListener(new WindowAdapter() {
 						@Override

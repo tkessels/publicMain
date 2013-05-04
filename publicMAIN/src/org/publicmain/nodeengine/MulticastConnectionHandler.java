@@ -69,7 +69,7 @@ public class MulticastConnectionHandler {
 	}
 
 	public synchronized void sendmutlicast(MSG nachricht) {
-		if (isOpen()) {
+		if (multi_socket!=null&&multi_socket.isBound()) {
 			try {
 				multi_socket.send(msg2UDP(nachricht, MULTICAST_GROUP, MULTICAST_PORT));
 				LogEngine.log(this, "sende [MC]", nachricht);
@@ -80,10 +80,7 @@ public class MulticastConnectionHandler {
 		else LogEngine.log(this, "dropped [MC]", nachricht);
 	}
 	
-	public boolean isOpen() {
-		return (multi_socket.isConnected()&&!multi_socket.isClosed());
-	}
-
+	
 	public void discoverBUS() {
 		MulticastConnectionHandler.getMC().sendmutlicast(new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_DISCOVER, -1, -1, null, null));
 	}

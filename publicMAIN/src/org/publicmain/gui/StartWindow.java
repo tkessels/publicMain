@@ -20,6 +20,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
@@ -65,7 +67,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	private GridBagConstraints c;
 	private Insets set;
 
-	private boolean plsRunGUI;
+//	private boolean plsRunGUI;
 
 	private StartWindow() {
 
@@ -81,18 +83,18 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.c 							= 	new GridBagConstraints();
 		this.set 						=	new Insets(5, 5, 5, 5);
 
-		this.plsRunGUI					=	false;
+//		this.plsRunGUI					=	false;
 
 		//Die, die dann noch dazu kommen wenn man "Pull from Backup" clickt
 		this.wellcomeLabel2				=	new JLabel("For using backupserver enter Username, Password");
 		this.wellcomeLabel3				=	new JLabel("and the IP of your backupserver");
 		this.userNameLabel				=	new JLabel("Username");
 		this.userNameTextField 			=	new JTextField();
+		this.userNameTextField.getDocument().addDocumentListener(new PPuserChecker());
 		this.passWordLabel				=	new JLabel("Password");
 		this.	passWordTextField		=	new JPasswordField();
+		this.passWordTextField.getDocument().addDocumentListener(new PPuserChecker());
 		this.	statusTextField			=	new JTextField();
-//		this.	backupserverIPLabel		=	new JLabel("Backupserver IP");
-//		this.	backupserverIPTextField	=	new JTextField();
 		this.txtFieldML = new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				nickNameTextField.setForeground(Color.BLACK);
@@ -107,7 +109,6 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.nickNameTextField.setActionCommand("GO");
 		this.nickNameTextField.addMouseListener(txtFieldML);
 		this.userNameTextField.addMouseListener(txtFieldML);
-//		this.backupserverIPTextField.addMouseListener(txtFieldML);
 
 
 		this.setTitle("Welcome!");
@@ -166,6 +167,16 @@ public class StartWindow extends JFrame implements ActionListener{
 		me.dispose();
 		return x;
 	}
+	
+	private void ppCheck() {
+		if(DatabaseEngine.getDatabaseEngine().isValid(userNameTextField.getText(), passWordTextField.getText())) {
+			userNameTextField.setBackground(Color.green);
+			passWordTextField.setBackground(Color.green);
+		}else {
+			userNameTextField.setBackground(Color.white);
+			passWordTextField.setBackground(Color.white);
+		}
+	}
 
 	private void changeStructure(JButton sourceButton){
 		statusTextField.setBackground(new Color(229, 195, 0));
@@ -219,7 +230,6 @@ public class StartWindow extends JFrame implements ActionListener{
 	}
 
 	public void actionPerformed(ActionEvent evt) {
-		synchronized (instanz) {
 			long userID = (long) (Math.random() * Long.MAX_VALUE);
 			String choosenAlias = nickNameTextField.getText();
 			String choosenBackupDBUserName = userNameTextField.getText().trim();
@@ -242,7 +252,7 @@ public class StartWindow extends JFrame implements ActionListener{
 					Config.getConfig().setUserID(userID);
 					Config.getConfig().setAlias(choosenAlias);
 					Config.write();
-					plsRunGUI = true;
+//					plsRunGUI = true;
 					synchronized (instanz) {
 						this.notifyAll();
 					}
@@ -260,7 +270,7 @@ public class StartWindow extends JFrame implements ActionListener{
 					int config_result = DatabaseEngine.getDatabaseEngine().getConfig(choosenBackupDBUserName, choosenBackupDBPassword);
 					if (config_result == 2) {
 						if (Config.getConfig().isvalid()) {
-							plsRunGUI = true;
+//							plsRunGUI = true;
 							synchronized (instanz) {
 								this.notifyAll();
 							}
@@ -297,7 +307,20 @@ public class StartWindow extends JFrame implements ActionListener{
 					});
 				}
 				break;
-			}	
+		}
+	}
+	private final class PPuserChecker implements DocumentListener {
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			ppCheck();
+		}
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			ppCheck();
+		}
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			ppCheck();
 		}
 	}
 }

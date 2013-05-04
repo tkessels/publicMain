@@ -189,7 +189,7 @@ public class Kalender extends JDialog {
 				}
 
 				// Fallse feiertag, bezeichnung setzen und markieren
-				if ( t.getFeiertagBez() != null ){
+				else if ( t.getFeiertagBez() != null ){
 					t.setBorder(new LineBorder(Color.RED, 2, true)); 
 					t.setToolTipText(t.getFeiertagBez());
 				}

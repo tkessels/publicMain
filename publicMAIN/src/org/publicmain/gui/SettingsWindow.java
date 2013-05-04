@@ -389,31 +389,9 @@ public class SettingsWindow extends JDialog{
 		
 
 		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
-		this.userPushPullTextField.getDocument().addDocumentListener(new DocumentListener() {
-			
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				checkppuser();
-				// TODO Auto-generated method stub
-				
-			}
-			
-			
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				// TODO Auto-generated method stub
-				checkppuser();
-				
-			}
-			
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				// TODO Auto-generated method stub
-				checkppuser();
-				
-			}
-		});
+		this.userPushPullTextField.getDocument().addDocumentListener(new PPuserChecker());
 		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
+		this.pwPushPullPasswordField.getDocument().addDocumentListener(new PPuserChecker());
 		this.portLocalDBTextField.setText(Config.getConfig().getLocalDBPort());
 		this.userLocalDBTextField.setText(Config.getConfig().getLocalDBUser());
 		this.pwLocalDBPasswordField.setText(Config.getConfig().getLocalDBPw());
@@ -623,6 +601,26 @@ public class SettingsWindow extends JDialog{
 
 	
 	
+	private final class PPuserChecker implements DocumentListener {
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			checkppuser();
+			// TODO Auto-generated method stub
+		}
+
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			// TODO Auto-generated method stub
+			checkppuser();
+		}
+
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			// TODO Auto-generated method stub
+			checkppuser();
+		}
+	}
+
 	class CardButtonController implements ActionListener{
 		public void actionPerformed(final ActionEvent e) {
 			cardsPanelLayout.show(cardsPanel, e.getActionCommand());

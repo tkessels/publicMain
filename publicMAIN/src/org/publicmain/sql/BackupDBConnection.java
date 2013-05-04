@@ -265,6 +265,38 @@ public class BackupDBConnection {
 		return false;
 	}
 	
+//	public synchronized boolean deleteAllMessages(){
+//		try {
+//			if(!userexists(usrName)){
+//			PreparedStatement prp = getCon().prepareStatement("Insert into t_backupUser(username,password) values(?,?)");
+//			prp.setString(1, usrName);
+//			prp.setString(2, passwd);
+//			prp.execute();
+//			prp.close();
+//			return true;
+//			}
+//			else{
+//				LogEngine.log(this, "BackupUser already exists",LogEngine.ERROR);
+//			}
+//		} catch (SQLException e) {
+//			LogEngine.log(this, e);
+//		}
+//		return false;
+//	}
+//	
+	private void writeResultSetToSettings (ResultSet settingsRS){
+		try {
+			settingsRS.beforeFirst();
+			while (settingsRS.next()){
+					Config.getConfig().put(settingsRS.getString(1), settingsRS.getString(3));
+			}
+			Config.write();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public synchronized boolean deleteUser(){
 		try {
 			String usrName = Config.getConfig().getBackupDBChoosenUsername();

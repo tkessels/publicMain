@@ -580,7 +580,8 @@ public class SettingsWindow extends JDialog{
 				 case 2:
 					 userPushPullTextField.setText("");
 					 pwPushPullPasswordField.setText("");
-//					 Config.getConfig().clearBackupDBChoosenUser();		//TODO: einkommentieren sobald methode da!
+					 Config.getConfig().clearBackupDBChoosenUser();		//TODO: einkommentieren sobald methode da!
+					 deletePushPullBtn.setEnabled(false);
 					 JOptionPane.showMessageDialog(me,"User deleted!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
 					 //alles Sahne
 					 break;

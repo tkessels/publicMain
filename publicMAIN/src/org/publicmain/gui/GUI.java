@@ -841,7 +841,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				DatabaseEngine.getDatabaseEngine().pull();
 				break;
 			case "Delete History":
-				DatabaseEngine.getDatabaseEngine().deleteBackup();
+				if(JOptionPane.showConfirmDialog(me, "Do you really want to delete the backup history?", "Delete backup history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0){
+					DatabaseEngine.getDatabaseEngine().deleteBackupMessages();
+				}
 				break;
 			}
 		}

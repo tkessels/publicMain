@@ -36,19 +36,19 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 		});			
 		System.out.println(scores);
 
-		
+
 		return scores.get(0).item;
 	}
-	
+
 	private double getScore(Node node,int depth) {
 		double maxcon =Config.getConfig().getMaxConnections();
 		double con = node.getChildCount();
 		con = (con>maxcon)?maxcon:con;
 		double conval=(scale_connections==LINEAR)?con/maxcon:Math.pow(con, 2)/Math.pow(maxcon,2);
-		double rootval=(scale_root_distance==LINEAR)?(node.getLevel()/(double)depth):(Math.pow(node.getLevel(),2)/Math.pow((double)depth,2));
+		double rootval=(scale_root_distance==LINEAR)?(node.getLevel()/(double)depth):(Math.pow(node.getLevel(),2)/Math.pow(depth,2));
 		return (conval*(1-ratio))+(rootval*ratio);
 	}
-	
+
 	public static List<Node> returnAllNodes(Node node){
 		List<Node> listOfNodes = new ArrayList<Node>();
 		addAllNodes(node, listOfNodes);
@@ -63,7 +63,7 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 			}
 		}
 	}
-	
+
 	class ScoreEntry{
 		Node item;
 		Double score;

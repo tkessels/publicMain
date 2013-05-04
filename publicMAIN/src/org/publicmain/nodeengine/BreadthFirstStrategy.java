@@ -30,9 +30,8 @@ public class BreadthFirstStrategy implements BestNodeStrategy {
 			Node tree_cursor = cursor.nextElement();
 			// Neues Level
 			if (tree_cursor.getLevel() != level) {
-				if (candidates.size() > 0) {
+				if (candidates.size() > 0)
 					return getMinNode(candidates);
-				}
 				level = tree_cursor.getLevel();
 			}
 			// Letzter Node

@@ -7,7 +7,6 @@ import org.publicmain.common.LogEngine;
 import org.publicmain.gui.GUI;
 import org.publicmain.gui.StartWindow;
 import org.publicmain.nodeengine.MulticastConnectionHandler;
-import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 /**
@@ -27,11 +26,11 @@ public class publicMAIN {
 	 */
 	public static void main(String[] args) throws IOException {
 		if (Config.getLock()) {
-			
-//			DatabaseEngine.getDatabaseEngine();
-			
+
+			//			DatabaseEngine.getDatabaseEngine();
+
 			if (Config.getConfig().getUserID() == null) {
-				
+
 				MulticastConnectionHandler.getMC().discoverBUS();
 				boolean tom = StartWindow.getStartWindow();
 				if (tom) {
@@ -48,13 +47,13 @@ public class publicMAIN {
 			// werden der die Module in der richtigen Reihenfolge startet.
 		} else {
 			JOptionPane.showMessageDialog(
-							null,
-							"Could not start publicMAIN\nAn instance is already running!",
-							"publicMAIN", JOptionPane.ERROR_MESSAGE,
-							Help.getIcon("pM_Logo.png", 48));
+					null,
+					"Could not start publicMAIN\nAn instance is already running!",
+					"publicMAIN", JOptionPane.ERROR_MESSAGE,
+					Help.getIcon("pM_Logo.png", 48));
 			LogEngine
-					.log("Could not start publicMAIN An instance is already running!",
-							LogEngine.ERROR);
+			.log("Could not start publicMAIN An instance is already running!",
+					LogEngine.ERROR);
 		}
 	}
 }

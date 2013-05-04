@@ -30,11 +30,11 @@ public class GruppenKanal extends Kanal {
 	 *   
 	 */
 	public boolean add(MSG nachricht) {
-		if (nachricht.getTyp() == NachrichtenTyp.GROUP
+		if ((nachricht.getTyp() == NachrichtenTyp.GROUP)
 				&& nachricht.getGroup().equals(referenz)) {
 			LogEngine.log(this, "[" + referenz + "]" + countObservers() + ":",
 					nachricht);
-		//	messages.add(nachricht);
+			//	messages.add(nachricht);
 			setChanged();
 			notifyObservers(nachricht);
 			return true;

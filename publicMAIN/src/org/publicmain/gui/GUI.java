@@ -98,7 +98,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} catch (Exception e) {
 			LogEngine.log(e);
 		}
-		
+
 		GUI.me 					= this;
 		this.log 				= new LogEngine();
 		// this.locDBCon 		= LocalDBConnection.getDBConnection();
@@ -124,7 +124,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.deleteLocalHistory		= new JMenuItem("Delete", Help.getIcon("delHistorySym.png"));
 		this.trayIcon 			= new PMTrayIcon();
 		this.afkStatus 			= false;
-		
+
 		/**
 		 * Erstellen erforderlicher Controller und Listener
 		 */
@@ -139,7 +139,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.pushHistory.addActionListener(new menuContoller());
 		this.delBackupHistory.addActionListener(new menuContoller());
 		this.settings.addActionListener(new menuContoller());
-		
+
 		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
 		this.contactListBtn.setToolTipText("show contacts");
 		this.contactListBtn.addActionListener(new ActionListener() {
@@ -156,7 +156,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}
 			}
 		});
-		
+
 		/**
 		 * Menü-Komponenten hinzufügen
 		 */
@@ -208,14 +208,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.contactListAufklappen();
 
 	}
-	
+
 	/**
 	 * Diese Methode klappt die Benutzerliste auf.
 	 */
 	private void contactListAufklappen(){
 
 		if(!contactListActive){
-			
+
 			this.contactListBtn.setToolTipText("hide contacts");
 			this.contactListBtn.setIcon(Help.getIcon("g20051.png"));
 			this.contactListBtn.setSelected(true);
@@ -224,7 +224,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			contactListActive = true;
 		}
 	}
-	
+
 	/**
 	 * Diese Methode klappt die Benutzerliste zu.
 	 */
@@ -253,9 +253,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			cw = new ChatWindow((String) referenz);
 		} else if (referenz instanceof Long) {
 			cw = new ChatWindow((Long) referenz);
-		} else {
+		} else
 			return null;
-		}
 
 		// Titel festlegen
 		String title = cw.getChatWindowName();
@@ -327,7 +326,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// TODO: Hier evtl. noch anderen Programmablauf implementier
 		// z.B. schließen des Programms wenn letztes ChatWindow geschlossen
 		// wird
-		
+
 		// Falls nur noch ein ChatWindow übrig kann dieses nicht entfernt werden
 		if(chatList.size() >= 2){
 			// ChatWindow (cw) aus jTabbedPane entfernen:
@@ -338,7 +337,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			ce.remove_MSGListener(cw);
 		}
 	}
-	
+
 	/**
 	 * Diese Methode entfernt ein ChatWindow anhand des Namens, sie sorgt dafür
 	 * das ChatWindows aus der ArrayList "chatList" entfernt werden und im GUI
@@ -349,7 +348,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public void delChat(Object refObject) {
 		delChat(getCW(refObject));
 	}
-	
+
 	/**
 	 * Fokussiert das angegebene ChatWindow
 	 * 
@@ -357,11 +356,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	private void focus(ChatWindow cw) {
 		int index = jTabbedPane.indexOfComponent(cw);
-		if (index >= 0)
+		if (index >= 0) {
 			jTabbedPane.setSelectedIndex(index);
+		}
 		cw.focusEingabefeld();
 	}
-	
+
 	/**
 	 * Diese Methode überprüft einen String (Gruppenname oder Alias) auf Gültigkeit
 	 * 
@@ -379,16 +379,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			if(typ == 0){
 				if(contactListWin==null) return true;
 				return !contactListWin.groupExists(name);
-			} else if(typ == 1){
+			} else if(typ == 1)
 				return !contactListWin.aliasExists(name);
-			} else {
+			else
 				return false;
-			}
-		} else {
+		} else
 			return false;
-		}
 	}
-	
+
 	/**
 	 * Diese Methode prüft einen übergebenen Namen auf gültige länge und 
 	 * kürzt diesen gegebenenfalls. Außerdem besteht die Möglichkeit den Namen
@@ -407,7 +405,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 		return name;
 	}
-	
+
 	/**
 	 * Diese Methode setzt den Alias auf den übergebenen String und schreibt diesen
 	 * in die Config, falls Alias ungültig wird eine entsprechende Fehlermeldung ausgegeben.
@@ -425,7 +423,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			info("Illegal charakter in username!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 1);
 		}
 	}
-	
+
 	/**
 	 * TODO: Kommentar
 	 * 
@@ -434,7 +432,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public ChatWindow getActiveCW() {
 		return (ChatWindow) jTabbedPane.getSelectedComponent();
 	}	
-	
+
 	/**
 	 * Diese Methode setzt den AFK Status (afkStatus).
 	 * 
@@ -451,7 +449,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 		this.notifyGUI();
 	}
-	
+
 	/**
 	 * Diese Methode gibt den AFK Status zurück.
 	 * 
@@ -461,8 +459,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public boolean isAFK() {
 		return afkStatus;
 	}
-	
-	
+
+
 	/**
 	 * Fährt das Programm ordnungsgemäß runter
 	 */
@@ -485,7 +483,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(hcdHelp != null) {
 			hcdHelp.hideIt();
 		}
-//		Help.playSound("logoff.wav");
+		//		Help.playSound("logoff.wav");
 		// Kontaktliste schließen
 		contactListZuklappen();
 		// SettingsWindow schließen
@@ -523,14 +521,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private ChatWindow getCW(Object referenz) {
 		if (referenz != null) {
 			for (ChatWindow cur : chatList) {
-				if (cur.equals(referenz)) {
+				if (cur.equals(referenz))
 					return cur;
-				}
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Diese Methode wird in einem privaten ChatWindow zum versenden der
 	 * Nachricht verwendet
@@ -567,11 +564,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				info("Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2);
 			}
 		} else {
-//			focus(tmpCW);
+			//			focus(tmpCW);
 		}
 		ce.send_group(empfGrp, msg);
 	}
-	
+
 	/**
 	 * Diese Methode ist für das Ignorien eines users
 	 * 
@@ -611,7 +608,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal=fileChooser.showOpenDialog(me);
 		File selectedFile = fileChooser.getSelectedFile();
-		if((returnVal== JFileChooser.APPROVE_OPTION)&&selectedFile!=null)sendFile(selectedFile, uid);
+		if((returnVal== JFileChooser.APPROVE_OPTION)&&(selectedFile!=null)) {
+			sendFile(selectedFile, uid);
+		}
 	}
 
 	/**
@@ -635,7 +634,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			info("Only single Files are supported!", uid, 3);
 		}
 	}	
-	
+
 	/**
 	 * @param msg
 	 */
@@ -644,7 +643,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			trayIcon.recieveMSG(msg);
 		}
 	}
-	
+
 	/**
 	 * @param text
 	 */
@@ -653,7 +652,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			trayIcon.recieveText(text, code);
 		}
 	}
-	
+
 	/**
 	 * Displays a text message in the referenced ChatWindow (Group/UID) or the
 	 * active Window if reference is <code>null</code>
@@ -681,7 +680,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}
 	}
-	
+
 	/**
 	 * Diese Methode liefert ein Fileobjekt, sie benachrichtigt über die GUI den
 	 * Nutzer und fordert einen Ablageort an.
@@ -696,7 +695,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		JOptionPane yesno_pane= new  JOptionPane("Möchten sie die Datei \""+dateiname+ "\" von "+ fr.sender.getAlias() +" annehmen? ("+fr.getNiceSize() +")",JOptionPane.QUESTION_MESSAGE,JOptionPane.YES_NO_OPTION);
 		final JDialog yesno_dialog=yesno_pane.createDialog(me, "Dateitransfer");
 		final JFileChooser fileChooser = new JFileChooser();
-		
+
 		Thread timoutBot = new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -707,24 +706,25 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				fileChooser.cancelSelection();
 			}
 		});
-		if(fr.size>=Config.getConfig().getMaxFileSize())timoutBot.start();
-		
+		if(fr.size>=Config.getConfig().getMaxFileSize()) {
+			timoutBot.start();
+		}
+
 		yesno_dialog.show();
 		Object  x = yesno_pane.getValue();
-		
-		
-		if(x!=null&&x instanceof Integer &&((Integer)x)==0) {
-			if (dateiname != null)
+
+
+		if((x!=null)&&(x instanceof Integer) &&(((Integer)x)==0)) {
+			if (dateiname != null) {
 				fileChooser.setSelectedFile(new File(dateiname));
-			int returnVal = fileChooser.showSaveDialog(me);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-//				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
-				return fileChooser.getSelectedFile();
 			}
+			int returnVal = fileChooser.showSaveDialog(me);
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+				//				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
+				return fileChooser.getSelectedFile();
 			return null;
-		} else {
+		} else
 			return null;
-		}
 	}
 
 	/**
@@ -742,8 +742,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if(o instanceof KnotenKanal){
 			MSG tmp = (MSG) arg;
 			Node tmp_node =null;
-			if(tmp.getSender()!=ce.getMyNodeID())tmp_node = ce.getNodeForNID(tmp.getSender());
-			else if (tmp.getEmpfänger()!=ce.getMyNodeID())tmp_node = ce.getNodeForNID(tmp.getEmpfänger());
+			if(tmp.getSender()!=ce.getMyNodeID()) {
+				tmp_node = ce.getNodeForNID(tmp.getSender());
+			} else if (tmp.getEmpfänger()!=ce.getMyNodeID()) {
+				tmp_node = ce.getNodeForNID(tmp.getEmpfänger());
+			}
 			if(tmp_node!=null){
 				me.addPrivCW(tmp_node.getUserID(), false);
 				ce.put(tmp);
@@ -760,7 +763,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public Node getNodeForUID(long uid) {
 		return ce.getNodeForUID(uid);
 	}
-	
+
 	/**
 	 * Diese Methode stellt das GUI bereit
 	 * 
@@ -775,7 +778,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 		return me;
 	}
-	
+
 	/**
 	 * TODO: Kommentar
 	 * 
@@ -792,17 +795,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
 	}
-	
-	
+
+
 	/**
 	 * ActionListener für Menu's
 	 */
 	class menuContoller implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
-			
+
 			JMenuItem source = (JMenuItem)e.getSource();
-			
+
 			switch (source.getText()) {
 
 			case "Exit":
@@ -823,7 +826,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				}
 				break;
 			case "Search":
-//				HistoryWindow.showThis();
+				//				HistoryWindow.showThis();
 				new HistoryWindow();
 				break;
 			case "Delete":
@@ -848,7 +851,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}
 	}
-	
+
 	/**
 	 * WindowListener für GUI
 	 */
@@ -860,7 +863,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				contactListZuklappen();
 			}
 		}
-		
+
 		public void windowClosed(WindowEvent arg0) {
 			shutdown();
 		}
@@ -877,7 +880,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	/**
 	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus
 	 */
-/*	private void getLookAndFeelDefaultsToConsole(){
+	/*	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
 		Vector<?> vec = new Vector<Object>(def.keySet());
 		Collections.sort(vec, new Comparator<Object>() {
@@ -889,5 +892,5 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 //			System.out.println(obj + "\n\t" + def.get(obj));
 		}
 	}
-*/
+	 */
 }

@@ -11,10 +11,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
@@ -31,7 +29,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
 import org.publicmain.chatengine.ChatEngine;
-import org.publicmain.common.Config;
 import org.publicmain.common.Node;
 import org.resources.Help;
 
@@ -44,24 +41,24 @@ import org.resources.Help;
  * 
  */
 public class ContactList extends JWindow {
-	
+
 	private int breite;
-	
+
 	private JFrame parent;
-	
+
 	private JInternalFrame internalFrame;
-	
+
 	private JScrollPane groupsScroller;
 	private JPanel groupPanel;
 	private JList<String> groups;
 	private JButton createGrp;
-	
+
 	private JSplitPane trenner;
-	
+
 	private JScrollPane usersScroller;
 	private JPanel userPanel;
 	private JList<Node> users;
-	
+
 	public ContactList(JFrame parent) {
 		this.parent			= parent;
 		this.internalFrame	= new JInternalFrame("contacts");
@@ -74,27 +71,27 @@ public class ContactList extends JWindow {
 		this.createGrp		= new JButton("Create Group");
 		this.userPanel		= new JPanel(new BorderLayout());
 		this.trenner		= new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-         
+
 		this.internalFrame.setLayout(new BorderLayout());
 		this.internalFrame.setFrameIcon(Help.getIcon("g18050.png"));
-		
+
 		this.groupPanel.setPreferredSize(new Dimension(breite, parent.getHeight()/4));
 		this.groupPanel.setBorder(BorderFactory.createTitledBorder("GROUPS"));
 		this.groupPanel.setBackground(Color.WHITE);
-		
+
 		this.userPanel.setBorder(BorderFactory.createTitledBorder("USERS"));
 		this.userPanel.setBackground(Color.WHITE);
-		
+
 		this.users.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.users.setLayoutOrientation(JList.VERTICAL);
 		this.users.setVisibleRowCount(-1);
 		this.users.setCellRenderer(new UsersListCellRenderer());
-		
+
 		this.groups.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.groups.setLayoutOrientation(JList.VERTICAL);
 		this.groups.setVisibleRowCount(-1);
 		this.groups.setCellRenderer(new GroupsListCellRenderer());
-		
+
 		// Listener adden
 		this.users.addMouseListener(new MyMouseListener());
 		this.groups.addMouseListener(new MyMouseListener());
@@ -103,7 +100,7 @@ public class ContactList extends JWindow {
 			public void actionPerformed(ActionEvent e) {
 				String tmpGrpName = null;
 				tmpGrpName = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter Groupname", "Groupname", JOptionPane.OK_CANCEL_OPTION, Help.getIcon("gruppe.png"), null, null);
-				if(tmpGrpName!=null && GUI.getGUI().checkName(tmpGrpName,0)){
+				if((tmpGrpName!=null) && GUI.getGUI().checkName(tmpGrpName,0)){
 					tmpGrpName = GUI.getGUI().confName(tmpGrpName, true);
 					GUI.getGUI().addGrpCW(tmpGrpName, true);
 				} else {
@@ -111,22 +108,22 @@ public class ContactList extends JWindow {
 				}
 			}
 		});
-		
+
 		// adden der Komponenten
 		this.groupPanel.add(groupsScroller, BorderLayout.CENTER);
 		this.groupPanel.add(createGrp, BorderLayout.SOUTH);
-		
+
 		this.userPanel.add(usersScroller, BorderLayout.CENTER);
-		
+
 		this.trenner.add(groupPanel);
 		this.trenner.add(userPanel);
 
 		this.internalFrame.add(trenner, BorderLayout.CENTER);
-		
+
 		this.add(internalFrame);
-		
+
 		this.internalFrame.setVisible(true);
-		
+
 		parent.addComponentListener(new ComponentListener() {
 			@Override
 			public void componentHidden(ComponentEvent e) {
@@ -145,7 +142,7 @@ public class ContactList extends JWindow {
 			}
 		});
 	}
-	
+
 	public boolean groupExists(String name){
 		return ((GroupListModel)groups.getModel()).contains(name);
 	}
@@ -153,14 +150,14 @@ public class ContactList extends JWindow {
 	public boolean aliasExists(String alias) {
 		return ((UserListModel)users.getModel()).contains(alias);
 	}
-	
+
 	@Override
 	public void repaint() {
 		Rectangle tmp=parent.getBounds();
 		setBounds((int)(tmp.getX()-breite),(int)tmp.getY(), breite, tmp.height);
 		super.repaint();
 	}
-	
+
 	class MyMouseListener extends MouseAdapter {
 
 		public void mouseClicked(MouseEvent e) {
@@ -183,7 +180,7 @@ public class ContactList extends JWindow {
 				if((index >= 0)&&(index<source.getModel().getSize())){
 					source.setSelectedIndex(index);
 					Object o = source.getModel().getElementAt(index);
-//					if(source.getModel().getClass().getSimpleName().startsWith("User")){
+					//					if(source.getModel().getClass().getSimpleName().startsWith("User")){
 					if(o instanceof Node){
 						Node tmp = (Node)o;
 						PopupUser popupUsr = new PopupUser(new popupListener(tmp.getAlias()));
@@ -193,15 +190,15 @@ public class ContactList extends JWindow {
 						PopupGroup popupGrp = new PopupGroup(o.toString(), new popupListener(o.toString()));
 						popupGrp.show(source, e.getX(), e.getY());
 					}
-					
-					
+
+
 				}
 			}
 		}
 	}
 
 	class PopupUser extends JPopupMenu{
-		
+
 		private JMenuItem whisper;
 		private JMenuItem sendFile;
 		private JMenuItem ignore;
@@ -209,7 +206,7 @@ public class ContactList extends JWindow {
 		private JMenuItem info;
 		private JMenuItem changeAlias;
 		private JMenuItem afkStatus;
-		
+
 		public PopupUser(ActionListener popupListener){
 			String user=users.getSelectedValue().getAlias();
 			long userID = users.getSelectedValue().getUserID();
@@ -221,7 +218,7 @@ public class ContactList extends JWindow {
 			this.info 		 = new JMenuItem("info's about " + user, Help.getIcon("infoSym.png"));
 			this.changeAlias = new JMenuItem("change Alias", Help.getIcon("changeAliasSym.png",14,16));
 			this.afkStatus	 = new JMenuItem("AFK (on/off)", Help.getIcon("afkSym.png",16,12));
-			
+
 			this.whisper.addActionListener(popupListener);
 			this.sendFile.addActionListener(popupListener);
 			this.ignore.addActionListener(popupListener);
@@ -229,7 +226,7 @@ public class ContactList extends JWindow {
 			this.info.addActionListener(popupListener);
 			this.changeAlias.addActionListener(popupListener);
 			this.afkStatus.addActionListener(popupListener);
-			
+
 			if (!(userID==ChatEngine.getCE().getUserID())) {
 				this.add(whisper);
 				this.add(new Separator());
@@ -247,40 +244,40 @@ public class ContactList extends JWindow {
 			}
 			this.add(info);
 		}
-	
+
 	}
-	
+
 	class PopupGroup extends JPopupMenu{
-		
+
 		private JMenuItem join;
 		private JMenuItem leave;
 		private String group;
-		
+
 		public PopupGroup(String group, ActionListener popupListener){
 			this.group = group;
 			this.join = new JMenuItem("join " + group, Help.getIcon("joinGrpSym.png"));
 			this.leave = new JMenuItem("leave " + group, Help.getIcon("leaveGrpSym.png"));
-			
+
 			this.join.addActionListener(popupListener);
 			this.leave.addActionListener(popupListener);
-			
+
 			this.add(join);
 			this.add(leave);
 		}
 	}
-	
+
 	class popupListener implements ActionListener{
-		
+
 		private String chatname;
-		
+
 		public popupListener(String chatname){
 			this.chatname = chatname;
 		}
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JMenuItem source = (JMenuItem)e.getSource();
-			
+
 			if(source.getText().startsWith("join")){
 				GUI.getGUI().addGrpCW(chatname, true);
 			}
@@ -288,8 +285,8 @@ public class ContactList extends JWindow {
 				GUI.getGUI().delChat(chatname);
 			}
 			else if(source.getText().startsWith("whisper")){
-				
-//				GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(chatname).getUserID());
+
+				//				GUI.getGUI().addPrivCW(ChatEngine.getCE().getNodeforAlias(chatname).getUserID());
 				GUI.getGUI().addPrivCW(users.getSelectedValue().getUserID(), true);
 			}
 			else if(source.getText().startsWith("ignore")){
@@ -310,20 +307,20 @@ public class ContactList extends JWindow {
 			else if(source.getText().startsWith("change")){
 				String tmpAlias = null;
 				tmpAlias = (String)JOptionPane.showInputDialog(GUI.getGUI(), "Enter new Alias", "Change Alias", JOptionPane.OK_CANCEL_OPTION, Help.getIcon("private.png"), null, null);
-				if(tmpAlias != null && !tmpAlias.equals("")){
+				if((tmpAlias != null) && !tmpAlias.equals("")){
 					GUI.getGUI().changeAlias(tmpAlias);
 				} 
 			}
 		}
 	}
-	
+
 	//Experimentel 
 	class UsersListCellRenderer extends JLabel implements ListCellRenderer {
-        public UsersListCellRenderer() {
-            setOpaque(true);
-        }
-        public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            
+		public UsersListCellRenderer() {
+			setOpaque(true);
+		}
+		public Component getListCellRendererComponent(JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
 			//die Anzeige des Alias in der Userliste anpassen:
 			String tmpText = value.toString();
 			String[] cutText = tmpText.split("@", 2);
@@ -332,28 +329,31 @@ public class ContactList extends JWindow {
 			if (ChatEngine.getCE().is_ignored(tmp.getNodeID())){
 				setText(cutText[0] + " (ignored)");
 				setForeground(Color.RED);
-			} else if(ChatEngine.getCE().getMyNodeID()==tmp.getNodeID() && GUI.getGUI().isAFK()){
+			} else if((ChatEngine.getCE().getMyNodeID()==tmp.getNodeID()) && GUI.getGUI().isAFK()){
 				setText(cutText[0] + " (afk)");
 				setForeground(Color.GRAY);
 			}
 			else if (ChatEngine.getCE().getMyNodeID() == tmp
-					.getNodeID())
+					.getNodeID()) {
 				setForeground(new Color(255, 133, 18));
-			else
+			} else {
 				setForeground(Color.BLACK);
-			
-			
-			if (isSelected)
+			}
+
+
+			if (isSelected) {
 				setBackground(new Color(25, 169, 241));
-			else
+			} else {
 				setBackground(Color.WHITE);
-			if (cellHasFocus)
+			}
+			if (cellHasFocus) {
 				setBackground(getBackground().darker());
+			}
 			return this;
-			
-        }
-    }
-	
+
+		}
+	}
+
 	class GroupsListCellRenderer extends JLabel implements ListCellRenderer {
 		public GroupsListCellRenderer() {
 			setOpaque(true);
@@ -366,8 +366,8 @@ public class ContactList extends JWindow {
 			} else {
 				setForeground(Color.BLACK);
 			}
-			
-			
+
+
 			if (isSelected){
 				setBackground(new Color(25, 169, 241));
 			} else {
@@ -378,6 +378,6 @@ public class ContactList extends JWindow {
 			}
 			return this;
 		}
-		
+
 	}
 }

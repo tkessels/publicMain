@@ -42,14 +42,14 @@ public class LocalDBConnection {
 	private String dbName;
 	private String rootUser;
 	private String rootPasswd;
-	
+
 	//Tabellen der Loc DB
 	private String usrTbl;
 	private String nodeTbl;
 	private String msgTbl;
 	private Set<Node> allnodes = Collections.synchronizedSet(new HashSet<Node>());
-	
-	
+
+
 	//--------neue Sachen------------
 	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=DB und Tabellen angelegt 3=mit db verbunden
 	private int maxVersuche;
@@ -60,23 +60,23 @@ public class LocalDBConnection {
 	private boolean ceReadyForWritingSettings;
 	private PreparedStatement searchInHistStmt;
 	//--------neue Sachen ende------------
-	
+
 	// verbindungssachen
 	private static LocalDBConnection me;
-	
+
 	private void addnodez(Collection<Node> node){
 		synchronized (allnodes) {
 			allnodes.removeAll(node);
 			allnodes.addAll(node);
 		}
 	}
-	
-	
- 	/**
- 	 * Constructor der LocDBConnection
- 	 * @param databaseEngine
- 	 */
- 	private LocalDBConnection(DatabaseEngine databaseEngine) {
+
+
+	/**
+	 * Constructor der LocDBConnection
+	 * @param databaseEngine
+	 */
+	private LocalDBConnection(DatabaseEngine databaseEngine) {
 		this.url 					= "jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/";
 		this.dbName 				= Config.getConfig().getLocalDBDatabasename();
 		this.rootUser				= "root";
@@ -89,15 +89,15 @@ public class LocalDBConnection {
 		this.dbStatus	= 0;				// 0=nicht bereit	1=con besteht	2=Tables wurden angelegt 3=use db_publicmain erfolgreich / als user publicMain angemeldet / hardWorkingThread läuft
 		this.maxVersuche = 5;
 		this.warteZeitInSec = 10;
-//		this.writtenStandardUser = false;
+		//		this.writtenStandardUser = false;
 		this.connectToDBThread = new Thread(new firstConnectToLocDBServerBot());
 		this.ceReadyForWritingSettings = false;
 		//--------neue Sachen ende------------
 		connectToDBThread.start();
 	}
- 	
- 	
- 	
+
+
+
 	/**
 	 * Factorymethode für die LocDBConnection
 	 * @param databaseEngine
@@ -110,8 +110,8 @@ public class LocalDBConnection {
 		return me;
 	}
 
-	
-	
+
+
 	/**
 	 * Ist für den ersten Verbindungsaufbau verantwortlich.
 	 * Prüft den Status der DB durch Abfragen.
@@ -165,21 +165,20 @@ public class LocalDBConnection {
 			}
 		}
 	}
-	
+
 	/**
 	 * Die Methode prüft ob die in der Config geschriebene DB-Version mit der in dieser Klasse befindlichen DB-Version überein stimmt 
 	 * @return true = DB-Version korrekt.
 	 * @return false = DB-Version !korrekt.
 	 */
 	private boolean correctLocDBVersion (){
-		if(Config.getConfig().getLocalDBVersion() == LOCAL_DATABASE_VERSION){
+		if(Config.getConfig().getLocalDBVersion() == LOCAL_DATABASE_VERSION)
 			return true;
-		}
 		return false;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Diese Methode stellt eine Verbindung als root zum DB-Server her
 	 *	@return true = erfolgreich.
@@ -187,8 +186,12 @@ public class LocalDBConnection {
 	 */
 	private synchronized boolean connectToLocDBServerAsRoot(){
 		try {
-			if(stmt!= null) stmt.close();
-			if(con!= null) con.close();
+			if(stmt!= null) {
+				stmt.close();
+			}
+			if(con!= null) {
+				con.close();
+			}
 			con = DriverManager.getConnection(url, rootUser, rootPasswd);
 			stmt = con.createStatement();
 			LogEngine.log(this, "DB-ServerVerbindung als " + rootUser + " hergestellt", LogEngine.INFO);
@@ -204,8 +207,8 @@ public class LocalDBConnection {
 			return false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Diese Methode stellt eine Verbindung mit in der Config angegebenen Benutzer zum DB-Server her
 	 *	@return true = erfolgreich.
@@ -213,8 +216,12 @@ public class LocalDBConnection {
 	 */
 	private synchronized boolean connectToLocDBServerAspublicMain() {
 		try {
-			if (stmt != null) stmt.close();
-			if (con != null) con.close();
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (con != null) {
+				con.close();
+			}
 			con = DriverManager.getConnection(url, Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
 			stmt = con.createStatement();
 			synchronized (stmt) {
@@ -229,20 +236,19 @@ public class LocalDBConnection {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Diese öffentliche Methode repräsentiert den Status der DB nach 'Außen'
 	 *	@return true = DB berreit zum schreiben.
 	 * 	@return false = DB !berreit zum schreiben.
 	 */
 	public boolean getStatus(){
-		if (dbStatus==3){
+		if (dbStatus==3)
 			return true;
-		} else {
+		else
 			return false;
-		}
 	}
-	
+
 	/**
 	 * Wird ein Verbindungsabbruch zur DB festgestellt wird diese Methode zum reconnect gentuzt
 	 * @param reconnectVersuche: repräsentiert den Zahlenwert des aktuellen Versuches wird bei jedem erfolglosen Versuch erhöht
@@ -253,26 +259,28 @@ public class LocalDBConnection {
 		new Thread(new Runnable() {
 			public void run() {
 				int reconnectVersuche = 1;
-				while (dbStatus < 3 && maxVersuche >= reconnectVersuche){
+				while ((dbStatus < 3) && (maxVersuche >= reconnectVersuche)){
 					LogEngine.log(this, "Lost connetion to locDBSvr. Try to reconnect in 10 seconds " + reconnectVersuche + "/" + maxVersuche +".", LogEngine.ERROR);
 					try {
 						Thread.sleep(warteZeitInSec * 1000);
 					} catch (InterruptedException e1) {
 					}
 					if (connectToLocDBServerAspublicMain()){
-							dbStatus = 3;
-							databaseEngine.go();
-							reconnectVersuche = 0;
+						dbStatus = 3;
+						databaseEngine.go();
+						reconnectVersuche = 0;
 					}
 					reconnectVersuche++;
-					if (reconnectVersuche == maxVersuche) LogEngine.log(this, "Lost connection to locDBSvr conclusively - will not try again.",LogEngine.ERROR);
+					if (reconnectVersuche == maxVersuche) {
+						LogEngine.log(this, "Lost connection to locDBSvr conclusively - will not try again.",LogEngine.ERROR);
+					}
 				}
 			}
 		}).start();
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Diese Methode erstellt die Datenbank aus einem create-script,
 	 * legt alle Procedures und Trigger an,
@@ -289,50 +297,50 @@ public class LocalDBConnection {
 					stmt.addBatch(read);
 				}
 				//INSERT PROCEDURES
-					
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_savePrivateMessage`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_savePrivateMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newTxt VARCHAR(200), IN newFk_t_users_userID_empfaenger BIGINT(20)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender, txt,fk_t_users_userID_empfaenger) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newTxt, newFk_t_users_userID_empfaenger); END;");
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_saveGroupMessage`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveGroupMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newTxt VARCHAR(200), IN newFk_t_groups_groupName VARCHAR(20)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, txt, fk_t_groups_groupName) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newTxt, newFk_t_groups_groupName); END;");
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_saveSystemMessage`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveSystemMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newFk_t_users_userID_empfaenger BIGINT(20),IN newFk_t_msgType_ID INT) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender, fk_t_users_userID_empfaenger,fk_t_msgType_ID) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newFk_t_users_userID_empfaenger, newFk_t_msgType_ID); END;");
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_groups_saveGroups`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newGroupName VARCHAR(20),IN newFk_t_users_userID BIGINT(20)) BEGIN insert into t_groups (groupName, fk_t_users_userID) values (newGroupName,newFk_t_users_userID) ON DUPLICATE KEY UPDATE fk_t_users_userID=VALUES(fk_t_users_userID); END;");
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_saveUsersAndNodes`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsersAndNodes` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45), IN newNodeID BIGINT(20),  IN newComputerName VARCHAR(45)) BEGIN	DELETE FROM t_nodes WHERE fk_t_users_userID_2 = newUserID; INSERT INTO t_users (userID, displayName, userName) VALUES (newUserID,newDisplayName,newUserName) ON DUPLICATE KEY UPDATE displayName=VALUES(displayName), userName=VALUES(userName); INSERT INTO t_nodes(nodeID, computerName, fk_t_users_userID_2) VALUES (newNodeID, newComputerName, newUserID) ON DUPLICATE KEY UPDATE computerName=VALUES(computerName), fk_t_users_userID_2=VALUES(fk_t_users_userID_2); END;");
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_msgType`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_nodes_saveNodes`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_nodes_saveNodes` (IN newNodeID BIGINT(20), IN newComputerName VARCHAR(45), IN newFk_t_users_userID_2 BIGINT(20), IN newFk_t_nodes_nodeID BIGINT(20)) BEGIN INSERT INTO t_nodes (nodeID, computerName, fk_t_users_userID_2, fk_t_nodes_nodeID) VALUES (newNodeID, newComputerName, newFk_t_users_userID_2, newFk_t_nodes_nodeID) ON DUPLICATE KEY UPDATE computerName=VALUES(computerName), fk_t_users_userID_2=VALUES(fk_t_users_userID_2), fk_t_nodes_nodeID=VALUES(fk_t_nodes_nodeID); END;");
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_settings_saveSettings`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_settings_saveSettings` (IN newSettingsKey VARCHAR(45),IN newFk_t_users_userID_3 BIGINT(20), IN newSettingsValue VARCHAR(100)) BEGIN INSERT INTO t_settings (settingsKey, fk_t_users_userID_3, settingsValue) VALUES (newsettingsKey, newFk_t_users_userID_3, newSettingsValue) ON DUPLICATE KEY UPDATE fk_t_users_userID_3=VALUES(fk_t_users_userID_3), settingsValue=VALUES(settingsValue); END;");
-					//PUSH PROCEDURES
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_pushMessages`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_pushMessages` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20),IN newDisplayName VARCHAR(200), IN newTxt VARCHAR(200),  IN newFk_t_users_userID_empfaenger BIGINT(20), IN newFk_t_groups_groupName VARCHAR(20), IN newFk_t_msgType_ID INT) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, displayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newDisplayName, newTxt, newFk_t_users_userID_empfaenger, newFk_t_groups_groupName, newFk_t_msgType_ID);END;");
-					
-					stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_pushUsers`;");
-					stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_pushUsers` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45)) BEGIN INSERT IGNORE INTO t_users (userID, displayName, userName) VALUES (newUserID,newDisplayName,newUserName); END;");
-					
-					//TRIGGER
-					stmt.addBatch("DROP TRIGGER IF EXISTS `db_publicmain`.`tr_t_messages`;");
-					stmt.addBatch("CREATE TRIGGER `db_publicmain`.`tr_t_messages` BEFORE INSERT ON t_messages FOR EACH ROW SET new.displayName = (SELECT displayName FROM t_users WHERE userID = new.fk_t_users_userID_sender);");
-					
-					//Hier wird die Tabelle t_msgType automatisch befüllt!
-					for (MSGCode c : MSGCode.values()){
-						stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
-					}
-					stmt.executeBatch();
-					dbStatus = 2;
-					Config.getConfig().setLocalDBVersion(LOCAL_DATABASE_VERSION);
-					Config.write();
-					LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
-				
+
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_savePrivateMessage`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_savePrivateMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newTxt VARCHAR(200), IN newFk_t_users_userID_empfaenger BIGINT(20)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender, txt,fk_t_users_userID_empfaenger) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newTxt, newFk_t_users_userID_empfaenger); END;");
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_saveGroupMessage`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveGroupMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newTxt VARCHAR(200), IN newFk_t_groups_groupName VARCHAR(20)) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, txt, fk_t_groups_groupName) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newTxt, newFk_t_groups_groupName); END;");
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_saveSystemMessage`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_saveSystemMessage` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20), IN newFk_t_users_userID_empfaenger BIGINT(20),IN newFk_t_msgType_ID INT) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp,fk_t_users_userID_sender, fk_t_users_userID_empfaenger,fk_t_msgType_ID) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newFk_t_users_userID_empfaenger, newFk_t_msgType_ID); END;");
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_groups_saveGroups`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_groups_saveGroups` (IN newGroupName VARCHAR(20),IN newFk_t_users_userID BIGINT(20)) BEGIN insert into t_groups (groupName, fk_t_users_userID) values (newGroupName,newFk_t_users_userID) ON DUPLICATE KEY UPDATE fk_t_users_userID=VALUES(fk_t_users_userID); END;");
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_saveUsersAndNodes`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_saveUsersAndNodes` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45), IN newNodeID BIGINT(20),  IN newComputerName VARCHAR(45)) BEGIN	DELETE FROM t_nodes WHERE fk_t_users_userID_2 = newUserID; INSERT INTO t_users (userID, displayName, userName) VALUES (newUserID,newDisplayName,newUserName) ON DUPLICATE KEY UPDATE displayName=VALUES(displayName), userName=VALUES(userName); INSERT INTO t_nodes(nodeID, computerName, fk_t_users_userID_2) VALUES (newNodeID, newComputerName, newUserID) ON DUPLICATE KEY UPDATE computerName=VALUES(computerName), fk_t_users_userID_2=VALUES(fk_t_users_userID_2); END;");
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_msgType`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_msgType`(IN newMsgTypeID INT,IN newName VARCHAR(45),IN newDescription VARCHAR(45)) BEGIN INSERT INTO t_msgType (msgTypeID, name, description) VALUES (newMsgTypeID,newName,newDescription) ON DUPLICATE KEY UPDATE name=VALUES(name),description=VALUES(description); END;");
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_nodes_saveNodes`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_nodes_saveNodes` (IN newNodeID BIGINT(20), IN newComputerName VARCHAR(45), IN newFk_t_users_userID_2 BIGINT(20), IN newFk_t_nodes_nodeID BIGINT(20)) BEGIN INSERT INTO t_nodes (nodeID, computerName, fk_t_users_userID_2, fk_t_nodes_nodeID) VALUES (newNodeID, newComputerName, newFk_t_users_userID_2, newFk_t_nodes_nodeID) ON DUPLICATE KEY UPDATE computerName=VALUES(computerName), fk_t_users_userID_2=VALUES(fk_t_users_userID_2), fk_t_nodes_nodeID=VALUES(fk_t_nodes_nodeID); END;");
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_settings_saveSettings`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_settings_saveSettings` (IN newSettingsKey VARCHAR(45),IN newFk_t_users_userID_3 BIGINT(20), IN newSettingsValue VARCHAR(100)) BEGIN INSERT INTO t_settings (settingsKey, fk_t_users_userID_3, settingsValue) VALUES (newsettingsKey, newFk_t_users_userID_3, newSettingsValue) ON DUPLICATE KEY UPDATE fk_t_users_userID_3=VALUES(fk_t_users_userID_3), settingsValue=VALUES(settingsValue); END;");
+				//PUSH PROCEDURES
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_messages_pushMessages`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_messages_pushMessages` (IN newMsgID INT(11), IN newTimestmp BIGINT(20), IN newFk_t_users_userID_sender BIGINT(20),IN newDisplayName VARCHAR(200), IN newTxt VARCHAR(200),  IN newFk_t_users_userID_empfaenger BIGINT(20), IN newFk_t_groups_groupName VARCHAR(20), IN newFk_t_msgType_ID INT) BEGIN INSERT IGNORE INTO t_messages (msgID,timestmp, fk_t_users_userID_sender, displayName, txt, fk_t_users_userID_empfaenger, fk_t_groups_groupName, fk_t_msgType_ID) VALUES (newMsgID, newTimestmp, newFk_t_users_userID_sender, newDisplayName, newTxt, newFk_t_users_userID_empfaenger, newFk_t_groups_groupName, newFk_t_msgType_ID);END;");
+
+				stmt.addBatch("DROP PROCEDURE IF EXISTS `db_publicmain`.`p_t_user_pushUsers`;");
+				stmt.addBatch("CREATE PROCEDURE `db_publicmain`.`p_t_user_pushUsers` (IN newUserID BIGINT(20),IN newDisplayName VARCHAR(45),IN newUserName VARCHAR(45)) BEGIN INSERT IGNORE INTO t_users (userID, displayName, userName) VALUES (newUserID,newDisplayName,newUserName); END;");
+
+				//TRIGGER
+				stmt.addBatch("DROP TRIGGER IF EXISTS `db_publicmain`.`tr_t_messages`;");
+				stmt.addBatch("CREATE TRIGGER `db_publicmain`.`tr_t_messages` BEFORE INSERT ON t_messages FOR EACH ROW SET new.displayName = (SELECT displayName FROM t_users WHERE userID = new.fk_t_users_userID_sender);");
+
+				//Hier wird die Tabelle t_msgType automatisch befüllt!
+				for (MSGCode c : MSGCode.values()){
+					stmt.addBatch("CALL p_t_msgType(" + c.ordinal() + ",'" + c.name() + "','" +  c.getDescription() + "')");
+				}
+				stmt.executeBatch();
+				dbStatus = 2;
+				Config.getConfig().setLocalDBVersion(LOCAL_DATABASE_VERSION);
+				Config.write();
+				LogEngine.log(this, "DB-Status: " + dbStatus, LogEngine.INFO);
+
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e1) {
@@ -350,10 +358,10 @@ public class LocalDBConnection {
 			} catch (SQLException e) {
 			}
 		}
-		
+
 	}
-	
-		
+
+
 	/**
 	 * @return fragt die View 'v_pullAll_t_messages' ab und gibt das Ergebniss als ResultSet zurück
 	 */
@@ -371,7 +379,7 @@ public class LocalDBConnection {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return fragt die View 'v_pullAll_t_users' ab und gibt das Ergebniss als ResultSet zurück
 	 */
@@ -408,9 +416,9 @@ public class LocalDBConnection {
 		}
 		return null;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Diese Methode speichert alle Nachichten in der LocDB indem es eine procedure aufruft
 	 * @param msgRS zu speicherndes ResultSet
@@ -418,7 +426,7 @@ public class LocalDBConnection {
 	 * @return false: Speichern hat !geklappt
 	 */
 	public boolean push_msgs(ResultSet msgRS){
-		if (dbStatus >=3 &&  msgRS != null){
+		if ((dbStatus >=3) &&  (msgRS != null)){
 			try {
 				synchronized (stmt) {
 					PreparedStatement prp = con.prepareStatement("CALL p_t_messages_pushMessages(?,?,?,?,?,?,?,?)");
@@ -430,7 +438,7 @@ public class LocalDBConnection {
 						prp.setString(5, msgRS.getString(5));
 						long tmp = msgRS.getLong(7);
 						if(msgRS.wasNull()){
-							 prp.setNull(6, java.sql.Types.BIGINT);
+							prp.setNull(6, java.sql.Types.BIGINT);
 						}else{
 							prp.setLong(6, tmp);
 						}
@@ -442,19 +450,19 @@ public class LocalDBConnection {
 							prp.setInt(8, tmpMsgID);
 						}
 						prp.addBatch();
-						
-//						StringBuffer pushMsgStmt = new StringBuffer();
-//						pushMsgStmt.append("CALL p_t_messages_pushMessages(");
-//						pushMsgStmt.append(msgRS.getInt("msgID") + ",");
-//						pushMsgStmt.append(msgRS.getLong("timestmp") + ",");
-//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_sender") + ",");
-//						pushMsgStmt.append("'" + msgRS.getString("displayName") + "',");
-//						pushMsgStmt.append("'" + msgRS.getString("txt") + "',");
-//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_empfaenger") + ",");
-//						pushMsgStmt.append("'" + msgRS.getString("groupName") + "',");
-//						pushMsgStmt.append(msgRS.getInt("fk_t_msgType_ID") + ")");
-//						System.out.println(pushMsgStmt.toString());
-//						stmt.addBatch(pushMsgStmt.toString());
+
+						//						StringBuffer pushMsgStmt = new StringBuffer();
+						//						pushMsgStmt.append("CALL p_t_messages_pushMessages(");
+						//						pushMsgStmt.append(msgRS.getInt("msgID") + ",");
+						//						pushMsgStmt.append(msgRS.getLong("timestmp") + ",");
+						//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_sender") + ",");
+						//						pushMsgStmt.append("'" + msgRS.getString("displayName") + "',");
+						//						pushMsgStmt.append("'" + msgRS.getString("txt") + "',");
+						//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_empfaenger") + ",");
+						//						pushMsgStmt.append("'" + msgRS.getString("groupName") + "',");
+						//						pushMsgStmt.append(msgRS.getInt("fk_t_msgType_ID") + ")");
+						//						System.out.println(pushMsgStmt.toString());
+						//						stmt.addBatch(pushMsgStmt.toString());
 					}
 					prp.executeBatch();
 					prp.close();
@@ -467,9 +475,9 @@ public class LocalDBConnection {
 		}
 		return false;
 	}
-	
+
 	public boolean push_settings(ResultSet tmp_settings){
-		if (dbStatus >=3 &&  tmp_settings != null){
+		if ((dbStatus >=3) &&  (tmp_settings != null)){
 			try {
 				PreparedStatement prp = con.prepareStatement("CALL p_t_settings_saveSettings(?,?,?)");
 				while (tmp_settings.next()){
@@ -493,20 +501,20 @@ public class LocalDBConnection {
 	 * @return false: Speichern hat !geklappt
 	 */
 	public boolean push_users(ResultSet usrRS){
-		if (dbStatus >=3 && usrRS != null){
+		if ((dbStatus >=3) && (usrRS != null)){
 			try {
 				synchronized (stmt) {
-				while (usrRS.next()){
-					StringBuffer pushMsgStmt = new StringBuffer();
-					pushMsgStmt.append("CALL p_t_user_pushUsers(");
-					pushMsgStmt.append(usrRS.getLong("userID") + ",");
-					pushMsgStmt.append("'" + usrRS.getString("displayName") + "',");
-					pushMsgStmt.append("'" + usrRS.getString("userName") + "')");
-					
-					stmt.addBatch(pushMsgStmt.toString());
-				}
-				stmt.executeBatch();
-				return true;
+					while (usrRS.next()){
+						StringBuffer pushMsgStmt = new StringBuffer();
+						pushMsgStmt.append("CALL p_t_user_pushUsers(");
+						pushMsgStmt.append(usrRS.getLong("userID") + ",");
+						pushMsgStmt.append("'" + usrRS.getString("displayName") + "',");
+						pushMsgStmt.append("'" + usrRS.getString("userName") + "')");
+
+						stmt.addBatch(pushMsgStmt.toString());
+					}
+					stmt.executeBatch();
+					return true;
 				}
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while executing 'push_users': " + e.getMessage(), LogEngine.ERROR);
@@ -515,10 +523,10 @@ public class LocalDBConnection {
 		}
 		return false;
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Diese Methode schreibt eine Collection von Nodes unter aufruf einer procedure in die DB
 	 * @param allNodesFormDBE: Collection aller übergebnener Nodes
@@ -533,7 +541,7 @@ public class LocalDBConnection {
 				Iterator<Node> it = allNodesFormDBE.iterator();
 				boolean alldone=true;
 				while (it.hasNext()){
-					Node tmpNode = (Node) it.next();
+					Node tmpNode = it.next();
 					saveUserStmt = new StringBuffer();
 					saveUserStmt.append("CALL p_t_user_saveUsersAndNodes(");
 					saveUserStmt.append(tmpNode.getUserID() + ",");
@@ -541,7 +549,7 @@ public class LocalDBConnection {
 					saveUserStmt.append("'" + tmpNode.getUsername() + "',");
 					saveUserStmt.append(tmpNode.getNodeID()+ ",");
 					saveUserStmt.append("'" + tmpNode.getHostname() + "')");
-					
+
 					try {
 						synchronized (stmt) {
 							stmt.execute(saveUserStmt.toString());
@@ -564,9 +572,9 @@ public class LocalDBConnection {
 		return false;
 	}
 	//Settings werden ins beziehungsweise aus dem ConfigObjekt geladen nicht hier	
-	
-	
-	
+
+
+
 	/**
 	 * Diese Methode schreibt eine Collection von Groups unter aufruf einer procedure in die DB
 	 * @param groupsSet: Collection aller übergebnener Groups
@@ -601,8 +609,8 @@ public class LocalDBConnection {
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Verarbeitet einzelne Nachichten um sie zum schrieben in die DB vorzubereiten
 	 * @param m: übernimmt eine einzelne Nachricht
@@ -614,7 +622,7 @@ public class LocalDBConnection {
 		if (dbStatus >= 3) {
 			long uid_empfänger = -1;
 			if (m.getEmpfänger() != -1){
-				
+
 				uid_empfänger = getUIDforNID(m.getEmpfänger());
 			}
 			long uid_sender = getUIDforNID(m.getSender());
@@ -628,7 +636,7 @@ public class LocalDBConnection {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Sucht node aus lokalem Nodes-Set
 	 * @param nid: ID des gesuchten Nodes
@@ -642,7 +650,7 @@ public class LocalDBConnection {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Wandelt NodeID in entsprechende UserID um
 	 * @param nid: gesuchte NodeID
@@ -653,8 +661,8 @@ public class LocalDBConnection {
 		if(node!=null)return node.getUserID();
 		else return -1;
 	}
-	
-	
+
+
 	/**
 	 * Führt Schreibvorgang für alle Nachichten auf die LocDB unter benutzung verschiedener procedures durch
 	 * @param uid_empfänger: Zu schreibende uid des Empfängers der Nachicht
@@ -693,12 +701,15 @@ public class LocalDBConnection {
 				prpstmt.setLong(1, id);
 				prpstmt.setLong(2, timestamp);
 				prpstmt.setLong(3, uid_sender);
-				if(uid_empfänger>=0)prpstmt.setLong(4,uid_empfänger);
-				else prpstmt.setNull(4, java.sql.Types.BIGINT);
+				if(uid_empfänger>=0) {
+					prpstmt.setLong(4,uid_empfänger);
+				} else {
+					prpstmt.setNull(4, java.sql.Types.BIGINT);
+				}
 				prpstmt.setInt(5, code.ordinal());
 
 			} else	return true;
-			
+
 			if (prpstmt!=null) {
 				synchronized (stmt) {
 					prpstmt.execute();
@@ -715,8 +726,8 @@ public class LocalDBConnection {
 		}
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Diese Methode schreibt die Routinginformationen in die Datenbank
 	 * @param nIDZiel:	NodeID des Ziels
@@ -783,7 +794,7 @@ public class LocalDBConnection {
 			}).start();
 		}
 	}
-	
+
 	/**
 	 * Löscht alle Nachichten aus der LocDB
 	 * @return true: Löschen hat geklappt
@@ -800,7 +811,7 @@ public class LocalDBConnection {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Diese Methode ermöglicht die suche in der History auf der locDB
 	 * @param userID: 	gesuchte UserID
@@ -814,17 +825,23 @@ public class LocalDBConnection {
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
 		if (dbStatus >= 3){
 			try {
-//				if(groupName==null)searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ?  AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
-//				else searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ? AND fk_t_groups_groupName LIKE ? AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
+				//				if(groupName==null)searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ?  AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
+				//				else searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ? AND fk_t_groups_groupName LIKE ? AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
 				//test
 				StringBuilder prepState = new StringBuilder();
 				prepState.append("SELECT * from v_searchInHistory WHERE ");
-				if(userID!=null)prepState.append("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
-				if(alias != null)prepState.append("(sender LIKE ? OR recipient LIKE ?) AND");
-				if(groupName!=null)prepState.append("`group` LIKE ? AND ");
+				if(userID!=null) {
+					prepState.append("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
+				}
+				if(alias != null) {
+					prepState.append("(sender LIKE ? OR recipient LIKE ?) AND");
+				}
+				if(groupName!=null) {
+					prepState.append("`group` LIKE ? AND ");
+				}
 				prepState.append("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
 				searchInHistStmt = con.prepareStatement(prepState.toString());
-//				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
+				//				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
 				//test
 				int part=1;
 				if(userID!=null) {
@@ -835,12 +852,14 @@ public class LocalDBConnection {
 					searchInHistStmt.setString(part++, alias);
 					searchInHistStmt.setString(part++, alias);
 				}
-				if(groupName!=null)searchInHistStmt.setString(part++, groupName);
+				if(groupName!=null) {
+					searchInHistStmt.setString(part++, groupName);
+				}
 				searchInHistStmt.setLong(part++, begin);
 				searchInHistStmt.setLong(part++, end);
 				searchInHistStmt.setString(part++, msgTxt);
 				return searchInHistStmt.executeQuery();
-				
+
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while executing 'searchInHistStmt' PreparedStatment: " + e.getMessage(), LogEngine.ERROR);
 				dbStatus = 0;
@@ -849,7 +868,7 @@ public class LocalDBConnection {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Diese Methode schließt alle Verbindungen. 
 	 */
@@ -872,7 +891,7 @@ public class LocalDBConnection {
 				con.close();
 				LogEngine.log(LocalDBConnection.this,"Connection to LocDBServer closed",LogEngine.INFO);
 			}
-			
+
 
 		} catch (SQLException e) {
 			LogEngine.log(this, e);

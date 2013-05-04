@@ -6,12 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.publicmain.chatengine.ChatEngine;
-import org.publicmain.nodeengine.NodeEngine;
 
 /**
  * @author ATRM
@@ -20,7 +18,7 @@ import org.publicmain.nodeengine.NodeEngine;
 
 public class Node extends DefaultMutableTreeNode implements Serializable {
 	private static final long	serialVersionUID	= 300420131L;
-//	private static Node me;
+	//	private static Node me;
 	private final long nodeID;
 	private final long userID;
 	private String alias;
@@ -28,7 +26,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	private final List<InetAddress> sockets;
 	private final String hostname;
 	private int server_port;
-	
+
 	public Node(long nid, long uid, String username, String alias, String hostname){
 		this.nodeID = nid;
 		this.userID = uid;
@@ -37,28 +35,28 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 		this.hostname=hostname;
 		sockets=null;
 	}
-	
+
 	public Node(int port, long nid, long uid, String username, String alias) {
 		this.nodeID =nid;
 		this.userID =uid;
 		this.username 	=	System.getProperty("user.name");
 		this.alias		=	ChatEngine.getCE().getAlias();
-		
+
 		this.hostname=getMyHostname();
 		this.sockets=getMyIPs();
 		server_port = port;
 	}
-	
-	
+
+
 
 	public long getNodeID() {
 		return nodeID;
 	}
 
-/*	public void setNodeID(long nodeID) {
+	/*	public void setNodeID(long nodeID) {
 		this.nodeID = nodeID;
 	}
-*/
+	 */
 	public long getUserID() {
 		return userID;
 	}
@@ -66,7 +64,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	public String getUsername(){
 		return username;
 	}
-/*	public void setUserID(long userID) {
+	/*	public void setUserID(long userID) {
 		this.userID = userID;
 	}*/
 
@@ -88,7 +86,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	}
 
 
-/*
+	/*
 	public boolean isRoot() {
 		return isRoot;
 	}
@@ -96,7 +94,7 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	public void setRoot(boolean isRoot) {
 		this.isRoot = isRoot;
 	}
-	*/
+	 */
 	/**Erzeugt eine Liste aller lokal vergebenen IP-Adressen mit ausnahme von Loopbacks und IPV6 Adressen
 	 * @return Liste aller lokalen IPs
 	 */
@@ -104,7 +102,10 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 		List<InetAddress> addrList = new ArrayList<InetAddress>();
 		try {
 			for (InetAddress inetAddress : InetAddress.getAllByName(InetAddress.getLocalHost().getHostName())) { //Finde alle IPs die mit meinem hostname assoziert sind und 
-			if (inetAddress.getAddress().length==4)addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
+				if (inetAddress.getAddress().length==4)
+				{
+					addrList.add(inetAddress);									 //füge die meiner liste hinzu die IPV4 sind also 4Byte lang
+				}
 			}
 		} catch (UnknownHostException e) {
 			LogEngine.log(e);
@@ -115,18 +116,18 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	public int getServer_port() {
 		return server_port;
 	}
-	
+
 	@Override
 	public String toString() {
 		return alias+"@"+hostname;
 	}
-	
+
 
 	public String toString2() {
 		return "Node [nodeID=" + nodeID + ", userID=" + userID + ", " + (alias != null ? "alias=" + alias + ", " : "") + (username != null ? "username=" + username + ", " : "") + (sockets != null ? "sockets=" + sockets + ", " : "") + (hostname != null ? "hostname=" + hostname + ", " : "") + "server_port=" + server_port + "]";
 	}
-	
-	
+
+
 	private static String getMyHostname() {
 		String tmp;
 		try {
@@ -144,8 +145,8 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (nodeID ^ (nodeID >>> 32));	//da die NodeID 64Bit LONG ist und der Hash nur 32 bit INTus hat (omg ;) 
-		result = prime * result + (int) (userID ^ (userID >>> 32)); 		//werden hier die beiden 32 bit Hälften der IDs mit OR übereinander gelegt und zusammen gerechnet.
+		result = (prime * result) + (int) (nodeID ^ (nodeID >>> 32));	//da die NodeID 64Bit LONG ist und der Hash nur 32 bit INTus hat (omg ;) 
+		result = (prime * result) + (int) (userID ^ (userID >>> 32)); 		//werden hier die beiden 32 bit Hälften der IDs mit OR übereinander gelegt und zusammen gerechnet.
 		return result;																					//die Primzahl spreizt das ergebnis ausserdem sind Primzahlen total toll und sollten überall drin sein.
 	}
 
@@ -155,8 +156,8 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 	 * Ist das Vergleichsobjekt kein Node gehen wir davon aus, dass es eine andere NodeID hätte und der User gerade in Vermont zum shoppen ist. (=Ungleicheit) 
 	 */
 	public boolean equals(Object obj) {
-		return (obj!=null&&obj instanceof Node &&((Node)obj).getNodeID()==nodeID);
-		
+		return ((obj!=null)&&(obj instanceof Node) &&(((Node)obj).getNodeID()==nodeID));
+
 
 	}
 	public Map<String, String> getData(){
@@ -168,22 +169,24 @@ public class Node extends DefaultMutableTreeNode implements Serializable {
 		rück.put("nodeid",String.valueOf(nodeID));
 		rück.put("port",String.valueOf(server_port));
 		int index =0;
-		for (InetAddress soc : sockets)rück.put("ip_"+(index++),soc.getHostAddress());
+		for (InetAddress soc : sockets) {
+			rück.put("ip_"+(index++),soc.getHostAddress());
+		}
 		return rück;
 	}
-	
-	
+
+
 	@Override
 	public Object clone() {
 		return new Node(this.server_port,this.nodeID,this.userID,this.username,this.alias);
 	}
-	
 
 
 
-	
-	
 
-	
+
+
+
+
 
 }

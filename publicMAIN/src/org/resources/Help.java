@@ -4,7 +4,6 @@ import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,20 +18,20 @@ import org.publicmain.common.LogEngine;
 //import the sun.audio package
 
 public class Help {
-	
+
 	public static ImageIcon getIcon(String filename) {
 		return getIcon(filename, 16);
 	}
 	public static ImageIcon getIcon(String filename,int size) {
 		return getIcon(filename, size,size);
 	}
-	
+
 	public static InputStream getInputStream(String filename) throws IOException {
 		URL resource = Help.class.getResource(filename);
 		if (resource !=null) return new BufferedInputStream(resource.openStream());
 		else return null;
 	}
-	
+
 	public static File getFile(String filename) throws IOException {
 
 		File tmp = null;
@@ -60,7 +59,7 @@ public class Help {
 
 		return tmp;
 	}
-	
+
 	/**
 	 * Gibt des Bild in der angeforderten Größe zurück.
 	 * 
@@ -79,37 +78,41 @@ public class Help {
 		ImageIcon newIcon = new ImageIcon(newimg);
 		return newIcon;
 	}
-	
-	public static Clip getSound(final String filename) {
-		      try {
-			        InputStream stream = getInputStream(filename);
-			        if (stream!=null) {
-					clip = AudioSystem.getClip();
-					AudioInputStream inputStream = AudioSystem.getAudioInputStream(stream);
-					clip.open(inputStream);
-					return clip;
-				}
-			      } catch (Exception e) {
-				      LogEngine.log("Resources",e);
-			      }
-		      return null;
-	}
-		public static synchronized void playSound(final String filename) {
-			stopSound();
-			  new Thread(new Runnable() {
-			    public void run() {
-				    clip=getSound(filename);
-				    if(clip!=null)clip.start();
-			    }
-			  }).start();
-			}
-		public static synchronized void stopSound() {
-			if (clip!=null)clip.stop();
-			clip=null;
-		}
-		
-		private static Clip clip;
-	
 
+	public static Clip getSound(final String filename) {
+		try {
+			InputStream stream = getInputStream(filename);
+			if (stream!=null) {
+				clip = AudioSystem.getClip();
+				AudioInputStream inputStream = AudioSystem.getAudioInputStream(stream);
+				clip.open(inputStream);
+				return clip;
+			}
+		} catch (Exception e) {
+			LogEngine.log("Resources",e);
+		}
+		return null;
 	}
+	public static synchronized void playSound(final String filename) {
+		stopSound();
+		new Thread(new Runnable() {
+			public void run() {
+				clip=getSound(filename);
+				if(clip!=null) {
+					clip.start();
+				}
+			}
+		}).start();
+	}
+	public static synchronized void stopSound() {
+		if (clip!=null) {
+			clip.stop();
+		}
+		clip=null;
+	}
+
+	private static Clip clip;
+
+
+}
 

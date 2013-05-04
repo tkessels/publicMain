@@ -22,7 +22,6 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -30,29 +29,29 @@ import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
 
 public class DatabaseEngine {
-	
+
 	private LocalDBConnection localDB;
 	private BackupDBConnection backupDB;
-	
+
 	private BlockingQueue<MSG> msg2Store;
 	private BlockingQueue<Node> node2Store;
 	private BlockingQueue<Map.Entry<Long, Long>> routes2Store;
 	private BlockingQueue<String> groups2Store; 
-	
+
 	private HashSet<MSG> failed_msgs;
 	private List<Node> failed_node;
 	private BlockingQueue<Map.Entry<Long, Long>> failed_routes;
-//	private HashSet<Node> stored_nodes;
-//	private HashSet<Node> stored_routes;
- 
+	//	private HashSet<Node> stored_nodes;
+	//	private HashSet<Node> stored_routes;
+
 	private static DatabaseEngine me;
 	Thread transporter = new Thread(new DPTransportBot());
-	
+
 	private DatabaseEngine() {
 		me=this;
 		localDB = LocalDBConnection.getDBConnection(this);
 		backupDB = BackupDBConnection.getBackupDBConnection();
-		
+
 		msg2Store = new LinkedBlockingQueue<MSG>();
 		node2Store = new LinkedBlockingQueue<Node>();
 		routes2Store = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
@@ -60,16 +59,18 @@ public class DatabaseEngine {
 		failed_msgs = new HashSet<MSG>();
 		failed_node = new ArrayList<Node>();
 		failed_routes = new LinkedBlockingQueue<Map.Entry<Long,Long>>();
-		
+
 		Config.registerDatabaseEngine(this);
 		transporter.start();
 	}
-	
+
 	public void writeConfig(){
-				if(localDB.getStatus())localDB.writeAllSettingsToDB(Config.getConfig());
+		if(localDB.getStatus()) {
+			localDB.writeAllSettingsToDB(Config.getConfig());
 		}
-	
-	
+	}
+
+
 	public int getConfig(String user, String password) {
 		//load config
 		try {
@@ -77,23 +78,24 @@ public class DatabaseEngine {
 			if (tmp!=null) { //load worked
 				Config.importConfig(tmp);
 				return 2;
-			}else {
+			} else
 				return 1; //load did return nothing
-			}
 		} catch (IllegalArgumentException e) {
 			return 0;
 		}
 	}
-	
+
 	public synchronized static DatabaseEngine getDatabaseEngine() {
-		if(me==null) new DatabaseEngine();
+		if(me==null) {
+			new DatabaseEngine();
+		}
 		return me;
 	}
-	
+
 	public void put(MSG x){
 		msg2Store.offer(x);
 	}
-	
+
 	public void put(Node x){
 		node2Store.offer(x);
 	}
@@ -103,22 +105,22 @@ public class DatabaseEngine {
 			node2Store.offer(node);
 		}
 	}
-	
+
 	public void put(String group){
 		groups2Store.add(group);
 	}
-	
+
 
 	public void put(long target, long gateway){
 		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
 	}
-	
+
 	public void deleteLocalHistory() {
 		localDB.deleteAllMsgs();
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Diese Methode führt nach Statusprüfung die Methode  deleteAllMessages() auf der backupDB aus. 
 	 */
@@ -130,14 +132,13 @@ public class DatabaseEngine {
 
 	public int deleteBackupUserAccount() {
 		if(backupDB.getStatus()>=1){
-			if (backupDB.deleteUser()){
+			if (backupDB.deleteUser())
 				return 2;
-			}
 			return 1;
 		}
 		return 0;
 	}
-	
+
 	public void push(){
 		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 			backupDB.push_users(localDB.pull_users());
@@ -145,7 +146,7 @@ public class DatabaseEngine {
 			backupDB.push_settings(localDB.pull_settings());
 		}
 	}
-	
+
 	public void pull(){
 		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 			localDB.push_users(backupDB.pull_users());
@@ -153,7 +154,7 @@ public class DatabaseEngine {
 			localDB.push_settings(backupDB.pull_settings());
 		}
 	}
-	
+
 	private final class DPTransportBot implements Runnable {
 		@Override
 		public void run() {
@@ -162,7 +163,9 @@ public class DatabaseEngine {
 				if (!localDB.getStatus()) {
 					synchronized (transporter) {
 						try {
-							if (locDBWasConnectetBefore) localDB.reconnectToLocDBServer();
+							if (locDBWasConnectetBefore) {
+								localDB.reconnectToLocDBServer();
+							}
 							transporter.wait();
 							locDBWasConnectetBefore = true;
 						} catch (InterruptedException e) {
@@ -173,11 +176,11 @@ public class DatabaseEngine {
 					// kopiere msgs
 					List<MSG> tmp_msg = new ArrayList<MSG>(msg2Store);
 					msg2Store.removeAll(tmp_msg);
-					
+
 					// kopiere groups
 					List<String> tmp_groups = new ArrayList<String>(groups2Store);
 					groups2Store.removeAll(tmp_groups);
-					
+
 					// kopiere nodes
 					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
 					node2Store.removeAll(tmp_nodes);
@@ -185,16 +188,18 @@ public class DatabaseEngine {
 					// kopiere routen
 					List<Map.Entry<Long, Long>> tmp_routes = new ArrayList<Map.Entry<Long, Long>>(routes2Store);
 					routes2Store.removeAll(tmp_routes);
-					
+
 					// schreibe nodes
 					if(!localDB.writeAllUsersToDB(tmp_nodes)){
 						failed_node.addAll(tmp_nodes);
-						if(!localDB.getStatus()) break;
+						if(!localDB.getStatus()) {
+							break;
+						}
 					}
-					
+
 					// schreibe groups
 					localDB.writeAllGroupsToDB(tmp_groups);
-					
+
 					// schreibe msgs
 					boolean all_msgs_written=true;
 					for (MSG current : tmp_msg) {
@@ -208,7 +213,7 @@ public class DatabaseEngine {
 							break;
 						}
 					}
-					
+
 					//schreibe alle routen
 					for (Entry<Long, Long> tmp_route : tmp_routes){
 						if(!localDB.writeRoutingTableToDB(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
@@ -216,7 +221,7 @@ public class DatabaseEngine {
 							break;
 						}
 					}
-					
+
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
@@ -225,7 +230,7 @@ public class DatabaseEngine {
 			}
 		}
 	}
-	
+
 	/**
 	 * Queries the local Database for Messages of a selected user (<code>uid</code>) which have been send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by giving a search text.
@@ -239,24 +244,27 @@ public class DatabaseEngine {
 	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
 
 		ResultSet tmpRS;
-		
+
 		String para_uid	=(uid>=0)?String.valueOf(uid):"%";
 		String para_alias	=null;
 		String para_group	=null;
 		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
-		
-//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
-		if (para_begin<para_end) tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
-		else tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
-		
+		if (para_begin<para_end) {
+			tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		} else {
+			tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		}
+
+
 		if(tmpRS!=null){
 			try {
-				
-//				new SimpleTableDemo(new JTable(buildTableModel(tmpRS)));
+
+				//				new SimpleTableDemo(new JTable(buildTableModel(tmpRS)));
 				return new JTable(buildTableModel(tmpRS));
 			} catch (SQLException e) {
 				LogEngine.log(this, "Error while building JTable: " + e.getMessage(), LogEngine.ERROR );
@@ -278,25 +286,28 @@ public class DatabaseEngine {
 	public JTable selectMSGsByAlias(String alias,GregorianCalendar begin, GregorianCalendar end,String text) {
 		ResultSet tmpRS;
 
-		
+
 		String para_uid		= null;
 		String para_alias	= (alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
 		String para_group	= null;
 		String para_text	= (text.trim().length()==0)?"%":"%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 		= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
-		
+
 		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
-		if (para_begin<para_end) tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
-		else tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		if (para_begin<para_end) {
+			tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		} else {
+			tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		}
 
 		if(tmpRS!=null){
 
-//			getResultInStringArray(tmpRS);
-			
+			//			getResultInStringArray(tmpRS);
+
 			try {
-//				return new JTable(buildTableModel(tmp));
+				//				return new JTable(buildTableModel(tmp));
 				return buildTable(tmpRS);
 			} catch (SQLException e) {
 				System.out.println(e.getMessage());
@@ -307,46 +318,46 @@ public class DatabaseEngine {
 		return allMSGs();
 
 	}
-	
+
 	public void printüberschriften(DatabaseDaten parameterObject){
 		for (String über: parameterObject.spaltenüberschriften) {				
-		System.out.println(über);	
+			System.out.println(über);	
 		}
-		
+
 	}
-	
+
 	public int getStatusBackup() {
 		return backupDB.getStatus();
 	}
 
 
 	private static DatabaseDaten getResultData(ResultSet rs) throws SQLException{
-		
-		 ResultSetMetaData metaData = rs.getMetaData();
 
-		    // names of columns
-		 int columnCount = metaData.getColumnCount();
-		 String[] spaüb= new String[columnCount];
-		    for (int column = 1; column <= columnCount; column++) {
-		        spaüb[column-1]= metaData.getColumnName(column);
-		    }
+		ResultSetMetaData metaData = rs.getMetaData();
 
-		    // data of the table
-		    rs.last();
-		    int rows = rs.getRow();
-		    rs.beforeFirst();
-		    
-		    String[][] stringdata = new String[rows][columnCount];
-		    while (rs.next()) {
-		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-		        	Object zelle = rs.getObject(columnIndex);
-					stringdata[rs.getRow()-1][columnIndex-1]=(zelle!=null)?zelle.toString():"";
-		        }
-		    }
-		    
-		    return new DatabaseDaten(spaüb, stringdata);
+		// names of columns
+		int columnCount = metaData.getColumnCount();
+		String[] spaüb= new String[columnCount];
+		for (int column = 1; column <= columnCount; column++) {
+			spaüb[column-1]= metaData.getColumnName(column);
+		}
+
+		// data of the table
+		rs.last();
+		int rows = rs.getRow();
+		rs.beforeFirst();
+
+		String[][] stringdata = new String[rows][columnCount];
+		while (rs.next()) {
+			for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+				Object zelle = rs.getObject(columnIndex);
+				stringdata[rs.getRow()-1][columnIndex-1]=(zelle!=null)?zelle.toString():"";
+			}
+		}
+
+		return new DatabaseDaten(spaüb, stringdata);
 	}
-	
+
 	/**
 	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
 	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
@@ -366,11 +377,14 @@ public class DatabaseEngine {
 		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
-		
-//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
-		if (para_begin<para_end) tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);else
-		tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+
+		if (para_begin<para_end) {
+			tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		} else {
+			tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
+		}
 
 		if(tmp!=null){
 			try {
@@ -405,15 +419,15 @@ public class DatabaseEngine {
 
 			ResultSet tmp = localDB.pull_users();
 			if(tmp!=null){
-//				ResultSetMetaData meta = tmp.getMetaData();
+				//				ResultSetMetaData meta = tmp.getMetaData();
 
-//				Vector<String> cols_title = new Vector<String>();
-//				int columnCount = meta.getColumnCount();
-//				for (int column = 1; column <= columnCount; column++) {
-//					cols_title.add(meta.getColumnName(column));
-//				}
-//				System.out.println(cols_title);
-//				
+				//				Vector<String> cols_title = new Vector<String>();
+				//				int columnCount = meta.getColumnCount();
+				//				for (int column = 1; column <= columnCount; column++) {
+				//					cols_title.add(meta.getColumnName(column));
+				//				}
+				//				System.out.println(cols_title);
+				//				
 				Vector<Node> nodes = new Vector<Node>();
 				Set <Node> testdata = new HashSet<Node>();
 
@@ -431,7 +445,7 @@ public class DatabaseEngine {
 
 
 			}else{
-//				System.out.println("tmp war null" );
+				//				System.out.println("tmp war null" );
 			}
 
 		} catch (SQLException e) {
@@ -440,71 +454,71 @@ public class DatabaseEngine {
 		return new JComboBox<Node>();
 
 	}
-	
-	
+
+
 	public static JTable buildTable(ResultSet rs) throws SQLException{
 
-//		    ResultSetMetaData metaData = rs.getMetaData();
-//
-//		    // names of columns
-//		    int columnCount = metaData.getColumnCount();
-//		    String[] columnNames = new String[columnCount];
-//		    for (int column = 1; column <= columnCount; column++) {
-//		        columnNames[column-1]=metaData.getColumnName(column);
-//		    }
-//		    System.out.println(columnNames);
-//		    
-//
-//		    // data of the table
-//		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-//		    while (rs.next()) {
-//		        Vector<Object> vector = new Vector<Object>();
-//		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-//		            vector.add(rs.getObject(columnIndex));
-//		        }
-//		        data.add(vector);
-//		    }
-////		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
-////		    tblModel.setColumnIdentifiers(colHdrs);
-//		    
-//		    data.toArray();
-//		    Object [][] array = new Object[data.size()][columnCount];
-//		    int i  =0;
-//		    for (Vector<Object> tmp : data) {
-//			    array[i++]=tmp.toArray();
-//		}
-//		  
-//		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
-//		    tmod.setColumnIdentifiers(columnNames);
-//		    JTable tmp = new JTable(tmod);
-//		    
-//		    return tmp;
+		//		    ResultSetMetaData metaData = rs.getMetaData();
+		//
+		//		    // names of columns
+		//		    int columnCount = metaData.getColumnCount();
+		//		    String[] columnNames = new String[columnCount];
+		//		    for (int column = 1; column <= columnCount; column++) {
+		//		        columnNames[column-1]=metaData.getColumnName(column);
+		//		    }
+		//		    System.out.println(columnNames);
+		//		    
+		//
+		//		    // data of the table
+		//		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		//		    while (rs.next()) {
+		//		        Vector<Object> vector = new Vector<Object>();
+		//		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+		//		            vector.add(rs.getObject(columnIndex));
+		//		        }
+		//		        data.add(vector);
+		//		    }
+		////		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
+		////		    tblModel.setColumnIdentifiers(colHdrs);
+		//		    
+		//		    data.toArray();
+		//		    Object [][] array = new Object[data.size()][columnCount];
+		//		    int i  =0;
+		//		    for (Vector<Object> tmp : data) {
+		//			    array[i++]=tmp.toArray();
+		//		}
+		//		  
+		//		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
+		//		    tmod.setColumnIdentifiers(columnNames);
+		//		    JTable tmp = new JTable(tmod);
+		//		    
+		//		    return tmp;
 		return new JTable(buildTableModel(rs));
-		
+
 	}
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
 		DatabaseDaten tmp = getResultData(rs);
-		
+
 		//	    ResultSetMetaData metaData = rs.getMetaData();
-//
-//	    // names of columns
-//	    Vector<String> columnNames = new Vector<String>();
-//	    int columnCount = metaData.getColumnCount();
-//	    for (int column = 1; column <= columnCount; column++) {
-//	        columnNames.add(metaData.getColumnName(column));
-//	    }
-//
-//	    // data of the table
-//	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-//	    while (rs.next()) {
-//	        Vector<Object> vector = new Vector<Object>();
-//	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-//	            vector.add(rs.getObject(columnIndex));
-//	        }
-//	        data.add(vector);
-//	    }
-//
-	    return new DefaultTableModel(tmp.zelleninhalt,tmp.spaltenüberschriften);
+		//
+		//	    // names of columns
+		//	    Vector<String> columnNames = new Vector<String>();
+		//	    int columnCount = metaData.getColumnCount();
+		//	    for (int column = 1; column <= columnCount; column++) {
+		//	        columnNames.add(metaData.getColumnName(column));
+		//	    }
+		//
+		//	    // data of the table
+		//	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		//	    while (rs.next()) {
+		//	        Vector<Object> vector = new Vector<Object>();
+		//	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+		//	            vector.add(rs.getObject(columnIndex));
+		//	        }
+		//	        data.add(vector);
+		//	    }
+		//
+		return new DefaultTableModel(tmp.zelleninhalt,tmp.spaltenüberschriften);
 
 	}
 
@@ -517,14 +531,13 @@ public class DatabaseEngine {
 	public int createUser(String username, String password) {
 		if(!username.matches(Config.getConfig().getNamePattern()) || !password.matches(Config.getConfig().getNamePattern())) return 2;
 		if(backupDB.getStatus()>=1){
-			if(backupDB.createUser(username, password)){
+			if(backupDB.createUser(username, password))
 				return 3;
-			}
 			return 1;
 		}
 		return 0;
-		
+
 	}
-	
+
 
 }

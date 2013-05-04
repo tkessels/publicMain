@@ -17,19 +17,19 @@ public class RandomStrategy implements BestNodeStrategy {
 		List<Node> tmp=new ArrayList<>(NodeEngine.getNE().getNodes());
 		return tmp.get(gen.nextInt(tmp.size()));
 	}
-	
-	public static List<Node> returnAllNodes(Node node){
-		    List<Node> listOfNodes = new ArrayList<Node>();
-		    addAllNodes(node, listOfNodes);
-		    return listOfNodes;
-		}
 
-		private static void addAllNodes(Node node, List<Node> listOfNodes) {
-		    if (node != null) {
-			    Enumeration<Node> cursor = node.breadthFirstEnumeration();
-			    while(cursor.hasMoreElements()) {
-				    listOfNodes.add(cursor.nextElement());
-			    }
+	public static List<Node> returnAllNodes(Node node){
+		List<Node> listOfNodes = new ArrayList<Node>();
+		addAllNodes(node, listOfNodes);
+		return listOfNodes;
+	}
+
+	private static void addAllNodes(Node node, List<Node> listOfNodes) {
+		if (node != null) {
+			Enumeration<Node> cursor = node.breadthFirstEnumeration();
+			while(cursor.hasMoreElements()) {
+				listOfNodes.add(cursor.nextElement());
 			}
 		}
+	}
 }

@@ -8,7 +8,6 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 
-import org.publicmain.gui.SettingsWindow;
 import org.publicmain.sql.DatabaseEngine;
 
 /**
@@ -19,7 +18,7 @@ import org.publicmain.sql.DatabaseEngine;
  */
 
 public class Config {
-	
+
 	private static final String APPNAME 			=   (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
 	private static final int CURRENTVERSION			=	5;
 	private static final int MINVERSION				=	5;
@@ -67,7 +66,7 @@ public class Config {
 		}
 		me.savetoDisk();
 	}
-	
+
 	/**
 	 * System-Konfiguration schreiben.
 	 * 
@@ -88,7 +87,7 @@ public class Config {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Melde die Datenbank f�r Schreibvorg�nge an der Konfiguration an.
 	 * 
@@ -97,7 +96,7 @@ public class Config {
 	public static void registerDatabaseEngine(DatabaseEngine databaseengine) {
 		de = databaseengine;
 	}
-	
+
 	/**
 	 * Method tries to Lock a file <code>pm.loc</code> in Users
 	 * <code>APPDATA\publicMAIN</code> folder. And returns result as boolen. It
@@ -149,7 +148,7 @@ public class Config {
 				"default settings loaded from source ["
 						+ ((system_conf.exists()) ? "S" : "0") + "|"
 						+ ((user_conf.exists()) ? "U" : "0") + "]",
-				LogEngine.INFO);
+						LogEngine.INFO);
 		// Versuche die System-Einstellungen vom JAR zu �berladen
 		if (system_conf.canRead()) {
 			try (FileInputStream in = new FileInputStream(system_conf)) {
@@ -175,8 +174,9 @@ public class Config {
 					LogEngine.log(this,
 							"user settings outdated only userid and alias will be used from "
 									+ user_conf, LogEngine.INFO);
-				} else
+				} else {
 					settings = user;
+				}
 				LogEngine.log(this, "user settings loaded from " + user_conf,
 						LogEngine.INFO);
 			} catch (IOException e) {
@@ -185,7 +185,7 @@ public class Config {
 			}
 		}
 	}
-	
+
 	/**
 	 * Die Methode liefert die Standart-Einstellungen der Anwendung
 	 * 
@@ -232,7 +232,7 @@ public class Config {
 		tmp.setBackupDBPw("backupPublicMain");
 		return tmp;
 	}
-	
+
 	/**
 	 * Einstellungen in einem Thread als Datei auf die Festplatte speichern.
 	 */
@@ -247,7 +247,7 @@ public class Config {
 				} catch (IOException e1) {
 					LogEngine.log(Config.this,
 							"Could not write user settings: " + user_conf
-									+ " reason : " + e1.getMessage(),
+							+ " reason : " + e1.getMessage(),
 							LogEngine.WARNING);
 				}
 			}
@@ -258,8 +258,10 @@ public class Config {
 	public static void importConfig(Properties tmp) {
 		ConfigData imported = new ConfigData(getConfig());
 		for (Object key : tmp.keySet()) {
-			if(tmp.get(key)!=null)imported.put(key, tmp.get(key));
+			if(tmp.get(key)!=null) {
+				imported.put(key, tmp.get(key));
 			}
+		}
 		setConfig(imported);
 	}
 }

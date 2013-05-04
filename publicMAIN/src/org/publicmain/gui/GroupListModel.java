@@ -7,7 +7,6 @@ import javax.swing.AbstractListModel;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
-import org.publicmain.common.Node;
 
 public class GroupListModel extends AbstractListModel<String>{
 
@@ -17,7 +16,7 @@ public class GroupListModel extends AbstractListModel<String>{
 	private static final long serialVersionUID = 4321214633320536027L;
 	private ArrayList<String> groups = new ArrayList<String>();
 	private Thread groupListWriter;
-	
+
 	public GroupListModel() {
 		this.groupListWriter = new Thread(new Runnable() {
 			@Override
@@ -36,23 +35,23 @@ public class GroupListModel extends AbstractListModel<String>{
 				}
 			}
 		});
-    	this.groupListWriter.start();
-    	
-	    Collections.sort(groups);
-    }
-    @Override
-    public int getSize() {
-    	return groups.size();
-    }
+		this.groupListWriter.start();
 
-    public boolean contains(String group){
-    	synchronized (groups) {
-    		return groups.contains(group);
+		Collections.sort(groups);
+	}
+	@Override
+	public int getSize() {
+		return groups.size();
+	}
+
+	public boolean contains(String group){
+		synchronized (groups) {
+			return groups.contains(group);
 		}
-    }
-    
-    @Override
-    public String getElementAt(int index) {
-    	return groups.get(index);
-    }
+	}
+
+	@Override
+	public String getElementAt(int index) {
+		return groups.get(index);
+	}
 }

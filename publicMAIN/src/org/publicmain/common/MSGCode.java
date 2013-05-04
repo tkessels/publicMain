@@ -9,7 +9,7 @@ package org.publicmain.common;
  */
 
 public enum MSGCode {
-	
+
 	NODE_UPDATE("inform on node changes"),
 	ALIAS_UPDATE("inform on alias changes"),
 	NODE_LOOKUP("beschreibungEinfügen"), // TODO
@@ -35,14 +35,14 @@ public enum MSGCode {
 	GROUP_LEAVE("inform about group leave"),
 	GROUP_EMPTY("inform about an empty group"),
 	GROUP_ANNOUNCE("register a group"),
-	
+
 	FILE_REQUEST("beschreibungEinfügen"),
 	FILE_REPLY("beschreibungEinfügen"),
 	FILE_RECIEVED("beschreibungEinfügen"),
 	FILE_TCP_REQUEST("beschreibungEinfügen"),
 	FILE_TCP_REPLY("beschreibungEinfügen"),
 	FILE_TCP_ABORT("file refused"),
-	
+
 	CMD_SHUTDOWN("beschreibungEinfügen"),
 	CMD_RESTART("beschreibungEinfügen"),
 	CMD_RECONNECT("beschreibungEinfügen"),
@@ -50,10 +50,10 @@ public enum MSGCode {
 	CW_INFO_TEXT("beschreibungEinfügen"),
 	CW_WARNING_TEXT("beschreibungEinfügen"),
 	CW_ERROR_TEXT("beschreibungEinfügen"),
-	
+
 	BACKUP_SERVER_DISCOVER("find active backupservers on the net"),
 	BACKUP_SERVER_OFFER("offer backupserver services on the net"),
-	
+
 	GUI_INFORM("notify the gui about an event");
 
 	private String description;
@@ -66,7 +66,7 @@ public enum MSGCode {
 	private MSGCode(String description) {
 		this.description = description;
 	}
-	
+
 	/**
 	 * Liefert eine Description.
 	 * 

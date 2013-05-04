@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -46,11 +45,11 @@ public class ChatWindowTab extends JPanel{
 		// übergebenen Besitzer und Parent setzen:
 		this.parent=parent;
 		this.owner=owner;
-		
+
 		// JPanel durchsichtig machen und Flowlayout anpassen:
 		this.setOpaque(false);
 		((FlowLayout) this.getLayout()).setHgap(5);
-		
+
 		// Tab Titel setzen und Listener adden:
 		this.lblTitle = new JLabel(owner.getChatWindowName());
 		this.lblTitle.addMouseListener(new MyMouseListener());
@@ -61,13 +60,13 @@ public class ChatWindowTab extends JPanel{
 		} else {
 			this.tabCloseImgIcon = Help.getIcon("TabCloseGray.png",10);
 		}
-		
+
 		// SchließenLabel für Tabbeschriftung erzeugen und gestalten:
 		this.lblClose = new JLabel(tabCloseImgIcon);
-		
+
 		// Observer für das Image auf das lblClose setzen:
 		this.tabCloseImgIcon.setImageObserver(lblClose);
-		
+
 		// MouseListener für Schließenlabel (lblClose) hinzufügen:
 		this.lblClose.addMouseListener(new MyMouseListener());
 
@@ -82,14 +81,14 @@ public class ChatWindowTab extends JPanel{
 		} else {
 			this.lblIcon.setIcon(Help.getIcon("gruppe.png"));
 		}
-		
+
 		// Das Icon (lblIcon), das TitelLabel (lblTitle) + SchließenLabel (btnClose) zum Tab (pnlTab) hinzufügen:
 		this.add(lblIcon);
 		this.add(lblTitle);
 		this.add(lblClose);
 	}
-	
-	
+
+
 	/**
 	 * Diese Methode setzt den Titel des ChatWindow Tabs neu.
 	 * 
@@ -99,7 +98,7 @@ public class ChatWindowTab extends JPanel{
 	void updateAlias() {
 		lblTitle.setText(owner.getChatWindowName());
 	}
-	
+
 	/**
 	 * Diese Methode setzt einen ChatWindowTab offline.
 	 * 
@@ -111,7 +110,7 @@ public class ChatWindowTab extends JPanel{
 		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseGray.png",10).getImage());
 		this.lblIcon.setIcon(Help.getIcon("privateOffline.png"));
 	}
-	
+
 	/**
 	 * Diese Methode setzt einen ChatWindowTab online.
 	 * 
@@ -123,8 +122,8 @@ public class ChatWindowTab extends JPanel{
 		this.tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png",10).getImage());
 		this.lblIcon.setIcon(Help.getIcon("private.png"));
 	}
-	
-	
+
+
 	/**
 	 * Diese Methode lässt den Tabtitel die Farbe wechseln.
 	 * 
@@ -153,7 +152,7 @@ public class ChatWindowTab extends JPanel{
 			blinker.start();
 		}
 	}
-	
+
 	/**
 	 * Diese Methode stoppt den Thread der für das Blinken zuständig ist
 	 * und setzt den Tabtitel auf schwarz.
@@ -165,8 +164,8 @@ public class ChatWindowTab extends JPanel{
 		}
 		lblTitle.setForeground(Color.BLACK);
 	}
-	
-	
+
+
 	/**
 	 * Diese Elementklasse stellt einen MouseAdapter für das ChatWindowTab bereit
 	 * 
@@ -183,12 +182,12 @@ public class ChatWindowTab extends JPanel{
 				// Wird der Tabtitel mit der mittleren Maustaste gedrückt wird dieses ChatWindow geschlossen
 				if (e.getModifiersEx() == 512) {
 					GUI.getGUI().delChat(owner);
-				// Wird der Tabtitel anders angeklickt wird der Tab selektiert und eventuelles blinken ausgeschalten
+					// Wird der Tabtitel anders angeklickt wird der Tab selektiert und eventuelles blinken ausgeschalten
 				} else {
 					parent.setSelectedComponent(owner);
 					stopBlink();
 				}
-			// Bei einer anderen Eventquelle wird das ChatWindow geschlossen
+				// Bei einer anderen Eventquelle wird das ChatWindow geschlossen
 			} else {
 				GUI.getGUI().delChat(owner);
 			}
@@ -203,7 +202,7 @@ public class ChatWindowTab extends JPanel{
 				// Ist die Maus über den lblClose und der Chatpartner online wird die Farbe orange
 				if(owner.getOnlineState()){
 					tabCloseImgIcon.setImage(Help.getIcon("TabCloseOrange.png",10).getImage());
-				// Ist der Chatpartner offline wird die Farbe schwarz
+					// Ist der Chatpartner offline wird die Farbe schwarz
 				} else {
 					tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png",10).getImage());
 				}
@@ -212,7 +211,7 @@ public class ChatWindowTab extends JPanel{
 				// Ist die Maus über dem Tabtitel und der Chatpartner online wird der Titel orange
 				if(owner.getOnlineState()){
 					source.setForeground(new Color(255, 130, 13));
-				// Ist der Chatpartner offline wird der Titel schwarz
+					// Ist der Chatpartner offline wird der Titel schwarz
 				} else {
 					source.setForeground(Color.BLACK);
 				}
@@ -228,7 +227,7 @@ public class ChatWindowTab extends JPanel{
 				// Verläßt die Maus den lblClose und der Chatpartner ist online wird die Farbe orange 
 				if(owner.getOnlineState()){
 					tabCloseImgIcon.setImage(Help.getIcon("TabCloseBlack.png",10).getImage());
-				// Ist der Chatpartner offline wird die Farbe grau
+					// Ist der Chatpartner offline wird die Farbe grau
 				} else {
 					tabCloseImgIcon.setImage(Help.getIcon("TabCloseGray.png",10).getImage());
 				}
@@ -237,14 +236,14 @@ public class ChatWindowTab extends JPanel{
 				// Verläßt die Maus den Tabtitel und der Chatpartner ist online wird der Titel orange
 				if(owner.getOnlineState()){
 					source.setForeground(Color.BLACK);
-				// Ist der Chatpartner offline wird der Titel grau
+					// Ist der Chatpartner offline wird der Titel grau
 				} else {
 					source.setForeground(Color.GRAY);
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Diese Klasse stellt einen Thread bereit
 	 * 
@@ -255,7 +254,7 @@ public class ChatWindowTab extends JPanel{
 	class Blinker extends Thread {
 		int delay;
 		volatile boolean active;
-		
+
 		/**
 		 * Konstruktor für den BlinkerThread.
 		 * 
@@ -267,7 +266,7 @@ public class ChatWindowTab extends JPanel{
 			this.delay = delay;
 			active = false;
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see java.lang.Thread#run()
 		 */
@@ -283,7 +282,7 @@ public class ChatWindowTab extends JPanel{
 				blink();
 			}
 		}
-		
+
 		/**
 		 * Diese Methode setzt den Thread inaktiv
 		 * 

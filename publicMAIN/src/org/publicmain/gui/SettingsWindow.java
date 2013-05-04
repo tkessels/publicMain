@@ -540,11 +540,20 @@ public class SettingsWindow extends JDialog{
 				String password=pwPushPullPasswordField.getText();
 				int res = DatabaseEngine.getDatabaseEngine().createUser(username, password);{
 				 switch(res){
-				 case 2:
+				 case 3:
 					 userPushPullTextField.setBackground(Color.green);
 					 pwPushPullPasswordField.setBackground(Color.green);
+					 Config.write();
+					 DatabaseEngine.getDatabaseEngine().push();
 					 //alles Sahne
 					 break;
+			
+				 case 2:
+					 userPushPullTextField.setBackground(Color.RED);
+					 pwPushPullPasswordField.setBackground(Color.RED);
+					 JOptionPane.showMessageDialog(me,"Username or Password dosn´t match requirements!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
+					 //Nutzername und Pwd entspricht nicht den anforderungen
+					 break;	 
 				 case 1:
 					 //user gab es bereits
 					 JOptionPane.showMessageDialog(me,"Username already exists!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
@@ -580,6 +589,8 @@ public class SettingsWindow extends JDialog{
 				 case 2:
 					 userPushPullTextField.setText("");
 					 pwPushPullPasswordField.setText("");
+					 userPushPullTextField.setBackground(Color.WHITE);
+					 pwPushPullPasswordField.setBackground(Color.WHITE);
 					 Config.getConfig().clearBackupDBChoosenUser();		//TODO: einkommentieren sobald methode da!
 					 deletePushPullBtn.setEnabled(false);
 					 JOptionPane.showMessageDialog(me,"User deleted!","BackupServer",JOptionPane.INFORMATION_MESSAGE);

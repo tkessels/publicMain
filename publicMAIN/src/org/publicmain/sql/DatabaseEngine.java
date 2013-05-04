@@ -22,6 +22,7 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
@@ -514,9 +515,10 @@ public class DatabaseEngine {
 	}
 
 	public int createUser(String username, String password) {
+		if(!username.matches(Config.getConfig().getNamePattern()) || !password.matches(Config.getConfig().getNamePattern())) return 2;
 		if(backupDB.getStatus()>=1){
 			if(backupDB.createUser(username, password)){
-				return 2;
+				return 3;
 			}
 			return 1;
 		}

@@ -145,17 +145,19 @@ public class DatabaseEngine {
 
 	public void push(){
 		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
-			backupDB.push_users(localDB.pull_users());
-			backupDB.push_msgs(localDB.pull_msgs());
-			backupDB.push_settings(localDB.pull_settings());
+			long id = backupDB.getMyID();
+			backupDB.push_users(localDB.pull_users(),id);
+			backupDB.push_msgs(localDB.pull_msgs(),id);
+			backupDB.push_settings(localDB.pull_settings(),id);
 		}
 	}
 
 	public void pull(){
 		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
-			localDB.push_users(backupDB.pull_users());
-			localDB.push_msgs(backupDB.pull_msgs());
-			localDB.push_settings(backupDB.pull_settings());
+			long id = backupDB.getMyID();
+			localDB.push_users(backupDB.pull_users(id));
+			localDB.push_msgs(backupDB.pull_msgs(id));
+			localDB.push_settings(backupDB.pull_settings(id));
 		}
 	}
 

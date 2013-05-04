@@ -35,7 +35,7 @@ public BackupDBConnection() {
 	/**Versucht mit den in den Einstellungen hinterlegten Zugangsdaten die BackupserverID abzufragen
 	 * @return BackupUserID des Konfigurierten Push/Pull - Users oder <code>-1</code> wenn der User nicht existiert
 	 */
-	private long getMyID() {
+	public long getMyID() {
 		String username = Config.getConfig().getBackupDBChoosenUsername();
 		String password = Config.getConfig().getBackupDBChoosenUserPassWord();
 		return getIDfor(username, password);
@@ -78,31 +78,60 @@ public BackupDBConnection() {
 
 
 
-	public ResultSet pull_settings(){
-		try {
-			return getCon().createStatement().executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
-		} catch (SQLException e) {
-			LogEngine.log(this, "Error while pulling settings from backupDB " + e.getMessage(), LogEngine.ERROR );
-			return null;
-		}
-	}
-
-
-	public ResultSet pull_users(){
-		try {
-			return getCon().createStatement().executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
-		} catch (SQLException e) {
-			LogEngine.log(this, "Error while pulling users from backupDB " + e.getMessage(), LogEngine.ERROR );
-			return null;
-		}
-	}
-
-	public CachedRowSet pull_msgs(){
+	public ResultSet pull_settings(long id){
 		Connection con=null;
 		Statement stmt=null;
 		ResultSet rs = null;
 		try {
-			long id = getMyID();
+//			return getCon().createStatement().executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
+//			long id = getMyID();
+			CachedRowSet tmp = new CachedRowSetImpl();
+			con = getCon();
+			stmt=con.createStatement();
+			rs=stmt.executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + id + "'");
+			tmp.populate(rs);
+			return tmp;
+		} catch (SQLException e) {
+			LogEngine.log(this, "Error while pulling settings from backupDB " + e.getMessage(), LogEngine.ERROR );
+			return null;
+		}finally {
+			   try{rs.close();  }catch(Exception ignored){}
+			   try{stmt.close();}catch(Exception ignored){}
+			   try{con.close();}catch(Exception ignored){}
+		}
+	}
+
+
+	public ResultSet pull_users(long id){
+		Connection con=null;
+		Statement stmt=null;
+		ResultSet rs = null;
+		try {
+//			return getCon().createStatement().executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
+//			long id = getMyID();
+			CachedRowSet tmp = new CachedRowSetImpl();
+			con = getCon();
+			stmt=con.createStatement();
+			rs=stmt.executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + id + "'");
+			tmp.populate(rs);
+			return tmp;
+			
+		} catch (SQLException e) {
+			LogEngine.log(this, "Error while pulling users from backupDB " + e.getMessage(), LogEngine.ERROR );
+			return null;
+		}finally {
+			   try{rs.close();  }catch(Exception ignored){}
+			   try{stmt.close();}catch(Exception ignored){}
+			   try{con.close();}catch(Exception ignored){}
+	}
+	}
+
+	public ResultSet pull_msgs(long id){
+		Connection con=null;
+		Statement stmt=null;
+		ResultSet rs = null;
+		try {
+//			long id = getMyID();
 			CachedRowSet tmp = new CachedRowSetImpl();
 			con = getCon();
 			stmt=con.createStatement();
@@ -120,13 +149,16 @@ public BackupDBConnection() {
 	}
 
 
-	public synchronized boolean push_msgs(ResultSet tmp_messages) {
-		long myID = getMyID();
-		if(myID !=-1){
+	public synchronized boolean push_msgs(ResultSet tmp_messages, long id) {
+//		long myID = getMyID();
+		if(id !=-1){
+			Connection con=null;
+			PreparedStatement  prp=null;
 			try {
-				PreparedStatement prp = getCon().prepareStatement("Insert ignore into t_messages(fk_t_backupUser_backupUserID, msgID, timestmp, fk_t_users_userID_sender, displayName, groupName, fk_t_users_userID_empfaenger, txt,  fk_t_msgType_ID) values(?,?,?,?,?,?,?,?,?)");
+				con = getCon();
+				prp = con.prepareStatement("Insert ignore into t_messages(fk_t_backupUser_backupUserID, msgID, timestmp, fk_t_users_userID_sender, displayName, groupName, fk_t_users_userID_empfaenger, txt,  fk_t_msgType_ID) values(?,?,?,?,?,?,?,?,?)");
 				while (tmp_messages.next()){
-					prp.setLong(1, myID);
+					prp.setLong(1, id);
 					prp.setInt(2,tmp_messages.getInt(1));
 					prp.setLong(3, tmp_messages.getLong(2));
 					prp.setLong(4,tmp_messages.getLong(3));
@@ -154,9 +186,10 @@ public BackupDBConnection() {
 			} catch (SQLException e) {
 				LogEngine.log(this, e);
 				return false;
-
+			}finally {
+				try{prp.close();}catch(Exception ignored){}
+				try{con.close();}catch(Exception ignored){}
 			}
-
 		}
 		else {
 			LogEngine.log(this, "BackUpUser nicht vorhanden, ANLEGEN!", LogEngine.INFO);
@@ -167,11 +200,13 @@ public BackupDBConnection() {
 
 
 
-	public synchronized boolean push_users(ResultSet tmp_users) {
-		long myID = getMyID();
-		if(myID !=-1){
+	public synchronized boolean push_users(ResultSet tmp_users,long id) {
+		if(id !=-1){
+			Connection con=null;
+			PreparedStatement prp = null;
 			try {
-				PreparedStatement prp = getCon().prepareStatement("Insert ignore into t_users(userID, displayName, userName) values(?,?,?)");
+				con=getCon();
+				prp = con.prepareStatement("Insert ignore into t_users(userID, displayName, userName) values(?,?,?)");
 				while (tmp_users.next()){
 					prp.setLong(1, tmp_users.getLong(1));
 					prp.setString(2, tmp_users.getString(2));
@@ -183,7 +218,9 @@ public BackupDBConnection() {
 
 			} catch (SQLException e) {
 				LogEngine.log(this, e);
-
+			}finally {
+				try{prp.close();}catch(Exception ignored){}
+				try{con.close();}catch(Exception ignored){}
 			}
 
 		}
@@ -191,15 +228,18 @@ public BackupDBConnection() {
 		return true;	
 	}
 
-	public synchronized boolean push_settings(ResultSet tmp_settings) {
-		long myID = getMyID();
-		if(myID !=-1){
+	public synchronized boolean push_settings(ResultSet tmp_settings,long id) {
+//		long myID = getMyID();
+		if(id !=-1){
+			Connection con = null;
+			PreparedStatement prp=null;
 			try {
-				PreparedStatement prp = getCon().prepareStatement("Insert into t_settings(settingsKey, settingsValue, fk_t_backupUser_backupUserID_2) values(?,?,?) ON DUPLICATE KEY UPDATE settingsKey=VALUES(settingsKey), settingsValue=VALUES(settingsValue), fk_t_backupUser_backupUserID_2=VALUES(fk_t_backupUser_backupUserID_2)");
+				con = getCon();
+				prp = con.prepareStatement("Insert into t_settings(settingsKey, settingsValue, fk_t_backupUser_backupUserID_2) values(?,?,?) ON DUPLICATE KEY UPDATE settingsKey=VALUES(settingsKey), settingsValue=VALUES(settingsValue), fk_t_backupUser_backupUserID_2=VALUES(fk_t_backupUser_backupUserID_2)");
 				while (tmp_settings.next()){
 					prp.setString(1, tmp_settings.getString(1));
 					prp.setString(2, tmp_settings.getString(3));
-					prp.setLong(3, myID);
+					prp.setLong(3, id);
 					prp.addBatch();
 				}
 				prp.executeBatch();
@@ -207,9 +247,10 @@ public BackupDBConnection() {
 
 			} catch (SQLException e) {
 				LogEngine.log(this, e);
-
+			}finally {
+				try{prp.close();}catch(Exception ignored){}
+				try{con.close();}catch(Exception ignored){}
 			}
-
 		}
 		else return false;
 		return true;

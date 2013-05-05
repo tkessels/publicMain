@@ -131,6 +131,12 @@ ENGINE = InnoDB;
 USE `db_publicmain_backup` ;
 
 -- -----------------------------------------------------
+-- Platzhalter Tabelle `db_publicmain`.`v_searchInHistory`
+-- für die View um Views auf Views zu verhindern.
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain_backup`.`v_searchInHistory` (`settingsKey` INT, `fk_t_backupUser_backupUserID_2` INT, `settingsValue` INT);
+
+-- -----------------------------------------------------
 -- View `db_publicmain`.`v_searchInHistory` löschen wenn
 -- sie existiert, die Platzhaltertabelle löschen und die
 -- View anlegen oder ersetzen.

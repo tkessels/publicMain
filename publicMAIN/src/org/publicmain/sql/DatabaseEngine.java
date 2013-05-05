@@ -1,13 +1,11 @@
 package org.publicmain.sql;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +22,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import org.publicmain.common.Config;
@@ -33,9 +30,11 @@ import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
 
-import com.mysql.jdbc.CommunicationsException;
-import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
-
+/**
+ * @author ATRM
+ * Die Klasse DatabaseEngine Verwaltet die Kommunikation mit der lokalen und der Backupdatenbank.
+ * Sie ruft deren Methoden auf um dem Anwenderwunsch gerecht zu werden
+ */
 public class DatabaseEngine {
 
 	private LocalDBConnection localDB;
@@ -70,27 +69,10 @@ public class DatabaseEngine {
 		transporter.start();
 	}
 
-	public void writeConfig(){
-		if(localDB.getStatus()) {
-			localDB.writeAllSettingsToDB(Config.getNonDefault());
-		}
-	}
-
-
-	public int getConfig(String user, String password) {
-		//load config
-		try {
-			Properties tmp = backupDB.getConfig(user, password);
-			if (tmp!=null) { //load worked
-				Config.importConfig(tmp);
-				return 2;
-			} else
-				return 1; //load did return nothing
-		} catch (IllegalArgumentException e) {
-			return 0;
-		}
-	}
-
+	/**
+	 * Factory-Methode der DatabaseEngine
+	 * @return DIE DatabaseEngine-Instanz
+	 */
 	public synchronized static DatabaseEngine getDatabaseEngine() {
 		if(me==null) {
 			new DatabaseEngine();
@@ -98,18 +80,30 @@ public class DatabaseEngine {
 		return me;
 	}
 
-	public void put(MSG x){
-		msg2Store.offer(x);
-	}
-
-	public void put(Node x){
-		node2Store.offer(x);
-	}
 	
+	/**
+	 * Diese Methode weist die BackupDatenbankConnectionKlasse an eine bestimmte Nutzername-Passwort-Kombination auf gültigkeit zu überprüfen.
+	 * @param username: Nutzername des bestimmten Benutzers
+	 * @param password:	Passwort des bestimmten Benutzers
+	 * @return
+	 */
 	public boolean isValid(String username, String password) {
 		return (backupDB.getIDfor(username, password)!=-1);
 	}
 	
+	/**
+	 * Diese Methode holt sich eine Connection von der BackupDBConnection Klasse,
+	 * indem sie ihr die gewünschten parameter übergibt und prüft damit / anschließend damit die 
+	 * richtigkeit der übergebenen Daten.
+	 * @param username:		zu überprüfender Benutzername
+	 * @param password:		zu überprüfendes Passowort
+	 * @param ip:			IP-Adresse des Datenbankservers zu welchem die Verbindung hergestellt werden soll
+	 * @param dbPort:		Port über welchen die DB-Verbidung hergestellt werden soll
+	 * @param dbusername:	Username mit welchem die DB-Verbidung hergestellt werden soll
+	 * @param dbpassword:	Passwort mit welchem die DB-Verbidung hergestellt werden soll
+	 * @return true:		übergebene Daten Korrekt
+	 * @return false:		übergebene Daten fehlerhaft
+	 */
 	public boolean isValid(String username, String password,String ip, String dbPort, String dbusername, String dbpassword) {
 		long tmpID=-1;
 		PreparedStatement prp = null;
@@ -136,26 +130,59 @@ public class DatabaseEngine {
 		return (tmpID!=-1);
 	}
 
+	/**
+	 * Diese Methode speichert einen übergebene Nachricht(x) in eine lokale NachrichtenQueue 
+	 * @param x: Die zu speichernde Nachricht
+	 */
+	public void put(MSG x){
+		msg2Store.offer(x);
+	}
+
+	/**
+	 * Diese Methode speichert einen übergebenen Node(x) in eine lokale NodeQueue 
+	 * @param x: Der zu speichernde Node
+	 */
+	public void put(Node x){
+		node2Store.offer(x);
+	}
+
+	/**
+	 * Diese Methode speichert eine übergebene Nodecollection(x) nacheinander in eine lokale NodeQueue 
+	 * @param x: Die zu speichernde Nodeliste
+	 */
 	public void put(Collection<Node> x){
 		for (Node node : x) {
 			node2Store.offer(node);
 		}
 	}
 
+	/**
+	 * Diese Methode speichert einen übergebenen Gruppe(group) in eine lokale GruppenQueue 
+	 * @param x: Der zu speichernde Node
+	 */
 	public void put(String group){
 		groups2Store.add(group);
 	}
-
-
+	
+	/**
+	 * Diese Methode speichert einen übergebenen Node(x) in eine lokale NodeQueue 
+	 * @param x: Der zu speichernde Node
+	 */
+	/**
+	 * Diese Methode speichert einen übergebenen Ziel-Gateway-Routenkombination in eine lokale RoutenQueue
+	 * @param target:	NodeID des Ziels
+	 * @param gateway:	NodeID des Gateways
+	 */
 	public void put(long target, long gateway){
 		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
 	}
 
+	/**
+	 * Diese Methode weist die LocalDBConnection an alle Nachichten aus der Datenbank zu entfernen
+	 */
 	public void deleteLocalHistory() {
 		localDB.deleteAllMsgs();
 	}
-
-
 
 	/**
 	 * Diese Methode führt nach Statusprüfung die Methode  deleteAllMessages() auf der backupDB aus. 
@@ -166,6 +193,12 @@ public class DatabaseEngine {
 		}
 	}
 
+	/**
+	 * Diese Methode weist die BackupDBConnection an die gegebene BenutzerName-Passwort-Kombination zu löschen
+	 * @param username:	Benutzername des zu löschenden Nutzers
+	 * @param password:	Passwort des zu löschenden Nutzers
+	 * @return
+	 */
 	public int deleteBackupUserAccount(String username, String password) {
 		if(backupDB.getStatus()>=1){
 			if (backupDB.deleteUser(username,password))
@@ -175,6 +208,10 @@ public class DatabaseEngine {
 		return 0;
 	}
 
+	/**
+	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachichten und Settings von der LocalDBConnection-Klasse
+	 * und übergibt diese zur Speicherung an die BackupDBConnection-Klasse
+	 */
 	public void push(){
 		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 			long id = backupDB.getMyID();
@@ -184,88 +221,16 @@ public class DatabaseEngine {
 		}
 	}
 
+	/**
+	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachichten und Settings von der BackupDBConnection-Klasse
+	 * und übergibt diese zur Speicherung an die LocalDBConnection-Klasse
+	 */
 	public void pull(){
 		if(localDB.getStatus()&&(backupDB.getStatus()==2)){
 			long id = backupDB.getMyID();
 			localDB.push_users(backupDB.pull_users(id));
 			localDB.push_msgs(backupDB.pull_msgs(id));
 			localDB.push_settings(backupDB.pull_settings(id));
-		}
-	}
-
-	private final class DPTransportBot implements Runnable {
-		@Override
-		public void run() {
-			boolean locDBWasConnectetBefore = false;
-			while (true) {
-				if (!localDB.getStatus()) {
-					synchronized (transporter) {
-						try {
-							if (locDBWasConnectetBefore) {
-								localDB.reconnectToLocDBServer();
-							}
-							transporter.wait();
-							locDBWasConnectetBefore = true;
-						} catch (InterruptedException e) {
-						}
-					}
-				}
-				while (true) {
-					// kopiere msgs
-					List<MSG> tmp_msg = new ArrayList<MSG>(msg2Store);
-					msg2Store.removeAll(tmp_msg);
-
-					// kopiere groups
-					List<String> tmp_groups = new ArrayList<String>(groups2Store);
-					groups2Store.removeAll(tmp_groups);
-
-					// kopiere nodes
-					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
-					node2Store.removeAll(tmp_nodes);
-
-					// kopiere routen
-					List<Map.Entry<Long, Long>> tmp_routes = new ArrayList<Map.Entry<Long, Long>>(routes2Store);
-					routes2Store.removeAll(tmp_routes);
-
-					// schreibe nodes
-					if(!localDB.writeAllUsersToDB(tmp_nodes)){
-						failed_node.addAll(tmp_nodes);
-						if(!localDB.getStatus()) {
-							break;
-						}
-					}
-
-					// schreibe groups
-					localDB.writeAllGroupsToDB(tmp_groups);
-
-					// schreibe msgs
-					boolean all_msgs_written=true;
-					for (MSG current : tmp_msg) {
-						if(!localDB.writeMsgToDB(current)){
-							all_msgs_written=false;
-							failed_msgs.add(current);
-						}
-					}
-					if(!all_msgs_written){
-						if(!localDB.getStatus()){
-							break;
-						}
-					}
-
-					//schreibe alle routen
-					for (Entry<Long, Long> tmp_route : tmp_routes){
-						if(!localDB.writeRoutingTableToDB(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
-							failed_routes.add(tmp_route);
-							break;
-						}
-					}
-
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-					}
-				}
-			}
 		}
 	}
 
@@ -384,12 +349,34 @@ public class DatabaseEngine {
 	
 	}
 
-
+	
+	/**
+	 * Diese Methode gibt den aktuellen Status der BackupDB zurück indem
+	 * sie die BackupDBConnection-Klasse danach fragt
+	 * @return	true 	bereit
+	 * @return 	false	nicht bereit
+	 */
 	public int getStatusBackup() {
 		return backupDB.getStatus();
 	}
 
 
+	/**
+	 * Diese Methode gibt den aktuellen Status der LocalDB zurück indem
+	 * sie die LocalDBConnection-Klasse danach fragt
+	 * @return	true 	bereit
+	 * @return 	false	nicht bereit
+	 */
+	public boolean getStatusLocal() {
+		return localDB.getStatus();
+	}
+
+	/**
+	 * Diese Methode wandelt ein gegebenes ResultSet in ein DatabaseDaten-Objekt um und gibt dies zurück
+	 * @param rs:	umzuwandelndes ResultSet
+	 * @return		Gibt ein DatabaseDaten-Objekt zurück
+	 * @throws SQLException
+	 */
 	private static DatabaseDaten getResultData(ResultSet rs) throws SQLException{
 
 		ResultSetMetaData metaData = rs.getMetaData();
@@ -417,6 +404,11 @@ public class DatabaseEngine {
 		return new DatabaseDaten(spaüb, stringdata);
 	}
 
+	/**
+	 * Diese Methode weist die LocalDBConnection-Klasse an alle gespeicherten
+	 * User zu übergeben, wandelt diese um und gibt sie als JComboBox zurück
+	 * @return
+	 */
 	public JComboBox<Node> getUsers(){
 		try {
 
@@ -448,6 +440,39 @@ public class DatabaseEngine {
 
 	}
 	
+	/**
+	 * Diese Methode weist die Klasse BackupDBConnection an die Configdaten einers bestimmten
+	 * Benutzers aus der BackupDatenbank zu lesen und schreibt das ergebnis in die ProgrammConfig
+	 * @param user:		Username des besitmmten Benutzers
+	 * @param password:	Passwort des besitmmten Benutzers
+	 * @return 0:		Probleme mit dem SQL-Server
+	 * @return 1:		geladene Config leer
+	 * @return 2:		erfolgreich durchgeführt
+	 */
+	public int getConfig(String user, String password) {
+		//load config
+		try {
+			Properties tmp = backupDB.getConfig(user, password);
+			if (tmp!=null) { //load worked
+				Config.importConfig(tmp);
+				return 2;
+			} else
+				return 1; //load did return nothing
+		} catch (IllegalArgumentException e) {
+			return 0;
+		}
+	}
+
+	/**
+	 * Diese Methode weist die Klasse LocalDBConnection.java an
+	 * alle Nachichten aus der Config in die Datenbank zu schreiben
+	 */
+	public void writeConfig(){
+		if(localDB.getStatus()) {
+			localDB.writeAllSettingsToDB(Config.getNonDefault());
+		}
+	}
+
 	/**Prüft ob eine Datenbankverbindung mit den angegebenen Parametern möglich ist und wirft entsprechende Fehlercodes
 	 * @param ip	Ip oder Hostname des Datenbankserver 
 	 * @param port Port des Datenbankserver
@@ -486,23 +511,39 @@ public class DatabaseEngine {
 	}
 
 
+	/**
+	 * Diese Methode wandelt ein ResultSet in ein DefaultTableModel um und gibt dieses zurück
+	 * @param rs:	umzuwandelndes ResultSet
+	 * @return		DefaultTableModel
+	 * @throws SQLException
+	 */
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
 		DatabaseDaten tmp = getResultData(rs);
 
 		return new DefaultTableModel(tmp.getData(127),tmp.getHeader(127));
 
 	}
+	
+	/**
+	 * Diese Methode wandelt ein übergebenes DatabaseDaten-Objekt in dein DefaultTableModel um
+	 * @param 	dbd
+	 * @return	DefaultTableModel
+	 * @throws SQLException
+	 */
 	public static DefaultTableModel buildTableModel(DatabaseDaten dbd) throws SQLException {
 		return new DefaultTableModel(dbd.getData(127),dbd.getHeader(127));
 		
 	}
 
-	public synchronized void go() {
-		synchronized (transporter) {
-			transporter.notify();
-		}
-	}
-
+	/**
+	 * Diese Methode weist die BackupDBConnection an, einen nutzer mit bestimmten Username und Passwort zu erstellen
+	 * @param username:	Benutzername des zu erstellenden Benutzers
+	 * @param password:	Passwort des zu erstellenden Benutzers
+	 * @return	0:	BackupDBConnection-Klasse nicht bereit
+	 * @return	1:	Anlegen des Benutzers nicht erfolgreich
+	 * @return	2:	Benutzername oder Passwort enthält verbotene Zeichen.
+	 * @return	3:	Benutzer wurde angelegt	
+	 */
 	public int createUser(String username, String password) {
 		if(!username.matches(Config.getConfig().getNamePattern()) || !password.matches(Config.getConfig().getNamePattern())) return 2;
 		if(backupDB.getStatus()>=1){
@@ -511,11 +552,101 @@ public class DatabaseEngine {
 			return 1;
 		}
 		return 0;
-
+	
 	}
 
-	public boolean getStatusLocal() {
-		return localDB.getStatus();
+	/**
+	 * 
+	 * @author ATRM
+	 * Diese Klasse (bzw.die Run-Methode) wertet den Status der LocalDBConnection aus und lässt diese gegebenenfalls einen 
+	 * reconnect auf die lokale Datenbank ausführen.
+	 * Zeigt der Status eine erfolgreiche Verbindung an übergibt sie die Daten aus der Nachichten-Queue, der Gruppen-Queue und der Nodes-Queue
+	 * um sie in umgekehrter Reihenfolge zum schreiben an die Local-DB-Connection-Klasse zu übergeben.   
+	 *
+	 */
+	private final class DPTransportBot implements Runnable {
+		@Override
+		public void run() {
+			boolean locDBWasConnectetBefore = false;
+			while (true) {
+				if (!localDB.getStatus()) {
+					synchronized (transporter) {
+						try {
+							if (locDBWasConnectetBefore) {
+								localDB.reconnectToLocDBServer();
+							}
+							transporter.wait();
+							locDBWasConnectetBefore = true;
+						} catch (InterruptedException e) {
+						}
+					}
+				}
+				while (true) {
+					// kopiere msgs
+					List<MSG> tmp_msg = new ArrayList<MSG>(msg2Store);
+					msg2Store.removeAll(tmp_msg);
+	
+					// kopiere groups
+					List<String> tmp_groups = new ArrayList<String>(groups2Store);
+					groups2Store.removeAll(tmp_groups);
+	
+					// kopiere nodes
+					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
+					node2Store.removeAll(tmp_nodes);
+	
+					// kopiere routen
+					List<Map.Entry<Long, Long>> tmp_routes = new ArrayList<Map.Entry<Long, Long>>(routes2Store);
+					routes2Store.removeAll(tmp_routes);
+	
+					// schreibe nodes
+					if(!localDB.writeAllUsersToDB(tmp_nodes)){
+						failed_node.addAll(tmp_nodes);
+						if(!localDB.getStatus()) {
+							break;
+						}
+					}
+	
+					// schreibe groups
+					localDB.writeAllGroupsToDB(tmp_groups);
+	
+					// schreibe msgs
+					boolean all_msgs_written=true;
+					for (MSG current : tmp_msg) {
+						if(!localDB.writeMsgToDB(current)){
+							all_msgs_written=false;
+							failed_msgs.add(current);
+						}
+					}
+					if(!all_msgs_written){
+						if(!localDB.getStatus()){
+							break;
+						}
+					}
+	
+					//schreibe alle routen
+					for (Entry<Long, Long> tmp_route : tmp_routes){
+						if(!localDB.writeRoutingTableToDB(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
+							failed_routes.add(tmp_route);
+							break;
+						}
+					}
+	
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Diese öffentliche Methode 'weckt' den transporterBot der DatabaseEngine
+	 */
+	public synchronized void go() {
+		synchronized (transporter) {
+			transporter.notify();
+		}
 	}
 
 

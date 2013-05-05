@@ -162,6 +162,30 @@ ENGINE = InnoDB;
 USE `db_publicmain` ;
 
 -- -----------------------------------------------------
+-- Platzhalter Tabelle `db_publicmain`.`v_pullAll_t_users`
+-- für die View um Views auf Views zu verhindern.
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_users` (`userID` INT, `displayName` INT, `userName` INT, `nodeID` INT, `computerName` INT, `fk_t_users_userID_2` INT, `fk_t_nodes_nodeID` INT);
+
+-- -----------------------------------------------------
+-- Platzhalter Tabelle `db_publicmain`.`v_pullAll_t_messages`
+-- für die View um Views auf Views zu verhindern.
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_messages` (`msgID` INT, `timestmp` INT, `fk_t_users_userID_sender` INT, `displayName` INT, `txt` INT, `fk_t_users_userID_empfaenger` INT, `fk_t_groups_groupName` INT, `fk_t_msgType_ID` INT);
+
+-- -----------------------------------------------------
+-- Platzhalter Tabelle `db_publicmain`.`v_pullALL_t_settings`
+-- für die View um Views auf Views zu verhindern.
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullALL_t_settings` (`settingsKey` INT, `fk_t_users_userID_3` INT, `settingsValue` INT);
+
+-- -----------------------------------------------------
+-- Platzhalter Tabelle `db_publicmain`.`v_searchInHistory`
+-- für die View um Views auf Views zu verhindern.
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_searchInHistory` (`'userID_Sender'` INT, `'userID_Recipient'` INT, `'time'` INT, `'sender'` INT, `'recipient'` INT, `'message'` INT, `'group'` INT);
+
+-- -----------------------------------------------------
 -- View `db_publicmain`.`v_pullAll_t_users` löschen wenn
 -- sie existiert, die Platzhaltertabelle löschen und die
 -- View anlegen oder ersetzen.
@@ -208,6 +232,6 @@ CREATE OR REPLACE VIEW `db_publicmain`.`v_searchInHistory` AS SELECT fk_t_users_
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_publicmain`;
-INSERT INTO `db_publicmain`.`t_dbVersion` (`dbVersion`) VALUES (22);
+INSERT INTO `db_publicmain`.`t_dbVersion` (`dbVersion`) VALUES (15);
 
 COMMIT;

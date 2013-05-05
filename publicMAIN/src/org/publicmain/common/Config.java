@@ -193,6 +193,7 @@ public class Config {
 						+ e.getMessage(), LogEngine.WARNING);
 			}
 		}
+		LogEngine.setVerbosity(settings.getLogVerbosity());
 	}
 
 	/**

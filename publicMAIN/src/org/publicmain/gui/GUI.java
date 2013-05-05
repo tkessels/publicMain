@@ -87,69 +87,68 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	private GUI() {
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception ex) {
-			LogEngine.log(ex);
+			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+		} catch ( Exception ex ) {
+			LogEngine.log( ex );
 		}
 
 		// Initialisierungen:
 		try {
 			this.ce = new ChatEngine();
-		} catch (Exception e) {
-			LogEngine.log(e);
+		} catch ( Exception e ) {
+			LogEngine.log( e );
 		}
 
 		GUI.me 					= this;
 		this.log 				= new LogEngine();
 		// this.locDBCon 		= LocalDBConnection.getDBConnection();
-		this.about 				= new JMenuItem("About", Help.getIcon("aboutSym.png"));
-		// TODO: evtl. noch anderes Icon wählen
-		this.helpContent		= new JMenuItem("Help Contents", Help.getIcon("helpSym.png", 12, 16));
-		this.exit				= new JMenuItem("Exit", Help.getIcon("exitSym.png"));
-		this.chatList 			= Collections.synchronizedList(new ArrayList<ChatWindow>());
+		this.about 				= new JMenuItem( "About", Help.getIcon( "aboutSym.png" ) );
+		this.helpContent		= new JMenuItem( "Help Contents", Help.getIcon( "helpSym.png", 12, 16 ) );
+		this.exit				= new JMenuItem( "Exit", Help.getIcon( "exitSym.png" ) );
+		this.chatList 			= Collections.synchronizedList( new ArrayList< ChatWindow >() );
 		this.jTabbedPane 		= new JTabbedPane();
-		this.contactListBtn 	= new JToggleButton(Help.getIcon("g18025.png"));
+		this.contactListBtn 	= new JToggleButton( Help.getIcon( "g18025.png" ) );
 		this.contactListActive 	= false;
 		this.menuBar 			= new JMenuBar();
-		this.pMAIN	 			= new JMenu("pMAIN");
-		this.history 			= new JMenu("History");
-		this.help	 			= new JMenu("Help");
-		this.localDB			= new JMenu("Local-DB");
-		this.backupServer		= new JMenu("Backup-Server");
-		this.pushHistory		= new JMenuItem("Push History", Help.getIcon("pushDBSym.png"));
-		this.pullHistory		= new JMenuItem("Pull History", Help.getIcon("pullDBSym.png"));
-		this.delBackupHistory	= new JMenuItem("Delete History", Help.getIcon("delBackupHistory.png",14,16));
-		this.settings 			= new JMenuItem("Settings", Help.getIcon("settingsSym.png"));
-		this.searchLocalHistory		= new JMenuItem("Search", Help.getIcon("historySym.png"));
-		this.deleteLocalHistory		= new JMenuItem("Delete", Help.getIcon("delHistorySym.png"));
+		this.pMAIN	 			= new JMenu( "pMAIN" );
+		this.history 			= new JMenu( "History" );
+		this.help	 			= new JMenu( "Help" );
+		this.localDB			= new JMenu( "Local-DB" );
+		this.backupServer		= new JMenu( "Backup-Server" );
+		this.pushHistory		= new JMenuItem( "Push History", Help.getIcon( "pushDBSym.png" ) );
+		this.pullHistory		= new JMenuItem( "Pull History", Help.getIcon( "pullDBSym.png" ) );
+		this.delBackupHistory	= new JMenuItem( "Delete History", Help.getIcon( "delBackupHistory.png", 14, 16 ) );
+		this.settings 			= new JMenuItem( "Settings", Help.getIcon( "settingsSym.png" ) );
+		this.searchLocalHistory	= new JMenuItem( "Search", Help.getIcon( "historySym.png" ) );
+		this.deleteLocalHistory	= new JMenuItem( "Delete", Help.getIcon( "delHistorySym.png" ) );
 		this.trayIcon 			= new PMTrayIcon();
 		this.afkStatus 			= false;
 
 		/**
 		 * Erstellen erforderlicher Controller und Listener
 		 */
-		this.addWindowListener(new winController());				// WindowListener für das GUI-Fenster
-		this.jTabbedPane.addChangeListener(this);					// ChangeListener für den Focus auf dem Eingabefeld
-		this.exit.addActionListener(new menuContoller());			
-		this.about.addActionListener(new menuContoller());
-		this.helpContent.addActionListener(new menuContoller());
-		this.searchLocalHistory.addActionListener(new menuContoller());
-		this.deleteLocalHistory.addActionListener(new menuContoller());
-		this.pullHistory.addActionListener(new menuContoller());
-		this.pushHistory.addActionListener(new menuContoller());
-		this.delBackupHistory.addActionListener(new menuContoller());
-		this.settings.addActionListener(new menuContoller());
+		this.addWindowListener( new winController() );
+		this.jTabbedPane.addChangeListener( this );
+		this.exit.addActionListener( new menuContoller() );			
+		this.about.addActionListener( new menuContoller() );
+		this.helpContent.addActionListener( new menuContoller() );
+		this.searchLocalHistory.addActionListener( new menuContoller() );
+		this.deleteLocalHistory.addActionListener( new menuContoller() );
+		this.pullHistory.addActionListener( new menuContoller() );
+		this.pushHistory.addActionListener( new menuContoller() );
+		this.delBackupHistory.addActionListener( new menuContoller() );
+		this.settings.addActionListener( new menuContoller() );
 
-		this.contactListBtn.setMargin(new Insets(2, 3, 2, 3));
-		this.contactListBtn.setToolTipText("show contacts");
-		this.contactListBtn.addActionListener(new ActionListener() {
+		this.contactListBtn.setMargin( new Insets( 2, 3, 2, 3 ) );
+		this.contactListBtn.setToolTipText( "show contacts" );
+		this.contactListBtn.addActionListener( new ActionListener() {
 
-			/**
-			 * TODO: Kommentar
+			/* (non-Javadoc)
+			 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 			 */
-			public void actionPerformed(ActionEvent e) {
-				JToggleButton source = (JToggleButton) e.getSource();
-				if (source.isSelected()) {
+			public void actionPerformed( ActionEvent e ) {
+				JToggleButton source = ( JToggleButton )e.getSource();
+				if ( source.isSelected() ) {
 					contactListAufklappen();
 				} else {
 					contactListZuklappen();
@@ -160,21 +159,21 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		/**
 		 * Menü-Komponenten hinzufügen
 		 */
-		this.history.add(localDB);
-		this.history.add(backupServer);
-		this.pMAIN.add(settings);
-		this.pMAIN.add(exit);
-		this.help.add(helpContent);
-		this.help.add(about);
-		this.localDB.add(searchLocalHistory);
-		this.localDB.add(deleteLocalHistory);
-		this.backupServer.add(pushHistory);
-		this.backupServer.add(pullHistory);
-		this.backupServer.add(delBackupHistory);
-		this.menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.LINE_AXIS));
-		this.menuBar.add(contactListBtn);
-		this.menuBar.add(pMAIN);
-		this.menuBar.add(history);
+		this.history.add( localDB );
+		this.history.add( backupServer );
+		this.pMAIN.add( settings );
+		this.pMAIN.add( exit );
+		this.help.add( helpContent );
+		this.help.add( about );
+		this.localDB.add( searchLocalHistory );
+		this.localDB.add( deleteLocalHistory );
+		this.backupServer.add( pushHistory );
+		this.backupServer.add( pullHistory );
+		this.backupServer.add( delBackupHistory );
+		this.menuBar.setLayout( new BoxLayout( menuBar, BoxLayout.LINE_AXIS ) );
+		this.menuBar.add( contactListBtn );
+		this.menuBar.add( pMAIN );
+		this.menuBar.add( history );
 		this.menuBar.add(help);
 
 		// Einkommentieren wenn Logo gewünscht:
@@ -183,27 +182,27 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// ImageIcon(Help.class.getResource("miniSpin.gif"))));
 
 		// GUI Komponenten hinzufügen:
-		this.setJMenuBar(menuBar);
-		this.add(jTabbedPane);
+		this.setJMenuBar( menuBar );
+		this.add( jTabbedPane );
 
 		// StandardGruppe erstellen:
-		this.addGrpCW("public", true);
+		this.addGrpCW( "public", true );
 		// StandardGruppe joinen:
 
 		// Registriert Hauptfenster als Empfänger für noch nicht gefangene
 		// Privatnachrichten.
-		this.ce.register_defaultMSGListener(this);
+		this.ce.register_defaultMSGListener( this );
 
 		// GUI JFrame Einstellungen
-		this.setIconImage(Help.getIcon("pM_Logo.png",64).getImage());
-		this.getContentPane().setBackground(Color.WHITE);
-		this.setMinimumSize(new Dimension(250, 250));
+		this.setIconImage( Help.getIcon( "pM_Logo.png", 64 ).getImage() );
+		this.getContentPane().setBackground( Color.WHITE );
+		this.setMinimumSize( new Dimension( 250, 250 ) );
 		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setTitle("publicMAIN");
-		this.contactListWin = new ContactList(me);
-		this.setVisible(true);
+		this.setLocationRelativeTo( null );
+		this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+		this.setTitle( "publicMAIN" );
+		this.contactListWin = new ContactList( me );
+		this.setVisible( true );
 		this.chatList.get(0).focusEingabefeld();
 		this.contactListAufklappen();
 
@@ -216,11 +215,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		if(!contactListActive){
 
-			this.contactListBtn.setToolTipText("hide contacts");
-			this.contactListBtn.setIcon(Help.getIcon("g20051.png"));
-			this.contactListBtn.setSelected(true);
+			this.contactListBtn.setToolTipText( "hide contacts" );
+			this.contactListBtn.setIcon(Help.getIcon( "g20051.png" ));
+			this.contactListBtn.setSelected( true );
 			this.contactListWin.repaint();
-			this.contactListWin.setVisible(true);
+			this.contactListWin.setVisible( true );
 			contactListActive = true;
 		}
 	}
@@ -230,11 +229,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	private void contactListZuklappen() {
 
-		if (contactListActive) {
-			this.contactListBtn.setToolTipText("show contacts");
-			this.contactListBtn.setIcon(Help.getIcon("g18025.png"));
-			this.contactListBtn.setSelected(false);
-			this.contactListWin.setVisible(false);
+		if ( contactListActive ) {
+			this.contactListBtn.setToolTipText( "show contacts" );
+			this.contactListBtn.setIcon( Help.getIcon( "g18025.png" ) );
+			this.contactListBtn.setSelected( false );
+			this.contactListWin.setVisible( false );
 			this.contactListActive = false;
 		}
 	}
@@ -246,13 +245,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param referenz, für was soll ein Fenster erstellt werden. 
 	 * @return
 	 */
-	public ChatWindow createChat(Object referenz) {
+	public ChatWindow createChat( Object referenz ) {
 
 		ChatWindow cw;
-		if (referenz instanceof String) {
-			cw = new ChatWindow((String) referenz);
-		} else if (referenz instanceof Long) {
-			cw = new ChatWindow((Long) referenz);
+		if ( referenz instanceof String ) {
+			cw = new ChatWindow( ( String )referenz );
+		} else if ( referenz instanceof Long) {
+			cw = new ChatWindow( ( Long )referenz );
 		} else
 			return null;
 
@@ -261,18 +260,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		// Neues ChatWindow (cw) zur Chatliste (ArrayList<ChatWindow>)
 		// hinzufügen
-		this.chatList.add(cw);
+		this.chatList.add( cw );
 		// erzeugen von neuem Tab für neues ChatWindow
-		this.jTabbedPane.addTab(title, cw);
+		this.jTabbedPane.addTab( title, cw );
 		// Index vom ChatWindow im JTabbedPane holen um am richtigen Ort
 		// einzufügen
-		int index = jTabbedPane.indexOfComponent(cw);
+		int index = jTabbedPane.indexOfComponent( cw );
 		// den neuen Tab an die Stelle von index setzen
-		this.jTabbedPane.setTabComponentAt(index, cw.getWindowTab());
-		if (cw.isGroup()) {
-			ce.add_MSGListener(cw, (String) referenz);
+		this.jTabbedPane.setTabComponentAt( index, cw.getWindowTab() );
+		if ( cw.isGroup() ) {
+			ce.add_MSGListener( cw, ( String )referenz );
 		} else {
-			ce.add_MSGListener(cw, (Long) referenz);
+			ce.add_MSGListener( cw, ( Long )referenz );
 		}
 
 		return cw;
@@ -285,16 +284,16 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param grpName
 	 * @param focus
 	 */
-	public void addGrpCW(String grpName, boolean focus) {
+	public void addGrpCW( String grpName, boolean focus ) {
 		// Hol ref. auf Gruppenfenster wenn existent
-		ChatWindow tmp_cw = getCW(grpName);
+		ChatWindow tmp_cw = getCW( grpName );
 		// wenn ref. leer dann erstelle neues Gruppenfesnter
-		if (tmp_cw == null) {
-			tmp_cw = createChat(grpName);
+		if ( tmp_cw == null ) {
+			tmp_cw = createChat( grpName );
 		}
 		// fokusiere das Gruppenfenster
-		if (focus) {
-			focus(tmp_cw);
+		if ( focus ) {
+			focus( tmp_cw );
 		}
 	}
 
@@ -304,13 +303,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param uid
 	 * @param focus
 	 */
-	public void addPrivCW(long uid,boolean focus){
-		ChatWindow tmp = getCW(uid);
-		if(tmp == null){
-			tmp=createChat(uid);
+	public void addPrivCW( long uid, boolean focus ){
+		ChatWindow tmp = getCW( uid );
+		if( tmp == null ){
+			tmp=createChat( uid );
 		}
-		if (focus){
-			focus(tmp);
+		if ( focus ){
+			focus( tmp );
 		}
 	}
 
@@ -322,19 +321,19 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * 
 	 * @param ChatWindow
 	 */
-	public void delChat(ChatWindow cw) {
+	public void delChat( ChatWindow cw ) {
 		// TODO: Hier evtl. noch anderen Programmablauf implementier
 		// z.B. schließen des Programms wenn letztes ChatWindow geschlossen
 		// wird
 
 		// Falls nur noch ein ChatWindow übrig kann dieses nicht entfernt werden
-		if(chatList.size() >= 2){
+		if( chatList.size() >= 2 ){
 			// ChatWindow (cw) aus jTabbedPane entfernen:
-			this.jTabbedPane.remove(cw);
+			this.jTabbedPane.remove( cw );
 			// ChatWindow aus Chatliste entfernen:
-			this.chatList.remove(cw);
+			this.chatList.remove( cw );
 			// ChatWindow aus Gruppe entfernen (MSGListener abschalten):
-			ce.remove_MSGListener(cw);
+			ce.remove_MSGListener( cw );
 		}
 	}
 
@@ -345,8 +344,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * 
 	 * @param chatname
 	 */
-	public void delChat(Object refObject) {
-		delChat(getCW(refObject));
+	public void delChat( Object refObject ) {
+		delChat( getCW( refObject ) );
 	}
 
 	/**
@@ -354,10 +353,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * 
 	 * @param cw, das zu fokussierende Chatwindow
 	 */
-	private void focus(ChatWindow cw) {
-		int index = jTabbedPane.indexOfComponent(cw);
-		if (index >= 0) {
-			jTabbedPane.setSelectedIndex(index);
+	private void focus( ChatWindow cw ) {
+		int index = jTabbedPane.indexOfComponent( cw );
+		if ( index >= 0 ) {
+			jTabbedPane.setSelectedIndex( index );
 		}
 		cw.focusEingabefeld();
 	}
@@ -374,13 +373,15 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param typ: 0 = Gruppenname, 1 = Alias
 	 * @return true wenn Name korrekt false wenn Name falsche Zeichen enthält
 	 */
-	boolean checkName(String name, int typ){
-		if(name.matches(Config.getConfig().getNamePattern())){
-			if(typ == 0){
-				if(contactListWin==null) return true;
-				return !contactListWin.groupExists(name);
-			} else if(typ == 1)
-				return !contactListWin.aliasExists(name);
+	boolean checkName( String name, int typ ){
+		if( name.matches( Config.getConfig().getNamePattern() ) ){
+			if( typ == 0 ){
+				if( contactListWin == null ){
+					return true;
+				}
+				return !contactListWin.groupExists( name );
+			} else if( typ == 1 )
+				return !contactListWin.aliasExists( name );
 			else
 				return false;
 		} else
@@ -396,11 +397,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param lowern: true = name wird gelowercased, false = keine Veränderung an Großbuchstaben
 	 * @return String: den gekürzten und ggf. gelowercasedten namen
 	 */
-	String confName(String name, boolean lowern){
-		if (name.length() > NAME_LENGTH) {
-			name = name.substring(0, NAME_LENGTH);
+	String confName( String name, boolean lowern ){
+		if ( name.length() > NAME_LENGTH ) {
+			name = name.substring( 0, NAME_LENGTH );
 		}
-		if(lowern){
+		if( lowern ){
 			name = name.toLowerCase();
 		}
 		return name;
@@ -413,14 +414,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param alias
 	 * @return boolean
 	 */
-	public void changeAlias(String alias){
-		alias = confName(alias, false);
-		if(checkName(alias, 1)){
-			ce.updateAlias(alias);
-			Config.getConfig().setAlias(alias);
+	public void changeAlias( String alias ){
+		alias = confName( alias, false );
+		if(checkName( alias, 1 )){
+			ce.updateAlias( alias );
+			Config.getConfig().setAlias( alias );
 			Config.write();
 		} else {
-			info("Illegal charakter in username!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 1);
+			info( "Illegal charakter in username!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 1 );
 		}
 	}
 
@@ -430,7 +431,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return
 	 */
 	public ChatWindow getActiveCW() {
-		return (ChatWindow) jTabbedPane.getSelectedComponent();
+		return ( ChatWindow )jTabbedPane.getSelectedComponent();
 	}	
 
 	/**
@@ -440,12 +441,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * auf true wenn false
 	 */
 	public void afk(){
-		if(afkStatus){
+		if( afkStatus ){
 			afkStatus = false;
-			info("You are <b>online</b>!", null, 2);
+			info( "You are <b>online</b>!", null, 2 );
 		} else {
 			afkStatus = true;
-			info("You are <b>A</b>way <b>F</b>rom <b>K</b>eyboard!", null, 2);
+			info( "You are <b>A</b>way <b>F</b>rom <b>K</b>eyboard!", null, 2 );
 		}
 		this.notifyGUI();
 	}
@@ -465,22 +466,22 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * Fährt das Programm ordnungsgemäß runter
 	 */
 	void shutdown() {
-		new Thread(new Runnable() {
+		new Thread( new Runnable() {
 			public void run() {
 				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
+					Thread.sleep( 2000 );
+				} catch ( InterruptedException e ) {
 				}
-				System.exit(0);
+				System.exit( 0 );
 			}
-		}).start();
-		LogEngine.log(this, "Shutdown initiated!", LogEngine.INFO);
+		} ).start();
+		LogEngine.log( this, "Shutdown initiated!", LogEngine.INFO );
 		// Wenn es ein About-Fenster gibt, Fenster ausblenden
-		if(hcdAbout != null) {
+		if( hcdAbout != null ) {
 			hcdAbout.hideIt();
 		}
 		// Wenn es ein Help-Fenster gibt, Fenster ausblenden
-		if(hcdHelp != null) {
+		if( hcdHelp != null ) {
 			hcdHelp.hideIt();
 		}
 		//		Help.playSound("logoff.wav");
@@ -495,7 +496,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// ChatEngine beenden
 		ce.shutdown();
 		// Datenbankverbindung schliessen
-		if (locDBCon != null) {
+		if ( locDBCon != null ) {
 			locDBCon.shutdownLocDB();
 		}
 	}
@@ -518,11 +519,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return, 		die laufende Instanz des Chatwindows zur angegebenen Referenz
 	 *         			oder <code>null</code> falls keine Instanz gefunden.
 	 */
-	private ChatWindow getCW(Object referenz) {
-		if (referenz != null) {
-			for (ChatWindow cur : chatList) {
-				if (cur.equals(referenz))
+	private ChatWindow getCW( Object referenz ) {
+		if ( referenz != null ) {
+			for ( ChatWindow cur : chatList ) {
+				if ( cur.equals( referenz ) ){
 					return cur;
+				}
 			}
 		}
 		return null;
@@ -535,11 +537,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param empfUID, long EmpfängerUID
 	 * @param msg, String die Nachricht
 	 */
-	void privSend(long empfUID, String msg) {
-		if(empfUID!=ce.getUserID()){
-			ce.send_private(empfUID, msg);
+	void privSend( long empfUID, String msg ) {
+		if( empfUID != ce.getUserID() ){
+			ce.send_private( empfUID, msg );
 		} else {
-			info("Message to yourself, is not allowed", null, 2);
+			info( "Message to yourself, is not allowed", null, 2 );
 		}
 	}
 
@@ -551,22 +553,22 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param msg, String die Nachricht/Msg
 	 * @param cw, ChatWindow das aufrufende ChatWindow
 	 */
-	void groupSend(String empfGrp, String msg) {
+	void groupSend( String empfGrp, String msg ) {
 
-		ChatWindow tmpCW = getCW(empfGrp);
-		if (tmpCW == null){
-			empfGrp = confName(empfGrp, true);
-			if (checkName(empfGrp, 0)) {
-				tmpCW = new ChatWindow(empfGrp);
-				addGrpCW(empfGrp, false);
+		ChatWindow tmpCW = getCW( empfGrp );
+		if ( tmpCW == null ){
+			empfGrp = confName( empfGrp, true );
+			if (checkName( empfGrp, 0 )) {
+				tmpCW = new ChatWindow( empfGrp );
+				addGrpCW( empfGrp, false );
 			}
 			else {
-				info("Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2);
+				info( "Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2 );
 			}
 		} else {
 			//			focus(tmpCW);
 		}
-		ce.send_group(empfGrp, msg);
+		ce.send_group( empfGrp, msg );
 	}
 
 	/**
@@ -575,10 +577,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param alias, String Alias des Users
 	 * @returns, true Wenn User gefunden
 	 */
-	boolean ignoreUser(long uid) {
-		if(ce.ignore_user(uid)) {
+	boolean ignoreUser( long uid ) {
+		if( ce.ignore_user( uid  )) {
 			notifyGUI();
-			info(ce.getNodeForUID(uid) + " is <b>ignored!</b>", null, 2);
+			info( ce.getNodeForUID(uid) + " is <b>ignored!</b>", null, 2 );
 			return true;
 		}
 		return false;
@@ -590,10 +592,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param alias, String Alias des Users
 	 * @return, true Wenn User gefunden
 	 */
-	boolean unignoreUser(long uid) {
-		if(ce.unignore_user(uid)) {
+	boolean unignoreUser( long uid ) {
+		if( ce.unignore_user( uid ) ) {
 			notifyGUI();
-			info(ce.getNodeForUID(uid) + " is <b>unignored!</b>", null, 2);
+			info( ce.getNodeForUID(uid) + " is <b>unignored!</b>", null, 2 );
 			return true;
 		}
 		return false;
@@ -604,12 +606,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * 
 	 * @param uid
 	 */
-	public void sendFile(long uid) {
+	public void sendFile( long uid ) {
 		JFileChooser fileChooser = new JFileChooser();
-		int returnVal=fileChooser.showOpenDialog(me);
+		int returnVal = fileChooser.showOpenDialog( me );
 		File selectedFile = fileChooser.getSelectedFile();
-		if((returnVal== JFileChooser.APPROVE_OPTION)&&(selectedFile!=null)) {
-			sendFile(selectedFile, uid);
+		if( ( returnVal == JFileChooser.APPROVE_OPTION) && ( selectedFile != null ) ) {
+			sendFile( selectedFile, uid );
 		}
 	}
 
@@ -619,28 +621,28 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param datei
 	 * @param uid
 	 */
-	public void sendFile(File datei, long uid) {
-		if (datei.isFile()) {
-			if (datei.canRead()) {
-				if (datei.length() > 0) {
-					ce.send_file(datei, uid);
+	public void sendFile( File datei, long uid ) {
+		if ( datei.isFile() ) {
+			if ( datei.canRead() ) {
+				if ( datei.length() > 0 ) {
+					ce.send_file( datei, uid );
 				} else {
-					info("File has a size of 0 bytes!", uid, 3);
+					info( "File has a size of 0 bytes!", uid, 3 );
 				}
 			} else {
-				info("Cant read file \"" + datei.getName() + "\"!", uid, 3);
+				info( "Cant read file \"" + datei.getName() + "\"!", uid, 3 );
 			}
 		} else {
-			info("Only single Files are supported!", uid, 3);
+			info( "Only single Files are supported!", uid, 3 );
 		}
 	}	
 
 	/**
 	 * @param msg
 	 */
-	protected void msgToTray(MSG msg){
-		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveMSG(msg);
+	protected void msgToTray( MSG msg ){
+		if( this.getExtendedState() == JFrame.ICONIFIED ){
+			trayIcon.recieveMSG( msg );
 		}
 	}
 
@@ -648,8 +650,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param text
 	 */
 	protected void textToTray(String text, MSGCode code){
-		if(this.getExtendedState() == JFrame.ICONIFIED){
-			trayIcon.recieveText(text, code);
+		if( this.getExtendedState() == JFrame.ICONIFIED ){
+			trayIcon.recieveText( text, code );
 		}
 	}
 
@@ -662,21 +664,21 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 *            		 <code>null</code> to take the active one.
 	 * @param typ, <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
 	 */
-	public void info(String nachricht, Object reference, int typ) {
-		ChatWindow tmp = getCW(reference);
-		if (tmp == null) {
+	public void info( String nachricht, Object reference, int typ ) {
+		ChatWindow tmp = getCW( reference );
+		if ( tmp == null ) {
 			tmp = getActiveCW();
 		}
-		if (tmp != null) {
-			if (typ == 0) {
-				tmp.info(nachricht);
-				textToTray(nachricht, MSGCode.CW_INFO_TEXT);
-			} else if (typ == 1) {
-				tmp.warn(nachricht);
-				textToTray(nachricht, MSGCode.CW_WARNING_TEXT);
+		if ( tmp != null ) {
+			if ( typ == 0 ) {
+				tmp.info( nachricht );
+				textToTray( nachricht, MSGCode.CW_INFO_TEXT );
+			} else if ( typ == 1 ) {
+				tmp.warn( nachricht );
+				textToTray( nachricht, MSGCode.CW_WARNING_TEXT );
 			} else {
-				tmp.error(nachricht);
-				textToTray(nachricht, MSGCode.CW_ERROR_TEXT);
+				tmp.error( nachricht );
+				textToTray( nachricht, MSGCode.CW_ERROR_TEXT );
 			}
 		}
 	}
@@ -689,24 +691,24 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return File
 	 */
 	@SuppressWarnings("deprecation")
-	public File request_File(FileTransferData fr) {
+	public File request_File( FileTransferData fr ) {
 		final long timeout = Config.getConfig().getFileTransferTimeout() - 1000;
 		String dateiname = fr.datei.getName();
-		JOptionPane yesno_pane= new  JOptionPane("Möchten sie die Datei \""+dateiname+ "\" von "+ fr.sender.getAlias() +" annehmen? ("+fr.getNiceSize() +")",JOptionPane.QUESTION_MESSAGE,JOptionPane.YES_NO_OPTION);
-		final JDialog yesno_dialog=yesno_pane.createDialog(me, "Dateitransfer");
+		JOptionPane yesno_pane = new JOptionPane( "Möchten sie die Datei \"" + dateiname + "\" von " + fr.sender.getAlias() + " annehmen? (" + fr.getNiceSize() + ")", JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION );
+		final JDialog yesno_dialog = yesno_pane.createDialog( me, "Dateitransfer" );
 		final JFileChooser fileChooser = new JFileChooser();
 
-		Thread timoutBot = new Thread(new Runnable() {
+		Thread timoutBot = new Thread( new Runnable() {
 			public void run() {
 				try {
-					Thread.sleep(timeout);
-				} catch (InterruptedException e) {
+					Thread.sleep( timeout );
+				} catch ( InterruptedException e ) {
 				}
 				yesno_dialog.dispose();
 				fileChooser.cancelSelection();
 			}
-		});
-		if(fr.size>=Config.getConfig().getMaxFileSize()) {
+		} );
+		if( fr.size >= Config.getConfig().getMaxFileSize() ) {
 			timoutBot.start();
 		}
 
@@ -714,12 +716,12 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		Object  x = yesno_pane.getValue();
 
 
-		if((x!=null)&&(x instanceof Integer) &&(((Integer)x)==0)) {
-			if (dateiname != null) {
-				fileChooser.setSelectedFile(new File(dateiname));
+		if( ( x != null ) && ( x instanceof Integer ) && ( ( ( Integer )x ) == 0 ) ) {
+			if ( dateiname != null ) {
+				fileChooser.setSelectedFile( new File( dateiname ) );
 			}
-			int returnVal = fileChooser.showSaveDialog(me);
-			if (returnVal == JFileChooser.APPROVE_OPTION)
+			int returnVal = fileChooser.showSaveDialog( me );
+			if ( returnVal == JFileChooser.APPROVE_OPTION )
 				//				System.out.println("You chose to save this file: " + fileChooser.getSelectedFile().getName());
 				return fileChooser.getSelectedFile();
 			return null;
@@ -731,25 +733,25 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * Diese Methode  informiert die GUI über Änderungen.
 	 */
 	public void notifyGUI() {
-		for (ChatWindow cw : chatList) {
+		for ( ChatWindow cw : chatList ) {
 			cw.updateName();
 		}
 		contactListWin.repaint();
 	}
 
-	public void update(Observable o, Object arg) {
+	public void update( Observable o, Object arg ) {
 		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
-		if(o instanceof KnotenKanal){
-			MSG tmp = (MSG) arg;
+		if ( o instanceof KnotenKanal ){
+			MSG tmp = ( MSG ) arg;
 			Node tmp_node =null;
-			if(tmp.getSender()!=ce.getMyNodeID()) {
-				tmp_node = ce.getNodeForNID(tmp.getSender());
-			} else if (tmp.getEmpfänger()!=ce.getMyNodeID()) {
+			if ( tmp.getSender() != ce.getMyNodeID() ) {
+				tmp_node = ce.getNodeForNID( tmp.getSender() );
+			} else if ( tmp.getEmpfänger() != ce.getMyNodeID() ) {
 				tmp_node = ce.getNodeForNID(tmp.getEmpfänger());
 			}
-			if(tmp_node!=null){
-				me.addPrivCW(tmp_node.getUserID(), false);
-				ce.put(tmp);
+			if ( tmp_node != null ){
+				me.addPrivCW( tmp_node.getUserID(), false );
+				ce.put( tmp );
 			}
 		}
 	}
@@ -760,8 +762,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param uid
 	 * @return Node
 	 */
-	public Node getNodeForUID(long uid) {
-		return ce.getNodeForUID(uid);
+	public Node getNodeForUID( long uid ) {
+		return ce.getNodeForUID( uid );
 	}
 
 	/**
@@ -773,7 +775,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return GUI
 	 */
 	public static GUI getGUI() {
-		if (me == null) {
+		if ( me == null ) {
 			me = new GUI();
 		}
 		return me;
@@ -793,7 +795,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 
 	public void stateChanged(ChangeEvent e) {
-		((ChatWindow)jTabbedPane.getSelectedComponent()).focusEingabefeld();
+		( ( ChatWindow )jTabbedPane.getSelectedComponent() ).focusEingabefeld();
 	}
 
 
@@ -802,63 +804,78 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	class menuContoller implements ActionListener{
 
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed( ActionEvent e ) {
 
-			JMenuItem source = (JMenuItem)e.getSource();
+			JMenuItem source = ( JMenuItem )e.getSource();
 
-			switch (source.getText()) {
+			switch ( source.getText() ) {
 
 			case "Exit":
 				shutdown();
 				break;
 			case "About":
-				if(hcdAbout == null) {
-					hcdAbout = new HTMLContentDialog("About", "pM_Logo.png", "about.html");
+				if ( hcdAbout == null ) {
+					hcdAbout = new HTMLContentDialog( "About", "pM_Logo.png", "about.html" );
 				} else {
 					hcdAbout.showIt();
 				}
 				break;
 			case "Help Contents":
-				if(hcdHelp == null) {
-					hcdHelp = new HTMLContentDialog("Help", "helpSym.png", "helpcontent.html");
+				if ( hcdHelp == null ) {
+					hcdHelp = new HTMLContentDialog( "Help", "helpSym.png", "helpcontent.html" );
 				} else {
 					hcdHelp.showIt();
 				}
 				break;
 			case "Search":
-				if(DatabaseEngine.getDatabaseEngine().getStatusLocal())new HistoryWindow();
-				else {
-					new SettingsWindow(1, true);
+				if ( DatabaseEngine.getDatabaseEngine().getStatusLocal() ) {
+					new HistoryWindow();
+				} else {
+					new SettingsWindow( 1, true );
 				}
 				break;
 			case "Delete":
-				if(JOptionPane.showConfirmDialog(me, "Do you really want to delete the local history?", "Delete local history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0){
+				if ( JOptionPane.showConfirmDialog( me, "Do you really want to delete the local history?", "Delete local history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE ) == 0 ) {
 					DatabaseEngine.getDatabaseEngine().deleteLocalHistory();
 				}
 				break;
 			case "Settings":
-				SettingsWindow.get().setVisible(true);
+				SettingsWindow.get().setVisible( true );
 				break;
 			case "Push History":
-				if(DatabaseEngine.getDatabaseEngine().getStatusLocal()) {
+				if ( DatabaseEngine.getDatabaseEngine().getStatusLocal() ) {
 					int statusBackup = DatabaseEngine.getDatabaseEngine().getStatusBackup();
-					if(statusBackup>=1) {
-						if (statusBackup>=2)DatabaseEngine.getDatabaseEngine().push();
-						else new SettingsWindow(2, true);
-					} else new SettingsWindow(1, true);
-				} else new SettingsWindow(1, true);
+					if ( statusBackup >= 1 ) {
+						if ( statusBackup >= 2 ){
+							DatabaseEngine.getDatabaseEngine().push();
+						} else {
+							new SettingsWindow( 2, true );
+						}
+					} else {
+						new SettingsWindow( 1, true );
+					}
+				} else {
+					new SettingsWindow( 1, true );
+				}
 				break;
 			case "Pull History":
-				if(DatabaseEngine.getDatabaseEngine().getStatusLocal()) {
+				if ( DatabaseEngine.getDatabaseEngine().getStatusLocal() ) {
 					int statusBackup = DatabaseEngine.getDatabaseEngine().getStatusBackup();
-					if(statusBackup>=1) {
-						if (statusBackup>=2)DatabaseEngine.getDatabaseEngine().pull();
-						else new SettingsWindow(2, true);
-					} else new SettingsWindow(1, true);
-				} else new SettingsWindow(1, true);
+					if ( statusBackup >= 1 ) {
+						if ( statusBackup >= 2 ){
+							DatabaseEngine.getDatabaseEngine().pull();
+						} else {
+							new SettingsWindow( 2, true );
+						}
+					} else {
+						new SettingsWindow( 1, true );
+					}
+				} else {
+					new SettingsWindow( 1, true );
+				}
 				break;
 			case "Delete History":
-				if(JOptionPane.showConfirmDialog(me, "Do you really want to delete the backup history?", "Delete backup history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == 0){
+				if( JOptionPane.showConfirmDialog( me, "Do you really want to delete the backup history?", "Delete backup history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE ) == 0 ) {
 					DatabaseEngine.getDatabaseEngine().deleteBackupMessages();
 				}
 				break;
@@ -872,18 +889,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	class winController extends WindowAdapter{
 		// Wird das GUI minimiert wird die Userlist zugeklappt und der
 		// userListBtn zurückgesetzt:
-		public void windowIconified(WindowEvent arg0) {
-			if (contactListBtn.isSelected()) {
+		public void windowIconified( WindowEvent arg0 ) {
+			if ( contactListBtn.isSelected() ) {
 				contactListZuklappen();
 			}
 		}
 
-		public void windowClosed(WindowEvent arg0) {
+		public void windowClosed( WindowEvent arg0 ) {
 			shutdown();
 		}
 
-		public void windowActivated(WindowEvent arg0) {
-			if (contactListBtn.isSelected()) {
+		public void windowActivated( WindowEvent arg0 ) {
+			if ( contactListBtn.isSelected() ) {
 				contactListWin.toFront();
 			}
 			me.toFront();

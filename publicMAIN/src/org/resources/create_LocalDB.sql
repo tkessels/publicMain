@@ -1,9 +1,19 @@
+-- -----------------------------------------------------
+-- Datenbank löschen wenn sie existiert, SCHEMA ist ein
+-- Alias für DATABASE und eine neue Datenbank mit dem
+-- Namen `db_publicmain` anlegen wenn noch nicht
+-- vorhanden.
+-- Die neue Datenbank im Anschluss zum Benutzen
+-- auswählen.
+-- -----------------------------------------------------
 DROP SCHEMA IF EXISTS `db_publicmain` ;
 CREATE SCHEMA IF NOT EXISTS `db_publicmain` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
 USE `db_publicmain` ;
 
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_users`
+-- Tabelle `db_publicmain`.`t_users` anlegen, mit den
+-- erforderlichen Attributen befüllen und den
+-- Primärschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_users` ;
 
@@ -14,9 +24,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_users` (
   PRIMARY KEY (`userID`) )
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_groups`
+-- Tabelle `db_publicmain`.`t_groups` anlegen, mit den
+-- erforderlichen Attributen befüllen, den
+-- Primär- und Fremdschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_groups` ;
 
@@ -32,9 +43,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_groups` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_msgType`
+-- Tabelle `db_publicmain`.`t_msgType` anlegen, mit den
+-- erforderlichen Attributen befüllen und den
+-- Primärschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_msgType` ;
 
@@ -45,9 +57,11 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_msgType` (
   PRIMARY KEY (`msgTypeID`) )
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_messages`
+-- Tabelle `db_publicmain`.`t_messages` anlegen, mit den
+-- erforderlichen Attributen befüllen und den zusammen-
+-- gesetzten Primärschlüssel sowie die Fremdschlüssel
+-- festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_messages` ;
 
@@ -87,9 +101,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_messages` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_settings`
+-- Tabelle `db_publicmain`.`t_settings` anlegen, mit den
+-- erforderlichen Attributen befüllen und den Primär-
+-- sowie Fremdschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_settings` ;
 
@@ -106,9 +121,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_settings` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_nodes`
+-- Tabelle `db_publicmain`.`t_nodes` anlegen, mit den
+-- erforderlichen Attributen befüllen und den Primär-
+-- sowie Fremdschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_nodes` ;
 
@@ -132,9 +148,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain`.`t_nodes` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain`.`t_dbVersion`
+-- Tabelle `db_publicmain`.`t_dbVersion` anlegen. Diese
+-- Tabelle hält nur die Versionnummer vor, um zu prüfen
+-- ob Programm- und Datenbankversion kompatibel sind.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain`.`t_dbVersion` ;
 
@@ -145,27 +162,33 @@ ENGINE = InnoDB;
 USE `db_publicmain` ;
 
 -- -----------------------------------------------------
--- Placeholder table for view `db_publicmain`.`v_pullAll_t_users`
+-- Platzhalter Tabelle `db_publicmain`.`v_pullAll_t_users`
+-- für die View um Views auf Views zu verhindern.
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_users` (`userID` INT, `displayName` INT, `userName` INT, `nodeID` INT, `computerName` INT, `fk_t_users_userID_2` INT, `fk_t_nodes_nodeID` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `db_publicmain`.`v_pullAll_t_messages`
+-- Platzhalter Tabelle `db_publicmain`.`v_pullAll_t_messages`
+-- für die View um Views auf Views zu verhindern.
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullAll_t_messages` (`msgID` INT, `timestmp` INT, `fk_t_users_userID_sender` INT, `displayName` INT, `txt` INT, `fk_t_users_userID_empfaenger` INT, `fk_t_groups_groupName` INT, `fk_t_msgType_ID` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `db_publicmain`.`v_pullALL_t_settings`
+-- Platzhalter Tabelle `db_publicmain`.`v_pullALL_t_settings`
+-- für die View um Views auf Views zu verhindern.
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_pullALL_t_settings` (`settingsKey` INT, `fk_t_users_userID_3` INT, `settingsValue` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `db_publicmain`.`v_searchInHistory`
+-- Platzhalter Tabelle `db_publicmain`.`v_searchInHistory`
+-- für die View um Views auf Views zu verhindern.
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_publicmain`.`v_searchInHistory` (`'userID_Sender'` INT, `'userID_Recipient'` INT, `'time'` INT, `'sender'` INT, `'recipient'` INT, `'message'` INT, `'group'` INT);
 
 -- -----------------------------------------------------
--- View `db_publicmain`.`v_pullAll_t_users`
+-- View `db_publicmain`.`v_pullAll_t_users` löschen wenn
+-- sie existiert, die Platzhaltertabelle löschen und die
+-- View anlegen oder ersetzen.
 -- -----------------------------------------------------
 DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_users` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_users`;
@@ -173,7 +196,9 @@ USE `db_publicmain`;
 CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_users` AS 	SELECT * FROM t_users, t_nodes WHERE userID = fk_t_users_userID_2;
 
 -- -----------------------------------------------------
--- View `db_publicmain`.`v_pullAll_t_messages`
+-- View `db_publicmain`.`v_pullAll_t_messages` löschen
+-- wenn sie existiert, die Platzhaltertabelle löschen
+-- und die View anlegen oder ersetzen.
 -- -----------------------------------------------------
 DROP VIEW IF EXISTS `db_publicmain`.`v_pullAll_t_messages` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_pullAll_t_messages`;
@@ -181,7 +206,9 @@ USE `db_publicmain`;
 CREATE OR REPLACE VIEW `db_publicmain`.`v_pullAll_t_messages` 	AS SELECT * FROM t_messages;
 
 -- -----------------------------------------------------
--- View `db_publicmain`.`v_pullALL_t_settings`
+-- View `db_publicmain`.`v_pullALL_t_settings` löschen
+-- wenn sie existiert, die Platzhaltertabelle löschen
+-- und die View anlegen oder ersetzen.
 -- -----------------------------------------------------
 DROP VIEW IF EXISTS `db_publicmain`.`v_pullALL_t_settings` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_pullALL_t_settings`;
@@ -189,7 +216,9 @@ USE `db_publicmain`;
 CREATE OR REPLACE VIEW `db_publicmain`.`v_pullALL_t_settings` AS SELECT * FROM t_settings;
 
 -- -----------------------------------------------------
--- View `db_publicmain`.`v_searchInHistory`
+-- View `db_publicmain`.`v_searchInHistory` löschen
+-- wenn sie existiert, die Platzhaltertabelle löschen
+-- und die View anlegen oder ersetzen.
 -- -----------------------------------------------------
 DROP VIEW IF EXISTS `db_publicmain`.`v_searchInHistory` ;
 DROP TABLE IF EXISTS `db_publicmain`.`v_searchInHistory`;
@@ -197,7 +226,9 @@ USE `db_publicmain`;
 CREATE OR REPLACE VIEW `db_publicmain`.`v_searchInHistory` AS SELECT fk_t_users_userID_sender 'userID_Sender', fk_t_users_userID_empfaenger 'userID_Recipient', timestmp 'time', t1.displayName 'sender', t2.displayName 'recipient', txt 'message', fk_t_groups_groupName 'group' FROM t_messages as t1 left join t_users as t2 on fk_t_users_userID_empfaenger = userID WHERE fk_t_msgtype_id is null ORDER BY time;
 
 -- -----------------------------------------------------
--- Data for table `db_publicmain`.`t_dbVersion`
+-- Datenbank `db_publicmain` zum Benutzen auswählen und
+-- Daten in die Tabelle `db_publicmain`.`t_dbVersion`
+-- einfügen.
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_publicmain`;

@@ -161,7 +161,7 @@ ENGINE = InnoDB;
 
 USE `db_publicmain` ;
 
-- -----------------------------------------------------
+-- -----------------------------------------------------
 -- Platzhalter Tabelle `db_publicmain`.`v_pullAll_t_users`
 -- für die View um Views auf Views zu verhindern.
 -- -----------------------------------------------------

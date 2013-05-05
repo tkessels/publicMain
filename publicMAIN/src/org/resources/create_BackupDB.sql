@@ -1,9 +1,19 @@
+-- -----------------------------------------------------
+-- Datenbank löschen wenn sie existiert, SCHEMA ist ein
+-- Alias für DATABASE und eine neue Datenbank mit dem
+-- Namen `db_publicmain` anlegen wenn noch nicht
+-- vorhanden.
+-- Die neue Datenbank im Anschluss zum Benutzen
+-- auswählen.
+-- -----------------------------------------------------
 DROP SCHEMA IF EXISTS `db_publicmain_backup` ;
 CREATE SCHEMA IF NOT EXISTS `db_publicmain_backup` DEFAULT CHARACTER SET utf8 ;
 USE `db_publicmain_backup` ;
 
 -- -----------------------------------------------------
--- Table `db_publicmain_backup`.`t_users`
+-- Tabelle `db_publicmain`.`t_users` anlegen, mit den
+-- erforderlichen Attributen befüllen und den
+-- Primärschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain_backup`.`t_users` ;
 
@@ -14,9 +24,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_users` (
   PRIMARY KEY (`userID`) )
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain_backup`.`t_msgType`
+-- Tabelle `db_publicmain`.`t_msgType` anlegen, mit den
+-- erforderlichen Attributen befüllen und den
+-- Primärschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain_backup`.`t_msgType` ;
 
@@ -27,9 +38,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_msgType` (
   PRIMARY KEY (`msgTypeID`) )
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain_backup`.`t_backupUser`
+-- Tabelle `db_publicmain`.`t_backupUser` anlegen, mit den
+-- erforderlichen Attributen befüllen und den
+-- Primärschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain_backup`.`t_backupUser` ;
 
@@ -40,9 +52,11 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_backupUser` (
   PRIMARY KEY (`backupUserID`) )
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain_backup`.`t_messages`
+-- Tabelle `db_publicmain`.`t_messages` anlegen, mit den
+-- erforderlichen Attributen befüllen und den zusammen-
+-- gesetzten Primärschlüssel sowie die Fremdschlüssel
+-- festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain_backup`.`t_messages` ;
 
@@ -83,9 +97,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_messages` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain_backup`.`t_settings`
+-- Tabelle `db_publicmain`.`t_settings` anlegen, mit den
+-- erforderlichen Attributen befüllen und den Primär-
+-- sowie Fremdschlüssel festlegen.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain_backup`.`t_settings` ;
 
@@ -102,9 +117,10 @@ CREATE  TABLE IF NOT EXISTS `db_publicmain_backup`.`t_settings` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
--- Table `db_publicmain_backup`.`t_dbVersion`
+-- Tabelle `db_publicmain`.`t_dbVersion` anlegen. Diese
+-- Tabelle hält nur die Versionnummer vor, um zu prüfen
+-- ob Programm- und Datenbankversion kompatibel sind.
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_publicmain_backup`.`t_dbVersion` ;
 
@@ -115,12 +131,15 @@ ENGINE = InnoDB;
 USE `db_publicmain_backup` ;
 
 -- -----------------------------------------------------
--- Placeholder table for view `db_publicmain_backup`.`v_searchInHistory`
+-- Platzhalter Tabelle `db_publicmain`.`v_searchInHistory`
+-- für die View um Views auf Views zu verhindern.
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_publicmain_backup`.`v_searchInHistory` (`settingsKey` INT, `fk_t_backupUser_backupUserID_2` INT, `settingsValue` INT);
 
 -- -----------------------------------------------------
--- View `db_publicmain_backup`.`v_searchInHistory`
+-- View `db_publicmain`.`v_searchInHistory` löschen wenn
+-- sie existiert, die Platzhaltertabelle löschen und die
+-- View anlegen oder ersetzen.
 -- -----------------------------------------------------
 DROP VIEW IF EXISTS `db_publicmain_backup`.`v_searchInHistory` ;
 DROP TABLE IF EXISTS `db_publicmain_backup`.`v_searchInHistory`;
@@ -128,7 +147,9 @@ USE `db_publicmain_backup`;
 CREATE  OR REPLACE VIEW `db_publicmain_backup`.`v_searchInHistory` AS SELECT * FROM t_settings;
 
 -- -----------------------------------------------------
--- Data for table `db_publicmain_backup`.`t_dbVersion`
+-- Datenbank `db_publicmain` zum Benutzen auswählen und
+-- Daten in die Tabelle `db_publicmain`.`t_dbVersion`
+-- einfügen.
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_publicmain_backup`;

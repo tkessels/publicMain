@@ -41,6 +41,12 @@ import org.publicmain.common.Config;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
+/**
+ * @author ATRM
+ * Diese Klasse stellt ein Einstellungsfenster zur Verfügung
+ * in welchem der Nutzer Nutzerspezifische Einstellungen treffen kann
+ *
+ */
 public class SettingsWindow extends JDialog{
 	private static final long serialVersionUID = 7576764930617798651L;
 	
@@ -116,6 +122,11 @@ public class SettingsWindow extends JDialog{
 	private ScheduledExecutorService executer = Executors.newSingleThreadScheduledExecutor();
 	
 
+	/**
+	 * Dieser Konstruktor Stellt ein SettingsWindow zur Verfügung
+	 * @param card die als erstes sichtbar sein soll
+	 * @param modal	true/false ob das Settingswindwo modal sein soll
+	 */
 	public SettingsWindow(int card, boolean modal) {
 		SettingsWindow.me = this;
 		constructWindowContent();
@@ -124,12 +135,31 @@ public class SettingsWindow extends JDialog{
 		this.setVisible(true);
 	}
 
+	/**
+	 * Dieser Konstruktor Stellt ein Standart-SettingsWindow zur Verfügung
+	 */
 	private SettingsWindow() {
 		SettingsWindow.me = this;
 		constructWindowContent();
 		this.setVisible(true);
 	}
 
+	/**
+	 * Factory-Methode für das Startwindwo
+	 * @return DIE StartWindowInstanz
+	 */
+	public synchronized static SettingsWindow get(){
+		if(me==null) {
+			new SettingsWindow();
+		}
+		return me;
+	
+	}
+
+	/**
+	 * Diese Methode sorgt für das Anzeigen eines besstimmten Tabs
+	 * @param i repräsentiert den gewünschten Tab (0=User, 1=Database, 2=Push/Pull)
+	 */
 	public void showTab(int i) {
 		String[] cards= {"User","DB","Push/Pull"};
 		i=Math.abs(i)%cards.length;
@@ -351,27 +381,30 @@ public class SettingsWindow extends JDialog{
 
 	}
 
+	/**
+	 * Diese Methode lässt das aktuelle StartWindow disposen wenn es vorhanden ist 
+	 */
 	public static void closeThis(){
 		if(me!=null) {
 			me.dispose();
 		}
 		
 	}
-	@Override
+
+	
+	/* (non-Javadoc)
+	 * @see java.awt.Window#dispose()
+	 * executes the disposing
+	 */
 	public void dispose() {
 		super.dispose();
 		executer.shutdownNow();
 		me = null;
 	}
 
-	public synchronized static SettingsWindow get(){
-		if(me==null) {
-			new SettingsWindow();
-		}
-		return me;
-
-	}
-
+	/**
+	 * Diese Methode holt sich die Standarteinstellungen aus der Config und setzt diese im SettingsWindow
+	 */
 	private void getDefaults(){
 		this.aliasTextField.setText(Config.getConfig().getAlias());
 		this.fileTransferCheckBox.setSelected(Config.getConfig().getDisableFileTransfer());
@@ -406,6 +439,9 @@ public class SettingsWindow extends JDialog{
 		
 	}
 	
+	/**
+	 * Diese Methode prüft die gesetzten Werte und färbt die Felder entsprechend des Ergebnisses
+	 */
 	private void checkSettings() {
 		new Thread(new Runnable() {
 			public void run() {
@@ -471,8 +507,10 @@ public class SettingsWindow extends JDialog{
 			}
 		}).start();
 	}
-
 	
+	/**
+	 * Schreibt die gewählten Einstellungen im Settingswinow in die Config 
+	 */
 	private void acceptSettings(){
 			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
 			Config.getConfig().setNotifyGroup(grpMsgCheckBox.isSelected());
@@ -532,12 +570,22 @@ public class SettingsWindow extends JDialog{
 	}
 	
 
+	/**
+	 * @author ATRM
+	 * Diese Klasse ist der Buttoncontroller für die Card-Buttons
+	 * Sie sorgt dafür, dass die Card, auf deren Button geclickt wurde angezeigt wird
+	 */
 	class CardButtonController implements ActionListener{
 		public void actionPerformed(final ActionEvent e) {
 			cardsPanelLayout.show(cardsPanel, e.getActionCommand());
 		}
 	}
 
+	/**
+	 * @author ATRM
+	 * Diese Klasse ist der Buttoncontroller für die SettingsButtons
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 */
 	class SettingButtonController implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
@@ -561,6 +609,11 @@ public class SettingsWindow extends JDialog{
 
 	}
 	
+	/**
+	 * @author ATRM
+	 * Diese Klasse verändert die angezeigte Schriftgröße bei bedienunge des Schriftgrößen-Sliders
+	 *
+	 */
 	class FontSizeSliderController implements ChangeListener{
 
 		/* (non-Javadoc)
@@ -572,6 +625,12 @@ public class SettingsWindow extends JDialog{
 
 	}
 
+	/**
+	 * @author ATRM
+	 * Diese Klasse ist der Buttoncontroller für die PushPullButtons
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 * und färbt die Felder entsprechend der Ergebnisse ein
+	 */
 	class PushPullButtonController implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {
@@ -621,6 +680,11 @@ public class SettingsWindow extends JDialog{
 
 	}
 
+	/**
+	 * @author ATRM
+	 * Diese Klasse ist der Buttoncontroller für den DeleteButton
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 */
 	class DeleteButtonController implements ActionListener{
 
 		public void actionPerformed(ActionEvent e) {

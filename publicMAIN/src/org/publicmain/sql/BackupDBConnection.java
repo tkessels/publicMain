@@ -76,6 +76,26 @@ public class BackupDBConnection {
 	}
 
 	/**
+	 * Über diese Methode kann der Status der Backupdatenbankverbindung abgefragt werden
+	 * @return:	0 - keine Verbindung zum Backupserver
+	 * @return:	1 - Verbindung besteht, aber kein User eingerichtet
+	 * @return:	2 -	Verbindung besteht, angegebene Nutzerdaten korrekt.
+	 */
+	public int getStatus() {
+		try {
+			Connection x = getCon();
+			x.close();
+			//level 1
+			long id = getMyID();
+			if (id!=-1) return 2;
+			return 1;
+	
+		} catch (SQLException e) {
+			return 0;
+		}
+	}
+
+	/**
 	 * Diese Methode fragt alle settings eines bestimmten Nutzers in der Datenabank ab.
 	 * @param id: ID des bestimmten Benutzers 
 	 * @return ResultSet: Ergebnis der Abfrage
@@ -278,26 +298,6 @@ public class BackupDBConnection {
 	}
 	
 	/**
-	 * Über diese Methode kann der Status der Backupdatenbankverbindung abgefragt werden
-	 * @return:	0 - keine Verbindung zum Backupserver
-	 * @return:	1 - Verbindung besteht, aber kein User eingerichtet
-	 * @return:	2 -	Verbindung besteht, angegebene Nutzerdaten korrekt.
-	 */
-	public int getStatus() {
-		try {
-			Connection x = getCon();
-			x.close();
-			//level 1
-			long id = getMyID();
-			if (id!=-1) return 2;
-			return 1;
-
-		} catch (SQLException e) {
-			return 0;
-		}
-	}
-
-	/**
 	 * Diese Methode überprüft ob ein bestimmter Nutzer in der BackupDatenbank angelegt ist
 	 * @param userName: Username des gesuchten Nutzers
 	 * @return	true:	gesuchter Nutzer vorhanden
@@ -358,24 +358,6 @@ public class BackupDBConnection {
 	}
 
 	/**
-	 * Diese Methode wandelt ein ResultSet von Settings in ein Config-Objekt um (Properties)
-	 * @param settingsRS:	ResultSet der umzuwandelnden settings
-	 * @return	Properties-Objekt welches Settings aus dem ResultSet zum Inhalt hat
-	 */
-	private Properties convertResultToConfig (ResultSet settingsRS){
-		Properties tmp = new Properties();
-		try {
-			settingsRS.beforeFirst();
-			while (settingsRS.next()){
-				tmp.put(settingsRS.getString(1), settingsRS.getString(3));
-			}
-		} catch (SQLException e) {
-			LogEngine.log(this,e);
-		}
-		return tmp;
-	}
-
-	/**
 	 * Diese Methode löscht den aktuell genutzten User von der BackupDatenbank
 	 * @return	true:	Löschen erfolgreich
 	 * @return	false:	Löschen nicht erfolgreich
@@ -411,6 +393,24 @@ public class BackupDBConnection {
 
 		}
 		return false;
+	}
+
+	/**
+	 * Diese Methode wandelt ein ResultSet von Settings in ein Config-Objekt um (Properties)
+	 * @param settingsRS:	ResultSet der umzuwandelnden settings
+	 * @return	Properties-Objekt welches Settings aus dem ResultSet zum Inhalt hat
+	 */
+	private Properties convertResultToConfig (ResultSet settingsRS){
+		Properties tmp = new Properties();
+		try {
+			settingsRS.beforeFirst();
+			while (settingsRS.next()){
+				tmp.put(settingsRS.getString(1), settingsRS.getString(3));
+			}
+		} catch (SQLException e) {
+			LogEngine.log(this,e);
+		}
+		return tmp;
 	}
 
 	/**

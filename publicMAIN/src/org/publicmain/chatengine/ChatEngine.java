@@ -76,6 +76,7 @@ public class ChatEngine{
 		// temporäre Initialisierung der GruppenListe mit default Groups
 		ne.getGroups().addAll(Arrays.asList(new String[] { "public" }));
 		msgSorterBot.start();
+		DatabaseEngine.getDatabaseEngine().pull();
 	}
 
 	/**

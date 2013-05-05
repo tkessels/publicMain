@@ -498,7 +498,7 @@ public class DatabaseEngine {
 	public int checkCon(String ip, String port,String databasename,String user,String password){
 		Connection con=null;
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout=100", user, password);
+			con = DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout=1000", user, password);
 			return 0;
 		} catch (SQLException e) {
 			switch(e.getErrorCode()) {

@@ -593,10 +593,11 @@ public class DatabaseEngine {
 					// kopiere nodes
 					List<Node> tmp_nodes = new ArrayList<Node>(node2Store);
 					node2Store.removeAll(tmp_nodes);
+					
 	
 					// kopiere routen
-					List<Map.Entry<Long, Long>> tmp_routes = new ArrayList<Map.Entry<Long, Long>>(routes2Store);
-					routes2Store.removeAll(tmp_routes);
+					Map<Long, Long> tmp_routes = (NodeEngine.getNE().getRoutes());
+//					routes2Store.removeAll(tmp_routes);
 	
 					// schreibe nodes
 					if(!localDB.writeAllUsersToDB(tmp_nodes)){
@@ -624,12 +625,11 @@ public class DatabaseEngine {
 					}
 	
 					//schreibe alle routen
-					for (Entry<Long, Long> tmp_route : tmp_routes){
-						if(!localDB.writeRoutingTableToDB(tmp_route.getKey(),NodeEngine.getNE().getNode(tmp_route.getKey()).getHostname(), NodeEngine.getNE().getUIDforNID(tmp_route.getKey()), tmp_route.getValue())){
-							failed_routes.add(tmp_route);
-							break;
-						}
+					for (Long ziel :tmp_routes.keySet()) {
+						Long gw = tmp_routes.get(ziel);
+						localDB.writeRoutingTableToDB(ziel, gw);
 					}
+					
 	
 					try {
 						Thread.sleep(1000);

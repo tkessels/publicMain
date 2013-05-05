@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -1564,6 +1566,16 @@ public class NodeEngine {
 			rootClaimProcessor = new Thread(new RootClaimProcessor());
 			rootClaimProcessor.start();
 		}
+	}
+	public Map<Long,Long> getRoutes(){
+		Map<Long,Long> rueck = new HashMap<Long, Long>();
+		for (ConnectionHandler con : connections) {
+			long gw =con.host_node.getNodeID();
+			for (Node  curchi : con.getChildren()) {
+				rueck.put(curchi.getNodeID(), gw);
+			}
+		}
+		return rueck;
 	}
 
 	/**

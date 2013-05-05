@@ -837,7 +837,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * 
 	 * @return GUI
 	 */
-	public static GUI getGUI() {
+	public synchronized static GUI getGUI() {
 		if ( me == null ) {
 			me = new GUI();
 		}

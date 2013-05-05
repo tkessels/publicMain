@@ -1,19 +1,30 @@
 package org.publicmain.sql;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.util.Arrays;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
+/**
+ * 
+ * @author LeeGewiese
+ * Diese Klasse Stellt eine Speichermöglichkeit für Daten für und aus der Datenbank da.
+ * Sie gibt die Möglichkeit sowohl Zelleninhalte als auch Spaltenüberschriften zu halten.
+ */
 public class DatabaseDaten {
 	private String[] spaltenüberschriften;
 	private String[][] zelleninhalt;
 
+	/**
+	 * Konstruktor zum anlegen einer DatabaseDaten
+	 * @param spaltenüberschriftens	übergebene Spaltenüberschriften
+	 * @param zelleninhalts			übergebene Zelleninhaltes
+	 */
 	public DatabaseDaten(String[] spaltenüberschriftens,String[][] zelleninhalts) {
 		this.spaltenüberschriften = spaltenüberschriftens;
 		this.zelleninhalt = zelleninhalts;//test
 	}
+	
+	/**
+	 * HEX HEX - trifft´s wohl am besten.
+	 * @param mask
+	 * @return
+	 */
 	private static int high(int mask)
 	{
 		mask -= ((mask >> 1) & 0x55555555);
@@ -21,6 +32,11 @@ public class DatabaseDaten {
 		return (((mask + (mask >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 	}
 	
+	/**
+	 * @param i
+	 * @param mask
+	 * @return
+	 */
 	private static boolean isUp(int i,int mask)
 	{
 		return (((mask>>>i)&1)==1); 
@@ -28,6 +44,10 @@ public class DatabaseDaten {
 
 	
 	
+	/**
+	 * @param colSelection
+	 * @return
+	 */
 	public String[] getSpaltenüberschriften(int colSelection) {
 		String[] header = new String[high(colSelection)];
 		int new_i=0;
@@ -37,6 +57,10 @@ public class DatabaseDaten {
 		return header;
 	}
 	
+	/**
+	 * @param colSelection
+	 * @return
+	 */
 	public String[][] getZelleninhalt(int colSelection) {
 		String[][] stringdata = new String[zelleninhalt.length][high(colSelection)];
 		for (int i = 0; i < zelleninhalt.length; i++) {

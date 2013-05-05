@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.sql.rowset.CachedRowSet;
+
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
@@ -25,6 +27,8 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.resources.Help;
+
+import com.sun.rowset.CachedRowSetImpl;
 
 /**
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
@@ -58,7 +62,7 @@ public class LocalDBConnection {
 	private final static int LOCAL_DATABASE_VERSION = 21;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
-	private PreparedStatement searchInHistStmt;
+	private PreparedStatement prp;
 	//--------neue Sachen ende------------
 
 	// verbindungssachen
@@ -843,47 +847,46 @@ public class LocalDBConnection {
 	 */
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
 		if (dbStatus >= 3){
-			try {
-				//				if(groupName==null)searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ?  AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
-				//				else searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE (fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND displayName LIKE ? AND fk_t_groups_groupName LIKE ? AND (timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
-				//test
+			
 				StringBuilder prepState = new StringBuilder();
-				prepState.append("SELECT * from v_searchInHistory WHERE ");
-				if(userID!=null) {
-					prepState.append("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
-				}
-				if(alias != null) {
-					prepState.append("(sender LIKE ? OR recipient LIKE ?) AND");
-				}
-				if(groupName!=null) {
-					prepState.append("`group` LIKE ? AND ");
-				}
-				prepState.append("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
-				searchInHistStmt = con.prepareStatement(prepState.toString());
-				//				searchInHistStmt = con.prepareStatement("SELECT * from t_messages WHERE "+((userID!=null)?"(fk_t_users_userID_sender LIKE ? OR fk_t_users_userID_empfaenger LIKE ?) AND ":"" )+ ((alias!=null)?"displayName LIKE ? AND ":"")+ ((groupName!=null)?"fk_t_groups_groupName LIKE ? AND ":"")+"(timestmp BETWEEN ? AND ?) AND txt LIKE ? ");
-				//test
-				int part=1;
-				if(userID!=null) {
-					searchInHistStmt.setString(part++, userID);
-					searchInHistStmt.setString(part++, userID);
-				}
-				if(alias != null){
-					searchInHistStmt.setString(part++, alias);
-					searchInHistStmt.setString(part++, alias);
-				}
-				if(groupName!=null) {
-					searchInHistStmt.setString(part++, groupName);
-				}
-				searchInHistStmt.setLong(part++, begin);
-				searchInHistStmt.setLong(part++, end);
-				searchInHistStmt.setString(part++, msgTxt);
-				return searchInHistStmt.executeQuery();
+				prepState.append						("SELECT * from v_searchInHistory WHERE ");
+				if(userID!=null) prepState.append		("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
+				if(alias != null) prepState.append		("(sender LIKE ? OR recipient LIKE ?) AND");
+				if(groupName!=null) prepState.append	("`group` LIKE ? AND ");
+				prepState.append						("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
 
-			} catch (SQLException e) {
-				LogEngine.log(this, "Error while executing 'searchInHistStmt' PreparedStatment: " + e.getMessage(), LogEngine.ERROR);
-				dbStatus = 0;
-				return null;
-			}
+				PreparedStatement prp=null;
+				ResultSet rs = null;
+				try {
+					CachedRowSet tmp = new CachedRowSetImpl();
+					prp = con.prepareStatement(prepState.toString());
+					int part=1;
+					if(userID!=null) {
+						prp.setString(part++, userID);
+						prp.setString(part++, userID);
+					}
+					if(alias != null){
+						prp.setString(part++, alias);
+						prp.setString(part++, alias);
+					}
+					if(groupName!=null) {
+						prp.setString(part++, groupName);
+					}
+					prp.setLong(part++, begin);
+					prp.setLong(part++, end);
+					prp.setString(part++, msgTxt);
+					rs=prp.executeQuery();
+					tmp.populate(rs);
+					return tmp;
+				} catch (SQLException e) {
+					LogEngine.log(this, "Error while executing 'searchInHistStmt' PreparedStatment: " + e.getMessage(), LogEngine.ERROR);
+					dbStatus = 0;
+					return null;
+				}
+				finally {
+					try{rs.close();  }catch(Exception ignored){}
+					try{prp.close();}catch(Exception ignored){}
+				}
 		}
 		return null;
 	}
@@ -898,8 +901,8 @@ public class LocalDBConnection {
 				stmt.close();
 				LogEngine.log(LocalDBConnection.this,"stmt of LocDBServers closed",LogEngine.INFO);
 			}
-			if (searchInHistStmt!=null){
-				searchInHistStmt.close();
+			if (prp!=null){
+				prp.close();
 				LogEngine.log(LocalDBConnection.this,"searchInHistStmt of LocDBServers closed",LogEngine.INFO);
 			}
 		} catch (SQLException e) {

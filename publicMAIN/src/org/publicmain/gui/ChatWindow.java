@@ -102,7 +102,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	public ChatWindow( long uid ) {
 		this.userID = uid;
 		this.isPrivCW = true;
-		Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
+		Node nodeForUID = GUI.getGUI().getNodeForUID( userID );
 		if( nodeForUID != null ){
 			this.name = nodeForUID.getAlias();
 		}

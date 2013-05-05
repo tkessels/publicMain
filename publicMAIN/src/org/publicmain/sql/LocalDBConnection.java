@@ -33,8 +33,8 @@ import com.sun.rowset.CachedRowSetImpl;
 /**
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
  * Sie legt weiterhin alle zwingend notwendigen Datenbanken(1) und Tabellen an.
- */
-/**
+ *
+ *
  * @author rpfaffner
  *
  */
@@ -62,7 +62,6 @@ public class LocalDBConnection {
 	private final static int LOCAL_DATABASE_VERSION = 21;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
-	private PreparedStatement prp;
 	//--------neue Sachen ende------------
 
 	// verbindungssachen
@@ -76,7 +75,6 @@ public class LocalDBConnection {
 	}
 	private Connection getCon() throws SQLException {
 		
-//		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 		return DriverManager.getConnection("jdbc:mysql://localhost:"+Config.getConfig().getLocalDBPort()+"/"+Config.getConfig().getLocalDBDatabasename()+"?connectTimeout=1000",Config.getConfig().getLocalDBUser(), Config.getConfig().getLocalDBPw());
 	}
 
@@ -249,7 +247,6 @@ public class LocalDBConnection {
 		try {
 			getCon();
 			return 1;
-			//if Select Version = SysteVersion return 2;
 		} catch (Exception e) {
 			return 0;
 		}
@@ -390,7 +387,6 @@ public class LocalDBConnection {
 				try {
 					return stmt.executeQuery("SELECT * FROM v_pullAll_t_messages");
 				} catch (SQLException e) {
-					//TODO: evtl. fehlermeldung + in DatabaseEngine für reconnect sorgen!
 					dbStatus = 0;
 					return null;
 				}
@@ -426,8 +422,6 @@ public class LocalDBConnection {
 				try {
 					return stmt.executeQuery("SELECT * FROM v_pullALL_t_settings");
 				} catch (SQLException e) {
-					// TODO: evtl. fehlermeldung + in DatabaseEngine für
-					// reconnect sorgen!
 					dbStatus = 0;
 					return null;
 				}
@@ -467,19 +461,6 @@ public class LocalDBConnection {
 							prp.setInt(8, tmpMsgID);
 						}
 						prp.addBatch();
-
-						//						StringBuffer pushMsgStmt = new StringBuffer();
-						//						pushMsgStmt.append("CALL p_t_messages_pushMessages(");
-						//						pushMsgStmt.append(msgRS.getInt("msgID") + ",");
-						//						pushMsgStmt.append(msgRS.getLong("timestmp") + ",");
-						//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_sender") + ",");
-						//						pushMsgStmt.append("'" + msgRS.getString("displayName") + "',");
-						//						pushMsgStmt.append("'" + msgRS.getString("txt") + "',");
-						//						pushMsgStmt.append(msgRS.getLong("fk_t_users_userID_empfaenger") + ",");
-						//						pushMsgStmt.append("'" + msgRS.getString("groupName") + "',");
-						//						pushMsgStmt.append(msgRS.getInt("fk_t_msgType_ID") + ")");
-						//						System.out.println(pushMsgStmt.toString());
-						//						stmt.addBatch(pushMsgStmt.toString());
 					}
 					prp.executeBatch();
 					prp.close();
@@ -594,9 +575,6 @@ public class LocalDBConnection {
 		}
 		return false;
 	}
-	//Settings werden ins beziehungsweise aus dem ConfigObjekt geladen nicht hier	
-
-
 
 	/**
 	 * Diese Methode schreibt eine Collection von Groups unter aufruf einer procedure in die DB
@@ -744,8 +722,7 @@ public class LocalDBConnection {
 			e.printStackTrace();
 			LogEngine.log(this, "Fehler beim schreiben von: " + ((prpstmt!=null)?prpstmt.toString():"") + " " + e.getMessage(), LogEngine.ERROR);
 			return false;
-			// hier falls während der schreibvorgänge die verbind
-			// verloren geht.
+			// hier falls während der schreibvorgänge die verbindung verloren geht.
 		}
 		return true;
 	}
@@ -900,10 +877,6 @@ public class LocalDBConnection {
 			if(stmt!=null){
 				stmt.close();
 				LogEngine.log(LocalDBConnection.this,"stmt of LocDBServers closed",LogEngine.INFO);
-			}
-			if (prp!=null){
-				prp.close();
-				LogEngine.log(LocalDBConnection.this,"searchInHistStmt of LocDBServers closed",LogEngine.INFO);
 			}
 		} catch (SQLException e) {
 			LogEngine.log(this, e);

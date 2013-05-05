@@ -402,22 +402,6 @@ public class SettingsWindow extends JDialog{
 				checkSettings();
 			}
 		},0,1,TimeUnit.SECONDS);
-		/*
-		 * ScheduledExecutorService executor =
-		    Executors.newSingleThreadScheduledExecutor();
-
-		Runnable periodicTask = new Runnable() {
-		    public void run() {
-		        // Invoke method(s) to do the work
-		        doPeriodicWork();
-		    }
-		};
-
-		executor.scheduleAtFixedRate(periodicTask, 0, 10, TimeUnit.SECONDS);
-		 */
-		
-		
-                checkSettings();
 		
 		
 	}
@@ -425,8 +409,8 @@ public class SettingsWindow extends JDialog{
 	private void checkSettings() {
 		new Thread(new Runnable() {
 			public void run() {
-				int localDBStatus = DatabaseEngine.getDatabaseEngine().checkCon("127.0.0.1", portLocalDBTextField.getText(), Config.getConfig().getLocalDBDatabasename(), userLocalDBTextField.getText(), pwLocalDBPasswordField.getText());
-				int backupDBStatus = DatabaseEngine.getDatabaseEngine().checkCon(ipBackupTextField.getText(), portBackupTextField.getText(), Config.getConfig().getBackupDBDatabasename(),userBackupTextField.getText(), pwBackPasswordField.getText());
+				int localDBStatus = DatabaseEngine.getDatabaseEngine().checkCon("127.0.0.1", portLocalDBTextField.getText(), Config.getConfig().getLocalDBDatabasename(), userLocalDBTextField.getText(), pwLocalDBPasswordField.getText(), 500);
+				int backupDBStatus = DatabaseEngine.getDatabaseEngine().checkCon(ipBackupTextField.getText(), portBackupTextField.getText(), Config.getConfig().getBackupDBDatabasename(),userBackupTextField.getText(), pwBackPasswordField.getText(), 500);
 				
 				if(localDBStatus==0) {
 					localDBPanel.setBackground(Color.WHITE);

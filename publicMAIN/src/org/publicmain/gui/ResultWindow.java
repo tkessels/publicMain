@@ -4,24 +4,31 @@
 package org.publicmain.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.Time;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.publicmain.common.LogEngine;
+import org.publicmain.sql.DatabaseDaten;
 import org.resources.Help;
 
 /**
@@ -39,7 +46,10 @@ public class ResultWindow extends JDialog {
 	private HTMLDocument htmlDoc;
 	private JScrollPane hisScroller;
 
-	public ResultWindow(JTable result){
+	/**
+	 * @param result
+	 */
+	private void constructWithJTable(JTable result) {
 		this.resultTable = result;
 		this.scroller = new JScrollPane(resultTable);
 
@@ -53,6 +63,7 @@ public class ResultWindow extends JDialog {
 
 			}
 		});
+		
 
 		this.autoSizeButton = new JButton("Auto-size columns");
 
@@ -72,6 +83,7 @@ public class ResultWindow extends JDialog {
 		this.setIconImage(Help.getIcon("pM_Logo.png",64).getImage());
 		this.pack();
 		this.setLocationRelativeTo(null);
+		ColumnsAutoSizer.sizeColumnsToFit(resultTable);
 		this.setVisible(true);
 
 		/*
@@ -110,6 +122,10 @@ public class ResultWindow extends JDialog {
 	}
 
 
+	public ResultWindow(DatabaseDaten querry, int style) {
+		if (style==0) constructWithJTable(new JTable( new DefaultTableModel(querry.getZelleninhalt(124),querry.getSpaltenüberschriften(124))));
+	}
+
 	private void printHis(Object[] history) {
 		try {
 			Time time = new Time((long)history[0]);
@@ -121,4 +137,8 @@ public class ResultWindow extends JDialog {
 			LogEngine.log(e);
 		}
 	}
+	
+
+	
+	
 }

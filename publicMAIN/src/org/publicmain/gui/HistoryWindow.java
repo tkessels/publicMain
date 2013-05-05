@@ -29,6 +29,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SpinnerDateModel;
 
 import org.publicmain.common.Node;
+import org.publicmain.sql.DatabaseDaten;
 import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
@@ -330,25 +331,25 @@ public class HistoryWindow extends JDialog{
 					endGregCal.set(Calendar.MINUTE,value.getMinutes() );
 					System.out.println(endGregCal);
 				}
-				JTable selectMSGsByUser = null;
+				DatabaseDaten querry= null;
 				switch(activeCard){
 				case "User":
 					long uid;
 					Node selectedNode = (Node) userSelectComboBox.getSelectedItem();
 					uid = (userSelectComboBox.getSelectedItem()!=null)?selectedNode.getUserID() : -1;
-					selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, textSearchTextField.getText());
+					querry = DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, textSearchTextField.getText());
 					break;
 				case "Group":
-					selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSearchTextField.getText(), beginGregCal, endGregCal, textSearchTextField.getText());
+					querry = DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSearchTextField.getText(), beginGregCal, endGregCal, textSearchTextField.getText());
 					break;
 				case "Alias":
-					selectMSGsByUser = DatabaseEngine.getDatabaseEngine().selectMSGsByAlias(aliasSearchTextField.getText(), beginGregCal,endGregCal,textSearchTextField.getText());
+					querry = DatabaseEngine.getDatabaseEngine().selectMSGsByAlias(aliasSearchTextField.getText(), beginGregCal,endGregCal,textSearchTextField.getText());
 					break;
 				default:
 				}
 
-				if(selectMSGsByUser!=null){
-					new ResultWindow(selectMSGsByUser);
+				if(querry!=null){
+					new ResultWindow(querry, 0);
 				}
 
 

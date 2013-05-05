@@ -1,11 +1,13 @@
 package org.publicmain.sql;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -279,7 +281,7 @@ public class DatabaseEngine {
 	 * @param text only messages containing this text will be shown. text will be ignored if empty string
 	 * @return a JTable listing all the messages fitting the given attributes (Maybe the Database Engine will update the Datamodel of the HistoryWindow later)
 	 */
-	public JTable selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
+	public DatabaseDaten selectMSGsByUser(long uid,GregorianCalendar begin, GregorianCalendar end,String text) {
 
 		ResultSet tmpRS;
 
@@ -297,18 +299,14 @@ public class DatabaseEngine {
 		} else {
 			tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
 		}
-
-
 		if(tmpRS!=null){
 			try {
-
-				//				new SimpleTableDemo(new JTable(buildTableModel(tmpRS)));
-				return new JTable(buildTableModel(tmpRS));
+				return getResultData(tmpRS);
 			} catch (SQLException e) {
-				LogEngine.log(this, "Error while building JTable: " + e.getMessage(), LogEngine.ERROR );
+				LogEngine.log(this, "Couldn't querry any messages",LogEngine.ERROR);
 			}
 		}
-		return allMSGs();
+		return null;
 	}
 
 	/**
@@ -321,10 +319,8 @@ public class DatabaseEngine {
 	 * @param text only messages containing this text will be shown. text will be ignored if empty string
 	 * @return a JTable listing all the messages fitting the given attributes
 	 */	
-	public JTable selectMSGsByAlias(String alias,GregorianCalendar begin, GregorianCalendar end,String text) {
+	public DatabaseDaten selectMSGsByAlias(String alias,GregorianCalendar begin, GregorianCalendar end,String text) {
 		ResultSet tmpRS;
-
-
 		String para_uid		= null;
 		String para_alias	= (alias.trim().length()==0)?"%":"%"+alias.trim()+"%";
 		String para_group	= null;
@@ -341,28 +337,55 @@ public class DatabaseEngine {
 		}
 
 		if(tmpRS!=null){
-
-			//			getResultInStringArray(tmpRS);
-
 			try {
-				//				return new JTable(buildTableModel(tmp));
-				return buildTable(tmpRS);
+				return getResultData(tmpRS); //124
 			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-
+				LogEngine.log(this, "Couldn't querry any messages",LogEngine.ERROR);
 			}
 		}
-		System.out.println("Abfrage hat nicht geklappt");
-		return allMSGs();
+		return null;
 
 	}
 
-	public void printüberschriften(DatabaseDaten parameterObject){
-		for (String über: parameterObject.spaltenüberschriften) {				
-			System.out.println(über);	
+	/**
+	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
+	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
+	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
+	 * @param group the message was send to
+	 * @param begin only messages after the given date (in long) will be considered. begin date will be ignored if negative 
+	 * @param end only messages before the given date (in long) will be considered. end date will be ignored if negative
+	 * @param text only messages containing this text will be shown. text will be ignored if empty string
+	 * @return a JTable listing all the messages fitting the given attributes
+	 */	
+	public DatabaseDaten selectMSGsByGroup(String group,GregorianCalendar begin, GregorianCalendar end,String text) {
+		ResultSet tmp;
+	
+		String para_uid	=null;
+		String para_alias	=null;
+		String para_group	=(group.trim().length()==0)?"%":"%"+group.trim()+"%";
+		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
+		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
+		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
+	
+		//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+	
+		if (para_begin<para_end) {
+			tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
+		} else {
+			tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
 		}
-
+	
+		if(tmp!=null){
+			try {
+				return getResultData(tmp); //108
+			} catch (SQLException e) {
+				LogEngine.log(this, "Couldn't querry any messages",LogEngine.ERROR);
+			}
+		}
+		return null;
+	
 	}
+
 
 	public int getStatusBackup() {
 		return backupDB.getStatus();
@@ -394,62 +417,6 @@ public class DatabaseEngine {
 		}
 
 		return new DatabaseDaten(spaüb, stringdata);
-	}
-
-	/**
-	 * Queries the local Database for Messages which have been send within the given <code>group</code> if send after the begin date but before the end date. 
-	 * Is either of the given dates a negative long the respective field will be ignored. Additionialy the Querry can be further narrowed by providing a search <code>text</code>.
-	 * Only messages where the written text contains the text (case insensitiv) will be returned. If the searchtext is an empty String it will be ignored.  
-	 * @param group the message was send to
-	 * @param begin only messages after the given date (in long) will be considered. begin date will be ignored if negative 
-	 * @param end only messages before the given date (in long) will be considered. end date will be ignored if negative
-	 * @param text only messages containing this text will be shown. text will be ignored if empty string
-	 * @return a JTable listing all the messages fitting the given attributes
-	 */	
-	public JTable selectMSGsByGroup(String group,GregorianCalendar begin, GregorianCalendar end,String text) {
-		ResultSet tmp;
-
-		String para_uid	=null;
-		String para_alias	=null;
-		String para_group	=(group.trim().length()==0)?"%":"%"+group.trim()+"%";
-		String para_text	=(text.trim().length()==0)?"%":"%"+text.trim()+"%";
-		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
-		long para_end 	= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
-
-		//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
-
-		if (para_begin<para_end) {
-			tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
-		} else {
-			tmp =localDB.searchInHistory(para_uid,para_alias,para_group,para_end,para_begin,para_text);
-		}
-
-		if(tmp!=null){
-			try {
-				return new JTable(buildTableModel(tmp));
-			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-
-			}
-		}
-		System.out.println("Abfrage hat nicht geklappt");
-		return allMSGs();
-
-	}
-
-	public JTable allMSGs() {
-		ResultSet tmp =localDB.pull_msgs();
-		if(tmp!=null){
-
-
-			try {
-				return new JTable(buildTableModel(tmp));
-			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-			}
-		}
-		return new JTable();
-
 	}
 
 	public JComboBox<Node> getUsers(){
@@ -489,16 +456,17 @@ public class DatabaseEngine {
 	 * @param databasename Zu verbindende Datenbank
 	 * @param user Anmeldename für den Datenbankserver
 	 * @param password Passwort für den Datenbankserver
+	 * @param timeout TODO
 	 * @return <table><tr><th>Wert</th><th align="left">Bedeutung</th></tr>
 	 * 				 <tr><td align="center">0</td><td>Verbindungsdaten sind korrekt Datenbank hat geantwortet</td></tr>
 	 * 				 <tr><td align="center">1</td><td>Server Antwortet nicht </td></tr>
 	 * 				 <tr><td align="center">2</td><td>Server Antwortet, Zugangsdaten sind jedoch falsch</td></tr>
 	 * 				 <tr><td align="center">3</td><td>Verbindungsdaten sind korrekt, aber angegebener Datenbankname nicht gefunden </td></tr>
 	 */
-	public int checkCon(String ip, String port,String databasename,String user,String password){
+	public int checkCon(String ip, String port,String databasename,String user,String password, long timeout){
 		Connection con=null;
 		try {
-			con = DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout=100", user, password);
+			con = DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout="+timeout, user, password);
 			return 0;
 		} catch (SQLException e) {
 			switch(e.getErrorCode()) {
@@ -520,70 +488,15 @@ public class DatabaseEngine {
 	}
 
 
-	public static JTable buildTable(ResultSet rs) throws SQLException{
-
-		//		    ResultSetMetaData metaData = rs.getMetaData();
-		//
-		//		    // names of columns
-		//		    int columnCount = metaData.getColumnCount();
-		//		    String[] columnNames = new String[columnCount];
-		//		    for (int column = 1; column <= columnCount; column++) {
-		//		        columnNames[column-1]=metaData.getColumnName(column);
-		//		    }
-		//		    System.out.println(columnNames);
-		//		    
-		//
-		//		    // data of the table
-		//		    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		//		    while (rs.next()) {
-		//		        Vector<Object> vector = new Vector<Object>();
-		//		        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-		//		            vector.add(rs.getObject(columnIndex));
-		//		        }
-		//		        data.add(vector);
-		//		    }
-		////		    DefaultTableModel tblModel = new DefaultTableModel(nmbrRows, colHdrs.size());
-		////		    tblModel.setColumnIdentifiers(colHdrs);
-		//		    
-		//		    data.toArray();
-		//		    Object [][] array = new Object[data.size()][columnCount];
-		//		    int i  =0;
-		//		    for (Vector<Object> tmp : data) {
-		//			    array[i++]=tmp.toArray();
-		//		}
-		//		  
-		//		    DefaultTableModel tmod = new DefaultTableModel(data.size(),columnCount);
-		//		    tmod.setColumnIdentifiers(columnNames);
-		//		    JTable tmp = new JTable(tmod);
-		//		    
-		//		    return tmp;
-		return new JTable(buildTableModel(rs));
-
-	}
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
 		DatabaseDaten tmp = getResultData(rs);
 
-		//	    ResultSetMetaData metaData = rs.getMetaData();
-		//
-		//	    // names of columns
-		//	    Vector<String> columnNames = new Vector<String>();
-		//	    int columnCount = metaData.getColumnCount();
-		//	    for (int column = 1; column <= columnCount; column++) {
-		//	        columnNames.add(metaData.getColumnName(column));
-		//	    }
-		//
-		//	    // data of the table
-		//	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
-		//	    while (rs.next()) {
-		//	        Vector<Object> vector = new Vector<Object>();
-		//	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-		//	            vector.add(rs.getObject(columnIndex));
-		//	        }
-		//	        data.add(vector);
-		//	    }
-		//
-		return new DefaultTableModel(tmp.zelleninhalt,tmp.spaltenüberschriften);
+		return new DefaultTableModel(tmp.getZelleninhalt(127),tmp.getSpaltenüberschriften(127));
 
+	}
+	public static DefaultTableModel buildTableModel(DatabaseDaten dbd) throws SQLException {
+		return new DefaultTableModel(dbd.getZelleninhalt(127),dbd.getSpaltenüberschriften(127));
+		
 	}
 
 	public synchronized void go() {

@@ -21,6 +21,12 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.resources.Help;
 
+/**
+ * @author ATRM
+ * Diese Klasse beinhaltet die Funktionalität des Backupserverprogrammes und die notwendige Starterklasse
+ * Der Backupserver wird als Datensicherungsmöglichkeit für das Chatprogramm publicMain angeboten
+ *
+ */
 public class Backupserver {
 	private final static  int BACKUP_DATABASE_VERSION = 12345;
 	private static Connection con;
@@ -28,7 +34,9 @@ public class Backupserver {
 	private static String local_username= "root";
 	private static String local_password="";
 	/**
-	 * @param args
+	 * Diese Methode ist der Einstiegspunkt für den Backupserver
+	 * Sie überprüft die mitgegebene Parameter und setzt diese entsprechend um 
+	 * @param args	mitgegebene(r) Parameter
 	 */
 	public static void main(String[] args) {
 		System.setProperty("appname", "pmBackupServer");
@@ -37,10 +45,6 @@ public class Backupserver {
 		String port=Config.getConfig().getLocalDBPort();
 		String databasename=Config.getConfig().getBackupDBDatabasename();
 		String ip=Node.getMyIPs().get(0).getHostAddress();
-
-		//if available load settings from file
-
-		//GRANT ALL PRIVILEGES ON * . * TO  'backupPublicMain'@'%' WITH GRANT OPTION MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
 
 		Random x = new Random(System.currentTimeMillis());
 		long nid = x.nextLong();
@@ -90,7 +94,7 @@ public class Backupserver {
 		//test for local mySQL Server
 		if(checkConnection(ip,port,local_username,local_password)) {
 			//test version of pm-Database on mySQL server OR create it 
-			if(checkVersion(ip,port,local_username,local_password) || createDatabase(ip, port, local_username, local_password)) {
+			if(checkVersion() || createDatabase()) {
 
 				//everything is fine start offering backupserver
 				try (MulticastSocket backupserver = new MulticastSocket(Config.getConfig().getMCPort())){
@@ -162,7 +166,7 @@ public class Backupserver {
 	}
 
 	/**
-	 * 
+	 * Diese Methode gibt usage-Infos zum starten aus.
 	 */
 	private static void printUsageInfoExit() {
 		String ip = "127.0.0.1";
@@ -181,6 +185,15 @@ public class Backupserver {
 	}
 
 
+	/**
+	 * Diese Methode stellt eine Verbindung zum SQL-Server her und nutzt dazu die gegebenen Parameter
+	 * @param ip		IP-Adresse des Servers zu dem verbunden werden soll
+	 * @param port		Port des Servers, welcher für die Verbindung genutzt werden soll
+	 * @param username	Username mit welchem Verbunden werden soll
+	 * @param password	Passwort mit welchem Verbunden werden soll
+	 * @return true		Verbindung hergestellt
+	 * @return false	Verbindung konnte nicht hergestellt werden
+	 */
 	private static boolean checkConnection(String ip, String port, String username, String password) {	
 		Config.getConfig().getBackupDBDatabasename();
 		String url			= "jdbc:mysql://localhost:"+ port + "/";	//TODO: IP not used. Caused faults. Just "localhost" and "127.0.0.1" seems to be possible.
@@ -192,9 +205,14 @@ public class Backupserver {
 			LogEngine.log("Fehler beim verbinden mit " + url + " : " + e.getMessage(),LogEngine.ERROR);
 			return false;
 		}
-		//TODO:Testen ob Datenbank vorhanden .... bei ner lokalen backup db kann hier auch statt der übergebenen IP 127.0.0.1 genommen werden oder? -> JA!
 	}
-	private static boolean checkVersion(String ip, String port, String username, String password) {
+	
+	/**
+	 * Diese Methode überprüft die gespeicherte BackupDB-Version in der Config mit der lokalen
+	 * @return true		Version aktuell
+	 * @return fasle	Version nicht aktuell
+	 */
+	private static boolean checkVersion() {
 		Config.getConfig().getBackupDBDatabasename();
 		int x = 123123;
 		//TODO:Testen ob Datenbank Version die richtige ist
@@ -204,7 +222,13 @@ public class Backupserver {
 		return false;
 	}
 
-	private static boolean createDatabase(String ip, String port, String username, String password) {
+	/**
+	 * Diese Methode legt die für den Betrieb notwenidge Datebank mithilfe eines Scripts sowie
+	 * Prozeduren an
+	 * @return	true
+	 * @return	false
+	 */
+	private static boolean createDatabase() {
 		String databasename = Config.getConfig().getBackupDBDatabasename();
 		synchronized (stmt) {
 			try {
@@ -243,6 +267,12 @@ public class Backupserver {
 		}
 	}
 
+	/**
+	 * Diese Methode löscht zunächst den Anonymos-Nutzer und legt anschließend 
+	 * den Nutzer für den Normalbetieb 'backupPublicMain' an
+	 * @return true		Anlegen erfolgreich
+	 * @return false	Fehler beim Anlegen
+	 */
 	private static boolean createClientUser(){
 		try {
 
@@ -256,15 +286,5 @@ public class Backupserver {
 			//Benutzer gab es evtl schonmal
 			return false;
 		}
-
-
-
-
-
-
-
-
-
-
 	}
 }

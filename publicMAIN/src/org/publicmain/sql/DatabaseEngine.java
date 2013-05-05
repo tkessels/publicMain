@@ -1,5 +1,8 @@
 package org.publicmain.sql;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -27,6 +30,9 @@ import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
+
+import com.mysql.jdbc.CommunicationsException;
+import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 
 public class DatabaseEngine {
 
@@ -102,6 +108,32 @@ public class DatabaseEngine {
 	
 	public boolean isValid(String username, String password) {
 		return (backupDB.getIDfor(username, password)!=-1);
+	}
+	
+	public boolean isValid(String username, String password,String ip, String dbPort, String dbusername, String dbpassword) {
+		long tmpID=-1;
+		PreparedStatement prp = null;
+		Connection x = null;
+		ResultSet myid = null;
+		try {
+			x = BackupDBConnection.getBackupDBConnection().getCon(ip, dbPort, Config.getConfig().getBackupDBDatabasename(), dbusername, dbpassword, 100);
+			prp = x.prepareStatement("Select backupUserID from t_backupUser where username like ? and password like ?");
+			prp.setString(1, username);
+			prp.setString(2, password);
+			myid = prp.executeQuery();
+			if (myid.first()) {
+				tmpID=myid.getLong(1);
+			}
+			myid.close();
+			prp.close();
+		} catch (SQLException e) {
+			LogEngine.log(this, e);
+		}finally {
+				   try{myid.close();  }catch(Exception ignored){}
+				   try{prp.close();}catch(Exception ignored){}
+				   try{x.close();}catch(Exception ignored){}
+		}
+		return (tmpID!=-1);
 	}
 
 	public void put(Collection<Node> x){
@@ -449,6 +481,42 @@ public class DatabaseEngine {
 		}
 		return new JComboBox<Node>();
 
+	}
+	
+	/**Prüft ob eine Datenbankverbindung mit den angegebenen Parametern möglich ist und wirft entsprechende Fehlercodes
+	 * @param ip	Ip oder Hostname des Datenbankserver 
+	 * @param port Port des Datenbankserver
+	 * @param databasename Zu verbindende Datenbank
+	 * @param user Anmeldename für den Datenbankserver
+	 * @param password Passwort für den Datenbankserver
+	 * @return <table><tr><th>Wert</th><th align="left">Bedeutung</th></tr>
+	 * 				 <tr><td align="center">0</td><td>Verbindungsdaten sind korrekt Datenbank hat geantwortet</td></tr>
+	 * 				 <tr><td align="center">1</td><td>Server Antwortet nicht </td></tr>
+	 * 				 <tr><td align="center">2</td><td>Server Antwortet, Zugangsdaten sind jedoch falsch</td></tr>
+	 * 				 <tr><td align="center">3</td><td>Verbindungsdaten sind korrekt, aber angegebener Datenbankname nicht gefunden </td></tr>
+	 */
+	public int checkCon(String ip, String port,String databasename,String user,String password){
+		Connection con=null;
+		try {
+			con = DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout=100", user, password);
+			return 0;
+		} catch (SQLException e) {
+			switch(e.getErrorCode()) {
+			case 0:
+				//host unreachable
+				return 1;
+			case 1045:
+				//access denied
+				return 2;
+			case 1049:
+				//unknown database
+				return 3;
+			default:
+				return 4;
+			}
+		}finally {
+			try {con.close();}catch(Exception ignored) {}
+		}
 	}
 
 

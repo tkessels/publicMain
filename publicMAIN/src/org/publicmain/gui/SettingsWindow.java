@@ -12,6 +12,10 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -39,6 +43,7 @@ import org.resources.Help;
 
 public class SettingsWindow extends JDialog{
 	private static final long serialVersionUID = 7576764930617798651L;
+	
 
 	private static SettingsWindow me;
 
@@ -107,7 +112,9 @@ public class SettingsWindow extends JDialog{
 	private JButton		resetBtn;
 	private JButton		acceptBtn;
 	private JButton		cancelBtn;
-
+	
+	private ScheduledExecutorService executer = Executors.newSingleThreadScheduledExecutor();
+	
 
 	public SettingsWindow(int card, boolean modal) {
 		SettingsWindow.me = this;
@@ -213,8 +220,7 @@ public class SettingsWindow extends JDialog{
 		this.resetBtn 		= new JButton("Reset");
 		this.acceptBtn	 	= new JButton("Accept");
 		this.cancelBtn 		= new JButton("Cancel");
-
-
+		
 		this.btnGrp.add(userBtn);
 		this.btnGrp.add(databaseBtn);
 		this.btnGrp.add(pushPullBtn);
@@ -354,6 +360,7 @@ public class SettingsWindow extends JDialog{
 	@Override
 	public void dispose() {
 		super.dispose();
+		executer.shutdownNow();
 		me = null;
 	}
 
@@ -364,17 +371,6 @@ public class SettingsWindow extends JDialog{
 		return me;
 
 	}
-	private void checkppuser() {
-		if(DatabaseEngine.getDatabaseEngine().isValid(userPushPullTextField.getText(), pwPushPullPasswordField.getText())) {
-			userPushPullTextField.setBackground(Color.green);
-			pwPushPullPasswordField.setBackground(Color.green);
-		}else {
-			userPushPullTextField.setBackground(Color.white);
-			pwPushPullPasswordField.setBackground(Color.white);
-		}
-		
-	}
-
 
 	private void getDefaults(){
 		this.aliasTextField.setText(Config.getConfig().getAlias());
@@ -389,9 +385,7 @@ public class SettingsWindow extends JDialog{
 		
 
 		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
-		this.userPushPullTextField.getDocument().addDocumentListener(new PPuserChecker());
 		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
-		this.pwPushPullPasswordField.getDocument().addDocumentListener(new PPuserChecker());
 		this.portLocalDBTextField.setText(Config.getConfig().getLocalDBPort());
 		this.userLocalDBTextField.setText(Config.getConfig().getLocalDBUser());
 		this.pwLocalDBPasswordField.setText(Config.getConfig().getLocalDBPw());
@@ -401,6 +395,28 @@ public class SettingsWindow extends JDialog{
 		this.userBackupTextField.setText(Config.getConfig().getBackupDBUser());
 		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
 		
+		
+		executer.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				checkSettings();
+			}
+		},0,1,TimeUnit.SECONDS);
+		/*
+		 * ScheduledExecutorService executor =
+		    Executors.newSingleThreadScheduledExecutor();
+
+		Runnable periodicTask = new Runnable() {
+		    public void run() {
+		        // Invoke method(s) to do the work
+		        doPeriodicWork();
+		    }
+		};
+
+		executor.scheduleAtFixedRate(periodicTask, 0, 10, TimeUnit.SECONDS);
+		 */
+		
+		
                 checkSettings();
 		
 		
@@ -409,137 +425,69 @@ public class SettingsWindow extends JDialog{
 	private void checkSettings() {
 		new Thread(new Runnable() {
 			public void run() {
-				int i = DatabaseEngine.getDatabaseEngine().getStatusBackup();
-				localDBPanel.setBackground((DatabaseEngine.getDatabaseEngine().getStatusLocal())?Color.WHITE:Color.ORANGE);
-				pushPullPanel.setBackground((i == 1) ? Color.ORANGE : Color.WHITE);
-				backupDBPanel.setBackground((i == 0) ? Color.ORANGE : Color.WHITE);
+				int localDBStatus = DatabaseEngine.getDatabaseEngine().checkCon("127.0.0.1", portLocalDBTextField.getText(), Config.getConfig().getLocalDBDatabasename(), userLocalDBTextField.getText(), pwLocalDBPasswordField.getText());
+				int backupDBStatus = DatabaseEngine.getDatabaseEngine().checkCon(ipBackupTextField.getText(), portBackupTextField.getText(), Config.getConfig().getBackupDBDatabasename(),userBackupTextField.getText(), pwBackPasswordField.getText());
+				
+				if(localDBStatus==0) {
+					localDBPanel.setBackground(Color.WHITE);
+					portLocalDBTextField.setBackground(Config.BLUE);
+					userLocalDBTextField.setBackground(Config.BLUE);
+					pwLocalDBPasswordField.setBackground(Config.BLUE);
+				}else if(localDBStatus==1){
+					localDBPanel.setBackground(Config.YELLOW);
+					portLocalDBTextField.setBackground(Config.ORANGE);
+					userLocalDBTextField.setBackground(Config.YELLOW);
+					pwLocalDBPasswordField.setBackground(Config.YELLOW);
+
+				}else if(localDBStatus==2) {
+					localDBPanel.setBackground(Config.YELLOW);
+					portLocalDBTextField.setBackground(Config.BLUE);
+					userLocalDBTextField.setBackground(Config.ORANGE);
+					pwLocalDBPasswordField.setBackground(Config.ORANGE);
+				}
+				
+				if(backupDBStatus==0) {
+					backupDBPanel.setBackground(Color.WHITE);
+					ipBackupTextField.setBackground(Config.BLUE);
+					portBackupTextField.setBackground(Config.BLUE);
+					userBackupTextField.setBackground(Config.BLUE);
+					pwBackPasswordField.setBackground(Config.BLUE);
+					if(DatabaseEngine.getDatabaseEngine().isValid(userPushPullTextField.getText(), pwPushPullPasswordField.getText(),ipBackupTextField.getText(),portBackupTextField.getText(),userBackupTextField.getText(),pwBackPasswordField.getText())) {
+						userPushPullTextField.setBackground(Config.BLUE);
+						pwPushPullPasswordField.setBackground(Config.BLUE);
+					}else {
+						userPushPullTextField.setBackground(Color.white);
+						pwPushPullPasswordField.setBackground(Color.white);
+					}
+				}else if(backupDBStatus==1){
+					backupDBPanel.setBackground(Config.YELLOW);
+					ipBackupTextField.setBackground(Config.ORANGE);
+					portBackupTextField.setBackground(Config.ORANGE);
+					userBackupTextField.setBackground(Config.YELLOW);
+					pwBackPasswordField.setBackground(Config.YELLOW);
+					userPushPullTextField.setBackground(Color.lightGray);
+					pwPushPullPasswordField.setBackground(Color.lightGray);
+
+
+				}else if(backupDBStatus==2) {
+					backupDBPanel.setBackground(Config.YELLOW);
+					ipBackupTextField.setBackground(Config.BLUE);
+					portBackupTextField.setBackground(Config.BLUE);
+					userBackupTextField.setBackground(Config.ORANGE);
+					pwBackPasswordField.setBackground(Config.ORANGE);
+					userPushPullTextField.setBackground(Color.lightGray);
+					pwPushPullPasswordField.setBackground(Color.lightGray);
+					
+				}
+
 				localDBPanel.repaint();
 				pushPullPanel.repaint();
 				backupDBPanel.repaint();
-				if(i==2) {
-					userPushPullTextField.setBackground(Color.green);
-					pwPushPullPasswordField.setBackground(Color.green);
-				}else {
-					userPushPullTextField.setBackground(Color.white);
-					pwPushPullPasswordField.setBackground(Color.white);
-				}
 				
 			}
 		}).start();
 	}
 
-	private void acceptSettings_old(){
-		boolean changes = false;
-
-		if(!aliasTextField.getText().equals(Config.getConfig().getAlias())){
-			GUI.getGUI().changeAlias(aliasTextField.getText());
-			//hier wird bewusst changes nicht auf true gesetz, da die Methode changeAlias()
-			//das schreiben der config übernimmt.
-		}
-		if(Config.getConfig().getDisableFileTransfer() != fileTransferCheckBox.isSelected()){
-			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
-			changes = true;
-		}
-
-		if(Config.getConfig().getNotifyGroup() != grpMsgCheckBox.isSelected()){
-			Config.getConfig().setNotifyGroup(grpMsgCheckBox.isSelected());
-			changes = true;
-		}
-		if(Config.getConfig().getNotifyPrivate() != privMsgCheckBox.isSelected()){
-			Config.getConfig().setNotifyPrivate(privMsgCheckBox.isSelected());
-			changes = true;
-		}
-
-		if(!fontChooserComboBox.getSelectedItem().equals(Config.getConfig().getFontFamily())){
-			Config.getConfig().setFontFamily((String)fontChooserComboBox.getSelectedItem());
-			changes = true;
-		}
-		if(fontSizeSlider.getValue() != Config.getConfig().getFontSize()){
-			Config.getConfig().setFontSize(fontSizeSlider.getValue());
-			changes = true;
-		}
-
-		if (!userPushPullTextField.getText().equals("") || (Config.getConfig().getBackupDBChoosenUsername() != null))
-		{
-			String tmpUserPushPull = userPushPullTextField.getText();
-			if (!tmpUserPushPull.equals(Config.getConfig().getBackupDBChoosenUsername())) {
-				Config.getConfig().setBackupDBChoosenUsername(userPushPullTextField.getText());
-				changes = true;
-			}
-		}
-		if((pwPushPullPasswordField.getPassword().length != 0) || (Config.getConfig().getBackupDBChoosenUserPassWord() != null))
-		{
-			String tmp_password = new String(pwPushPullPasswordField.getPassword());
-			if(!tmp_password.equals(Config.getConfig().getBackupDBChoosenUserPassWord())) {
-				Config.getConfig().setBackupDBChoosenUserPassWord(tmp_password);
-				changes = true;
-			}
-		}
-
-		if (portLocalDBTextField.getText().length()>1)
-		{
-			String tmp_port = new String(portLocalDBTextField.getText());
-			if (!tmp_port.equals(Config.getConfig().getLocalDBPort())) {
-				Config.getConfig().setLocalDBPort(portLocalDBTextField.getText());
-				changes = true;
-			}
-		}
-		if (userLocalDBTextField.getText().length()>1)
-		{
-			String tmp_user = new String(userLocalDBTextField.getText());
-			if (!tmp_user.equals(Config.getConfig().getLocalDBUser())) {
-				Config.getConfig().setLocalDBUser(userLocalDBTextField.getText());
-				changes = true;
-			}
-		}
-		if(pwLocalDBPasswordField.getPassword().length>1)
-		{
-			String tmp_password = new String(pwLocalDBPasswordField.getPassword());
-			if(!tmp_password.equals(Config.getConfig().getLocalDBPw())) {
-				Config.getConfig().setLocalDBPw(tmp_password);
-				changes = true;
-			}
-		}
-
-		if (!ipBackupTextField.getText().equals(""))
-		{
-			String tmpBackupIp = ipBackupTextField.getText();
-			if (!tmpBackupIp.equals(Config.getConfig().getBackupDBIP())) {
-				Config.getConfig().setBackupDBIP(ipBackupTextField.getText());
-				changes = true;
-			}
-		}
-		if (portBackupTextField.getText().length()>1)
-		{
-			String tmp_port = new String(portBackupTextField.getText());
-			if (!tmp_port.equals(Config.getConfig().getBackupDBPort())){
-				Config.getConfig().setBackupDBPort(
-						portBackupTextField.getText());
-				changes = true;
-			}
-		}
-		if (userBackupTextField.getText().length()>1)
-		{
-			String tmp_user = new String(userBackupTextField.getText());
-			if (!tmp_user.equals(Config.getConfig().getBackupDBUser())) {
-				Config.getConfig().setBackupDBUser(userBackupTextField.getText());
-				changes = true;
-			}
-		}
-		if(pwBackPasswordField.getPassword().length>1)
-		{
-			String tmp_password = new String(pwBackPasswordField.getPassword());
-			if(!tmp_password.equals(Config.getConfig().getBackupDBPw())) {
-				Config.getConfig().setBackupDBPw(tmp_password);
-				changes = true;
-			}
-		}
-
-
-		if(changes){
-			Config.write();
-		}
-	}
 	
 	private void acceptSettings(){
 			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
@@ -598,28 +546,7 @@ public class SettingsWindow extends JDialog{
 		if(ChatEngine.getCE()!=null)GUI.getGUI().changeAlias(aliasTextField.getText().trim());
 		else Config.write();
 	}
-
 	
-	
-	private final class PPuserChecker implements DocumentListener {
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			checkppuser();
-			// TODO Auto-generated method stub
-		}
-
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			// TODO Auto-generated method stub
-			checkppuser();
-		}
-
-		@Override
-		public void changedUpdate(DocumentEvent e) {
-			// TODO Auto-generated method stub
-			checkppuser();
-		}
-	}
 
 	class CardButtonController implements ActionListener{
 		public void actionPerformed(final ActionEvent e) {
@@ -649,6 +576,7 @@ public class SettingsWindow extends JDialog{
 		}
 
 	}
+	
 	class FontSizeSliderController implements ChangeListener{
 
 		/* (non-Javadoc)

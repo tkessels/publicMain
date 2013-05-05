@@ -1,5 +1,6 @@
 package org.publicmain.common;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +19,14 @@ import org.publicmain.sql.DatabaseEngine;
  */
 
 public class Config {
+	public static Color BLUE = new Color(25,169,241);
+	public static Color BLUE2 = new Color(9,112,164);
+	public static Color BLUE3 = new Color(5,64,94);
+	public static Color ORANGE = new Color(255,133,18);
+	public static Color YELLOW = new Color(229,195,0);
+	public static Color GREEN= new Color(51,144,124);
+	public static Color GREEN2= new Color(123,195,165);
+	
 
 	private static final String APPNAME 			=   (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
 	private static final int CURRENTVERSION			=	5;

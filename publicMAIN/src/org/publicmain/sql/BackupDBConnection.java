@@ -359,9 +359,16 @@ public BackupDBConnection() {
 
 
 	public Connection getCon() throws SQLException {
-		DriverManager.setLoginTimeout(0);
-		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
+		return getCon(Config.getConfig().getBackupDBIP(), Config.getConfig().getBackupDBPort(),Config.getConfig().getBackupDBDatabasename(),Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw(),1000);
+//		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 	}
+	
+	public Connection getCon(String ip, String port,String databasename,String user,String password, long timeout) throws SQLException{
+		return DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout="+timeout, user, password);
+	}
+
+
+	
 
 	public Properties getConfig(String user, String password) throws IllegalArgumentException {
 		try {

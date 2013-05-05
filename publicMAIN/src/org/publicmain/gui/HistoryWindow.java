@@ -5,12 +5,14 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -22,10 +24,12 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerDateModel;
 
 import org.publicmain.common.Node;
@@ -80,7 +84,13 @@ public class HistoryWindow extends JDialog{
 	private JLabel		searchTextLabel;
 	private JTextField	textSearchTextField;
 
-	private JPanel		platzhalterPanel;
+	private JPanel		outputFormatPanel;
+	private JLabel spaltenauswahl_label;
+	private JTextField spaltenauswahl;
+	private JLabel formatString_label;
+	private JTextArea formatString;
+	private JLabel darstellungsStil_label;
+	private JComboBox<String> darstellungsStil;
 
 	private JPanel		buttonPanel;
 	private JButton		searchButton;
@@ -90,6 +100,9 @@ public class HistoryWindow extends JDialog{
 	private GregorianCalendar endGregCal;
 
 	private String activeCard = "User";
+	private String activeTyp = "Tabbed";
+	private String[] tabbed_format= {"1,2,3,4,5,6,7","7,6,5,4,3,2,1","3,4,6"};
+	private String[] text_format= {"$6$:$3$:$5$","7,6,5,4,3,2,1","<font color='orange'>$2d% $2t% $3$ ($6$): </font><font color='black'>$5$</font>"};
 
 
 
@@ -150,7 +163,8 @@ public class HistoryWindow extends JDialog{
 		this.textSearchTextField.setActionCommand("Search");
 		this.textSearchTextField.addActionListener(new HistoryButtonController());
 
-		this.platzhalterPanel		= new JPanel();
+	
+		this.outputFormatPanel		= new JPanel();
 
 		this.dateEditorBegin		= new JSpinner.DateEditor(beginSpinner, "HH:mm");
 		this.dateEditorEnd			= new JSpinner.DateEditor(endSpinner, "HH:mm");
@@ -239,9 +253,38 @@ public class HistoryWindow extends JDialog{
 		this.myPanel.add(textSearchTextField);
 
 
-		this.platzhalterPanel.setPreferredSize(new Dimension(230,137));
-		this.platzhalterPanel.setBackground(Color.WHITE);
-
+		this.outputFormatPanel.setPreferredSize(new Dimension(230,137));
+		this.outputFormatPanel.setBackground(Color.WHITE);
+		String[] typs = {"Tabbed","Text"};
+		this.darstellungsStil_label = new JLabel("Typ");
+		this.darstellungsStil=new JComboBox<String>(typs) ;
+		this.darstellungsStil.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+					        JComboBox cb = (JComboBox)e.getSource();
+					        String typ= (String)cb.getSelectedItem();
+					        toggleTyp(typ);
+			}
+		});
+		 this.formatString_label = new JLabel("Format-String:");
+		 this.formatString = new JTextArea();
+		 
+		formatString.setFont(new Font("Serif", Font.ITALIC, 12));
+		formatString.setText(tabbed_format[0]);
+		formatString.setLineWrap(true);
+		formatString.setWrapStyleWord(true);
+		JScrollPane areaScrollPane = new JScrollPane(formatString);
+		areaScrollPane.setBackground(Color.white);
+		areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		areaScrollPane.setPreferredSize(new Dimension(230, 105));
+		areaScrollPane.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Format String"),BorderFactory.createEmptyBorder(1,1,1,1)),areaScrollPane.getBorder()));
+		JPanel tmp_pnl = new JPanel();
+		tmp_pnl.setBackground(Color.white);
+		tmp_pnl.add(darstellungsStil_label);
+		tmp_pnl.add(darstellungsStil);
+		this.outputFormatPanel.add(tmp_pnl);
+		this.outputFormatPanel.add(areaScrollPane);
+		
 		this.buttonPanel.setPreferredSize(new Dimension(230,27));
 		this.buttonPanel.setBackground(Color.WHITE);
 		this.buttonPanel.add(searchButton);
@@ -251,7 +294,7 @@ public class HistoryWindow extends JDialog{
 		this.add(searchTypePanel);
 		this.add(cardsPanel);
 		this.add(myPanel);
-		this.add(platzhalterPanel);
+		this.add(outputFormatPanel);
 		this.add(buttonPanel);
 
 
@@ -268,6 +311,22 @@ public class HistoryWindow extends JDialog{
 
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
+	}
+
+
+	protected void toggleTyp(String typ) {
+		int i = Arrays.asList(new String[] {"User","Alias","Group"}).indexOf(activeCard);
+		if(!activeTyp.equals(typ)) {
+			if(typ.equals("Tabbed")) {
+				text_format[i]=formatString.getText();
+				formatString.setText(tabbed_format[i]);
+			}else {
+				tabbed_format[i]=formatString.getText();
+				formatString.setText(text_format[i]);
+			}
+			activeTyp=typ;
+		}
+		
 	}
 
 
@@ -306,10 +365,28 @@ public class HistoryWindow extends JDialog{
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			
+			
 			CardLayout card = (CardLayout) ref.getLayout();
+			int i = Arrays.asList(new String[] {"User","Alias","Group"}).indexOf(activeCard);
 			String text = ((JToggleButton)e.getSource()).getText();
+			int j = Arrays.asList(new String[] {"User","Alias","Group"}).indexOf(text);
+
+			
+			if(i!=j) {
+				if(darstellungsStil.getSelectedItem().equals("Tabbed")) {
+					tabbed_format[i]=formatString.getText();
+					formatString.setText(tabbed_format[j]);
+				}else {
+					text_format[i]=formatString.getText();
+					formatString.setText(text_format[j]);
+
+				}
+			}
+			
 			card.show( ref, text );
 			activeCard=text;
+			
 		}
 	}
 
@@ -334,23 +411,34 @@ public class HistoryWindow extends JDialog{
 				DatabaseDaten querry= null;
 				switch(activeCard){
 				case "User":
-					long uid;
+					long uid; 
 					Node selectedNode = (Node) userSelectComboBox.getSelectedItem();
 					uid = (userSelectComboBox.getSelectedItem()!=null)?selectedNode.getUserID() : -1;
 					querry = DatabaseEngine.getDatabaseEngine().selectMSGsByUser(uid,beginGregCal, endGregCal, textSearchTextField.getText());
+					if(querry!=null) {
+						new ResultWindow(querry,formatString.getText(),darstellungsStil.getSelectedItem().equals("Text"));
+					}
+				
 					break;
-				case "Group":
+				case "Group": 
 					querry = DatabaseEngine.getDatabaseEngine().selectMSGsByGroup(groupSearchTextField.getText(), beginGregCal, endGregCal, textSearchTextField.getText());
+					
+					if(querry!=null) {
+						new ResultWindow(querry,formatString.getText(),darstellungsStil.getSelectedItem().equals("Text"));
+					}
+					
 					break;
 				case "Alias":
 					querry = DatabaseEngine.getDatabaseEngine().selectMSGsByAlias(aliasSearchTextField.getText(), beginGregCal,endGregCal,textSearchTextField.getText());
+					if(querry!=null) {
+						new ResultWindow(querry,formatString.getText(),darstellungsStil.getSelectedItem().equals("Text"));
+					}
 					break;
 				default:
 				}
 
-				if(querry!=null){
-					new ResultWindow(querry, 0);
-				}
+				
+				
 
 
 				break;

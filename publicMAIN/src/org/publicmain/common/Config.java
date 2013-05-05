@@ -256,32 +256,42 @@ public class Config {
 				} catch (IOException e1) {
 					LogEngine.log(Config.this,
 							"Could not write user settings: " + user_conf
-							+ " reason : " + e1.getMessage(),
+									+ " reason : " + e1.getMessage(),
 							LogEngine.WARNING);
 				}
 			}
 		};
 		new Thread(target).start();
 	}
-
+	
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @param tmp
+	 */
 	public static void importConfig(Properties tmp) {
 		ConfigData imported = new ConfigData(getConfig());
 		for (Object key : tmp.keySet()) {
-			if(tmp.get(key)!=null) {
+			if (tmp.get(key) != null) {
 				imported.put(key, tmp.get(key));
 			}
 		}
 		setConfig(imported);
 	}
-	
+
+	/**
+	 * TODO: Kommentar!
+	 * 
+	 * @return
+	 */
 	public static Properties getNonDefault() {
 		Properties rueck = new Properties();
 		ConfigData defaults = getSourceSettings();
 		ConfigData current = getConfig();
 		for (Object key : current.keySet()) {
-			if(!current.get(key).equals(defaults.get(key))) rueck.put(key, current.get(key));
+			if (!current.get(key).equals(defaults.get(key)))
+				rueck.put(key, current.get(key));
 		}
 		return rueck;
-		
 	}
 }

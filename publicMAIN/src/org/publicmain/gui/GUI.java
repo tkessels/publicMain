@@ -42,8 +42,11 @@ import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
 
 /**
- * @author ATRM
+ * Diese Klasse stellt das Hauptfenster der Anwendung publicMAIN bereit.
  * 
+ * Diese Klasse stellt das GUI für die Anwendung publicMAIN zur Verfügung.
+ * 
+ * @author ATRM
  */
 
 @SuppressWarnings("serial")
@@ -86,6 +89,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * Konstruktor für das GUI mit Initialisierungen
 	 */
 	private GUI() {
+		// Das Look&Feel auf Systemeinstellungen setzen
 		try {
 			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		} catch ( Exception ex ) {
@@ -123,9 +127,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.trayIcon 			= new PMTrayIcon();
 		this.afkStatus 			= false;
 
-		/**
-		 * Erstellen erforderlicher Controller und Listener
-		 */
+		// Erstellen benötigter Listener
 		this.addWindowListener( new winController() );
 		this.jTabbedPane.addChangeListener( this );
 		this.exit.addActionListener( new menuContoller() );			
@@ -138,6 +140,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.delBackupHistory.addActionListener( new menuContoller() );
 		this.settings.addActionListener( new menuContoller() );
 
+		// Button für die Kontaktliste konfigurieren und Listener hinzufügen
 		this.contactListBtn.setMargin( new Insets( 2, 3, 2, 3 ) );
 		this.contactListBtn.setToolTipText( "show contacts" );
 		this.contactListBtn.addActionListener( new ActionListener() {
@@ -152,12 +155,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				} else {
 					contactListZuklappen();
 				}
-			}
+			}//eom actionPerformed()
 		} );
 
-		/**
-		 * Menü-Komponenten hinzufügen
-		 */
+		//Menükomponenten hinzufügen
 		this.history.add( localDB );
 		this.history.add( backupServer );
 		this.pMAIN.add( settings );
@@ -204,11 +205,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.setVisible( true );
 		this.chatList.get(0).focusEingabefeld();
 		this.contactListAufklappen();
-
-	}
+	}//eom GUI()
 
 	/**
-	 * Diese Methode klappt die Benutzerliste auf.
+	 * Diese Methode klappt die Kontaktliste auf.
+	 * 
+	 * Diese Methode klappt die Kontaktliste auf und konfiguriert den
+	 * JButton (contactListBtn) entsprechend.
 	 */
 	private void contactListAufklappen(){
 
@@ -220,10 +223,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			this.contactListWin.setVisible( true );
 			contactListActive = true;
 		}
-	}
+	}//eom contactListAufklappen()
 
 	/**
-	 * Diese Methode klappt die Benutzerliste zu.
+	 * Diese Methode klappt die Kontaktliste zu.
+	 * 
+	 * Diese Methode klappt die Kontaktliste zu und konfiguriert den
+	 * JButton (contactListBtn) entsprechend.
 	 */
 	private void contactListZuklappen() {
 
@@ -234,16 +240,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			this.contactListWin.setVisible( false );
 			this.contactListActive = false;
 		}
-	}
+	}//eom contactListZuklappen()
 
 	/** 
-	 * Diese Methode erstellt ein neues ChatFenster. Ist das der Parameter ein {@link String} erstellt
+	 * Diese Methode erstellt ein neues ChatFenster.
+	 * 
+	 * Diese Methode erstellt ein neues ChatFenster. Ist der Parameter ein {@link String} erstellt
 	 * sie ein Gruppenfenster ist er {@link Long} ein PrivatChatFenster.
 	 * 
 	 * @param referenz, für was soll ein Fenster erstellt werden. 
-	 * @return
+	 * @return ChatWindow das erstellte ChatWindow.
 	 */
-	public ChatWindow createChat( Object referenz ) {
+	private ChatWindow createChat( Object referenz ) {
 
 		ChatWindow cw;
 		if ( referenz instanceof String ) {
@@ -266,6 +274,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		int index = jTabbedPane.indexOfComponent( cw );
 		// den neuen Tab an die Stelle von index setzen
 		this.jTabbedPane.setTabComponentAt( index, cw.getWindowTab() );
+		// je nach Typ des ChatWindows den entsprechenden MSGListener hinzufügen
 		if ( cw.isGroup() ) {
 			ce.add_MSGListener( cw, ( String )referenz );
 		} else {
@@ -273,16 +282,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 
 		return cw;
-	}
+	}//eom createChat()
 
 	/**
+	 * Diese Methode erstellt ein Gruppen ChatWindow.
+	 * 
 	 * Diese Methode erstellt ein ChatWindow für Gruppen, falls ChatWindow
 	 * bereits vorhanden, wird dieses fokusiert.
 	 * 
-	 * @param grpName
-	 * @param focus
+	 * @param grpName String Name der Gruppe.
+	 * @param focus boolean true wenn Focus auf das neue ChatWindow gesetzt werden soll.
 	 */
-	public void addGrpCW( String grpName, boolean focus ) {
+	void addGrpCW( String grpName, boolean focus ) {
 		// Hol ref. auf Gruppenfenster wenn existent
 		ChatWindow tmp_cw = getCW( grpName );
 		// wenn ref. leer dann erstelle neues Gruppenfesnter
@@ -293,15 +304,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if ( focus ) {
 			focus( tmp_cw );
 		}
-	}
+	}//eom addGrpCW()
 
 	/**
-	 * TODO: Kommentar
+	 * Diese Methode erstellt ein privates ChatWindow.
 	 * 
-	 * @param uid
-	 * @param focus
+	 * Diese Methode erstellt ein ChatWindow für Gruppen, falls ChatWindow
+	 * bereits vorhanden, wird dieses fokusiert.
+	 * 
+	 * @param uid long UserID.
+	 * @param focus boolean true wenn Focus auf das neue ChatWindow gesetzt werden soll.
 	 */
-	public void addPrivCW( long uid, boolean focus ){
+	void addPrivCW( long uid, boolean focus ){
 		ChatWindow tmp = getCW( uid );
 		if( tmp == null ){
 			tmp = createChat( uid );
@@ -309,21 +323,18 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if ( focus ){
 			focus( tmp );
 		}
-	}
+	}//eom addPrivCW()
 
 	/**
-	 * Diese Methode entfernt ein ChatWindow
+	 * Diese Methode entfernt ein ChatWindow.
 	 * 
 	 * Diese Methode sorgt dafür das ChatWindows aus der ArrayList "chatList"
-	 * entfernt werden und im GUI nicht mehr angezeigt werden.
+	 * entfernt werden und im GUI nicht mehr angezeigt werden. Außerdem
+	 * entfernt sie den MSGListener.
 	 * 
-	 * @param ChatWindow
+	 * @param cw ChatWindow das zu löschende ChatWindow
 	 */
-	public void delChat( ChatWindow cw ) {
-		// TODO: Hier evtl. noch anderen Programmablauf implementier
-		// z.B. schließen des Programms wenn letztes ChatWindow geschlossen
-		// wird
-
+	void delChat( ChatWindow cw ) {
 		// Falls nur noch ein ChatWindow übrig kann dieses nicht entfernt werden
 		if( chatList.size() >= 2 ){
 			// ChatWindow (cw) aus jTabbedPane entfernen:
@@ -333,21 +344,24 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			// ChatWindow aus Gruppe entfernen (MSGListener abschalten):
 			ce.remove_MSGListener( cw );
 		}
-	}
+	}//eom delChat()
 
 	/**
-	 * Diese Methode entfernt ein ChatWindow anhand des Namens, sie sorgt dafür
-	 * das ChatWindows aus der ArrayList "chatList" entfernt werden und im GUI
-	 * nicht mehr angezeigt werden.
+	 * Diese Methode entfernt ein ChatWindow.
 	 * 
-	 * @param chatname
+	 * Diese Methode entfernt ein ChatWindow anhand eines übergebenen
+	 * Referenzobjektes.
+	 * 
+	 * @param refObject Object zu entfernendes ChatWindow.
 	 */
-	public void delChat( Object refObject ) {
+	void delChat( Object refObject ) {
 		delChat( getCW( refObject ) );
-	}
+	}//eom delChat()
 
 	/**
-	 * Fokussiert das angegebene ChatWindow
+	 * Diese Methode Fokussiert das angegebene ChatWindow.
+	 * 
+	 * Diese ethode sorgt dafür das das übergebene ChatWindow fokusiert wird.
 	 * 
 	 * @param cw, das zu fokussierende Chatwindow
 	 */
@@ -357,7 +371,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			jTabbedPane.setSelectedIndex( index );
 		}
 		cw.focusEingabefeld();
-	}
+	}//eom focus()
 
 	/**
 	 * Diese Methode überprüft einen String (Gruppenname oder Alias) auf Gültigkeit
@@ -385,14 +399,16 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		} else
 			return false;
-	}
+	}//eom checkName()
 
 	/**
+	 * Diese Methode konfiguriert einen String
+	 * 
 	 * Diese Methode prüft einen übergebenen Namen auf gültige länge und 
 	 * kürzt diesen gegebenenfalls. Außerdem besteht die Möglichkeit den Namen
-	 * zu in Kleinbuchstaben zu setzen.
+	 * in Kleinbuchstaben zu setzen.
 	 *  
-	 * @param name
+	 * @param name: String der zu konfigurierende Name
 	 * @param lowern: true = name wird gelowercased, false = keine Veränderung an Großbuchstaben
 	 * @return String: den gekürzten und ggf. gelowercasedten namen
 	 */
@@ -404,16 +420,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			name = name.toLowerCase();
 		}
 		return name;
-	}
+	}//eom confName()
 
 	/**
+	 * Diese Methode setzt einen Alias neu.
+	 * 
 	 * Diese Methode setzt den Alias auf den übergebenen String und schreibt diesen
 	 * in die Config, falls Alias ungültig wird eine entsprechende Fehlermeldung ausgegeben.
 	 * 
-	 * @param alias
-	 * @return boolean
+	 * @param alias String neuer Aliasname
 	 */
-	public void changeAlias( String alias ){
+	void changeAlias( String alias ){
 		alias = confName( alias, false );
 		if ( checkName( alias, 1 ) ) {
 			ce.updateAlias( alias );
@@ -422,16 +439,19 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} else {
 			info( "Illegal charakter in username!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 1 );
 		}
-	}
+	}//eom changeAlias()
 
 	/**
-	 * TODO: Kommentar
+	 * Diese Methode gibt das aktive ChatWindow zurück.
 	 * 
-	 * @return
+	 * Diese Methode holt das selektierte ChatWindow des JTabbedPane und
+	 * liefert es zurück.
+	 * 
+	 * @return ChatWindow: das aktive ChatWindow
 	 */
-	public ChatWindow getActiveCW() {
+	ChatWindow getActiveCW() {
 		return ( ChatWindow )jTabbedPane.getSelectedComponent();
-	}	
+	}//eom getActiveCW()
 
 	/**
 	 * Diese Methode setzt den AFK Status (afkStatus).
@@ -448,21 +468,24 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			info( "You are <b>A</b>way <b>F</b>rom <b>K</b>eyboard!", null, 2 );
 		}
 		this.notifyGUI();
-	}
+	}//eom afk()
 
 	/**
 	 * Diese Methode gibt den AFK Status zurück.
 	 * 
 	 * Diese Methode gibt true zurück falls der User afk ist ansonsten false.
-	 * @return boolean afkStatus
+	 * 
+	 * @return boolean afkStatus true falls afk, ansonsten false.
 	 */
 	public boolean isAFK() {
 		return afkStatus;
-	}
+	}//eom isAFK()
 
 
 	/**
-	 * Fährt das Programm ordnungsgemäß runter
+	 * Diese Methode beendet die Anwendung publicMAIN.
+	 * 
+	 * Diese Methode fährt das Programm ordnungsgemäß herrunter.
 	 */
 	void shutdown() {
 		new Thread( new Runnable() {
@@ -498,7 +521,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if ( locDBCon != null ) {
 			locDBCon.shutdownLocDB();
 		}
-	}
+	}//eom shutdown()
 
 	/**
 	 * Die Methode liefert das zu einer Referenz gehörende {@link ChatWindow}.
@@ -527,11 +550,13 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			}
 		}
 		return null;
-	}
+	}// eom getCW()
 
 	/**
+	 * Diese Methode versendet private Nachrichten.
+	 * 
 	 * Diese Methode wird in einem privaten ChatWindow zum versenden der
-	 * Nachricht verwendet
+	 * Nachricht verwendet. 
 	 * 
 	 * @param empfUID, long EmpfängerUID
 	 * @param msg, String die Nachricht
@@ -542,9 +567,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} else {
 			info( "Message to yourself, is not allowed", null, 2 );
 		}
-	}
+	}//eom privSend()
 
 	/**
+	 * Diese Methode versendet Gruppen Nachrichten.
+	 * 
 	 * Diese Methode wird für das Senden von Gruppennachrichten verwendet Falls
 	 * noch kein ChatWindow für diese Gruppe besteht wird eines erzeugt.
 	 * 
@@ -565,13 +592,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				info( "Illegal charakter in groupname!<br>Allowed charakters: a-z,A-Z,0-9,ö,ä,ü,Ö,Ä,Ü,ß,é,á,-,_", null, 2 );
 			}
 		} else {
-			//			focus(tmpCW);
+			//	focus(tmpCW);
 		}
 		ce.send_group( empfGrp, msg );
-	}
+	}//eom groupSend()
 
 	/**
-	 * Diese Methode ist für das Ignorien eines users
+	 * Diese Methode sorgt dafür das ein User ignoriert wird.
+	 * 
+	 * Diese Methode sorgt dafür das der User mit der übergebenen UserID
+	 * ignoriert wird, d.h. es werden keine weiteren Nachrichten von diesem
+	 * User angezeigt.
 	 * 
 	 * @param alias, String Alias des Users
 	 * @returns, true Wenn User gefunden
@@ -583,10 +614,14 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			return true;
 		}
 		return false;
-	}
+	}//eom ignoreUser()
 
 	/**
-	 * Diese Methode ist für das nicht weitere Ignorieren eines Benutzers.
+	 * Diese Methode sorgt dafür das ein User nicht mehr ignoriert wird.
+	 * 
+	 * Diese Methode sorgt dafür das ein User mit der übergebenene UserID
+	 * nicht weiter ignoriert wird und alle Nachrichten von diesem User wieder
+	 * angezeigt werden.
 	 * 
 	 * @param alias, String Alias des Users
 	 * @return, true Wenn User gefunden
@@ -598,29 +633,37 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			return true;
 		}
 		return false;
-	}	
+	}//eom unignoreUser()
 
 	/**
-	 * TODO: Kommentar
+	 * Diese Methode wird verwendet um Datei auszuwählen die verschickt werden soll.
+	 * 
+	 * Diese Methode öffnet einen FileChooser in dem man die zu versendende Datei auswählen
+	 * kann. Diese Datei wird dann versendet.
 	 * 
 	 * @param uid
 	 */
-	public void sendFile( long uid ) {
+	void sendFile( long uid ) {
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showOpenDialog( me );
 		File selectedFile = fileChooser.getSelectedFile();
 		if ( ( returnVal == JFileChooser.APPROVE_OPTION) && ( selectedFile != null ) ) {
 			sendFile( selectedFile, uid );
 		}
-	}
+	}//eom sendFile()
 
 	/**
-	 * TODO: Kommentar
+	 * Diese Methode versendet eine Datei.
 	 * 
-	 * @param datei
-	 * @param uid
+	 * Diese Methode prüft die Größe, die Rechte und die Auswahl der übergebenen Datei.
+	 * Ist die Prüfung erfolgreich, d.h. die Datei ist größer als 0 Bytes, es bestehen
+	 * Leserechte und es wurde nur eine Datei ausgewählt, dann wird die Datei an den 
+	 * übergebenen User (UserID) versendet.
+	 * 
+	 * @param datei File die versendet werden soll.
+	 * @param uid long UserID des Empfängers der Datei.
 	 */
-	public void sendFile( File datei, long uid ) {
+	void sendFile( File datei, long uid ) {
 		if ( datei.isFile() ) {
 			if ( datei.canRead() ) {
 				if ( datei.length() > 0 ) {
@@ -634,29 +677,42 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} else {
 			info( "Only single Files are supported!", uid, 3 );
 		}
-	}	
+	}//eom sendFile()
 
 	/**
-	 * @param msg
+	 * Diese Methode ermöglicht es Nachrichten im TrayIcon anzuzeigen.
+	 * 
+	 * Diese Methode bietet die Möglichkeit Nachrichten über das TrayIcon in Form
+	 * von Popups anzuzeigen falls das GUI minimiert ist.
+	 * 
+	 * @param msg MSG die angezeigt werden soll.
 	 */
-	protected void msgToTray( MSG msg ){
+	void msgToTray( MSG msg ){
 		if( this.getExtendedState() == JFrame.ICONIFIED ){
 			trayIcon.recieveMSG( msg );
 		}
-	}
+	}//eom msgToTray()
 
 	/**
+	 * Diese Methode ermöglicht es Text im TrayIcon anzuzeigen.
+	 * 
+	 * Diese Methode bietet die Möglichkeit Text über das TrayIcon in Form
+	 * von Popups anzuzeigen falls das GUI minimiert ist.
+	 * 
 	 * @param text
 	 */
-	protected void textToTray(String text, MSGCode code){
+	void textToTray(String text, MSGCode code){
 		if( this.getExtendedState() == JFrame.ICONIFIED ){
 			trayIcon.recieveText( text, code );
 		}
-	}
+	}//eom textToTray()
 
 	/**
-	 * Displays a text message in the referenced ChatWindow (Group/UID) or the
-	 * active Window if reference is <code>null</code>
+	 * Diese Methode zeigt eine Nachricht im ChatWindow an.
+	 * 
+	 * Diese Methode zeigt eine Nachricht im übergebenen referenz ChatWindow an
+	 * (Group/UID) oder sie wird im aktuellen ChatWindow angezeigt falls die
+	 * Referenz null ist.
 	 * 
 	 * @param nachricht, Text of the message
 	 * @param reference, Groupname or UID of ChatWindow to put the message in or
@@ -680,14 +736,16 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				textToTray( nachricht, MSGCode.CW_ERROR_TEXT );
 			}
 		}
-	}
+	}//eom info()
 
 	/**
+	 * Diese Methode wird zum speichern empfangener Dateien verwendet.
+	 *
 	 * Diese Methode liefert ein Fileobjekt, sie benachrichtigt über die GUI den
 	 * Nutzer und fordert einen Ablageort an.
 	 * 
-	 * @param filename
-	 * @return File
+	 * @param fr FileTransferData
+	 * @return File request_File
 	 */
 	@SuppressWarnings("deprecation")
 	public File request_File( FileTransferData fr ) {
@@ -726,18 +784,24 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			return null;
 		} else
 			return null;
-	}
+	}//eom request_File()
 
 	/**
-	 * Diese Methode  informiert die GUI über Änderungen.
+	 * Diese Methode informiert das GUI über Änderungen.
+	 * 
+	 * Diese Methode sorgt dafür das bei Änderungen von Aliasnamen etc.
+	 * das GUI informiert und aktuallisiert wird.
 	 */
 	public void notifyGUI() {
 		for ( ChatWindow cw : chatList ) {
 			cw.updateName();
 		}
 		contactListWin.repaint();
-	}
+	}//eom notifyGUI()
 
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
 	public void update( Observable o, Object arg ) {
 		//FIXME : vielleicht nochmal überarbeiten... wenn Zeit ist
 		if ( o instanceof KnotenKanal ){
@@ -753,49 +817,48 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				ce.put( tmp );
 			}
 		}
-	}
+	}//eom update()
 
 	/**
-	 * Diese Methode stellt das Node bereit und holt das {@link NODE}-Objekt für eine UserID
+	 * Diese Methode stellt das Node bereit und holt das {@link NODE}-Objekt für eine UserID.
 	 * 
-	 * @param uid
+	 * @param uid long
 	 * @return Node
 	 */
-	public Node getNodeForUID( long uid ) {
+	Node getNodeForUID( long uid ) {
 		return ce.getNodeForUID( uid );
-	}
+	}//eom getNodeForUID()
 
 	/**
-	 * Diese Methode stellt das GUI bereit
+	 * Diese Methode stellt das GUI bereit.
 	 * 
 	 * Diese Methode stellt das GUI für andere Klassen bereit um einen Zugriff
-	 * auf GUI Attribute zu ermöglichen
+	 * auf GUI Attribute zu ermöglichen.
 	 * 
 	 * @return GUI
 	 */
-	public static GUI getGUI() {
+	public synchronized static GUI getGUI() {
 		if ( me == null ) {
 			me = new GUI();
 		}
 		return me;
-	}
+	}//eom getGUI()
 
 	/**
-	 * TODO: Kommentar
+	 * Diese Methode stellt das jTabbedPane für andere Klassen bereit.
 	 * 
-	 * @return
+	 * @return JTabbedPane jTabbedPane
 	 */
 	JTabbedPane getTabbedPane(){
 		return this.jTabbedPane;
-	}
+	}//eom getTabbedPane()
 
-	/**
-	 * TODO: Kommentar
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
 	 */
-
 	public void stateChanged(ChangeEvent e) {
 		( ( ChatWindow )jTabbedPane.getSelectedComponent() ).focusEingabefeld();
-	}
+	}//eom stateChanged()
 
 
 	/**
@@ -803,6 +866,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	class menuContoller implements ActionListener{
 
+		/* (non-Javadoc)
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
 		public void actionPerformed( ActionEvent e ) {
 
 			JMenuItem source = ( JMenuItem )e.getSource();
@@ -880,7 +946,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 				break;
 			}
 		}
-	}
+	}//eoc menuContoller
 
 	/**
 	 * WindowListener für GUI
@@ -888,27 +954,37 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	class winController extends WindowAdapter{
 		// Wird das GUI minimiert wird die Userlist zugeklappt und der
 		// userListBtn zurückgesetzt:
+		/* (non-Javadoc)
+		 * @see java.awt.event.WindowAdapter#windowIconified(java.awt.event.WindowEvent)
+		 */
 		public void windowIconified( WindowEvent arg0 ) {
 			if ( contactListBtn.isSelected() ) {
 				contactListZuklappen();
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see java.awt.event.WindowAdapter#windowClosed(java.awt.event.WindowEvent)
+		 */
 		public void windowClosed( WindowEvent arg0 ) {
 			shutdown();
 		}
 
+		/* (non-Javadoc)
+		 * @see java.awt.event.WindowAdapter#windowActivated(java.awt.event.WindowEvent)
+		 */
 		public void windowActivated( WindowEvent arg0 ) {
 			if ( contactListBtn.isSelected() ) {
 				contactListWin.toFront();
 			}
 			me.toFront();
 		}
-	}
+	}//eoc winController
 
 
 	/**
-	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus
+	 * Diese Methode gibt die Default Settings des aktuellen L&F in der Console aus und
+	 * kann verwendet werden um evtl. Änderungen am Layout vorzunehmen.
 	 */
 	/*	private void getLookAndFeelDefaultsToConsole(){
 		UIDefaults def = UIManager.getLookAndFeelDefaults();
@@ -923,4 +999,4 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		}
 	}
 	 */
-}
+}//eoc GUI

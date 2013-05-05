@@ -86,7 +86,7 @@ public class ChatWindowTab extends JPanel{
 		this.add( lblIcon );
 		this.add( lblTitle );
 		this.add( lblClose );
-	}
+	}//eom ChatWindowTab()
 
 
 	/**
@@ -97,7 +97,7 @@ public class ChatWindowTab extends JPanel{
 	 */
 	void updateAlias() {
 		lblTitle.setText( owner.getChatWindowName() );
-	}
+	}//eom updateAlias()
 
 	/**
 	 * Diese Methode setzt einen ChatWindowTab offline.
@@ -109,7 +109,7 @@ public class ChatWindowTab extends JPanel{
 		this.lblTitle.setForeground( Color.GRAY );
 		this.tabCloseImgIcon.setImage( Help.getIcon( "TabCloseGray.png", 10 ).getImage() );
 		this.lblIcon.setIcon( Help.getIcon( "privateOffline.png" ) );
-	}
+	}//eom setOffline()
 
 	/**
 	 * Diese Methode setzt einen ChatWindowTab online.
@@ -121,7 +121,7 @@ public class ChatWindowTab extends JPanel{
 		this.lblTitle.setForeground( Color.BLACK );
 		this.tabCloseImgIcon.setImage( Help.getIcon( "TabCloseBlack.png", 10 ).getImage() );
 		this.lblIcon.setIcon( Help.getIcon( "private.png" ) );
-	}
+	}//eom setOnline()
 
 
 	/**
@@ -141,29 +141,29 @@ public class ChatWindowTab extends JPanel{
 		if ( parent.indexOfComponent( owner ) == parent.getSelectedIndex() ) {
 			this.stopBlink();
 		}
-	}
+	}//eom blink()
 
 	/**
 	 * Diese Methode startet den Thread der für das Blinken zuständig ist
 	 */
-	public synchronized void startBlink() {
+	synchronized void startBlink() {
 		if( blinker == null ) {
 			blinker = new Blinker( 500 );
 			blinker.start();
 		}
-	}
+	}//eom startBlink()
 
 	/**
 	 * Diese Methode stoppt den Thread der für das Blinken zuständig ist
 	 * und setzt den Tabtitel auf schwarz.
 	 */
-	public void stopBlink() {
+	void stopBlink() {
 		if ( blinker != null ) {
 			blinker.stopit();
 			blinker = null;
 		}
 		lblTitle.setForeground( Color.BLACK );
-	}
+	}//eom stopBlink()
 
 
 	/**
@@ -191,7 +191,7 @@ public class ChatWindowTab extends JPanel{
 			} else {
 				GUI.getGUI().delChat( owner );
 			}
-		}
+		}//eom mouseClicked()
 
 		/* (non-Javadoc)
 		 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
@@ -216,7 +216,7 @@ public class ChatWindowTab extends JPanel{
 					source.setForeground( Color.BLACK );
 				}
 			}
-		}
+		}//eom mouseEntered()
 
 		/* (non-Javadoc)
 		 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
@@ -241,8 +241,8 @@ public class ChatWindowTab extends JPanel{
 					source.setForeground( Color.GRAY );
 				}
 			}
-		}
-	}
+		}//eom mouseExited()
+	}//eoc MyMouseListener
 
 	/**
 	 * Diese Klasse stellt einen Thread bereit
@@ -251,7 +251,7 @@ public class ChatWindowTab extends JPanel{
 	 * @author ATRM
 	 *
 	 */
-	class Blinker extends Thread {
+	private class Blinker extends Thread {
 		int delay;
 		volatile boolean active;
 
@@ -262,10 +262,10 @@ public class ChatWindowTab extends JPanel{
 		 * setzt die Variable active auf false.
 		 * @param delay
 		 */
-		public Blinker( int delay ) {
+		private Blinker( int delay ) {
 			this.delay = delay;
 			active = false;
-		}
+		}//eom Blinker()
 
 		/* (non-Javadoc)
 		 * @see java.lang.Thread#run()
@@ -281,15 +281,15 @@ public class ChatWindowTab extends JPanel{
 				}
 				blink();
 			}
-		}
+		}//eom run()
 
 		/**
 		 * Diese Methode setzt den Thread inaktiv
 		 * 
 		 * Diese Methode setzt die Variable active auf false und deaktiviert somit den Thread
 		 */
-		public void stopit() {
+		private void stopit() {
 			active = false;
-		}
-	}
-}
+		}//eom stopit()
+	}//eoc Blinker
+}//eoc ChatWindowTab

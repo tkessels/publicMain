@@ -59,7 +59,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 21;
+	private final static int LOCAL_DATABASE_VERSION = 22;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	//--------neue Sachen ende------------
@@ -259,6 +259,7 @@ public class LocalDBConnection {
 	 * 	@return false = DB !berreit zum schreiben.
 	 */
 	public boolean getStatus(){
+//		return (getStatus2()==1);
 		if (dbStatus==3)
 			return true;
 		else
@@ -714,15 +715,17 @@ public class LocalDBConnection {
 			if (prpstmt!=null) {
 				synchronized (stmt) {
 					prpstmt.execute();
-					prpstmt.close();
+
 				}
 			}
 		} catch (Exception e) {
 			dbStatus = 0;
-			e.printStackTrace();
+//			e.printStackTrace();
 			LogEngine.log(this, "Fehler beim schreiben von: " + ((prpstmt!=null)?prpstmt.toString():"") + " " + e.getMessage(), LogEngine.ERROR);
 			return false;
 			// hier falls während der schreibvorgänge die verbindung verloren geht.
+		}finally {
+			try{prpstmt.close();} catch (Exception ignored) {}
 		}
 		return true;
 	}
@@ -737,25 +740,22 @@ public class LocalDBConnection {
 	 * @return true: Speichern hat geklappt
 	 * @return false: Speichern hat !geklappt 
 	 */
-	public synchronized boolean writeRoutingTableToDB(Long nIDZiel, String hostNameZiel, Long uIDZiel, Long nIDGateWay) {
-		StringBuffer saveNodeStmt = new StringBuffer();
-		if (dbStatus >= 3){
-			saveNodeStmt.append("CALL p_t_nodes_saveNodes(");
-			saveNodeStmt.append(nIDZiel + ",");
-			saveNodeStmt.append("'" + hostNameZiel + "',");
-			saveNodeStmt.append(uIDZiel+ "',");
-			saveNodeStmt.append(nIDGateWay+ "')");
-		}
+	public synchronized boolean writeRoutingTableToDB(Long nIDZiel, Long nIDGateWay) {
+		PreparedStatement prp =null;
 		try {
-			synchronized (stmt) {
-				stmt.execute(saveNodeStmt.toString());
+			if (dbStatus >= 3){
+				prp = con.prepareStatement("update t_nodes set fk_t_nodes_nodeID=? where nodeID = ?");
+				prp.setLong(1, nIDGateWay);
+				prp.setLong(2, nIDZiel);
+				prp.execute();
+				return true;
 			}
-			return true;
 		} catch (SQLException e) {
-			LogEngine.log(LocalDBConnection.this,"Fehler beim eintragen in: t_nodes "+ e.getMessage(),LogEngine.ERROR);
-			dbStatus = 0;
 			return false;
+		}finally {
+			try {prp.close();}catch(Exception ignored) {}
 		}
+		return true;
 	}
 
 	/**

@@ -489,11 +489,11 @@ public class DatabaseEngine {
 	public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
 		DatabaseDaten tmp = getResultData(rs);
 
-		return new DefaultTableModel(tmp.getZelleninhalt(127),tmp.getSpaltenüberschriften(127));
+		return new DefaultTableModel(tmp.getData(127),tmp.getHeader(127));
 
 	}
 	public static DefaultTableModel buildTableModel(DatabaseDaten dbd) throws SQLException {
-		return new DefaultTableModel(dbd.getZelleninhalt(127),dbd.getSpaltenüberschriften(127));
+		return new DefaultTableModel(dbd.getData(127),dbd.getHeader(127));
 		
 	}
 

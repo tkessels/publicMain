@@ -382,45 +382,23 @@ public class NodeEngine {
 						new Thread(new Runnable() {
 							public void run() {
 								// Datei holen, Socket öffnen
-								try (final BufferedInputStream bis = new BufferedInputStream(
-										new FileInputStream(datei));
-										final ServerSocket f_server = new ServerSocket(
-												0)) {
+								try (final BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
+										final ServerSocket f_server = new ServerSocket(0)) {
 									// Warten
 									Socket client = null;
-									f_server.setSoTimeout((int) Config
-											.getConfig()
-											.getFileTransferTimeout());
+									f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
 									synchronized (tmp_FR) {
-										tmp_FR.server_port = f_server
-												.getLocalPort();
+										tmp_FR.server_port = f_server.getLocalPort();
 										tmp_FR.notify();
 									}
 
 									// Server Close Thread
 									new Thread(new Runnable() {
 										public void run() {
-											MSG tmp_msg = angler
-													.fishfor(
-															NachrichtenTyp.SYSTEM,
-															MSGCode.FILE_TCP_ABORT,
-															tmp_FR.getReceiver_nid(),
-															tmp_FR.hashCode(),
-															true,
-															Config.getConfig()
-															.getFileTransferTimeout());
+											MSG tmp_msg = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout());
 											if (tmp_msg != null) {
 												try {
-													GUI.getGUI()
-													.info("User "
-															+ tmp_FR.receiver
-															.getAlias()
-															+ "has denied recieving the file: "
-															+ tmp_FR.datei
-															.getName(),
-															tmp_FR.receiver
-															.getUserID(),
-															0);
+													GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + "has denied recieving the file: " + tmp_FR.datei.getName(), tmp_FR.receiver.getUserID(), 0);
 													f_server.close();
 												} catch (IOException e) {
 												}
@@ -435,14 +413,9 @@ public class NodeEngine {
 									} catch (Exception e) {
 									}
 									// Übertragen
-									if ((client != null) && client.isConnected()
-											&& !client.isClosed()) {
-										BufferedOutputStream bos = new BufferedOutputStream(
-												client.getOutputStream());
-										long infoupdate = System
-												.currentTimeMillis()
-												+ Config.getConfig()
-												.getFileTransferInfoInterval();
+									if ((client != null) && client.isConnected() && !client.isClosed()) {
+										BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+										long infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
 										long transmitted = 0;
 										byte[] cup = new byte[65535];
 										int len = -1;
@@ -450,52 +423,26 @@ public class NodeEngine {
 											bos.write(cup, 0, len);
 											transmitted += len;
 											if (System.currentTimeMillis() > infoupdate) {
-												infoupdate = System
-														.currentTimeMillis()
-														+ Config.getConfig()
-														.getFileTransferInfoInterval();
-												GUI.getGUI()
-												.info(tmp_FR.datei
-														.getName()
-														+ "("
-														+ ((transmitted * 100) / tmp_FR.size)
-														+ "%)",
-														tmp_FR.sender
-														.getUserID(),
-														0);
+												infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
+												GUI.getGUI().info(tmp_FR.datei.getName() + "(" + ((transmitted * 100) / tmp_FR.size) + "%)", tmp_FR.sender.getUserID(), 0);
 											}
 										}
 										bos.flush();
 										bos.close();
 
-										GUI.getGUI().info(
-												tmp_FR.datei.getName()
-												+ " Done",
-												tmp_FR.sender.getUserID(), 0);
+										GUI.getGUI().info(tmp_FR.datei.getName() + " Done", tmp_FR.sender.getUserID(), 0);
 									}
 									// Ergebnis melden
 								} catch (FileNotFoundException e) {
-									LogEngine.log("FileTransfer",
-											e.getMessage(), LogEngine.ERROR);
+									LogEngine.log("FileTransfer", e.getMessage(), LogEngine.ERROR);
 								} catch (SocketTimeoutException e) {
-									LogEngine.log("FileTransfer", "Timed Out",
-											LogEngine.ERROR);
-									GUI.getGUI()
-									.info("User "
-											+ tmp_FR.receiver
-											.getAlias()
-											+ " has not answered in time. Connection Timedout",
-											tmp_FR.receiver.getUserID(),
-											0);
+									LogEngine.log("FileTransfer", "Timed Out", LogEngine.ERROR);
+									GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + " has not answered in time. Connection Timedout", tmp_FR.receiver.getUserID(), 0);
 								} catch (SocketException e) {
-									LogEngine.log("FileTransfer", "Aborted",
-											LogEngine.ERROR);
+									LogEngine.log("FileTransfer", "Aborted", LogEngine.ERROR);
 								} catch (IOException e) {
 									LogEngine.log("FileTransfer", e);
-									GUI.getGUI()
-									.info("Transmission-Error, if this keeps happening buy a USB-Stick",
-											tmp_FR.receiver.getUserID(),
-											0);
+									GUI.getGUI().info("Transmission-Error, if this keeps happening buy a USB-Stick", tmp_FR.receiver.getUserID(), 0);
 								}
 							}
 						}).start();

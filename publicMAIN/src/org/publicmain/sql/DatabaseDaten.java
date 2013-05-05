@@ -25,10 +25,24 @@ public class DatabaseDaten {
 	{
 		return (((mask>>>i)&1)==1); 
 	}
+	
+	public int getRows() {
+		return zelleninhalt.length;
+	}
+	
+	public int getCols() {
+		return spaltenüberschriften.length;
+	}
+	
+	public String[] getHeader() {
+		return spaltenüberschriften;
+	}
+	public String[][] getData(){
+		return zelleninhalt;
+	}
 
 	
-	
-	public String[] getSpaltenüberschriften(int colSelection) {
+	public String[] getHeader(int colSelection) {
 		String[] header = new String[high(colSelection)];
 		int new_i=0;
 		for (int i = 0; i < spaltenüberschriften.length; i++) {
@@ -37,7 +51,7 @@ public class DatabaseDaten {
 		return header;
 	}
 	
-	public String[][] getZelleninhalt(int colSelection) {
+	public String[][] getData(int colSelection) {
 		String[][] stringdata = new String[zelleninhalt.length][high(colSelection)];
 		for (int i = 0; i < zelleninhalt.length; i++) {
 			int new_j = 0;

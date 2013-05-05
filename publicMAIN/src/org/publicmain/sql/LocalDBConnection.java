@@ -29,7 +29,7 @@ import org.resources.Help;
 /**
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
  * Sie legt weiterhin alle zwingend notwendigen Datenbanken(1) und Tabellen an.
- *
+ * Zudem stellt sie Methoden zum Abfragen und Speichern von Daten zur Verfügung.
  *
  * @author rpfaffner
  *

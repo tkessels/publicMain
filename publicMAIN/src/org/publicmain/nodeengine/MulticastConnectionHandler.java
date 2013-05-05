@@ -13,7 +13,7 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 
-/**TODO
+/** HüllKlasse für einen Multicastsocket. Dekoriert den Socket mit einem Objektwriter.
  * @author ATRM
  *
  */
@@ -49,13 +49,15 @@ public class MulticastConnectionHandler {
 
 
 	/**
-	 * @return
+	 * Erstellt einen MulticastSocket nach den Einstellungen in der Config und dekoriert ihn mit einem {@link MulticastConnectionHandler}.
+	 * @return 
 	 */
 	public static MulticastConnectionHandler getMC() {
 		if (me!=null) return me;
 		else return getMC(Config.getConfig().getMCGroup(),Config.getConfig().getMCPort(),Config.getConfig().getMCTTL());
 	}
 	/**
+	 * Erstellt einen MulticastSocket mit den angegebenen Parametern und dekoriert ihn mit einem {@link MulticastConnectionHandler}.
 	 * @param multicast_IP
 	 * @param port
 	 * @param ttl
@@ -77,7 +79,7 @@ public class MulticastConnectionHandler {
 	}
 
 	/**
-	 * 
+	 *  Schließt den zugrundeliegenden MulticasSocket und stoppt den Empfangsthread
 	 */
 	public void close() {
 		multicastReciever.stop();
@@ -85,7 +87,8 @@ public class MulticastConnectionHandler {
 	}
 
 	/**
-	 * @param nachricht
+	 * Sendet eine Nachricht via Multicast
+	 * @param nachricht das zu versendende Messageobjekt
 	 */
 	public synchronized void sendmutlicast(MSG nachricht) {
 		if (multi_socket!=null&&multi_socket.isBound()) {
@@ -101,15 +104,16 @@ public class MulticastConnectionHandler {
 	
 	
 	/**
-	 * 
+	 * Schickt ein Discover für einen Backupserver auf dem Multicastkanal
 	 */
 	public void discoverBUS() {
 		MulticastConnectionHandler.getMC().sendmutlicast(new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_DISCOVER, -1, -1, null, null));
 	}
 
 	/**
-	 * @param nachricht
-	 * @param target
+	 * Sendet ein Unicastpaket auf dem MulticastSocket
+	 * @param nachricht Das zu versendende NachrichtenObjekt
+	 * @param target Der Empfänger
 	 */
 	public synchronized void sendunicast(MSG nachricht, Node target) {
 		for (InetAddress x : target.getSockets()) {
@@ -123,19 +127,22 @@ public class MulticastConnectionHandler {
 			}
 		}
 	}
+	
 	/**
-	 * @param ne
+	 * Registriert die NodeEngine als Empfänger der Pakete
+	 * @param ne die zu registrierende Instanz der NodeEngine
 	 */
 	public void registerNodeEngine(NodeEngine ne) {
 		this.ne=ne;
 	}
 
 	/**
-	 * @param nachricht
-	 * @param recipient
-	 * @param port
-	 * @return
-	 * @throws IllegalArgumentException
+	 * Wandelt ein Messageobjekt in ein übertragbares UDP-Datagram
+	 * @param nachricht Messageobjekt 
+	 * @param recipient IP-Adresse des Empfängers
+	 * @param port Port des Empfängers
+	 * @return Das fertig adressierte UDP-Paket
+	 * @throws IllegalArgumentException Wenn das Paket zu groß ist oder aus anderem Grund nicht serialisiert werden kann.
 	 */
 	private DatagramPacket msg2UDP(MSG nachricht,InetAddress recipient, int port) throws IllegalArgumentException {
 		byte[] data = MSG.getBytes(nachricht);
@@ -144,8 +151,10 @@ public class MulticastConnectionHandler {
 		else
 			throw new IllegalArgumentException(nachricht.toString()+" to big for UDP - Datagram");
 	}
+	
 	/**
-	 * @param paket
+	 * Interne behandlung von Multicastpaket
+	 * @param paket das zu behandelnde Paket
 	 */
 	private void handle(MSG paket) {
 		if(paket.getTyp()==NachrichtenTyp.SYSTEM) {
@@ -164,7 +173,8 @@ public class MulticastConnectionHandler {
 
 
 	/**
-	 * @author SkyHawk
+	 * @author tkessels
+	 * Thread für den Empfang der Multicastpakete
 	 *
 	 */
 	private final class MulticastReciever implements Runnable {

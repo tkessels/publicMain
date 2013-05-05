@@ -9,7 +9,7 @@ import org.publicmain.common.Node;
 
 /**
  * @author ATRM
- * TODO
+ *  Strategie wählt aus allen bekannten Knoten zufällig einen aus.
  */
 public class RandomStrategy implements BestNodeStrategy {
 	private Random gen;
@@ -25,9 +25,9 @@ public class RandomStrategy implements BestNodeStrategy {
 		return tmp.get(gen.nextInt(tmp.size()));
 	}
 
-	/**
-	 * @param node
-	 * @return
+	/**Ermittelt alle Kindknoten eines Knoten
+	 * @param node Wurzelknoten
+	 * @return Liste aller Kindknoten einschließlich des Wurzelknotens
 	 */
 	public static List<Node> returnAllNodes(Node node){
 		List<Node> listOfNodes = new ArrayList<Node>();
@@ -35,9 +35,9 @@ public class RandomStrategy implements BestNodeStrategy {
 		return listOfNodes;
 	}
 
-	/**
-	 * @param node
-	 * @param listOfNodes
+	/** Fügt alle Kinder und Kindeskinder mit einer Breitensuche einer Liste von Knoten hinzu.
+	 * @param node Wurzel des zu druchlaufenden Baums
+	 * @param listOfNodes zu befüllende Liste
 	 */
 	private static void addAllNodes(Node node, List<Node> listOfNodes) {
 		if (node != null) {

@@ -9,6 +9,11 @@ import java.util.List;
 import org.publicmain.common.Config;
 import org.publicmain.common.Node;
 
+/**
+ * @author tkessels
+ * Erzeugt ein Scoring für alle Knoten mit justierbaren Parametern und wählt dann den am besten bewerteten Knoten
+ *
+ */
 public class WeightedDistanceStrategy implements BestNodeStrategy {
 	public static final int LINEAR =0;
 	public static final int QUADRATIC =1;
@@ -16,11 +21,22 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 	private int scale_connections;
 	private int scale_root_distance;
 
+	/**
+	 * Erstellt eine neue dynamische Regel zur Bestimmung von Verbindungskandidaten. 
+	 * Diese Strategie erlaubt es das Verhältnis zwischen der Distanz eines Knoten zur Wurzel und der Anzahl von bereits 
+	 * bestehenden Verbindungen zur eingestellten Obergrenze in sowohl linear als auch quadratisch zu bewerten und die beiden Teilscore mit einem Ratio zu relativieren.
+	 * @param ratio Verhältnis zwischen Verbindungsauschöpfung und Wurzelknotendistanz
+	 * @param scale_connections Skala für Verbindungen ist <br> <ul><li>1- Linear <li>2- Quadratisch</ul>
+	 * @param scale_root_distance Skala für Wurzeldistanz ist <br> <ul><li>1- Linear <li>2- Quadratisch</ul>
+	 */
 	public WeightedDistanceStrategy(double ratio,int scale_connections,int scale_root_distance) {
 		this.ratio=ratio;
 		this.scale_connections =scale_connections;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.publicmain.nodeengine.BestNodeStrategy#getBestNode()
+	 */
 	public Node getBestNode() {
 		Node root = NodeEngine.getNE().getTree();
 		List<Node> allnodes = returnAllNodes(root);
@@ -40,6 +56,11 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 		return scores.get(0).item;
 	}
 
+	/**Ermittelt den Score eines Knoten nach den Voreingestellten Regeln
+	 * @param node der zu bewertende Knoten
+	 * @param depth Maximale Baumtiefe
+	 * @return Scorewertung des Knoten
+	 */
 	private double getScore(Node node,int depth) {
 		double maxcon =Config.getConfig().getMaxConnections();
 		double con = node.getChildCount();
@@ -48,13 +69,21 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 		double rootval=(scale_root_distance==LINEAR)?(node.getLevel()/(double)depth):(Math.pow(node.getLevel(),2)/Math.pow(depth,2));
 		return (conval*(1-ratio))+(rootval*ratio);
 	}
-
+	
+	/**Ermittelt alle Kindknoten eines Knoten
+	 * @param node Wurzelknoten
+	 * @return Liste aller Kindknoten einschließlich des Wurzelknotens
+	 */
 	public static List<Node> returnAllNodes(Node node){
 		List<Node> listOfNodes = new ArrayList<Node>();
 		addAllNodes(node, listOfNodes);
 		return listOfNodes;
 	}
-
+	
+	/** Fügt alle Kinder und Kindeskinder mit einer Breitensuche einer Liste von Knoten hinzu.
+	 * @param node Wurzel des zu druchlaufenden Baums
+	 * @param listOfNodes zu befüllende Liste
+	 */
 	private static void addAllNodes(Node node, List<Node> listOfNodes) {
 		if (node != null) {
 			Enumeration<Node> cursor = node.breadthFirstEnumeration();
@@ -64,6 +93,10 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 		}
 	}
 
+	/**
+	 * @author tkessels
+	 * DatenObjekt für die Scoringtabelle
+	 */
 	class ScoreEntry{
 		Node item;
 		Double score;

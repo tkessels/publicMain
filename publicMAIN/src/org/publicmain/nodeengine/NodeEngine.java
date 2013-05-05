@@ -540,9 +540,7 @@ public class NodeEngine {
 	}
 
 	// Ggf. für die weitere Entwicklung benötigt.
-	//	/**
-	//	 * Kommentar!
-	//	 */
+
 	private void pollChilds() {
 		sendchild(new MSG(null, MSGCode.POLL_CHILDNODES), null);
 	}

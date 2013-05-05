@@ -824,7 +824,6 @@ public class LocalDBConnection {
 	 */
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
 		if (dbStatus >= 3){
-			try {
 				StringBuilder prepState = new StringBuilder();
 
 				prepState.append						("SELECT * from v_searchInHistory WHERE ");
@@ -866,7 +865,7 @@ public class LocalDBConnection {
 					try{rs.close();  }catch(Exception ignored){}
 					try{prp.close();}catch(Exception ignored){}
 				}
-		}
+			}
 		return null;
 	}
 

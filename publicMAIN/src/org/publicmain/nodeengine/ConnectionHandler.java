@@ -306,6 +306,10 @@ public class ConnectionHandler {
 
 		}
 	}
+	
+	public Hook getHook() {
+		return hookmanager;
+	}
 
 	/**
 	 * Der Reciever-Thread hört auf der Verbindung ob eingende Nachrichten oder
@@ -323,31 +327,32 @@ public class ConnectionHandler {
 					if ((readObject != null) && (readObject instanceof MSG)) {
 						MSG tmp = (MSG) readObject;
 
-						if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
-							switch (tmp.getCode()) {
-							case ECHO_REQUEST:
-								pong(tmp);
-								break;
-							case ECHO_RESPONSE:
-								latency = System.currentTimeMillis()
-								- (Long) tmp.getData();
-								break;
-							case NODE_UPDATE:
-								me.getChildren().add((Node) tmp.getData());
-							default:
+						if (!hookmanager.check(tmp)) {
+							if (tmp.getTyp() == NachrichtenTyp.SYSTEM) {
+								switch (tmp.getCode()) {
+								case ECHO_REQUEST:
+									pong(tmp);
+									break;
+								case ECHO_RESPONSE:
+									latency = System.currentTimeMillis() - (Long) tmp.getData();
+									break;
+								case NODE_UPDATE:
+									me.getChildren().add((Node) tmp.getData());
+								default:
+									try {
+										ne.handle(tmp, me);
+									} catch (Exception e) {
+										LogEngine.log("handle", e);
+									}
+								}
+							} else {
 								try {
 									ne.handle(tmp, me);
 								} catch (Exception e) {
 									LogEngine.log("handle", e);
 								}
-							}
-						} else {
-							try {
-								ne.handle(tmp, me);
-							} catch (Exception e) {
-								LogEngine.log("handle", e);
-							}
 
+							}
 						}
 					} else {
 						LogEngine.log(me, "Empfangenes Objekt ist keine MSG");

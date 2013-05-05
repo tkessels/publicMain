@@ -1463,7 +1463,10 @@ public class NodeEngine {
 			Config.writeSystemConfiguration();
 			break;
 		case "tree":
-			showTree();
+			showTree(getTree());
+			break;
+		case "tree2":
+			showTree(getTree2());
 			break;
 		case "reconnect_all":
 			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
@@ -1500,6 +1503,32 @@ public class NodeEngine {
 		}
 		return root;
 	}
+	
+	public Node getTree2() {
+		Node root = (Node) meinNode.clone();
+		MiniMonitor mon = new MiniMonitor();
+		for (final ConnectionHandler con : connections) {
+			Runnable runa = new Runnable() {
+				public void run() {
+					con.send(new MSG(null, MSGCode.TREE_DATA_POLL));
+				}};
+			// Zuerst werden für alle connections hooks registrier
+			mon.add();
+			MSG tmp =con.getHook().fishfor(NachrichtenTyp.SYSTEM,MSGCode.TREE_DATA, null, null, true, Config.getConfig().getTreeBuildTime(),runa);
+			if(tmp!=null) mon.dec((Node) tmp.getData());
+			else mon.dec(null);
+			}
+		//wenn alle hooks abgelaufen sind
+		List<Node> tmp = mon.check();
+		for (Node node : tmp) {
+			root.add(node);
+		}
+		
+		//tree bauen und zurückgeben
+		return root;
+	}
+	
+	
 
 	/**
 	 * Liefert die <code>uid</code> für eine <code>nid</code>. 
@@ -1518,8 +1547,8 @@ public class NodeEngine {
 	/**
 	 * Visualisiert den Topologie-Baum für das Debug-Kommando (/debug tree).
 	 */
-	public void showTree() {
-		TreeNode root = getTree();
+	public void showTree(TreeNode root) {
+//		TreeNode root = getTree();
 		// Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
 		JTree tree = new JTree( root );
 		// Ein Frame herstellen, um den Tree anzuzeigen
@@ -1666,5 +1695,36 @@ public class NodeEngine {
 				}
 			}
 		}
+	}
+	
+	private final class MiniMonitor{
+		private  int anzahl;
+		private  List<Node> mynodes;
+		
+		
+		public MiniMonitor() {
+			anzahl=0;
+			mynodes = new ArrayList<Node>();
+		}
+		
+		public synchronized void add() {
+			anzahl++;
+		}
+		public synchronized  List<Node> check() {
+			while(anzahl>0) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+			return mynodes;
+		}
+		public synchronized void dec(Node tmp) {
+			anzahl--;
+			if(tmp!=null)mynodes.add(tmp);
+			this.notifyAll();
+		}
+		
+		
 	}
 }

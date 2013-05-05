@@ -59,7 +59,7 @@ public class LocalDBConnection {
 	private int maxVersuche;
 	private long warteZeitInSec;
 	private Thread connectToDBThread;
-	private final static int LOCAL_DATABASE_VERSION = 21;
+	private final static int LOCAL_DATABASE_VERSION = 22;
 	private DatabaseEngine databaseEngine;
 	private boolean ceReadyForWritingSettings;
 	//--------neue Sachen ende------------

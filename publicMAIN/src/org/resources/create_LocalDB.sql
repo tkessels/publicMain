@@ -208,6 +208,6 @@ CREATE OR REPLACE VIEW `db_publicmain`.`v_searchInHistory` AS SELECT fk_t_users_
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `db_publicmain`;
-INSERT INTO `db_publicmain`.`t_dbVersion` (`dbVersion`) VALUES (15);
+INSERT INTO `db_publicmain`.`t_dbVersion` (`dbVersion`) VALUES (22);
 
 COMMIT;

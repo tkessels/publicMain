@@ -49,11 +49,11 @@ public class BreadthFirstStrategy implements BestNodeStrategy {
 	}
 
 	/**
-	 * Sucht aus einer Collection von Nodes, den mit den wenigsten ChildNodes.
+	 * Sucht aus einer Kollektion von Nodes den, mit den wenigsten ChildNodes.
 	 * 
 	 * @param selection
-	 *            die Collection von Nodes
-	 * @return Node mit den wenigsten Childs oder bei gleich vielen den ersten.
+	 *            die Kollektion von Nodes.
+	 * @return Knoten mit den wenigsten Childs oder bei gleich vielen den Ersten.
 	 */
 	private Node getMinNode(Collection<Node> selection) {
 		Node theone = null;

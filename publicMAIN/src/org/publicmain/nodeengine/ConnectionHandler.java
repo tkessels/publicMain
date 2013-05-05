@@ -42,13 +42,14 @@ public class ConnectionHandler {
 	private Thread				pingpongBot			= new Thread(new Pinger());
 
 	/**
-	 * TODO: Überprüfen!
 	 * 
-	 * Kontruktor für den ConnectionHandler, mit Übergabeparameter zu welchem
+	 * Statische Methode zum Erzeugen eines ConnectionHandlers mit Übergabeparameter, zu welchem
 	 * Node eine Verbindung hergestellt werden soll.
 	 * 
-	 * @param knoten
+	 * @param knoten 
+	 * 			Knoten, mit dem die Verbindung hergestellt werden soll.
 	 * @throws IOException
+	 * 			wenn bei der Erzeugung des Sockets ein IO-Fehler auftritt.
 	 */
 
 	public static ConnectionHandler connectTo(Node knoten) throws IOException{
@@ -68,10 +69,12 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Konstruktor zum erstellen eines ConnectionHandlers um einen bestehenden Socket.
+	 * Konstruktor zum Erstellen eines ConnectionHandlers um einen bestehenden Socket.
 	 * 
 	 * @param underlying
+	 * 			Socket, der von dem ConnectionHandler dekoriert werden soll.
 	 * @throws IOException
+	 * 			wenn es bei der Einbindung des Sockets zu IO-Fehlern kommt.
 	 */
 	public ConnectionHandler(Socket underlying) throws IOException {
 
@@ -100,10 +103,10 @@ public class ConnectionHandler {
 	 * Verschickt ein MSG-Objekt über den Socket.
 	 * 
 	 * @param paket
-	 *            , das zu versendende Paket
+	 *            , das zu versendende Paket.
 	 * @throws IOException
 	 *             , wenn es zu einem Fehler beim Senden auf dem TCP-Socket
-	 *             kommt
+	 *             kommt.
 	 */
 	public synchronized void send(final MSG paket) {
 		if (isConnected()) {
@@ -121,17 +124,17 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Prüft ob der eigene Node noch verbunden ist.
+	 * Prüft, ob der eigene Knoten noch verbunden ist.
 	 * 
-	 * @return <code>true</code> wenn die Verbindung noch besteht
-	 *         <code>false</code> wenn nicht
+	 * @return <code>true</code> wenn die Verbindung noch besteht, wenn nicht
+	 *         <code>false</code>.
 	 */
 	public boolean isConnected() {
 		return ((line != null) && line.isConnected() && !line.isClosed());
 	}
 
 	/**
-	 * Sendet eine Information über das unmittelbar bevorstehende herunterfahren
+	 * Sendet eine Information über das unmittelbar bevorstehende Herunterfahren
 	 * des Nodes an andere Nodes.
 	 */
 	public void disconnect() {
@@ -182,13 +185,13 @@ public class ConnectionHandler {
 
 	/**
 	 * 
-	 * Methode für das routen von Gruppen-Nachrichten. Diese Methode speichert
+	 * Methode für das Routen von Gruppen-Nachrichten. Diese Methode speichert,
 	 * welche Gruppen auf welcher Verbindung existieren.
 	 * 
 	 * @param gruppe
-	 *            Collection von Gruppenstrings die an dieser Verbindung
-	 *            existieren
-	 * @return <code>true</code> Wenn sich die Liste durch die Aktion verändert
+	 *            Kollektion von Gruppenstrings, die an dieser Verbindung
+	 *            existieren.
+	 * @return <code>true</code> wenn sich die Liste durch die Aktion verändert
 	 *         hat, anderfalls <code>false</code>
 	 */
 	public boolean add(Collection<String> gruppe) {
@@ -198,11 +201,14 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Entfernt eine Collection von Gruppen Strings von dieser Verbindung.
+	 * Entfernt eine Kollektion von Gruppenstrings von dieser Verbindung.
 	 * 
 	 * @param gruppe
+	 * 		Kollektion von Gruppenstrings, die von dieser Verbindung entfernt werden sollen.
 	 * @return
-	 */
+	 * <code>true</code> wenn sich die Liste durch die Aktion verändert
+	 *         hat, anderfalls <code>false</code>
+	 */		
 	public boolean remove(Collection<String> gruppe) {
 		synchronized (groups) {
 			return groups.removeAll(gruppe);
@@ -210,11 +216,13 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Prüft ob der eigene Nodes weitere Child-Nodes hat und liefert
+	 * Prüft, ob der eigene Node weitere Child-Nodes hat und liefert
 	 * entsprechend <code>true</code> oder <code>false</code> zurück.
 	 * 
 	 * @param nid
+	 * 		NodeID des zu prüfenden Knotens.
 	 * @return
+	 * 		<code>true</code> wenn der angegebene Knoten Child-Nodes hat, andernfalls <code>false</code>
 	 */
 	public boolean hasChild(final long nid) {
 		synchronized (children) {
@@ -229,7 +237,8 @@ public class ConnectionHandler {
 	/**
 	 * Getter für die Gruppenliste, hier als Set von Strings.
 	 * 
-	 * @return, Set<String>
+	 * @return
+	 * 		Set aller dieser Verbindung zugeordneten Gruppen.
 	 */
 	public Set<String> getGroups() {
 		synchronized (groups) {
@@ -241,6 +250,7 @@ public class ConnectionHandler {
 	 * Sendet ein ECHO.RESPONSE.
 	 * 
 	 * @param ping
+	 * 		erzeugt auf ein ping-Paket ein entsprechendes Antwortpaket.
 	 */
 	private void pong(final MSG ping) {
 		new Thread(new Runnable() {
@@ -254,6 +264,7 @@ public class ConnectionHandler {
 	 * Getter für die Child-Nodes.
 	 * 
 	 * @return
+	 * 		gibt alle über die Verbindung erreichbaren Knoten zurück.
 	 */
 	public Set<Node> getChildren() {
 		synchronized (children) {
@@ -266,9 +277,9 @@ public class ConnectionHandler {
 	 * Gateway für alle Nodes aus <code>toAdd</code> hinzu.
 	 * 
 	 * @param toAdd
-	 *            Collection von Nodes die über diese TCP-Verbindung zu
+	 *            Collection von Nodes, die über diese TCP-Verbindung zu
 	 *            erreichen sind.
-	 * @return <code>true</code> Wenn sich die Liste durch die Aktion verändert
+	 * @return <code>true</code> wenn sich die Liste durch die Aktion verändert
 	 *         hat, anderfalls <code>false</code>
 	 */
 	public boolean addChildren(Collection<Node> toAdd) {
@@ -278,10 +289,13 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Entfernt ein Child-Node vom eigenen Node.
+	 * Entfernt alle angegebenen Knoten von der Verbindung.
 	 * 
 	 * @param toRemove
+	 * 		Kollektion von Nodes, die von dieser Verbindung entfernt werden sollen.
 	 * @return
+	 * 		<code>true</code> wenn sich die Liste durch die Aktion verändert
+	 * 		hat, andernfalls <code>false</code>
 	 */
 	public boolean removeChildren(Collection<Node> toRemove) {
 		synchronized (children) {
@@ -290,11 +304,11 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Aktuallisiert die Liste der über die Verbindung angebundenen Nodes.
+	 * Aktualisiert die Liste der über die Verbindung angebundenen Nodes.
 	 * 
 	 * @param toSet
-	 *            Neue Liste von Nodes
-	 * @return <code>true</code> Wenn sich die Liste durch die Aktion verändert
+	 *            Neue Liste von Nodes.
+	 * @return <code>true</code> wenn sich die Liste durch die Aktion verändert
 	 *         hat, anderfalls <code>false</code>
 	 */
 	public boolean setChildren(Collection<Node> toSet) {
@@ -312,9 +326,9 @@ public class ConnectionHandler {
 	}
 
 	/**
-	 * Der Reciever-Thread hört auf der Verbindung ob eingende Nachrichten oder
+	 * Der Reciever-Thread hört auf der Verbindung, ob eingehende Nachrichten oder
 	 * Steuerungsanforderungen ankommen und behandelt einige LowLevel
-	 * Nachrichten selbst bevor er sie ggf. weiterleitet.
+	 * Nachrichten selber, bevor er diese ggf. weiterleitet.
 	 */
 	class Reciever implements Runnable {
 		public void run() {
@@ -373,8 +387,8 @@ public class ConnectionHandler {
 
 	/**
 	 * Der Pinger ist als prüfende Instanz für die Verbindungsgüteprüfung
-	 * konzipiert wird jedoch noch nicht verwendet. Die NoteEngine sollte auf
-	 * grundlage von Verbindungsauslastung und Verbindungsqualität zu einem
+	 * konzipiert, wird jedoch noch nicht verwendet. Die NodeEngine sollte auf
+	 * Grundlage von Verbindungsauslastung und Verbindungsqualität zu einem
 	 * spätern Zeitpunkt einzelne Verbindungen austauschen können. (Noch nicht
 	 * implementiert)
 	 */

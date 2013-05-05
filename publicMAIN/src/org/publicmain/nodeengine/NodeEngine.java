@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -106,10 +108,12 @@ public class NodeEngine {
 	private BestNodeStrategy myStrategy; 
 
 	/**
-	 * Konstruktor für die NodeEngine
+	 * Konstruktor für die NodeEngine.
 	 * 
 	 * @param parent
+	 * 		die dazugehörige ChatEngine.
 	 * @throws IOException
+	 * 		wirft IOExceptions, wenn der Serverport nicht geöffnet werden kann.
 	 */
 	public NodeEngine(ChatEngine parent) throws IOException {
 
@@ -174,16 +178,17 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Gibt <code>true</code> zurück wenn die laufende NodeEngine hochgefahren
-	 * und mit anderen Nodes verbunden oder Root ist, <code>false</code> wenn
-	 * nicht.
+	 * Gibt an, ob dieser Knoten Vater von anderen Knoten im topologischen Baum ist.
+	 * 
+	 * @return
+	 *  <code>true</code> Wenn dieser Knoten verbundene Kindknoten hat
 	 */
 	private boolean hasChildren() {
 		return connections.size() > 0;
 	}
 
 	/**
-	 * Gibt <code>true</code> zurück wenn die laufende NodeEngine Root ist und
+	 * Gibt <code>true</code> zurück, wenn die laufende NodeEngine Root ist und
 	 * <code>false</code> wenn nicht.
 	 * 
 	 * @return boolean
@@ -193,7 +198,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Gibt <code>true</code> zurück wenn die Anwendung den Status online hat
+	 * Gibt <code>true</code> zurück, wenn die Anwendung den Status online hat
 	 * und <code>false</code> wenn nicht.
 	 * 
 	 * @return boolean
@@ -203,7 +208,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Prüft ob dieser Node einen übergeordneten Node hat. Gibt
+	 * Prüft, ob dieser Node einen übergeordneten Node hat. Gibt
 	 * <code>true</code> zurück wenn ja und <code>false</code> wenn nicht.
 	 * 
 	 * @return boolean
@@ -225,10 +230,10 @@ public class NodeEngine {
 
 	/**
 	 * Liefert das NodeObjekt zu einer NodeID. Sollte der Node nicht bekannt
-	 * sein wird <code>null</code> zurückgeliefert. Befindet sich der Knoten der
-	 * die Abfrage ausführt im RootMode versucht er den Knoten über ein Lookup
-	 * finden. Schlägt dieser Versuch ebenfalls fehl wird ein Befehl an den
-	 * Knoten schicken sich neu zu verbinden (noch nicht implementiert).
+	 * sein, wird <code>null</code> zurückgeliefert. Befindet sich der Knoten, der
+	 * die Abfrage ausführt, im RootMode, versucht er den Knoten über ein Lookup
+	 * zu finden. Schlägt dieser Versuch ebenfalls fehl, wird ein Befehl an den
+	 * Knoten geschickt, sich neu zu verbinden (noch nicht implementiert).
 	 * 
 	 * @param nid
 	 *            NodeID
@@ -285,7 +290,7 @@ public class NodeEngine {
 
 	/**
 	 * Versendet Daten vom Typ MSG an bestimmte Nodes oder gibt diese an
-	 * send_file() weiter. Hier wird geprüft ob die Dateigröße < 5MB (Aufruf der
+	 * send_file() weiter. Hier wird geprüft, ob die Dateigröße < 5MB (Aufruf der
 	 * send_file()) anderenfalls als Msg-Type Data
 	 * 
 	 * @param nachricht
@@ -298,7 +303,7 @@ public class NodeEngine {
 	 * Sendet auf dem Multicast-Socket ein Unicast-Paket.
 	 * 
 	 * @param msg
-	 *            ist die Nachricht die verschickt werden soll (darf nicht
+	 *            ist die Nachricht, die verschickt werden soll (darf nicht
 	 *            größer 64KB sein)
 	 * @param target
 	 */
@@ -354,11 +359,11 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Versendet Datein über eine TCP-Direktverbindung wird nur von send()
-	 * aufgerufen nachdem festgestellt wurde, dass nachicht > 5MB
+	 * Versendet Datein über eine TCP-Direktverbindung. Wird nur von send()
+	 * aufgerufen, nachdem festgestellt wurde, dass nachicht > 5MB
 	 * 
-	 * @param datei
-	 * @param receiver
+	 * @param datei Das zu versendende Fileobjekt
+	 * @param receiver NodeID des Empfängers
 	 */
 	public void send_file(final File datei, final long receiver) {
 		if (datei.isFile() && datei.exists() && datei.canRead()
@@ -382,45 +387,23 @@ public class NodeEngine {
 						new Thread(new Runnable() {
 							public void run() {
 								// Datei holen, Socket öffnen
-								try (final BufferedInputStream bis = new BufferedInputStream(
-										new FileInputStream(datei));
-										final ServerSocket f_server = new ServerSocket(
-												0)) {
+								try (final BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
+										final ServerSocket f_server = new ServerSocket(0)) {
 									// Warten
 									Socket client = null;
-									f_server.setSoTimeout((int) Config
-											.getConfig()
-											.getFileTransferTimeout());
+									f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
 									synchronized (tmp_FR) {
-										tmp_FR.server_port = f_server
-												.getLocalPort();
+										tmp_FR.server_port = f_server.getLocalPort();
 										tmp_FR.notify();
 									}
 
 									// Server Close Thread
 									new Thread(new Runnable() {
 										public void run() {
-											MSG tmp_msg = angler
-													.fishfor(
-															NachrichtenTyp.SYSTEM,
-															MSGCode.FILE_TCP_ABORT,
-															tmp_FR.getReceiver_nid(),
-															tmp_FR.hashCode(),
-															true,
-															Config.getConfig()
-															.getFileTransferTimeout());
+											MSG tmp_msg = angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout());
 											if (tmp_msg != null) {
 												try {
-													GUI.getGUI()
-													.info("User "
-															+ tmp_FR.receiver
-															.getAlias()
-															+ "has denied recieving the file: "
-															+ tmp_FR.datei
-															.getName(),
-															tmp_FR.receiver
-															.getUserID(),
-															0);
+													GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + "has denied recieving the file: " + tmp_FR.datei.getName(), tmp_FR.receiver.getUserID(), 0);
 													f_server.close();
 												} catch (IOException e) {
 												}
@@ -435,14 +418,9 @@ public class NodeEngine {
 									} catch (Exception e) {
 									}
 									// Übertragen
-									if ((client != null) && client.isConnected()
-											&& !client.isClosed()) {
-										BufferedOutputStream bos = new BufferedOutputStream(
-												client.getOutputStream());
-										long infoupdate = System
-												.currentTimeMillis()
-												+ Config.getConfig()
-												.getFileTransferInfoInterval();
+									if ((client != null) && client.isConnected() && !client.isClosed()) {
+										BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+										long infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
 										long transmitted = 0;
 										byte[] cup = new byte[65535];
 										int len = -1;
@@ -450,52 +428,26 @@ public class NodeEngine {
 											bos.write(cup, 0, len);
 											transmitted += len;
 											if (System.currentTimeMillis() > infoupdate) {
-												infoupdate = System
-														.currentTimeMillis()
-														+ Config.getConfig()
-														.getFileTransferInfoInterval();
-												GUI.getGUI()
-												.info(tmp_FR.datei
-														.getName()
-														+ "("
-														+ ((transmitted * 100) / tmp_FR.size)
-														+ "%)",
-														tmp_FR.sender
-														.getUserID(),
-														0);
+												infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
+												GUI.getGUI().info(tmp_FR.datei.getName() + "(" + ((transmitted * 100) / tmp_FR.size) + "%)", tmp_FR.sender.getUserID(), 0);
 											}
 										}
 										bos.flush();
 										bos.close();
 
-										GUI.getGUI().info(
-												tmp_FR.datei.getName()
-												+ " Done",
-												tmp_FR.sender.getUserID(), 0);
+										GUI.getGUI().info(tmp_FR.datei.getName() + " Done", tmp_FR.sender.getUserID(), 0);
 									}
 									// Ergebnis melden
 								} catch (FileNotFoundException e) {
-									LogEngine.log("FileTransfer",
-											e.getMessage(), LogEngine.ERROR);
+									LogEngine.log("FileTransfer", e.getMessage(), LogEngine.ERROR);
 								} catch (SocketTimeoutException e) {
-									LogEngine.log("FileTransfer", "Timed Out",
-											LogEngine.ERROR);
-									GUI.getGUI()
-									.info("User "
-											+ tmp_FR.receiver
-											.getAlias()
-											+ " has not answered in time. Connection Timedout",
-											tmp_FR.receiver.getUserID(),
-											0);
+									LogEngine.log("FileTransfer", "Timed Out", LogEngine.ERROR);
+									GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + " has not answered in time. Connection Timedout", tmp_FR.receiver.getUserID(), 0);
 								} catch (SocketException e) {
-									LogEngine.log("FileTransfer", "Aborted",
-											LogEngine.ERROR);
+									LogEngine.log("FileTransfer", "Aborted", LogEngine.ERROR);
 								} catch (IOException e) {
 									LogEngine.log("FileTransfer", e);
-									GUI.getGUI()
-									.info("Transmission-Error, if this keeps happening buy a USB-Stick",
-											tmp_FR.receiver.getUserID(),
-											0);
+									GUI.getGUI().info("Transmission-Error, if this keeps happening buy a USB-Stick", tmp_FR.receiver.getUserID(), 0);
 								}
 							}
 						}).start();
@@ -520,9 +472,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Private Klasse zum Dateiempfang, wenn der Dateiempfang aktiviert ist.
+	 * Behandelt Dateitransferanfragen
 	 * 
-	 * @param data_paket
+	 * @param data_paket Das FileRequest Paket des Senders
 	 */
 	private void recieve_file(final MSG data_paket) {
 		Object[] tmp = (Object[]) data_paket.getData();
@@ -564,11 +516,10 @@ public class NodeEngine {
 	/**
 	 * Antwort auf ROOT_DISCOVERY senden.
 	 * 
-	 * @param quelle
+	 * @param quelle Ziel für gerichtete (Unicast) Antwort
 	 */
 	private void sendDiscoverReply(Node quelle) {
-		LogEngine.log(this, "sending Replay to " + quelle.toString(),
-				LogEngine.INFO);
+		LogEngine.log(this, "sending Replay to " + quelle.toString(),LogEngine.INFO);
 		sendunicast(new MSG(getBestNode(), MSGCode.ROOT_REPLY), quelle);
 	}
 
@@ -782,7 +733,7 @@ public class NodeEngine {
 
 	/**
 	 * Hier wird das Paket verarbeitet und weitergeleitet. Diese Methode wird
-	 * ausschließlich von den ConnectionHandlern aufgerufen um empfangene Pakete
+	 * ausschließlich von den ConnectionHandlern aufgerufen, um empfangene Pakete
 	 * verarbeiten zu lassen.
 	 * 
 	 * @param paket
@@ -1180,13 +1131,13 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Starte Lookup für {@link Node} mit der NodeID <code>nid</code>. Und
-	 * versucht ihn neu zu verbinden zu lassen falls die Verbindung fehl
+	 * Startet Lookup für {@link Node} mit der NodeID <code>nid</code>. 
+	 * Versucht ihn neu verbinden zu lassen, falls die Verbindung fehl
 	 * schlägt.
 	 * 
 	 * @param nid
 	 *            ID des Nodes
-	 * @return das {@link Node}-Objekt oder <code>null</code> wenn der Knoten
+	 * @return das {@link Node}-Objekt oder <code>null</code>, wenn der Knoten
 	 *         nicht gefunden wurde.
 	 */
 	private Node retrieve(long nid) {
@@ -1224,7 +1175,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Diese Methode tritt einer Gruppe auf einer bestimmten Verbindung bei um
+	 * Diese Methode tritt einer Gruppe auf einer bestimmten Verbindung bei, um
 	 * die Nachrichten der abonierten Gruppe zu empfangen.
 	 * 
 	 * @param gruppen_namen
@@ -1235,8 +1186,8 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Verlässt eine Gruppe wieder auf einer bestimmten Verbindung wieder und
-	 * kann die Nachrichten der vorher abonierten Gruppe nicht mehr erhalten.
+	 * Verlässt eine Gruppe auf einer bestimmten Verbindung wieder und
+	 * kann die Nachrichten der vorher abonnierten Gruppe nicht mehr erhalten.
 	 * 
 	 * @param gruppen_namen
 	 * @param con
@@ -1246,10 +1197,10 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Entfernt Gruppen aus der Gruppenübersicht
 	 * 
-	 * @param gruppen_name
-	 * @return
+	 * @param gruppen_name die zu entfernenden Gruppennamen
+	 * @return 
 	 */
 	public boolean removeGroup(Collection<String> gruppen_name) {
 		synchronized (allGroups) {
@@ -1365,7 +1316,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Geänderten Alias der GUI mitteilen, dass der Alias korrekt auf der GUI
+	 * Geänderten Alias der GUI mitteilen, damit der Alias korrekt auf der GUI
 	 * dargestellt wird.
 	 * 
 	 * @param newAlias
@@ -1585,7 +1536,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Definiert diesen Node nach einem Timeout als Root wenn bis dahin keine
+	 * Definiert diesen Node nach einem Timeout als Root, wenn bis dahin keine
 	 * Verbindung aufgebaut wurde.
 	 */
 	private final class RootMe implements Runnable {
@@ -1617,6 +1568,16 @@ public class NodeEngine {
 			rootClaimProcessor = new Thread(new RootClaimProcessor());
 			rootClaimProcessor.start();
 		}
+	}
+	public Map<Long,Long> getRoutes(){
+		Map<Long,Long> rueck = new HashMap<Long, Long>();
+		for (ConnectionHandler con : connections) {
+			long gw =con.host_node.getNodeID();
+			for (Node  curchi : con.getChildren()) {
+				rueck.put(curchi.getNodeID(), gw);
+			}
+		}
+		return rueck;
 	}
 
 	/**

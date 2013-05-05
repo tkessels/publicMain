@@ -9,11 +9,11 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 
 /**
- * Dies Klasse erlaubt es eine Reihe von Vergleichskriterien (Haken)
- * abzuspeichern und eine blockende Abfrage zu starten, sie erlaubt es einer
- * Methode einen Haken zu registrieren und zu blocken bis eine MSG
+ * Diese Klasse erlaubt es, eine Reihe von Vergleichskriterien (Haken)
+ * abzuspeichern und eine blockende Abfrage zu starten. Sie erlaubt es einer
+ * Methode, einen Haken zu registrieren und zu blocken, bis eine MSG
  * entsprechender Zusammensetzung angekommen ist. Dabei wird ein Timeout
- * benötigt um tote Hooks zu verhindern.
+ * benötigt, um tote Hooks zu verhindern.
  * 
  * @author ATRM
  * 
@@ -25,32 +25,34 @@ public class Hook {
 	private volatile List<Haken> allHooks = new CopyOnWriteArrayList<Haken>();
 
 	/**
-	 * Private Methode für den Haken um sich zu registrieren.
+	 * Private Methode für den Haken, um sich zu registrieren.
 	 * 
 	 * @param toAdd
+	 * 		Haken, der geaddet werden soll.
 	 */
 	private void add(Haken toAdd) {
 		allHooks.add(toAdd);
 	}
 
 	/**
-	 * Private Methode für den Haken um die Registrierung wieder rückgängig zu
+	 * Private Methode für den Haken, um die Registrierung wieder rückgängig zu
 	 * machen.
 	 * 
 	 * @param toRemove
+	 * 		Haken, der entfernt werden soll.
 	 */
 	private void remove(Haken toRemove) {
 		allHooks.remove(toRemove);
 	}
 
 	/**
-	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
+	 * Richtet einen Hook ein, der blockt, bis eine MSG mit den entsprechenden
 	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
 	 * verknüpft und müssen alle erfüllt werden.
 	 * 
 	 * @param typ
 	 *            Nachrichtentyp der zu erwartenden Nachricht. Also ob
-	 *            <code>SYSTEM, GROUP,PRIVATE</code> oder <code>DATA</code>
+	 *            <code>SYSTEM,GROUP,PRIVATE</code> oder <code>DATA</code>
 	 * @param code
 	 *            Der MSGCode der Nachricht. Also um welchen Typ von
 	 *            SystemNachricht es sich handelt (z.B.:
@@ -58,7 +60,7 @@ public class Hook {
 	 * @param nid
 	 *            NodeID des Absenders
 	 * @param filter
-	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
+	 *            gibt an, ob die Nachricht von der weiteren Verarbeitung in der
 	 *            NodeEngine ausgeschlossen werden soll.
 	 *            <ul>
 	 *            <li><code>true</code>-Nachricht wird von handle nicht weiter
@@ -66,10 +68,10 @@ public class Hook {
 	 *            <li><code>false</code>-Nachricht wird normal
 	 *            weiterverarbeitet.
 	 * @param timeout
-	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
+	 *            gibt die Dauer in Millisekunden an, für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 *            
-	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
+	 * @return gibt die Nachricht zurück, die den Hook ausgelöst hat oder <code>
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
 	 */
@@ -88,13 +90,13 @@ public class Hook {
 	}
 
 	/**
-	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
+	 * Richtet einen Hook ein, der blockt, bis eine MSG mit den entsprechenden
 	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
 	 * verknüpft und müssen alle erfüllt werden.
 	 * 
 	 * @param typ
 	 *            Nachrichtentyp der zu erwartenden Nachricht. Also ob
-	 *            <code>SYSTEM, GROUP,PRIVATE</code> oder <code>DATA</code>
+	 *            <code>SYSTEM,GROUP,PRIVATE</code> oder <code>DATA</code>
 	 * @param code
 	 *            Der MSGCode der Nachricht. Also um welchen Typ von
 	 *            SystemNachricht es sich handelt (z.B.:
@@ -102,9 +104,9 @@ public class Hook {
 	 * @param nid
 	 *            NodeID des Absenders
 	 * @param payload
-	 *            Daten die das Paket trägt
+	 *            Daten, die das Paket trägt.
 	 * @param filter
-	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
+	 *            gibt an, ob die Nachricht von der weiteren Verarbeitung in der
 	 *            NodeEngine ausgeschlossen werden soll.
 	 *            <ul>
 	 *            <li><code>true</code>-Nachricht wird von handle nicht weiter
@@ -112,13 +114,13 @@ public class Hook {
 	 *            <li><code>false</code>-Nachricht wird normal
 	 *            weiterverarbeitet.
 	 * @param timeout
-	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
+	 *            gibt die Dauer in Millisekunden an, für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 * @param paket
-	 *            Die Nachricht die gesendet werden soll wenn der Hook
-	 *            registriert ist
+	 *            Die Nachricht, die gesendet werden soll, wenn der Hook
+	 *            registriert ist.
 	 * 
-	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
+	 * @return gibt die Nachricht zurück, die den Hook ausgelöst hat oder <code>
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
 	 */
@@ -138,13 +140,13 @@ public class Hook {
 	}
 
 	/**
-	 * Richtet einen Hook ein der blockt bis eine MSG mit den entsprechenden
+	 * Richtet einen Hook ein, der blockt, bis eine MSG mit den entsprechenden
 	 * Daten von der NodeEngine verarbeitet wird. Dabei sind die Parameter UND
 	 * verknüpft und müssen alle erfüllt werden.
 	 * 
 	 * @param typ
 	 *            Nachrichtentyp der zu erwartenden Nachricht. Also ob
-	 *            <code>SYSTEM, GROUP,PRIVATE</code> oder <code>DATA</code>
+	 *            <code>SYSTEM,GROUP,PRIVATE</code> oder <code>DATA</code>
 	 * @param code
 	 *            Der MSGCode der Nachricht. Also um welchen Typ von
 	 *            SystemNachricht es sich handelt (z.B.:
@@ -152,9 +154,9 @@ public class Hook {
 	 * @param nid
 	 *            NodeID des Absenders
 	 * @param payload
-	 *            Daten die das Paket trägt
+	 *            Daten, die das Paket trägt
 	 * @param filter
-	 *            gibt an ob die Nachricht von der weiteren Verarbeitung in der
+	 *            gibt an, ob die Nachricht von der weiteren Verarbeitung in der
 	 *            NodeEngine ausgeschlossen werden soll.
 	 *            <ul>
 	 *            <li><code>true</code>-Nachricht wird von handle nicht weiter
@@ -162,13 +164,13 @@ public class Hook {
 	 *            <li><code>false</code>-Nachricht wird normal
 	 *            weiterverarbeitet.
 	 * @param timeout
-	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
+	 *            gibt die Dauer in Millisekunden an, für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 * @param dothat
-	 *            das Runnable welches gestartet werden soll wenn der Hook
+	 *            das Runnable, welches gestartet werden soll, wenn der Hook
 	 *            registriert ist
 	 * 
-	 * @return gibt die Nachricht zurück die den Hook ausgelöst hat oder <code>
+	 * @return gibt die Nachricht zurück, die den Hook ausgelöst hat oder <code>
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
 	 */
@@ -188,14 +190,14 @@ public class Hook {
 	}
 
 	/**
-	 * Nicht blockierende Methode die für eine gewisse Zeit <code>timeout</code>
-	 * alle Nachrichten verwirft die den angegebennen Kriterien entspricht.
+	 * Nicht blockierende Methode, die für eine gewisse Zeit <code>timeout</code>
+	 * alle Nachrichten verwirft, die den angegebenen Kriterien entsprechen.
 	 * 
 	 * @param typ
 	 *            Typ der zu verwerfenden Nachricht
 	 * @param typ
-	 *            Nachrichtentyp der zu filternden Nachricht. (z.b:
-	 *            <code>SYSTEM, GROUP, PRIVATE</code> oder <code>DATA</code>)
+	 *            Nachrichtentyp der zu filternden Nachricht. (z.B:
+	 *            <code>SYSTEM,GROUP,PRIVATE</code> oder <code>DATA</code>)
 	 * @param code
 	 *            Der MSGCode der Nachricht. Also um welchen Typ von
 	 *            SystemNachricht es sich handelt (z.B.:
@@ -203,7 +205,7 @@ public class Hook {
 	 * @param nid
 	 *            NodeID des Absenders
 	 * @param timeout
-	 *            gibt die Dauer in Millisekunden an für die der Hook aktiv
+	 *            gibt die Dauer in Millisekunden an, für die der Hook aktiv
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 * 
 	 */
@@ -225,13 +227,15 @@ public class Hook {
 	}
 
 	/**
-	 * Diese Methode prüft ob einer der registrierten Haken auf das
+	 * Diese Methode prüft, ob einer der registrierten Haken auf das
 	 * mitgelieferte Paket passt und ob es bei passendem Haken noch
 	 * weiterverarbeitet werden soll <code>true</code> oder nicht
 	 * <code>false</code>.
 	 * 
 	 * @param paket
+	 * 		Pakete, die geprüft werden sollen
 	 * @return
+	 * 		<code>true</code> wenn einer der registrierten Haken das Paket filtern möchte, andernfalls <code>false</code>
 	 */
 	public boolean check(MSG paket) {
 		boolean tmp = false;
@@ -272,13 +276,13 @@ public class Hook {
 		private MSG hookedMSG;
 
 		/**
-		 * Erzeugt einen Haken der die angegebennen Paramter matched .
+		 * Erzeugt einen Haken, der die angegebenen Paramter matched.
 		 * 
-		 * @param typ Nachrichtentyp der betrachtet werden soll
-		 * @param code Nachrichtencode der betrachtet werden soll
-		 * @param sender Sender  der betrachtet werden soll 
-		 * @param payload Daten der betrachtet werden sollen
-		 * @param filter Ob die Nachricht entfernt werden soll oder nicht
+		 * @param typ Nachrichtentyp, der betrachtet werden soll.
+		 * @param code Nachrichtencode, der betrachtet werden soll.
+		 * @param sender Sender, der betrachtet werden soll.
+		 * @param payload Daten, die betrachtet werden sollen.
+		 * @param filter Ob die Nachricht entfernt werden soll oder nicht.
 		 */
 		public Haken(NachrichtenTyp typ, MSGCode code, Long sender,
 				Object payload, boolean filter) {
@@ -294,10 +298,11 @@ public class Hook {
 		}
 
 		/**
-		 * Prüft alle registrierten Hacken und prüft ob einer der Hacken möchte, dass das Paket 
+		 * Prüft alle registrierten Haken und liefert <code>true</code>, wenn einer der Haken auf Filtern gesetzt ist.
 		 * 
 		 * @param x die zu überpüfende Nachricht
-		 * @return true wenn es einen passenden Hacken gibt und dieser wünscht das die Nachricht entfernt wird
+		 * @return <code>true</code> wenn es einen passenden Haken gibt und dieser auf Filtern gestellt ist,
+		 * 			andernfalls <code>false</code>
 		 */
 		private synchronized boolean check(MSG x) {
 			boolean typ_check = (typ == null) || (typ == x.getTyp());
@@ -331,7 +336,7 @@ public class Hook {
 		}
 
 		/**
-		 * Birgt die MSG die den Haken gematched hat.
+		 * Birgt die MSG, die den Haken gematched hat.
 		 * 
 		 * @return Hooked Message oder <code>null</code> wenn Timout abgelaufen
 		 */

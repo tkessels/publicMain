@@ -13,6 +13,10 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 
+/**TODO
+ * @author ATRM
+ *
+ */
 public class MulticastConnectionHandler {
 
 
@@ -44,10 +48,19 @@ public class MulticastConnectionHandler {
 	}
 
 
+	/**
+	 * @return
+	 */
 	public static MulticastConnectionHandler getMC() {
 		if (me!=null) return me;
 		else return getMC(Config.getConfig().getMCGroup(),Config.getConfig().getMCPort(),Config.getConfig().getMCTTL());
 	}
+	/**
+	 * @param multicast_IP
+	 * @param port
+	 * @param ttl
+	 * @return
+	 */
 	public static synchronized MulticastConnectionHandler getMC(String multicast_IP, int port, int ttl) {
 		if (me!=null) return me;
 		else {
@@ -63,11 +76,17 @@ public class MulticastConnectionHandler {
 
 	}
 
+	/**
+	 * 
+	 */
 	public void close() {
 		multicastReciever.stop();
 		multi_socket.close();
 	}
 
+	/**
+	 * @param nachricht
+	 */
 	public synchronized void sendmutlicast(MSG nachricht) {
 		if (multi_socket!=null&&multi_socket.isBound()) {
 			try {
@@ -81,10 +100,17 @@ public class MulticastConnectionHandler {
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public void discoverBUS() {
 		MulticastConnectionHandler.getMC().sendmutlicast(new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_DISCOVER, -1, -1, null, null));
 	}
 
+	/**
+	 * @param nachricht
+	 * @param target
+	 */
 	public synchronized void sendunicast(MSG nachricht, Node target) {
 		for (InetAddress x : target.getSockets()) {
 			if (!Node.getMyIPs().contains(x)) {
@@ -97,10 +123,20 @@ public class MulticastConnectionHandler {
 			}
 		}
 	}
+	/**
+	 * @param ne
+	 */
 	public void registerNodeEngine(NodeEngine ne) {
 		this.ne=ne;
 	}
 
+	/**
+	 * @param nachricht
+	 * @param recipient
+	 * @param port
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
 	private DatagramPacket msg2UDP(MSG nachricht,InetAddress recipient, int port) throws IllegalArgumentException {
 		byte[] data = MSG.getBytes(nachricht);
 		if (data.length < 65000)
@@ -108,6 +144,9 @@ public class MulticastConnectionHandler {
 		else
 			throw new IllegalArgumentException(nachricht.toString()+" to big for UDP - Datagram");
 	}
+	/**
+	 * @param paket
+	 */
 	private void handle(MSG paket) {
 		if(paket.getTyp()==NachrichtenTyp.SYSTEM) {
 			if(paket.getCode()==MSGCode.BACKUP_SERVER_OFFER) {
@@ -124,6 +163,10 @@ public class MulticastConnectionHandler {
 	}
 
 
+	/**
+	 * @author SkyHawk
+	 *
+	 */
 	private final class MulticastReciever implements Runnable {
 		public void run() {
 			if(multi_socket==null)return;

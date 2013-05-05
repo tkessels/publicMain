@@ -47,8 +47,6 @@ public class DatabaseEngine {
 	private HashSet<MSG> failed_msgs;
 	private List<Node> failed_node;
 	private BlockingQueue<Map.Entry<Long, Long>> failed_routes;
-	//	private HashSet<Node> stored_nodes;
-	//	private HashSet<Node> stored_routes;
 
 	private static DatabaseEngine me;
 	Thread transporter = new Thread(new DPTransportBot());

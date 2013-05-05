@@ -15,31 +15,37 @@ import java.util.zip.GZIPOutputStream;
 
 import org.publicmain.nodeengine.NodeEngine;
 
-
-
-
-/**Diese Klasse repräsentiert unser Datenpaket
- * ggf. von Serializable auf Externalized umstellen wenn Dateneingespart werden müssen da nicht alle Paktearten alle Felder benötigen
- * @author tkessels
- *
+/**
+ * Diese Klasse repräsentiert unser Datenpaket ggf. von Serializable auf
+ * Externalized umstellen wenn Dateneingespart werden müssen da nicht alle
+ * Paktearten alle Felder benötigen
+ * 
+ * @author ATRM
+ * 
  */
-public class MSG implements Serializable,Comparable<MSG>{
-	private static int id_counter=0;
+
+public class MSG implements Serializable, Comparable<MSG> {
+	private static int id_counter = 0;
 	private static final long serialVersionUID = 270420135L;
 
-	//Typisierung
+	// Typisierung
 	private final NachrichtenTyp typ;
 	private MSGCode code;
-	//Quelle und Eindeutigkeit
+	// Quelle und Eindeutigkeit
 	private final long sender;
 	private long timestamp;
 	private final int id;
-	//Optionale Datenfelder für beispielsweise Empfänger
-	private long empfänger=-1;
+	// Optionale Datenfelder für beispielsweise Empfänger
+	private long empfänger = -1;
 	private String group;
-	//Payload
+	// Payload
 	private Object data;
 
+	/**
+	 * Konstruktor für TODO
+	 * 
+	 * @param typ
+	 */
 	private MSG(NachrichtenTyp typ) {
 		this.id = getnextID();
 		this.typ=typ;
@@ -48,12 +54,24 @@ public class MSG implements Serializable,Comparable<MSG>{
 	}
 
 	/**
+	 * Getter für einen Zähler, addiert 1 dazu wenn er aufgerufen wird.
 	 * 
+	 * @return
 	 */
 	private static synchronized int getnextID() {
 		return id_counter++;
 	}
 
+	/**
+	 * Konstruktor für Nachrichten
+	 * 
+	 * @param typ
+	 * @param code
+	 * @param sender
+	 * @param empfänger
+	 * @param group
+	 * @param data
+	 */
 	public MSG(NachrichtenTyp typ, MSGCode code, long sender, long empfänger, String group, Object data) {
 		this.typ = typ;
 		this.code = code;
@@ -65,109 +83,160 @@ public class MSG implements Serializable,Comparable<MSG>{
 		this.data = data;
 	}
 
+	/**
+	 * Konstruktor für TODO
+	 * 
+	 * @param payload
+	 * @param code
+	 */
 	public MSG(Object payload, MSGCode code){
 		this(NachrichtenTyp.SYSTEM);
 		this.code = code;
 		this.data = payload;
 	}
 
+	/**
+	 * Konstruktor für TODO
+	 * 
+	 * @param payload
+	 * @param code
+	 * @param recipient
+	 */
 	public MSG(Object payload, MSGCode code, long recipient) {
 		this(payload,code);
 		this.empfänger=recipient;
 	}
 
+	/**
+	 * Konstruktor für System-Nachrichten
+	 * 
+	 * @param daNode
+	 */
 	public MSG(Node daNode){
 		this(NachrichtenTyp.SYSTEM);
 		this.code=MSGCode.NODE_UPDATE;
 		this.data=daNode;
 	}
 
+	/**
+	 * Konstruktor für Gruppen-Nachrichten
+	 * 
+	 * @param group
+	 * @param text
+	 */
 	public MSG(String group,String text){
 		this(NachrichtenTyp.GROUP);
 		this.group=group.toLowerCase();
 		this.data=text;
 	}
 
+	/**
+	 * Konstruktor für Private-Nachrichten
+	 * 
+	 * @param user
+	 * @param text
+	 */
 	public MSG(long user, String text){
 		this(NachrichtenTyp.PRIVATE);
 		this.empfänger=user;
 		this.data=text;
 	}
 
-	/*
-	public MSG(File datei, long nid) throws IOException {
-		this(NachrichtenTyp.DATA);
-		if(!datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		GZIPOutputStream zip = new GZIPOutputStream(bout);
-		BufferedOutputStream bos = new BufferedOutputStream(zip);
-		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
-		byte[] cup=new byte[64000];
-		int leng=-1;
-		while((leng=bis.read(cup))!=-1){
-				bos.write(cup,0,leng);
-		}
-		bos.flush();
-		zip.finish();
-		bos.close();
-		Object tmp_data[]=new Object[2];
-		tmp_data[0]=datei;
-		tmp_data[1]=bout.toByteArray();
-		data=tmp_data;
-		setEmpfänger(nid);
-		group=datei.getName();
-	}
+//	Ggf. für die weitere Entwicklung benötigt.
+//	/**
+//	 * Konstruktor für den Dateiversand
+//	 * 
+//	 * @param datei
+//	 * @param nid
+//	 * @throws IOException
+//	 */
+//	public MSG(File datei, long nid) throws IOException {
+//		this(NachrichtenTyp.DATA);
+//		if(!datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
+//		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//		GZIPOutputStream zip = new GZIPOutputStream(bout);
+//		BufferedOutputStream bos = new BufferedOutputStream(zip);
+//		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
+//		byte[] cup=new byte[64000];
+//		int leng=-1;
+//		while((leng=bis.read(cup))!=-1){
+//				bos.write(cup,0,leng);
+//		}
+//		bos.flush();
+//		zip.finish();
+//		bos.close();
+//		Object tmp_data[]=new Object[2];
+//		tmp_data[0]=datei;
+//		tmp_data[1]=bout.toByteArray();
+//		data=tmp_data;
+//		setEmpfänger(nid);
+//		group=datei.getName();
+//	}
+
+	/**
+	 * Konstruktor für den Dateiversand
+	 * 
+	 * @param tmp_FR
+	 * @throws IOException
 	 */
 	public MSG(FileTransferData tmp_FR) throws IOException {
 		this(NachrichtenTyp.DATA);
-		this.empfänger=tmp_FR.getReceiver_nid();
-
-		if(! tmp_FR.datei.isFile())throw new IOException("Verzeichnisse werden nicht unterstützt.");
+		this.empfänger = tmp_FR.getReceiver_nid();
+		if (!tmp_FR.datei.isFile())
+			throw new IOException("Verzeichnisse werden nicht unterstützt.");
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		GZIPOutputStream zip = new GZIPOutputStream(bout);
 		BufferedOutputStream bos = new BufferedOutputStream(zip);
-		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(tmp_FR.datei));
-		byte[] cup=new byte[64000];
-		int leng=-1;
-		while((leng=bis.read(cup))!=-1){
-			bos.write(cup,0,leng);
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(
+				tmp_FR.datei));
+		byte[] cup = new byte[64000];
+		int leng = -1;
+		while ((leng = bis.read(cup)) != -1) {
+			bos.write(cup, 0, leng);
 		}
 		bos.flush();
 		zip.finish();
 		bos.close();
 		bis.close();
-		Object tmp_data[]=new Object[2];
-		tmp_data[0]=tmp_FR;
-		tmp_data[1]=bout.toByteArray();
-		data=tmp_data;
-		//		setEmpfänger(tmp_FR.getReceiver_nid());
+		Object tmp_data[] = new Object[2];
+		tmp_data[0] = tmp_FR;
+		tmp_data[1] = bout.toByteArray();
+		data = tmp_data;
 	}
 
-	public void save(File datei) throws IOException{
-		if((typ==NachrichtenTyp.DATA)&&(data!=null)&&(data instanceof Object[])&&(((Object[])data).length==2)&&(((Object[])data)[0]instanceof FileTransferData)&&(((Object[])data)[1]instanceof byte[])){
-			byte[] tmp_data=(byte[]) ((Object[])data)[1];
-			//			System.out.println(tmp_data.length);
+	/**
+	 * Methode zum Abspeichern von empfangenen Dateien. 
+	 * 
+	 * @param datei
+	 * @throws IOException
+	 */
+	public void save(File datei) throws IOException {
+		if ((typ == NachrichtenTyp.DATA) && (data != null)
+				&& (data instanceof Object[])
+				&& (((Object[]) data).length == 2)
+				&& (((Object[]) data)[0] instanceof FileTransferData)
+				&& (((Object[]) data)[1] instanceof byte[])) {
+			byte[] tmp_data = (byte[]) ((Object[]) data)[1];
 
 			ByteArrayInputStream bais = new ByteArrayInputStream(tmp_data);
 			GZIPInputStream zip = new GZIPInputStream(bais);
 			BufferedInputStream bis = new BufferedInputStream(zip);
 
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(datei));
-			byte[] cup=new byte[64000];
-			int leng=-1;
-			while((leng=bis.read(cup))!=-1){
-				bos.write(cup,0,leng);
+			BufferedOutputStream bos = new BufferedOutputStream(
+					new FileOutputStream(datei));
+			byte[] cup = new byte[64000];
+			int leng = -1;
+			while ((leng = bis.read(cup)) != -1) {
+				bos.write(cup, 0, leng);
 			}
 			bos.flush();
 			bos.close();
 		}
 	}
 
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
+	/**
+	 * TODO: Kommentar!
 	 */
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -177,10 +246,10 @@ public class MSG implements Serializable,Comparable<MSG>{
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
+	/**
+	 * Methode für den String-Vergleich, liefert abhängig vom Vergleich
+	 * <code>true</code> oder <code>false</code> zurück.
 	 */
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -198,49 +267,98 @@ public class MSG implements Serializable,Comparable<MSG>{
 		return true;
 	}
 
+	/**
+	 * Getter für die Empfänger NodeID.
+	 * 
+	 * @return
+	 */
 	public long getEmpfänger() {
 		return empfänger;
 	}
-
+	
+	/**
+	 * Getter für die Sender NodeID
+	 * 
+	 * @return
+	 */
 	public long getSender() {
 		return sender;
 	}
-
+	
+	/**
+	 * Getter für den Zeitstempel.
+	 * 
+	 * @return
+	 */
 	public long getTimestamp() {
 		return timestamp;
 	}
-
+	
+	/**
+	 * Diese Methode setzt den Zeitstempel, auf die aktuelle Zeit.
+	 */
 	public void reStamp() {
-		timestamp=System.currentTimeMillis();
+		timestamp = System.currentTimeMillis();
 	}
 
+	/**
+	 * Getter für den Nachrichtentyp.
+	 * 
+	 * @return
+	 */
 	public NachrichtenTyp getTyp() {
 		return typ;
 	}
 
+	/**
+	 * Getter fürden Nachrichten-Code.
+	 * 
+	 * @return
+	 */
 	public MSGCode getCode() {
 		return code;
 	}
-
+	
+	/**
+	 * Getter für TODO
+	 * 
+	 * @return
+	 */
 	public Object getData() {
 		return data;
 	}
-
+	
+	/**
+	 * Getter für die Empfänger-Gruppe. 
+	 * 
+	 * @return
+	 */
 	public String getGroup() {
 		return group;
 	}
 
+	/**
+	 * Getter für TODO
+	 * 
+	 * @return
+	 */
 	public int getId() {
 		return id;
 	}
-	/*public void setEmpfänger(long value) {
-		empfänger=value;
-	}
+
+//	Ggf. für die weitere Entwicklung benötigt.
+//	/**
+//	 * Setter für den Empfänger
+//	 * 
+//	 * @param value
+//	 */
+//	public void setEmpfänger(long value) {
+//		empfänger=value;
+//	}
+
+	/**
+	 * Eigene toString()-Methode
 	 */
-
-
-
-	@Override
 	public String toString() {
 		return "MSG [" + (typ != null ? "typ=" + typ + ", " : "")
 				+ (code != null ? "code=" + code + ", " : "") + "sender="
@@ -250,7 +368,14 @@ public class MSG implements Serializable,Comparable<MSG>{
 				+ (data != null ? "data=" + data : "") + "]";
 	}
 
-	public static byte[] getBytes(MSG x){
+	/**
+	 * Methode zum umwandeln von Objekten in einen Byte-Strom, liefert ein
+	 * Byte-Array zurück.
+	 * 
+	 * @param x
+	 * @return
+	 */
+	public static byte[] getBytes(MSG x) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
 			ObjectOutputStream obout = new ObjectOutputStream(bos);
@@ -262,32 +387,45 @@ public class MSG implements Serializable,Comparable<MSG>{
 		return bos.toByteArray();
 	}
 
-	public static MSG getMSG(byte[] data){
+	/**
+	 * Methode zum umwandeln eines Byte-Arrays in ein MSG-Objekt.
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public static MSG getMSG(byte[] data) {
 		try {
-			ObjectInputStream obin=new ObjectInputStream( new ByteArrayInputStream(data));
-			MSG tmp = (MSG)obin.readObject();
+			ObjectInputStream obin = new ObjectInputStream(
+					new ByteArrayInputStream(data));
+			MSG tmp = (MSG) obin.readObject();
 			return tmp;
 
 		} catch (Exception e) {
-			LogEngine.log("MSG.getMSG",e);
+			LogEngine.log("MSG.getMSG", e);
 		}
 		return null;
 	}
 
-	@Override
+	/**
+	 * Eigene Vergleichsmethode.
+	 */
 	public int compareTo(MSG o) {
-		if (this.getTimestamp() != o.getTimestamp())	return (this.getTimestamp() > o.getTimestamp()) ? 1 : -1;
-		else if (this.getSender() != o.getSender())	return (this.getSender() > o.getSender()) ? 1 : -1;
-		else if (this.getId() != o.getId())			return (this.getId() - o.getId());
+		if (this.getTimestamp() != o.getTimestamp()) {
+			return (this.getTimestamp() > o.getTimestamp()) ? 1 : -1;
+		} else if (this.getSender() != o.getSender()) {
+			return (this.getSender() > o.getSender()) ? 1 : -1;
+		} else if (this.getId() != o.getId()) {
+			return (this.getId() - o.getId());
+		}
 		return 0;
-
 	}
 
+	/**
+	 * Setter für den Gruppen-Namen. 
+	 * 
+	 * @param string
+	 */
 	public void setGroup(String string) {
 		group=string;
 	}
-
-
-
-
 }

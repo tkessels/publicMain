@@ -8,6 +8,13 @@ import javax.swing.AbstractListModel;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.LogEngine;
 
+/**
+ * TODO: Kommentar
+ * 
+ * 
+ * @author ATRM
+ *
+ */
 public class GroupListModel extends AbstractListModel<String>{
 
 	/**
@@ -18,40 +25,40 @@ public class GroupListModel extends AbstractListModel<String>{
 	private Thread groupListWriter;
 
 	public GroupListModel() {
-		this.groupListWriter = new Thread(new Runnable() {
+		this.groupListWriter = new Thread( new Runnable() {
 			@Override
 			public void run() {
-				while (true) {
+				while ( true ) {
 					groups.clear();
-					groups.addAll(ChatEngine.getCE().getAllGroups());
-					fireContentsChanged(this, 0, groups.size());
-					synchronized (ChatEngine.getCE().getAllGroups()) {
+					groups.addAll( ChatEngine.getCE().getAllGroups() );
+					fireContentsChanged( this, 0, groups.size() );
+					synchronized ( ChatEngine.getCE().getAllGroups() ) {
 						try {
 							ChatEngine.getCE().getAllGroups().wait();
-						} catch (InterruptedException e) {
+						} catch ( InterruptedException e ) {
 							LogEngine.log(e);
 						}
 					}
 				}
 			}
-		});
+		} );
 		this.groupListWriter.start();
 
-		Collections.sort(groups);
+		Collections.sort( groups );
 	}
 	@Override
 	public int getSize() {
 		return groups.size();
 	}
 
-	public boolean contains(String group){
-		synchronized (groups) {
-			return groups.contains(group);
+	public boolean contains( String group ){
+		synchronized ( groups ) {
+			return groups.contains( group );
 		}
 	}
 
 	@Override
-	public String getElementAt(int index) {
-		return groups.get(index);
+	public String getElementAt( int index ) {
+		return groups.get( index );
 	}
 }

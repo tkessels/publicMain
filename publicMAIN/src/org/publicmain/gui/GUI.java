@@ -55,32 +55,32 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private ChatEngine ce;
 	LogEngine log;
 
-	private static GUI me;
+	private static GUI 	me;
 	private List<ChatWindow> chatList;
-	private JMenuBar menuBar;
-	private JMenu pMAIN;
-	private JMenu history;
-	private JMenu help;
-	private JMenu localDB;
-	private JMenu backupServer;
-	private JMenuItem pullHistory;
-	private JMenuItem pushHistory;
-	private JMenuItem delBackupHistory;
-	private JMenuItem settings;
-	private JMenuItem searchLocalHistory;
-	private JMenuItem deleteLocalHistory;
-	private JMenuItem about;
-	private JMenuItem helpContent;
-	private JMenuItem exit;
+	private JMenuBar	menuBar;
+	private JMenu 		pMAIN;
+	private JMenu 		history;
+	private JMenu 		help;
+	private JMenu 		localDB;
+	private JMenu 		backupServer;
+	private JMenuItem 	pullHistory;
+	private JMenuItem 	pushHistory;
+	private JMenuItem 	delBackupHistory;
+	private JMenuItem 	settings;
+	private JMenuItem 	searchLocalHistory;
+	private JMenuItem 	deleteLocalHistory;
+	private JMenuItem 	about;
+	private JMenuItem 	helpContent;
+	private JMenuItem 	exit;
 	private JTabbedPane jTabbedPane;
 	private JToggleButton contactListBtn;
-	private boolean contactListActive;
+	private boolean 	contactListActive;
 	private ContactList contactListWin;
-	private PMTrayIcon trayIcon;
+	private PMTrayIcon 	trayIcon;
 	private LocalDBConnection locDBCon;
 	private HTMLContentDialog hcdAbout;
 	private HTMLContentDialog hcdHelp;
-	private boolean afkStatus;	
+	private boolean 	afkStatus;	
 
 	/**
 	 * Konstruktor für das GUI mit Initialisierungen
@@ -101,7 +101,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 
 		GUI.me 					= this;
 		this.log 				= new LogEngine();
-		// this.locDBCon 		= LocalDBConnection.getDBConnection();
 		this.about 				= new JMenuItem( "About", Help.getIcon( "aboutSym.png" ) );
 		this.helpContent		= new JMenuItem( "Help Contents", Help.getIcon( "helpSym.png", 12, 16 ) );
 		this.exit				= new JMenuItem( "Exit", Help.getIcon( "exitSym.png" ) );
@@ -154,7 +153,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 					contactListZuklappen();
 				}
 			}
-		});
+		} );
 
 		/**
 		 * Menü-Komponenten hinzufügen
@@ -174,7 +173,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		this.menuBar.add( contactListBtn );
 		this.menuBar.add( pMAIN );
 		this.menuBar.add( history );
-		this.menuBar.add(help);
+		this.menuBar.add( help );
 
 		// Einkommentieren wenn Logo gewünscht:
 		// this.menuBar.add(Box.createHorizontalGlue());
@@ -213,10 +212,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	private void contactListAufklappen(){
 
-		if(!contactListActive){
-
+		if( !contactListActive ){
 			this.contactListBtn.setToolTipText( "hide contacts" );
-			this.contactListBtn.setIcon(Help.getIcon( "g20051.png" ));
+			this.contactListBtn.setIcon( Help.getIcon( "g20051.png" ) );
 			this.contactListBtn.setSelected( true );
 			this.contactListWin.repaint();
 			this.contactListWin.setVisible( true );
@@ -306,7 +304,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	public void addPrivCW( long uid, boolean focus ){
 		ChatWindow tmp = getCW( uid );
 		if( tmp == null ){
-			tmp=createChat( uid );
+			tmp = createChat( uid );
 		}
 		if ( focus ){
 			focus( tmp );
@@ -374,16 +372,17 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return true wenn Name korrekt false wenn Name falsche Zeichen enthält
 	 */
 	boolean checkName( String name, int typ ){
-		if( name.matches( Config.getConfig().getNamePattern() ) ){
-			if( typ == 0 ){
-				if( contactListWin == null ){
+		if ( name.matches( Config.getConfig().getNamePattern() ) ){
+			if ( typ == 0 ){
+				if ( contactListWin == null ){
 					return true;
 				}
 				return !contactListWin.groupExists( name );
-			} else if( typ == 1 )
+			} else if ( typ == 1 ){
 				return !contactListWin.aliasExists( name );
-			else
+			} else {
 				return false;
+			}
 		} else
 			return false;
 	}
@@ -401,7 +400,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		if ( name.length() > NAME_LENGTH ) {
 			name = name.substring( 0, NAME_LENGTH );
 		}
-		if( lowern ){
+		if ( lowern ){
 			name = name.toLowerCase();
 		}
 		return name;
@@ -416,7 +415,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 */
 	public void changeAlias( String alias ){
 		alias = confName( alias, false );
-		if(checkName( alias, 1 )){
+		if ( checkName( alias, 1 ) ) {
 			ce.updateAlias( alias );
 			Config.getConfig().setAlias( alias );
 			Config.write();
@@ -440,8 +439,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * Diese Methode setzt afkStatus auf false wenn true bzw.
 	 * auf true wenn false
 	 */
-	public void afk(){
-		if( afkStatus ){
+	public void afk() {
+		if ( afkStatus ) {
 			afkStatus = false;
 			info( "You are <b>online</b>!", null, 2 );
 		} else {
@@ -477,11 +476,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		} ).start();
 		LogEngine.log( this, "Shutdown initiated!", LogEngine.INFO );
 		// Wenn es ein About-Fenster gibt, Fenster ausblenden
-		if( hcdAbout != null ) {
+		if ( hcdAbout != null ) {
 			hcdAbout.hideIt();
 		}
 		// Wenn es ein Help-Fenster gibt, Fenster ausblenden
-		if( hcdHelp != null ) {
+		if ( hcdHelp != null ) {
 			hcdHelp.hideIt();
 		}
 		//		Help.playSound("logoff.wav");
@@ -522,7 +521,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private ChatWindow getCW( Object referenz ) {
 		if ( referenz != null ) {
 			for ( ChatWindow cur : chatList ) {
-				if ( cur.equals( referenz ) ){
+				if ( cur.equals( referenz ) ) {
 					return cur;
 				}
 			}
@@ -538,7 +537,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @param msg, String die Nachricht
 	 */
 	void privSend( long empfUID, String msg ) {
-		if( empfUID != ce.getUserID() ){
+		if ( empfUID != ce.getUserID() ) {
 			ce.send_private( empfUID, msg );
 		} else {
 			info( "Message to yourself, is not allowed", null, 2 );
@@ -558,7 +557,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		ChatWindow tmpCW = getCW( empfGrp );
 		if ( tmpCW == null ){
 			empfGrp = confName( empfGrp, true );
-			if (checkName( empfGrp, 0 )) {
+			if ( checkName( empfGrp, 0 ) ) {
 				tmpCW = new ChatWindow( empfGrp );
 				addGrpCW( empfGrp, false );
 			}
@@ -578,9 +577,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @returns, true Wenn User gefunden
 	 */
 	boolean ignoreUser( long uid ) {
-		if( ce.ignore_user( uid  )) {
+		if ( ce.ignore_user( uid  ) ) {
 			notifyGUI();
-			info( ce.getNodeForUID(uid) + " is <b>ignored!</b>", null, 2 );
+			info( ce.getNodeForUID( uid ) + " is <b>ignored!</b>", null, 2 );
 			return true;
 		}
 		return false;
@@ -593,9 +592,9 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * @return, true Wenn User gefunden
 	 */
 	boolean unignoreUser( long uid ) {
-		if( ce.unignore_user( uid ) ) {
+		if ( ce.unignore_user( uid ) ) {
 			notifyGUI();
-			info( ce.getNodeForUID(uid) + " is <b>unignored!</b>", null, 2 );
+			info( ce.getNodeForUID( uid ) + " is <b>unignored!</b>", null, 2 );
 			return true;
 		}
 		return false;
@@ -610,7 +609,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		JFileChooser fileChooser = new JFileChooser();
 		int returnVal = fileChooser.showOpenDialog( me );
 		File selectedFile = fileChooser.getSelectedFile();
-		if( ( returnVal == JFileChooser.APPROVE_OPTION) && ( selectedFile != null ) ) {
+		if ( ( returnVal == JFileChooser.APPROVE_OPTION) && ( selectedFile != null ) ) {
 			sendFile( selectedFile, uid );
 		}
 	}
@@ -747,7 +746,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 			if ( tmp.getSender() != ce.getMyNodeID() ) {
 				tmp_node = ce.getNodeForNID( tmp.getSender() );
 			} else if ( tmp.getEmpfänger() != ce.getMyNodeID() ) {
-				tmp_node = ce.getNodeForNID(tmp.getEmpfänger());
+				tmp_node = ce.getNodeForNID( tmp.getEmpfänger() );
 			}
 			if ( tmp_node != null ){
 				me.addPrivCW( tmp_node.getUserID(), false );

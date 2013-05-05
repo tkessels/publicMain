@@ -33,7 +33,7 @@ import com.sun.rowset.CachedRowSetImpl;
 /**
  * Die Klasse DBConnection stellt die Verbindung zu dem Lokalen DB-Server her.
  * Sie legt weiterhin alle zwingend notwendigen Datenbanken(1) und Tabellen an.
- *
+ * Zudem stellt sie Methoden zum Abfragen und Speichern von Daten zur Verfügung.
  *
  * @author rpfaffner
  *
@@ -824,13 +824,15 @@ public class LocalDBConnection {
 	 */
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){
 		if (dbStatus >= 3){
-			
+			try {
 				StringBuilder prepState = new StringBuilder();
+
 				prepState.append						("SELECT * from v_searchInHistory WHERE ");
 				if(userID!=null) prepState.append		("(userID_Sender LIKE ? OR userID_Recipient LIKE ?) AND ");
 				if(alias != null) prepState.append		("(sender LIKE ? OR recipient LIKE ?) AND");
 				if(groupName!=null) prepState.append	("`group` LIKE ? AND ");
 				prepState.append						("(time BETWEEN ? AND ?) AND message LIKE ? AND length(message)>0 ORDER BY time");
+
 
 				PreparedStatement prp=null;
 				ResultSet rs = null;

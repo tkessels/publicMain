@@ -16,14 +16,15 @@ import org.publicmain.common.LogEngine;
 import com.sun.rowset.CachedRowSetImpl;
 
 
+/**
+ * @author ATRM
+ * 	Über diese Klasse kann mit der BackupDatenbank kommuniziert werden.
+ *  Sie beinhaltet Methoden zum Abfragen und Speichern von Daten und stellt eine Verbindunge zum BackupServer her. 
+ *
+ */
 public class BackupDBConnection {
 
 	private static BackupDBConnection me;
-
-public BackupDBConnection() {
-//	DriverManager.setLogWriter(LogEngine.getLogWriter("Backupserver"));
-}
-
 
 	public static BackupDBConnection getBackupDBConnection() {
 		if (me == null) {
@@ -74,17 +75,16 @@ public BackupDBConnection() {
 		return tmpID;
 	}
 
-
-
-
-
+	/**
+	 * Diese Methode fragt alle settings eines bestimmten Nutzers in der Datenabank ab.
+	 * @param id: ID des bestimmten Benutzers 
+	 * @return ResultSet: Ergebnis der Abfrage
+	 */
 	public ResultSet pull_settings(long id){
 		Connection con=null;
 		Statement stmt=null;
 		ResultSet rs = null;
 		try {
-//			return getCon().createStatement().executeQuery("SELECT * FROM t_settings WHERE fk_t_backupUser_backupUserID_2 LIKE '" + getMyID() + "'");
-//			long id = getMyID();
 			CachedRowSet tmp = new CachedRowSetImpl();
 			con = getCon();
 			stmt=con.createStatement();
@@ -101,14 +101,16 @@ public BackupDBConnection() {
 		}
 	}
 
-
+	/**
+	 * Diese Methode fragt die UserTabelle eines bestimmten Nutzers in der BackupDatenbank ab.
+	 * @param id: ID des bestimmten Benutzers 
+	 * @return ResultSet: Ergebnis der Abfrage
+	 */
 	public ResultSet pull_users(long id){
 		Connection con=null;
 		Statement stmt=null;
 		ResultSet rs = null;
 		try {
-//			return getCon().createStatement().executeQuery("SELECT userID, t_users.displayName, userName FROM t_users, t_messages WHERE userID = fk_t_users_userID_sender AND fk_t_backupUser_backupUserID LIKE '" + getMyID() + "'");
-//			long id = getMyID();
 			CachedRowSet tmp = new CachedRowSetImpl();
 			con = getCon();
 			stmt=con.createStatement();
@@ -123,15 +125,19 @@ public BackupDBConnection() {
 			   try{rs.close();  }catch(Exception ignored){}
 			   try{stmt.close();}catch(Exception ignored){}
 			   try{con.close();}catch(Exception ignored){}
+		}
 	}
-	}
-
+	
+	/**
+	 * Diese Methode fragt alle Nachrichten eines bestimmten Nutzers in der BackupDatenbank ab.
+	 * @param id: ID des bestimmten Benutzers 
+	 * @return ResultSet: Ergebnis der Abfrage
+	 */
 	public ResultSet pull_msgs(long id){
 		Connection con=null;
 		Statement stmt=null;
 		ResultSet rs = null;
 		try {
-//			long id = getMyID();
 			CachedRowSet tmp = new CachedRowSetImpl();
 			con = getCon();
 			stmt=con.createStatement();
@@ -145,12 +151,17 @@ public BackupDBConnection() {
 			   try{rs.close();  }catch(Exception ignored){}
 			   try{stmt.close();}catch(Exception ignored){}
 			   try{con.close();}catch(Exception ignored){}
-	}
+		}
 	}
 
-
+	/**
+	 * Diese Methode speichert alle Nachichten eines bestimmten Nutzers in der BackupDatenbank ab.
+	 * @param tmp_messages: Übergebenes ResultSet welches die zu speichernden Nachichten beinhaltet.
+	 * @param id: ID des Nutzers, dessen Nachichten gespeichert werden sollen
+	 * @return 	true: 	Speichern erfolgreich
+	 * 			false:	Speichern fehlgeschlagen
+	 */
 	public synchronized boolean push_msgs(ResultSet tmp_messages, long id) {
-//		long myID = getMyID();
 		if(id !=-1){
 			Connection con=null;
 			PreparedStatement  prp=null;
@@ -197,9 +208,13 @@ public BackupDBConnection() {
 		}
 	}
 
-
-
-
+	/**
+	 * Diese Methode speichert die Nutzertabelle eines bestimmten Nutzers in der BackupDatenbank ab.
+	 * @param tmp_users: Übergebenes ResultSet welches die zu speichernden User(Nutzer) beinhaltet.
+	 * @param id: ID des Nutzers, dessen Nutzertabelle gespeichert werden sollen
+	 * @return 	true: 	Speichern erfolgreich
+	 * 			false:	Speichern fehlgeschlagen
+	 */
 	public synchronized boolean push_users(ResultSet tmp_users,long id) {
 		if(id !=-1){
 			Connection con=null;
@@ -228,8 +243,14 @@ public BackupDBConnection() {
 		return true;	
 	}
 
+	/**
+	 * Diese Methode speichert alle Einstellungen (Settings) eines bestimmten Nutzers in der BackupDatenbank ab.
+	 * @param tmp_settings: Übergebenes ResultSet welches die zu speichernden Einstellungen beinhaltet.
+	 * @param id: ID des Nutzers, dessen Einstellungen gespeichert werden sollen
+	 * @return 	true: 	Speichern erfolgreich
+	 * 			false:	Speichern fehlgeschlagen
+	 */
 	public synchronized boolean push_settings(ResultSet tmp_settings,long id) {
-//		long myID = getMyID();
 		if(id !=-1){
 			Connection con = null;
 			PreparedStatement prp=null;
@@ -255,7 +276,13 @@ public BackupDBConnection() {
 		else return false;
 		return true;
 	}
-
+	
+	/**
+	 * Über diese Methode kann der Status der Backupdatenbankverbindung abgefragt werden
+	 * @return:	0 - keine Verbindung zum Backupserver
+	 * @return:	1 - Verbindung besteht, aber kein User eingerichtet
+	 * @return:	2 -	Verbindung besteht, angegebene Nutzerdaten korrekt.
+	 */
 	public int getStatus() {
 		try {
 			Connection x = getCon();
@@ -270,6 +297,13 @@ public BackupDBConnection() {
 		}
 	}
 
+	/**
+	 * Diese Methode überprüft ob ein bestimmter Nutzer in der BackupDatenbank angelegt ist
+	 * @param userName: Username des gesuchten Nutzers
+	 * @return	true:	gesuchter Nutzer vorhanden
+	 * @return	false:	gesuchter Nutzer nicht vorhanden
+	 * @throws SQLException
+	 */
 	private synchronized boolean userexists(String userName) throws SQLException{
 		PreparedStatement prp = getCon().prepareStatement("Select backupUserID from t_backupUser where username like ?");
 		prp.setString(1, userName);
@@ -279,6 +313,14 @@ public BackupDBConnection() {
 		return tmp;
 	}
 
+	/**
+	 * Diese Methode dient zum Anlegen eines neuen Benutzers.
+	 * Sollte dieser schon vorhanden sein: return false.
+	 * @param usrName:	gewünschter Username
+	 * @param passwd:	gewpnschtes Passwort
+	 * @return	true:	Nutzer angelegt
+	 * @return	false:	Nutzer nicht angelegt (schon vorhanden / SQL Exception)
+	 */
 	public synchronized boolean createUser (String usrName, String passwd){
 		try {
 			if(!userexists(usrName)){
@@ -298,6 +340,11 @@ public BackupDBConnection() {
 		return false;
 	}
 
+	/**
+	 * Diese Methode löscht alle Nachrichten des aktuellen Benutzers
+	 * @return	true:	Löschen aller Nachirchten erfolgreich
+	 * @return	false:	Löschen aller Nachirchten nicht erfolgreich
+	 */
 	public synchronized boolean deleteAllMessages(){
 		try {
 			PreparedStatement prp = getCon().prepareStatement("delete from t_messages where fk_t_backupUser_backupUserID = ?");
@@ -310,6 +357,11 @@ public BackupDBConnection() {
 		return false;
 	}
 
+	/**
+	 * Diese Methode wandelt ein ResultSet von Settings in ein Config-Objekt um (Properties)
+	 * @param settingsRS:	ResultSet der umzuwandelnden settings
+	 * @return	Properties-Objekt welches Settings aus dem ResultSet zum Inhalt hat
+	 */
 	private Properties convertResultToConfig (ResultSet settingsRS){
 		Properties tmp = new Properties();
 		try {
@@ -323,17 +375,21 @@ public BackupDBConnection() {
 		return tmp;
 	}
 
-
+	/**
+	 * Diese Methode löscht den aktuell genutzten User von der BackupDatenbank
+	 * @return	true:	Löschen erfolgreich
+	 * @return	false:	Löschen nicht erfolgreich
+	 */
 	public synchronized boolean deleteUser(){
 		String usrName = Config.getConfig().getBackupDBChoosenUsername();
 		String passwd = Config.getConfig().getBackupDBChoosenUserPassWord();
 		return deleteUser(usrName, passwd);
 	}
 
-
 	/**
-	 * @param usrName
-	 * @param passwd
+	 * Diese Methode löscht einen bestimmten Benutzer (Benutzernamen-Passwort-kombination) von der BackupDatenbank
+	 * @param usrName:	UserName des zu löschenden Nutzers
+	 * @param passwd:	Passwort des zu löschenden Nutzers
 	 * @throws SQLException
 	 */
 	public boolean deleteUser(String usrName, String passwd){
@@ -357,19 +413,37 @@ public BackupDBConnection() {
 		return false;
 	}
 
-
+	/**
+	 * Diese Methode stellt eine Verbinung mit in der Config gespeicherten Daten her
+	 * @return Connection: mit ConfigDaten hergestellte Verbindung
+	 * @throws SQLException
+	 */
 	public Connection getCon() throws SQLException {
 		return getCon(Config.getConfig().getBackupDBIP(), Config.getConfig().getBackupDBPort(),Config.getConfig().getBackupDBDatabasename(),Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw(),1000);
-//		return DriverManager.getConnection("jdbc:mysql://"+Config.getConfig().getBackupDBIP()+":"+ Config.getConfig().getBackupDBPort()+"/"+Config.getConfig().getBackupDBDatabasename()+"?connectTimeout=1000", Config.getConfig().getBackupDBUser(), Config.getConfig().getBackupDBPw());
 	}
 	
+	/**
+	 * Diese Methode stellt eine Verbinung mit gegenen Parametern her
+	 * @param ip:			IP-Adresse des Zielservers	
+	 * @param port:			Port des Zielservers
+	 * @param databasename:	Anzusprechender Datenbankname auf dem Zielserver
+	 * @param user:			BenutzerName welcher zum Verbindungsaufbau genutzt werden soll
+	 * @param password:		Passwort welches zum Verbindungsaufbau genutzt werden soll
+	 * @param timeout:		gewünschtes VerbindungsTimeOut
+	 * @return Connection: 	mit gegebenen Parametern hergestellte Verbindung
+	 * @throws SQLException
+	 */
 	public Connection getCon(String ip, String port,String databasename,String user,String password, long timeout) throws SQLException{
 		return DriverManager.getConnection("jdbc:mysql://"+ip+":"+ port+"/"+databasename+"?connectTimeout="+timeout, user, password);
 	}
 
-
-	
-
+	/**
+	 * Diese Methode liefert die Settings eines bestimmten Benutzers aus der BackupDatenbank 
+	 * @param user:		UserName des bestimmten Nutzers 
+	 * @param password:	Passwort des bestimmten Nutzers
+	 * @return	Properties-Objekt welche die gewünschten Settings enthält.
+	 * @throws IllegalArgumentException
+	 */
 	public Properties getConfig(String user, String password) throws IllegalArgumentException {
 		try {
 			long tmp_ID = getIDfor(user, password);
@@ -387,5 +461,4 @@ public BackupDBConnection() {
 			return null;
 		}
 	}
-
 }

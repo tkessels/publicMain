@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -32,8 +31,6 @@ import javax.swing.ListSelectionModel;
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Node;
 import org.resources.Help;
-
-import sun.awt.AWTAccessor.ComponentAccessor;
 
 /**
  * Diese Klasse stellt eine Kontaktliste zur Verfügung.
@@ -152,7 +149,7 @@ public class ContactList extends JWindow {
 		this.add( internalFrame );
 
 		this.internalFrame.setVisible( true );
-	}
+	}//eom ContactList(JFrame parent)
 
 	/**
 	 * Diese Methode prüft ob eine Gruppe bereits existier.
@@ -166,7 +163,7 @@ public class ContactList extends JWindow {
 	 */
 	boolean groupExists( String name ){
 		return ( ( GroupListModel )groups.getModel() ).contains( name );
-	}
+	}//eom groupExists()
 
 	/**
 	 * Diese Methode prüft ob ein User mit dem selben Alias in der Userliste existiert.
@@ -180,7 +177,7 @@ public class ContactList extends JWindow {
 	 */
 	boolean aliasExists( String alias ) {
 		return ( ( UserListModel )users.getModel() ).contains( alias );
-	}
+	}//eom aliasExists()
 
 	/**
 	 * Diese Methode sorgt dafür das die Kontaktliste neu gezeichnet wird.
@@ -193,7 +190,7 @@ public class ContactList extends JWindow {
 		Rectangle tmp = parent.getBounds();
 		setBounds( ( int )( tmp.getX()-breite ),( int )tmp.getY(), breite, tmp.height );
 		super.repaint();
-	}
+	}//eom repaint()
 
 	/**
 	 * Diese Elementklasse stellt einen ComponentAdapter bereit.
@@ -212,7 +209,7 @@ public class ContactList extends JWindow {
 		@Override
 		public void componentMoved( ComponentEvent e ) {
 			repaint();
-		}
+		}//eom componentMoved()
 		
 		/* (non-Javadoc)
 		 * @see java.awt.event.ComponentAdapter#componentResized(java.awt.event.ComponentEvent)
@@ -221,8 +218,8 @@ public class ContactList extends JWindow {
 		public void componentResized( ComponentEvent e ) {
 			validate();
 			repaint();
-		}
-	}
+		}//eom componentResized()
+	}//eoc MyComponentListener
 	
 	/**
 	 * Diese Elementklasse stellt einen MouseAdapter bereit.
@@ -235,6 +232,9 @@ public class ContactList extends JWindow {
 	 */
 	private class MyMouseListener extends MouseAdapter {
 
+		/* (non-Javadoc)
+		 * @see java.awt.event.MouseAdapter#mouseClicked(java.awt.event.MouseEvent)
+		 */
 		public void mouseClicked( MouseEvent e ) {
 			JList source = ( JList )e.getSource();
 			// Doppelklick:
@@ -276,8 +276,8 @@ public class ContactList extends JWindow {
 					}
 				}
 			}
-		}
-	}
+		}//eom mouseClicked()
+	}//eoc MyMouseListener
 
 	/**
 	 * Diese Elementklasse stellt das PopupMenu für die Userliste bereit.
@@ -309,7 +309,7 @@ public class ContactList extends JWindow {
 		 * 
 		 * @param popupListener ActionListener
 		 */
-		public PopupUser( ActionListener popupListener ){
+		private PopupUser( ActionListener popupListener ){
 			String user = users.getSelectedValue().getAlias();
 			long userID = users.getSelectedValue().getUserID();
 
@@ -354,9 +354,8 @@ public class ContactList extends JWindow {
 			}
 			// In jedem Fall wird das InfoMenü hinzugefügt
 			this.add( info );
-		}
-
-	}
+		}//eom PopupUser()
+	}//eoc PopupUser
 
 	/**
 	 * Diese Elementklasse stellt das PopupMenu für die Gruppenliste bereit.
@@ -383,7 +382,7 @@ public class ContactList extends JWindow {
 		 * @param group String 
 		 * @param popupListener ActionListener
 		 */
-		public PopupGroup( String group, ActionListener popupListener ) {
+		private PopupGroup( String group, ActionListener popupListener ) {
 			this.group = group;
 			
 			// Initialisierungen der Menüeinträge
@@ -397,8 +396,8 @@ public class ContactList extends JWindow {
 			// Menüeinträge hinzufügen
 			this.add( join );
 			this.add( leave );
-		}
-	}
+		}//eom PopupGroup()
+	}//eoc PopupGroup
 
 	/**
 	 * Diese Elementklasse stellt einen ActionListener bereit.
@@ -421,9 +420,9 @@ public class ContactList extends JWindow {
 		 * 
 		 * @param chatname Strin
 		 */
-		public popupListener( String chatname ){
+		private popupListener( String chatname ){
 			this.chatname = chatname;
-		}
+		}//eom popupListener( String chatname )
 
 		/* (non-Javadoc)
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
@@ -472,8 +471,8 @@ public class ContactList extends JWindow {
 					GUI.getGUI().changeAlias( tmpAlias );
 				} 
 			}
-		}
-	}
+		}//eom actionPerformed()
+	}//eoc popupListener
 
 	/**
 	 * Diese Elementklasse rendert die Elemente der Userlist
@@ -488,15 +487,14 @@ public class ContactList extends JWindow {
 		/**
 		 * Konstruktor für den ListCellRenderer
 		 */
-		public UsersListCellRenderer() {
+		private UsersListCellRenderer() {
 			setOpaque( true );
-		}
+		}//eom UsersListCellRenderer()
 		
 		/* (non-Javadoc)
 		 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 		 */
 		public Component getListCellRendererComponent( JList paramlist, Object value, int index, boolean isSelected, boolean cellHasFocus ) {
-
 			//die Anzeige des Alias in der Userliste anpassen:
 			String tmpText = value.toString();
 			String[] cutText = tmpText.split( "@", 2 );
@@ -532,8 +530,8 @@ public class ContactList extends JWindow {
 				setBackground( getBackground().darker() );
 			}
 			return this;
-		}
-	}
+		}// eom getListCellRendererComponent()
+	}//eoc UserListCellRenderer
 
 	/**
 	 * Diese Elementklasse rendert die Elemente der Gruppenliste
@@ -548,9 +546,9 @@ public class ContactList extends JWindow {
 		/**
 		 * Konstruktor für den ListCellRenderer
 		 */
-		public GroupsListCellRenderer() {
+		private GroupsListCellRenderer() {
 			setOpaque( true );
-		}
+		}//eom GroupsListCellRenderer()
 		
 		/* (non-Javadoc)
 		 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
@@ -577,6 +575,6 @@ public class ContactList extends JWindow {
 				setBackground( getBackground().darker() );
 			}
 			return this;
-		}
-	}
-}
+		}//eom getListCellRendererComponent()
+	}//eoc GroupListCellRenderer
+}//eoc ContactList

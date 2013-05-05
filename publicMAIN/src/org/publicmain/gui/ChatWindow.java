@@ -697,7 +697,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		 * 
 		 * @param target
 		 */
-		public History( JTextField target ) {
+		private History( JTextField target ) {
 			eingabeHistorie = new ArrayList<String>();
 			eingabeAktuell = 0;
 			target.addKeyListener( this );
@@ -711,7 +711,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		 * 
 		 * @param eingabe
 		 */
-		public void add( String eingabe ) {
+		private void add( String eingabe ) {
 			eingabeHistorie.add( eingabe );
 			eingabeAktuell = eingabeHistorie.size();
 		}//eom add( String eingabe )

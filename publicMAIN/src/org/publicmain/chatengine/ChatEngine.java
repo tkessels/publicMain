@@ -339,7 +339,7 @@ public class ChatEngine{
 	 * an.
 	 * 
 	 * @param chatPanel das abonierende Fenster
-	 * @param gruppen_name zu abonierender Gruppen Kanal
+	 * @param uid zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel, long uid) {
 		//long nid = ce.getNodeForUID(uid).getNodeID();

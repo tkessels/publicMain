@@ -53,7 +53,6 @@ public class LocalDBConnection {
 	private String msgTbl;
 	private Set<Node> allnodes = Collections.synchronizedSet(new HashSet<Node>());
 
-
 	//--------neue Sachen------------
 	private int dbStatus;					// 0=nicht bereit	1=con besteht	2=DB und Tabellen angelegt 3=mit db verbunden
 	private int maxVersuche;

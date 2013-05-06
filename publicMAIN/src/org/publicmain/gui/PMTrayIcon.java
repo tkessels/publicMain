@@ -23,13 +23,14 @@ import org.publicmain.common.NachrichtenTyp;
 import org.resources.Help;
 
 /**
+ * Diese Klasse stellt das TrayIcon zur Verfügung.
+ * 
  * Diese Klasse stellt das Icon in der SystemTray mit Kontextmenü bereit, hier
  * können Benachrichtigungen und andere Einstellungen getätigt werden.
  * 
  * @author ATRM
  * 
  */
-
 public class PMTrayIcon {
 
 	private TrayIcon trayIcon;
@@ -41,7 +42,9 @@ public class PMTrayIcon {
 	private CheckboxMenuItem notifyPrivMsg;
 	private CheckboxMenuItem notifyGroupMsg;
 
-
+	/**
+	 * Der Konstruktor für PMTrayIcon
+	 */
 	public PMTrayIcon() {
 		// Prüfung ob Systemtray unterstützt:
 		if (!SystemTray.isSupported()) {
@@ -49,16 +52,19 @@ public class PMTrayIcon {
 			return;
 		}
 
+		// Initialisierungen:
 		this.popup = new PopupMenu();
-		this.trayIcon = new TrayIcon(Help.getIcon("pM_Logo.png",16).getImage());
+		this.trayIcon = new TrayIcon(Help.getIcon("pM_Logo.png", 16).getImage());
 		this.sysTray = SystemTray.getSystemTray();
 		this.display = new MenuItem("Display");
 		this.notifies = new Menu("Notify");
-		this.notifyPrivMsg = new CheckboxMenuItem("Private Messages",Config.getConfig().getNotifyPrivate());
-		this.notifyGroupMsg = new CheckboxMenuItem("Group Messages",Config.getConfig().getNotifyGroup());
-
+		this.notifyPrivMsg = new CheckboxMenuItem("Private Messages", Config
+				.getConfig().getNotifyPrivate());
+		this.notifyGroupMsg = new CheckboxMenuItem("Group Messages", Config
+				.getConfig().getNotifyGroup());
 		this.exit = new MenuItem("Exit");
 
+		// Hinzufügen der komponenten
 		popup.add(display);
 		popup.addSeparator();
 		popup.add(notifies);
@@ -70,104 +76,147 @@ public class PMTrayIcon {
 		try {
 			sysTray.add(trayIcon);
 		} catch (AWTException e) {
-			LogEngine.log(this, "TrayIcon konnte nicht hinzugefügt werden.", LogEngine.ERROR);
+			LogEngine.log(this, "TrayIcon konnte nicht hinzugefügt werden.",
+					LogEngine.ERROR);
 			return;
 		}
 
-		/**
-		 * TODO: Kommentar
-		 */
+		// Listener hinzufügen
+		// ActionListener für das TrayIcon selbst.
 		trayIcon.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
+				if (GUI.getGUI().getExtendedState() == JFrame.ICONIFIED) {
 					GUI.getGUI().setExtendedState(JFrame.NORMAL);
 				}
 				GUI.getGUI().setVisible(true);
 			}
 		});
 
-		/**
-		 * TODO: Kommentar
-		 */
+		// ActionListener für Menüeintrag display.
 		display.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e){
-				if(GUI.getGUI().getExtendedState() == JFrame.ICONIFIED){
+			public void actionPerformed(ActionEvent e) {
+				if (GUI.getGUI().getExtendedState() == JFrame.ICONIFIED) {
 					GUI.getGUI().setExtendedState(JFrame.NORMAL);
 				}
 				GUI.getGUI().setVisible(true);
 			}
 		});
 
-		/**
-		 * TODO: Kommentar
-		 */
+		// Listener für die CheckboxMenuItems Private Messages / Group Messages.
 		ItemListener listener = new ItemListener() {
 
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see
+			 * java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent
+			 * )
+			 */
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				CheckboxMenuItem item = (CheckboxMenuItem)e.getSource();
-				switch (item.getLabel()){
-				case "Private Messages" :
+				CheckboxMenuItem item = (CheckboxMenuItem) e.getSource();
+				switch (item.getLabel()) {
+				// wenn selektiert wird bei minimierten GUI ein Popup über neue
+				// private Nachrichten angezeigt
+				case "Private Messages":
 					Config.getConfig().setNotifyPrivate(item.getState());
 					Config.write();
-
-					//		                	notifyPriv = item.getState();
 					break;
-				case "Group Messages" :
+				// wenn selektiert wird bei minimierten GUI ein Popup über neue
+				// gruppen Nachrichten angezeigt
+				case "Group Messages":
 					Config.getConfig().setNotifyGroup(item.getState());
 					Config.write();
-					//		                	notifyGrp = item.getState();
 					break;
-				default :
-					trayIcon.displayMessage("default", "default", TrayIcon.MessageType.NONE);
+				default:
+					trayIcon.displayMessage("default", "default",
+							TrayIcon.MessageType.NONE);
 					break;
 				}
 			}
 		};
 
+		// Listener den CheckboxMenuItems hinzufügen
 		notifyPrivMsg.addItemListener(listener);
 		notifyGroupMsg.addItemListener(listener);
 
+		// ActionListener für Menüeintrag exit
 		exit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sysTray.remove(trayIcon);
+				removeTray();
 				GUI.getGUI().shutdown();
 			}
 		});
-	}
+	}// eom PMTrayIcon()
 
-	protected void removeTray(){
+	/**
+	 * Diese Methode entfernt das TrayIcon.
+	 */
+	void removeTray() {
 		sysTray.remove(trayIcon);
-	}
+	}// eom removeTray()
 
-	protected void recieveMSG(MSG msg) {
+	/**
+	 * Diese Methode erlaubt das empfangen von Nachrichten im TrayIcon.
+	 * 
+	 * Diese Methode übernimmt eine MSG (msg) und zeigt diese ggf. als Popup an.
+	 * 
+	 * @param msg
+	 *            MSG übergebene Nachricht.
+	 */
+	void recieveMSG(MSG msg) {
+		// Das nervigste Geräusch das wir gefunden haben.
 		Help.playSound("icq.au");
 		String msgSender;
 
-		if(msg.getTyp() == NachrichtenTyp.PRIVATE){
-			msgSender = ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias();
-			if(Config.getConfig().getNotifyPrivate()){
-				trayIcon.displayMessage(msgSender, (String)msg.getData(), TrayIcon.MessageType.NONE);
+		if (msg.getTyp() == NachrichtenTyp.PRIVATE) {
+			// Sender der Nachricht aus dem MSG paket holen
+			msgSender = ChatEngine.getCE().getNodeForNID(msg.getSender())
+					.getAlias();
+			// Wenn getNotifyPrivate true (pirvate Nachrichten sollen angezeigt
+			// werden) wird Popup ausgegeben.
+			if (Config.getConfig().getNotifyPrivate()) {
+				trayIcon.displayMessage(msgSender, (String) msg.getData(),
+						TrayIcon.MessageType.NONE);
 			}
 		} else {
+			// SenderGruppe aus dem MSG paket holen
 			msgSender = msg.getGroup();
+			// Wenn getNotifyGroup true (gruppen Nachrichten sollen angezeigt
+			// werden) wird Popup ausgegeben.
 			if (Config.getConfig().getNotifyGroup()) {
-				trayIcon.displayMessage( msgSender,
-						ChatEngine.getCE().getNodeForNID(msg.getSender()).getAlias() + ": " + (String) msg.getData(),
-						TrayIcon.MessageType.NONE );
+				trayIcon.displayMessage(msgSender, ChatEngine.getCE()
+						.getNodeForNID(msg.getSender()).getAlias()
+						+ ": " + (String) msg.getData(),
+						TrayIcon.MessageType.NONE);
 			}
 		}
 
-	}
+	}// eom recieveMSG()
 
-	protected void recieveText(String text, MSGCode code) {
+	/**
+	 * Diese Methode erlaubt das empfangen von Text im TrayIcon.
+	 * 
+	 * Diese Methode übernimmt einen String (text) und einen MSGCode (code) und
+	 * zeigt je nach MSGCode unterschiedliche Arten von Popups im TrayIcon.
+	 * 
+	 * @param text
+	 *            String auszugebende Text Nachricht
+	 * @param code
+	 *            MSGCode CW_WARNING_TEXT für Warnmeldung, CW_ERROR_TEXT für
+	 *            Fehlermeldungen, CW_INFO_TEXT für Informartionen.
+	 */
+	void recieveText(String text, MSGCode code) {
 		Help.playSound("notify.wav");
-		if(code == MSGCode.CW_INFO_TEXT){
-			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.INFO);
-		} else if(code == MSGCode.CW_WARNING_TEXT){
-			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.WARNING);
-		} else if(code == MSGCode.CW_ERROR_TEXT){
-			trayIcon.displayMessage("Incoming Info", text, TrayIcon.MessageType.ERROR);
+		if (code == MSGCode.CW_INFO_TEXT) {
+			trayIcon.displayMessage("Incoming Info", text,
+					TrayIcon.MessageType.INFO);
+		} else if (code == MSGCode.CW_WARNING_TEXT) {
+			trayIcon.displayMessage("Incoming Info", text,
+					TrayIcon.MessageType.WARNING);
+		} else if (code == MSGCode.CW_ERROR_TEXT) {
+			trayIcon.displayMessage("Incoming Info", text,
+					TrayIcon.MessageType.ERROR);
 		}
-	}
-}
+	}// eom recieve Text()
+}// eoc PMTrayIcon

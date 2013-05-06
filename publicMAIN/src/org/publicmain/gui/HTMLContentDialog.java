@@ -122,7 +122,6 @@ public class HTMLContentDialog extends JDialog {
 
 	/**
 	 * Den HTMLContentDialog ausblenden.
-	 * TODO: Überprüfen ob diese Methode genutzt wird!
 	 */
 	public void hideIt() {
 		this.setVisible(false);

@@ -171,7 +171,7 @@ public class NodeEngine {
 	 * Getter für den optimalen Node zum anfügen eines weiteren, abhängig von
 	 * der gewählten Strategie.
 	 * 
-	 * @return
+	 * @return Node
 	 */
 	private Node getBestNode() {
 		return myStrategy.getBestNode();
@@ -1272,7 +1272,7 @@ public class NodeEngine {
 	 * @param newAlias Neuer Anzeigename des Knoten
 	 * @param nid Der zu aktualisierende Knoten
 	 * 
-	 * @return 
+	 * @return boolean
 	 */
 	private boolean updateAlias(String newAlias, long nid) {
 		Node tmp;

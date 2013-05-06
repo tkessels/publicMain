@@ -478,7 +478,7 @@ public class DatabaseEngine {
 	 * @param databasename Zu verbindende Datenbank
 	 * @param user Anmeldename für den Datenbankserver
 	 * @param password Passwort für den Datenbankserver
-	 * @param timeout TODO
+	 * @param timeout für den Verbindungsaufbauversuch
 	 * @return <table><tr><th>Wert</th><th align="left">Bedeutung</th></tr>
 	 * 				 <tr><td align="center">0</td><td>Verbindungsdaten sind korrekt Datenbank hat geantwortet</td></tr>
 	 * 				 <tr><td align="center">1</td><td>Server Antwortet nicht </td></tr>

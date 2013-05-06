@@ -46,7 +46,7 @@ public class Config {
 	/**
 	 * Getter welcher die aktuelle Konfiguration zurï¿½ckliefert.
 	 * 
-	 * @return
+	 * @return ConfigData-Objekt mit der Config zum Inhalt
 	 */
 	public static synchronized ConfigData getConfig() {
 		if (me == null) {
@@ -79,7 +79,7 @@ public class Config {
 	/**
 	 * System-Konfiguration schreiben.
 	 * 
-	 * @return
+	 * @return true wenn write erfolgreich, false wenn write nicht erfolgreich
 	 */
 	public static synchronized boolean writeSystemConfiguration() {
 		try (FileOutputStream fos = new FileOutputStream(system_conf)) {
@@ -199,7 +199,7 @@ public class Config {
 	/**
 	 * Die Methode liefert die Standart-Einstellungen der Anwendung
 	 * 
-	 * @return
+	 * @return Standart ConfigData
 	 */
 	private static ConfigData getSourceSettings() {
 		ConfigData tmp = new ConfigData();
@@ -266,7 +266,8 @@ public class Config {
 	}
 	
 	/**
-	 * TODO: Kommentar!
+	 * Diese Methoder importiert mitgegebene Einstellungen 
+	 * in die lokale Config
 	 * 
 	 * @param tmp
 	 */
@@ -281,9 +282,9 @@ public class Config {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Gibt alle nonDefault Settings zurück
 	 * 
-	 * @return
+	 * @return Properties-Objekt mit nonDefault Einstellungen zum Inhalt
 	 */
 	public static Properties getNonDefault() {
 		Properties rueck = new Properties();

@@ -49,7 +49,7 @@ public class ChatEngine{
 	/**
 	 * Liefert die laufende Instanz der ChatEngine
 	 * 
-	 * @return: ChatEngine
+	 * @return ChatEngine
 	 */
 	public static ChatEngine getCE() {
 		return ce;
@@ -82,8 +82,8 @@ public class ChatEngine{
 	/**
 	 * Findet zu einer definierten NodeID zugehörigen Node in der Liste.
 	 * 
-	 * @param nid, NodeID
-	 * @return Node-Objekt zu angegebenem NodeID
+	 * @param nid NodeID
+	 * @return Node Node-Objekt zu angegebenem NodeID
 	 */
 	public Node getNodeForNID(long nid) {
 		return ne.getNode(nid);
@@ -98,8 +98,8 @@ public class ChatEngine{
 	 * {@link Node} und liefert diesen zurück. <br>
 	 * <b>Diese Methode ist nur für Befehlseingaben vorgesehen!</b>
 	 * 
-	 * @param
-	 * @return {@link Node}
+	 * @param alias
+	 * @return Node {@link Node}
 	 */
 	public Node getNodeforAlias(String alias) {
 		Set<Node> tmp = new HashSet<Node>();
@@ -118,7 +118,7 @@ public class ChatEngine{
 	/**
 	 * Diese Methode liefert die eigene NodeID.
 	 * 
-	 * @return
+	 * @return long
 	 */
 	public long getMyNodeID() {
 		return ne.getNodeID();
@@ -127,7 +127,7 @@ public class ChatEngine{
 	/**
 	 * Getter für die <code>UserID</code>.
 	 * 
-	 * @return userID
+	 * @return long userID
 	 */
 	public long getUserID() {
 		return userID;
@@ -136,7 +136,7 @@ public class ChatEngine{
 	/**
 	 * Getter für den Anzeigenamen (Alias) zurück.
 	 * 
-	 * @return userID
+	 * @return String alias
 	 */
 	public String getAlias() {
 		return alias;
@@ -145,7 +145,7 @@ public class ChatEngine{
 	/**
 	 * Setter für den Anzeigenamen (Alias) des eigenen Benutzers.
 	 * 
-	 * @param alias, neuer Anzeigename [a-zA-Z0-9]{12}
+	 * @param alias neuer Anzeigename [a-zA-Z0-9]{12}
 	 */
 	public void setAlias(String alias) {
 		this.alias = alias;
@@ -174,8 +174,8 @@ public class ChatEngine{
 	 * Weisst die ChatEngine an einen <code>Text</code> an eine Gruppe
 	 * <code>group</code> zu schicken.
 	 * 
-	 * @param group, Gruppenbezeichnung
-	 * @param text, Nachricht
+	 * @param group Gruppenbezeichnung
+	 * @param text Nachricht
 	 */
 	public void send_group(String group, String text) {
 		MSG tmp = new MSG(group, text);
@@ -194,8 +194,6 @@ public class ChatEngine{
 	 *            Datei
 	 * @param uid
 	 *            UID des Empfängers
-	 * 
-	 * @return id des Dateitransfers für spätere Rückfragen
 	 */
 	public void send_file(File datei, long uid) {
 		Node tmp_node = getNodeForUID(uid);
@@ -226,7 +224,7 @@ public class ChatEngine{
 	/**
 	 * Fragt ein Array alle User ab.
 	 * 
-	 * @return Array aller verbundener Nodes
+	 * @return Set<Node> aller verbundener Nodes
 	 */
 	public Set<Node> getUsers() {
 		return ne.getNodes();
@@ -251,7 +249,7 @@ public class ChatEngine{
 	/**
 	 * Verlässt eine Gruppe wieder.
 	 * 
-	 * @param gruppen_name, Gruppennamen sind CaseInSensitiv und
+	 * @param gruppen_name Gruppennamen sind CaseInSensitiv und
 	 *            			bestehen aus alphanumerischen Zeichen
 	 */
 	public void group_leave(String gruppen_name) {
@@ -265,7 +263,7 @@ public class ChatEngine{
 	/**
 	 * Liefert eine Liste der verfügbaren Gruppenstrings.
 	 * 
-	 * @return Array der verfügbaren Gruppenstrings
+	 * @return Set<String> der verfügbaren Gruppenstrings
 	 */
 	public Set<String> getAllGroups() {
 		synchronized (ne.getGroups()) {
@@ -278,9 +276,8 @@ public class ChatEngine{
 	 * wird von der NodeEnginge aufgerufen und soll an die GUI weiterleiten.
 	 * 
 	 * @param parameterObject
-	 * @param filename
 	 * 
-	 * @return, abstraktes Fileobjekt zu speicherung einer Datei oder "null"
+	 * @return File abstraktes Fileobjekt zu speicherung einer Datei oder "null"
 	 *          wenn der Nutzer den Empfang ablehnt
 	 */
 	public File request_File(FileTransferData parameterObject) {
@@ -293,6 +290,8 @@ public class ChatEngine{
 	 * die GUI realisiert werden.
 	 * 
 	 * @param uid
+	 * 
+	 * @return boolean
 	 */
 	public boolean ignore_user(long uid) {
 		if (uid != userID)
@@ -308,6 +307,8 @@ public class ChatEngine{
 	 * Eintrages signalisiert
 	 * 
 	 * @param uid
+	 * 
+	 *@return boolean
 	 */
 	public boolean unignore_user(long uid) {
 		return ignored.remove(uid);
@@ -317,8 +318,8 @@ public class ChatEngine{
 	 * Meldet einen Nachrichten-Listener an einem Gruppen - Nachrichten Kanal
 	 * an.
 	 * 
-	 * @param chatPanel, das abonierende Fenster
-	 * @param gruppen_name, zu abonierender Gruppen Kanal
+	 * @param chatPanel das abonierende Fenster
+	 * @param gruppen_name zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel, String gruppen_name) {
 		for (Kanal cur : group_channels) {
@@ -337,8 +338,8 @@ public class ChatEngine{
 	 * Meldet einen Nachrichten-Listener an einem privaten - Nachrichten Kanal
 	 * an.
 	 * 
-	 * @param chatPanel, das abonierende Fenster
-	 * @param gruppen_name, zu abonierender Gruppen Kanal
+	 * @param chatPanel das abonierende Fenster
+	 * @param uid zu abonierender Gruppen Kanal
 	 */
 	public void add_MSGListener(Observer chatPanel, long uid) {
 		//long nid = ce.getNodeForUID(uid).getNodeID();
@@ -395,7 +396,7 @@ public class ChatEngine{
 	 * Wird von der NodeEngine aufgerufen um für den User interressante
 	 * Nachrichten an die ChatEngine zu übermitteln.
 	 * 
-	 * @param nachricht, die neue Nachricht
+	 * @param nachricht die neue Nachricht
 	 */
 	public void put(MSG nachricht) {
 		inbox.add(nachricht);
@@ -448,7 +449,7 @@ public class ChatEngine{
 	 * Getter für die eigenen Gruppenmigliedschaften, liefert ein Set, vom Typ
 	 * String, zurück.
 	 * 
-	 * @return
+	 * @return Set<String>
 	 */
 	public Set<String> getMyGroups() {
 		synchronized (myGroups) {
@@ -458,6 +459,8 @@ public class ChatEngine{
 
 	/**
 	 * Den eigenen Benutzeralias ändern.
+	 * 
+	 * @param newAlias
 	 */
 	public void updateAlias(String newAlias) {
 		setAlias(newAlias);
@@ -468,6 +471,8 @@ public class ChatEngine{
 	 * Verschiedene Debug-Funktionen zum testen usw. diese werden später
 	 * aus dem Programm entfernt.
 	 * 
+	 * @param command
+	 * @param parameter
 	 */
 	public void debug(String command, String parameter) {
 		switch (command) {
@@ -526,7 +531,7 @@ public class ChatEngine{
 	 * zurückliefern.
 	 * 
 	 * @param nodeID
-	 * @return
+	 * @return boolean
 	 */
 	public boolean is_ignored(long nodeID) {
 		Node tmp = ce.getNodeForNID(nodeID);
@@ -539,7 +544,7 @@ public class ChatEngine{
 	 * zurückliefern.
 	 * 
 	 * @param uid
-	 * @return
+	 * @return boolean
 	 */
 	public boolean is_uid_ignored(long uid) {
 		return ignored.contains(uid);

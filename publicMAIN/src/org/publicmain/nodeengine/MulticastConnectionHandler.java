@@ -61,7 +61,7 @@ public class MulticastConnectionHandler {
 	 * @param multicast_IP MulticastIP des Multicastkanals
 	 * @param port Port des Multicastsockets
 	 * @param ttl Anzahl an hops die gesende Multicastpakete machen
-	 * @return
+	 * @return MulticastConnectionHandler
 	 */
 	public static synchronized MulticastConnectionHandler getMC(String multicast_IP, int port, int ttl) {
 		if (me!=null) return me;

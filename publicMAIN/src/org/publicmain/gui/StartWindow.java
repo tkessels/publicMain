@@ -29,10 +29,10 @@ import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 /**
- * @author ATRM
  * Diese Klasse Stellt das Fenster für den ersten Start des Programmes zur Verfügung 
  * und nimmt die für den Programmstart notwendigen Daten entgegen.
  *
+ * @author ATRM
  */
 public class StartWindow extends JFrame implements ActionListener{
 
@@ -154,9 +154,10 @@ public class StartWindow extends JFrame implements ActionListener{
 
 	/**
 	 * Diese Methode prüft die gültigkeit der Konfiguration (Config)
-	 * nachdem das Startwindow alle Notwendigen abfragen durchgeführt hat
-	 * @return true:	Config nicht gültig
-	 * @return false:	Config gültig
+	 * nachdem das Startwindow alle Notwendigen abfragen durchgeführt hat.
+	 * 
+	 * @return boolean 	true	Config nicht gültig
+	 * 					false	Config gültig
 	 */
 	private synchronized boolean checkAndReturn(){
 		try {
@@ -169,9 +170,10 @@ public class StartWindow extends JFrame implements ActionListener{
 	}
 
 	/**
-	 * Factory-Methode für das StartWindow
-	 * @return true:	alle StartWindow-Aufgaben wurden erfolgreich abgearbeitet 
-	 * @return false:	Fehler bei der Abarbeitung innerhalb des Startwindwos
+	 * Factory-Methode für das StartWindow.
+	 * 
+	 * @return boolean  true:	alle StartWindow-Aufgaben wurden erfolgreich abgearbeitet 
+	 * 					false:	Fehler bei der Abarbeitung innerhalb des Startwindwos
 	 */
 	public static boolean getStartWindow(){
 		StartWindow me = new StartWindow();
@@ -182,7 +184,7 @@ public class StartWindow extends JFrame implements ActionListener{
 	
 	/**
 	 * Diese Methode prüft die Richtigekeit der der vom Benutzer in das Nutzername und Passwort-Feld eingegebenen daten
-	 * und färbt den Hintergund dieser Felder Grün(eingegebene daten richtig) oder white(eingegebene Daten (noch) nicht korrekt(/komplett)  
+	 * und färbt den Hintergund dieser Felder Grün(eingegebene daten richtig) oder white(eingegebene Daten (noch) nicht korrekt(/komplett). 
 	 */
 	private void ppCheck() {
 		if(DatabaseEngine.getDatabaseEngine().isValid(userNameTextField.getText(), passWordTextField.getText())) {
@@ -195,8 +197,9 @@ public class StartWindow extends JFrame implements ActionListener{
 	}
 
 	/**
-	 * Diese Methode ändert das Aussehen des Startwindows und stellt zusätzliche Eingabefelder zur Verfügung
-	 * @param sourceButton:	Der button, aufgrund dessen Click das Startwindow umgebaut wird.
+	 * Diese Methode ändert das Aussehen des Startwindows und stellt zusätzliche Eingabefelder zur Verfügung.
+	 * 
+	 * @param sourceButton	Der button, aufgrund dessen Click das Startwindow umgebaut wird.
 	 */
 	private void changeStructure(JButton sourceButton){
 		statusTextField.setBackground(new Color(229, 195, 0));
@@ -337,9 +340,10 @@ public class StartWindow extends JFrame implements ActionListener{
 	
 	
 	/**
-	 * @author ATRM
 	 * Diese Klasse initialiseier eine prüfung der eingegenen Daten
-	 * und kann zum beispiel für Textfelder eingebunden werden
+	 * und kann zum beispiel für Textfelder eingebunden werden.
+	 * 
+	 * @author ATRM
 	 */
 	private final class PPuserChecker implements DocumentListener {
 		@Override

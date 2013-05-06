@@ -11,8 +11,6 @@ package org.publicmain.sql;
  * - die Anwendung kann Logs über die aktuelle Sitzung hinaus ablegen,
  * - die Anwendung kann Routinginformationen ablegen.
  *
- * TODO: Kommentar erweitern!
- * 
  * Verantwortlich für das SQL-Package: René Pfaffner
  * 
  * @author ATRM

@@ -47,7 +47,7 @@ import org.resources.Help;
 
 /**
  * Die NodeEngine ist für die Verbindungen zu anderen Nodes zuständig. Sie
- * verwaltet die bestehenden Verbindungen, sendet Nachichten und Dateien und ist
+ * verwaltet die bestehenden Verbindungen, sendet Nachrichten und Dateien und ist
  * für das Routing zuständig.
  * 
  * @author ATRM
@@ -360,7 +360,7 @@ public class NodeEngine {
 
 	/**
 	 * Versendet Datein über eine TCP-Direktverbindung. Wird nur von send()
-	 * aufgerufen, nachdem festgestellt wurde, dass nachicht > 5MB
+	 * aufgerufen, nachdem festgestellt wurde, dass Nachricht > 5MB
 	 * 
 	 * @param datei Das zu versendende Fileobjekt
 	 * @param receiver NodeID des Empfängers

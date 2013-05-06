@@ -31,10 +31,11 @@ import org.publicmain.common.Node;
 import org.publicmain.nodeengine.NodeEngine;
 
 /**
- * @author ATRM
  * 
  * Die Klasse DatabaseEngine Verwaltet die Kommunikation mit der lokalen und der Backupdatenbank.
  * Sie ruft deren Methoden auf um dem Anwenderwunsch gerecht zu werden
+ * 
+ * @author ATRM
  */
 public class DatabaseEngine {
 
@@ -84,9 +85,9 @@ public class DatabaseEngine {
 	
 	/**
 	 * Diese Methode weist die BackupDatenbankConnectionKlasse an eine bestimmte Nutzername-Passwort-Kombination auf gültigkeit zu überprüfen.
-	 * @param username: Nutzername des bestimmten Benutzers
-	 * @param password:	Passwort des bestimmten Benutzers
-	 * @return
+	 * @param username Nutzername des bestimmten Benutzers
+	 * @param password	Passwort des bestimmten Benutzers
+	 * @return true ist valid, false if not valid
 	 */
 	public boolean isValid(String username, String password) {
 		return (backupDB.getIDfor(username, password)!=-1);
@@ -96,14 +97,14 @@ public class DatabaseEngine {
 	 * Diese Methode holt sich eine Connection von der BackupDBConnection Klasse,
 	 * indem sie ihr die gewünschten parameter übergibt und prüft damit / anschließend damit die 
 	 * richtigkeit der übergebenen Daten.
-	 * @param username:		zu überprüfender Benutzername
-	 * @param password:		zu überprüfendes Passowort
-	 * @param ip:			IP-Adresse des Datenbankservers zu welchem die Verbindung hergestellt werden soll
-	 * @param dbPort:		Port über welchen die DB-Verbidung hergestellt werden soll
-	 * @param dbusername:	Username mit welchem die DB-Verbidung hergestellt werden soll
-	 * @param dbpassword:	Passwort mit welchem die DB-Verbidung hergestellt werden soll
-	 * @return true:		übergebene Daten Korrekt
-	 * @return false:		übergebene Daten fehlerhaft
+	 * @param username		zu überprüfender Benutzername
+	 * @param password		zu überprüfendes Passowort
+	 * @param ip			IP-Adresse des Datenbankservers zu welchem die Verbindung hergestellt werden soll
+	 * @param dbPort		Port über welchen die DB-Verbidung hergestellt werden soll
+	 * @param dbusername	Username mit welchem die DB-Verbidung hergestellt werden soll
+	 * @param dbpassword	Passwort mit welchem die DB-Verbidung hergestellt werden soll
+	 * @return true			übergebene Daten Korrekt
+	 * @return false		übergebene Daten fehlerhaft
 	 */
 	public boolean isValid(String username, String password,String ip, String dbPort, String dbusername, String dbpassword) {
 		long tmpID=-1;
@@ -133,7 +134,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert einen übergebene Nachricht(x) in eine lokale NachrichtenQueue 
-	 * @param x: Die zu speichernde Nachricht
+	 * @param x Die zu speichernde Nachricht
 	 */
 	public void put(MSG x){
 		msg2Store.offer(x);
@@ -141,7 +142,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert einen übergebenen Node(x) in eine lokale NodeQueue 
-	 * @param x: Der zu speichernde Node
+	 * @param x Der zu speichernde Node
 	 */
 	public void put(Node x){
 		node2Store.offer(x);
@@ -149,7 +150,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert eine übergebene Nodecollection(x) nacheinander in eine lokale NodeQueue 
-	 * @param x: Die zu speichernde Nodeliste
+	 * @param x Die zu speichernde Nodeliste
 	 */
 	public void put(Collection<Node> x){
 		for (Node node : x) {
@@ -159,27 +160,24 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert einen übergebenen Gruppe(group) in eine lokale GruppenQueue 
-	 * @param x: Der zu speichernde Node
+	 * @param group Der zu speichernde Gruppenname
 	 */
 	public void put(String group){
 		groups2Store.add(group);
 	}
 	
-	/**
-	 * Diese Methode speichert einen übergebenen Node(x) in eine lokale NodeQueue 
-	 * @param x: Der zu speichernde Node
-	 */
+
 	/**
 	 * Diese Methode speichert einen übergebenen Ziel-Gateway-Routenkombination in eine lokale RoutenQueue
-	 * @param target:	NodeID des Ziels
-	 * @param gateway:	NodeID des Gateways
+	 * @param target	NodeID des Ziels
+	 * @param gateway	NodeID des Gateways
 	 */
 	public void put(long target, long gateway){
 		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
 	}
 
 	/**
-	 * Diese Methode weist die LocalDBConnection an alle Nachichten aus der Datenbank zu entfernen
+	 * Diese Methode weist die LocalDBConnection an alle Nachrichten aus der Datenbank zu entfernen
 	 */
 	public void deleteLocalHistory() {
 		localDB.deleteAllMsgs();
@@ -196,9 +194,9 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode weist die BackupDBConnection an die gegebene BenutzerName-Passwort-Kombination zu löschen
-	 * @param username:	Benutzername des zu löschenden Nutzers
-	 * @param password:	Passwort des zu löschenden Nutzers
-	 * @return
+	 * @param username	Benutzername des zu löschenden Nutzers
+	 * @param password	Passwort des zu löschenden Nutzers
+	 * @return 0 if no DB-Connection, 1 if couldn´t find user, 2 if user deleted 
 	 */
 	public int deleteBackupUserAccount(String username, String password) {
 		if(backupDB.getStatus()>=1){
@@ -210,7 +208,7 @@ public class DatabaseEngine {
 	}
 
 	/**
-	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachichten und Settings von der LocalDBConnection-Klasse
+	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachrichten und Settings von der LocalDBConnection-Klasse
 	 * und übergibt diese zur Speicherung an die BackupDBConnection-Klasse
 	 */
 	public void push(){
@@ -223,7 +221,7 @@ public class DatabaseEngine {
 	}
 
 	/**
-	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachichten und Settings von der BackupDBConnection-Klasse
+	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachrichten und Settings von der BackupDBConnection-Klasse
 	 * und übergibt diese zur Speicherung an die LocalDBConnection-Klasse
 	 */
 	public void pull(){
@@ -408,7 +406,7 @@ public class DatabaseEngine {
 	/**
 	 * Diese Methode weist die LocalDBConnection-Klasse an alle gespeicherten
 	 * User zu übergeben, wandelt diese um und gibt sie als JComboBox zurück
-	 * @return
+	 * @return JComboBox mit Nodes
 	 */
 	public JComboBox<Node> getUsers(){
 		try {
@@ -444,11 +442,11 @@ public class DatabaseEngine {
 	/**
 	 * Diese Methode weist die Klasse BackupDBConnection an die Configdaten einers bestimmten
 	 * Benutzers aus der BackupDatenbank zu lesen und schreibt das ergebnis in die ProgrammConfig
-	 * @param user:		Username des besitmmten Benutzers
-	 * @param password:	Passwort des besitmmten Benutzers
-	 * @return 0:		Probleme mit dem SQL-Server
-	 * @return 1:		geladene Config leer
-	 * @return 2:		erfolgreich durchgeführt
+	 * @param user		Username des besitmmten Benutzers
+	 * @param password	Passwort des besitmmten Benutzers
+	 * @return 0		Probleme mit dem SQL-Server
+	 * @return 1		geladene Config leer
+	 * @return 2		erfolgreich durchgeführt
 	 */
 	public int getConfig(String user, String password) {
 		//load config
@@ -466,7 +464,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode weist die Klasse LocalDBConnection.java an
-	 * alle Nachichten aus der Config in die Datenbank zu schreiben
+	 * alle Nachrichten aus der Config in die Datenbank zu schreiben
 	 */
 	public void writeConfig(){
 		if(localDB.getStatus()) {
@@ -480,7 +478,7 @@ public class DatabaseEngine {
 	 * @param databasename Zu verbindende Datenbank
 	 * @param user Anmeldename für den Datenbankserver
 	 * @param password Passwort für den Datenbankserver
-	 * @param timeout TODO
+	 * @param timeout für den Verbindungsaufbauversuch
 	 * @return <table><tr><th>Wert</th><th align="left">Bedeutung</th></tr>
 	 * 				 <tr><td align="center">0</td><td>Verbindungsdaten sind korrekt Datenbank hat geantwortet</td></tr>
 	 * 				 <tr><td align="center">1</td><td>Server Antwortet nicht </td></tr>
@@ -514,7 +512,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode wandelt ein ResultSet in ein DefaultTableModel um und gibt dieses zurück
-	 * @param rs:	umzuwandelndes ResultSet
+	 * @param rs	umzuwandelndes ResultSet
 	 * @return		DefaultTableModel
 	 * @throws SQLException
 	 */
@@ -538,12 +536,12 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode weist die BackupDBConnection an, einen nutzer mit bestimmten Username und Passwort zu erstellen
-	 * @param username:	Benutzername des zu erstellenden Benutzers
-	 * @param password:	Passwort des zu erstellenden Benutzers
-	 * @return	0:	BackupDBConnection-Klasse nicht bereit
-	 * @return	1:	Anlegen des Benutzers nicht erfolgreich
-	 * @return	2:	Benutzername oder Passwort enthält verbotene Zeichen.
-	 * @return	3:	Benutzer wurde angelegt	
+	 * @param username	Benutzername des zu erstellenden Benutzers
+	 * @param password	Passwort des zu erstellenden Benutzers
+	 * @return	0	BackupDBConnection-Klasse nicht bereit
+	 * @return	1	Anlegen des Benutzers nicht erfolgreich
+	 * @return	2	Benutzername oder Passwort enthält verbotene Zeichen.
+	 * @return	3	Benutzer wurde angelegt	
 	 */
 	public int createUser(String username, String password) {
 		if(!username.matches(Config.getConfig().getNamePattern()) || !password.matches(Config.getConfig().getNamePattern())) return 2;
@@ -561,7 +559,7 @@ public class DatabaseEngine {
 	 * @author ATRM
 	 * Diese Klasse (bzw.die Run-Methode) wertet den Status der LocalDBConnection aus und lässt diese gegebenenfalls einen 
 	 * reconnect auf die lokale Datenbank ausführen.
-	 * Zeigt der Status eine erfolgreiche Verbindung an übergibt sie die Daten aus der Nachichten-Queue, der Gruppen-Queue und der Nodes-Queue
+	 * Zeigt der Status eine erfolgreiche Verbindung an übergibt sie die Daten aus der Nachrichten-Queue, der Gruppen-Queue und der Nodes-Queue
 	 * um sie in umgekehrter Reihenfolge zum schreiben an die Local-DB-Connection-Klasse zu übergeben.   
 	 *
 	 */

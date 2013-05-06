@@ -57,7 +57,7 @@ public class UserListModel extends AbstractListModel<Node>{
 						try {
 							ChatEngine.getCE().getUsers().wait();
 						} catch ( InterruptedException e ) {
-							LogEngine.log(e);
+							LogEngine.log( e );
 						}
 					}
 				}
@@ -103,8 +103,14 @@ public class UserListModel extends AbstractListModel<Node>{
 	}//eom getElementAt()
 	
 	/**
-	 * @param user
-	 * @return
+	 * Diese Methode prüft ob ein User vorhanden ist.
+	 * 
+	 * Diese Methode prüft ob ein übergebener String (user) bereits in der
+	 * Liste (users) enthalten ist. Ist dies der Fall wird true zurückgegeben
+	 * falls nicht wird false zurückgegeben.
+	 * 
+	 * @param user name des users
+	 * @return boolean true wenn vorhanden, false wenn nicht
 	 */
 	public boolean contains( String user ){
 		synchronized ( users ) {

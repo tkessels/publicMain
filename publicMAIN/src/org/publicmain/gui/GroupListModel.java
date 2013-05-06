@@ -42,21 +42,21 @@ public class GroupListModel extends AbstractListModel<String> {
 			@Override
 			public void run() {
 				// Endlosschleife
-				while (true) {
+				while ( true ) {
 					// die ArrayList<String> der Gruppen (groups) leeren
 					groups.clear();
 					// die Liste befüllen
-					groups.addAll(ChatEngine.getCE().getAllGroups());
+					groups.addAll( ChatEngine.getCE().getAllGroups() );
 					// hier wird der Liste die dieses Model hält
 					// bescheid gegeben das sich was geändert hat
-					fireContentsChanged(this, 0, groups.size());
+					fireContentsChanged( this, 0, groups.size() );
 					// synchronized Block für geregelten Zugriff auf die
 					// Schlüsselvariable .getAllGroups()
-					synchronized (ChatEngine.getCE().getAllGroups()) {
+					synchronized ( ChatEngine.getCE().getAllGroups() ) {
 						try {
 							ChatEngine.getCE().getAllGroups().wait();
-						} catch (InterruptedException e) {
-							LogEngine.log(e);
+						} catch ( InterruptedException e ) {
+							LogEngine.log( e );
 						}
 					}
 				}
@@ -66,7 +66,7 @@ public class GroupListModel extends AbstractListModel<String> {
 		this.groupListWriter.start();
 
 		// den Inhalt der Liste sortieren
-		Collections.sort(groups);
+		Collections.sort( groups );
 	} // eom GroupListModel()
 
 	/*
@@ -85,8 +85,8 @@ public class GroupListModel extends AbstractListModel<String> {
 	 * @see javax.swing.ListModel#getElementAt(int)
 	 */
 	@Override
-	public String getElementAt(int index) {
-		return groups.get(index);
+	public String getElementAt( int index ) {
+		return groups.get( index );
 	} // eom getElementAt ( int index )
 
 	/**
@@ -100,9 +100,9 @@ public class GroupListModel extends AbstractListModel<String> {
 	 *            String name der Gruppe
 	 * @return boolean true wenn enthalten, false wenn nicht enthalten.
 	 */
-	boolean contains(String group) {
-		synchronized (groups) {
-			return groups.contains(group);
+	boolean contains( String group ) {
+		synchronized ( groups ) {
+			return groups.contains( group );
 		}
 	} // eom contains( String group )
 } // eoc GroupListModel

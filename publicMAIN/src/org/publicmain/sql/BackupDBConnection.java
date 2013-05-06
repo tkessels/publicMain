@@ -32,7 +32,7 @@ public class BackupDBConnection {
 	 * Wenn noch keine BackupDBConnection besteht wird eine erstellt und
 	 * zurückgeliefert.
 	 * 
-	 * @return
+	 * @return DIE Instanz der BackupDBConnection
 	 */
 	public static BackupDBConnection getBackupDBConnection() {
 		if (me == null) {
@@ -43,7 +43,7 @@ public class BackupDBConnection {
 
 	/**
 	 * Versucht mit den in den Einstellungen hinterlegten Zugangsdaten die
-	 * BackupserverID abzufragen
+	 * BackupserverID abzufragen.
 	 * 
 	 * @return BackupUserID des Konfigurierten Push/Pull - Users oder
 	 *         <code>-1</code> wenn der User nicht existiert
@@ -55,7 +55,7 @@ public class BackupDBConnection {
 	}
 
 	/**
-	 * Versucht mit den angegebenen Zugangsdaten die BackupserverID abzufragen
+	 * Versucht mit den angegebenen Zugangsdaten die BackupserverID abzufragen.
 	 * 
 	 * @param username
 	 *            accountname auf dem Backupserver
@@ -102,11 +102,11 @@ public class BackupDBConnection {
 
 	/**
 	 * Über diese Methode kann der Status der Backupdatenbankverbindung
-	 * abgefragt werden
+	 * abgefragt werden.
 	 * 
-	 * @return: 0 - keine Verbindung zum Backupserver
-	 * @return: 1 - Verbindung besteht, aber kein User eingerichtet
-	 * @return: 2 - Verbindung besteht, angegebene Nutzerdaten korrekt.
+	 * @return 0 - keine Verbindung zum Backupserver
+	 * @return 1 - Verbindung besteht, aber kein User eingerichtet
+	 * @return 2 - Verbindung besteht, angegebene Nutzerdaten korrekt.
 	 */
 	public int getStatus() {
 		try {
@@ -250,14 +250,14 @@ public class BackupDBConnection {
 	}
 
 	/**
-	 * Diese Methode speichert alle Nachichten eines bestimmten Nutzers in der
+	 * Diese Methode speichert alle Nachrichten eines bestimmten Nutzers in der
 	 * BackupDatenbank ab.
 	 * 
 	 * @param tmp_messages
-	 *            Übergebenes ResultSet welches die zu speichernden Nachichten
+	 *            Übergebenes ResultSet welches die zu speichernden Nachrichten
 	 *            beinhaltet.
 	 * @param id
-	 *            ID des Nutzers, dessen Nachichten gespeichert werden sollen
+	 *            ID des Nutzers, dessen Nachrichten gespeichert werden sollen
 	 * @return true
 	 * 			  Speichern erfolgreich false: Speichern fehlgeschlagen
 	 */
@@ -411,7 +411,7 @@ public class BackupDBConnection {
 	
 	/**
 	 * Diese Methode überprüft ob ein bestimmter Nutzer in der BackupDatenbank
-	 * angelegt ist
+	 * angelegt ist.
 	 * 
 	 * @param userName
 	 *            Username des gesuchten Nutzers
@@ -467,7 +467,7 @@ public class BackupDBConnection {
 	}
 
 	/**
-	 * Diese Methode löscht alle Nachrichten des aktuellen Benutzers
+	 * Diese Methode löscht alle Nachrichten des aktuellen Benutzers.
 	 * 
 	 * @return true: Löschen aller Nachirchten erfolgreich
 	 * @return false: Löschen aller Nachirchten nicht erfolgreich
@@ -487,7 +487,7 @@ public class BackupDBConnection {
 	}
 
 	/**
-	 * Diese Methode löscht den aktuell genutzten User von der BackupDatenbank
+	 * Diese Methode löscht den aktuell genutzten User von der BackupDatenbank.
 	 * 
 	 * @return true: Löschen erfolgreich
 	 * @return false: Löschen nicht erfolgreich
@@ -500,7 +500,7 @@ public class BackupDBConnection {
 
 	/**
 	 * Diese Methode löscht einen bestimmten Benutzer
-	 * (Benutzernamen-Passwort-kombination) von der BackupDatenbank
+	 * (Benutzernamen-Passwort-kombination) von der BackupDatenbank.
 	 * 
 	 * @param usrName
 	 *            : UserName des zu löschenden Nutzers
@@ -533,7 +533,7 @@ public class BackupDBConnection {
 
 	/**
 	 * Diese Methode wandelt ein ResultSet von Settings in ein Config-Objekt um
-	 * (Properties)
+	 * (Properties).
 	 * 
 	 * @param settingsRS
 	 *            : ResultSet der umzuwandelnden settings
@@ -555,7 +555,7 @@ public class BackupDBConnection {
 
 	/**
 	 * Diese Methode stellt eine Verbinung mit in der Config gespeicherten Daten
-	 * her
+	 * her.
 	 * 
 	 * @return Connection: mit ConfigDaten hergestellte Verbindung
 	 * @throws SQLException
@@ -568,7 +568,7 @@ public class BackupDBConnection {
 	}
 
 	/**
-	 * Diese Methode stellt eine Verbinung mit gegenen Parametern her
+	 * Diese Methode stellt eine Verbinung mit gegenen Parametern her.
 	 * 
 	 * @param ip
 	 *            : IP-Adresse des Zielservers
@@ -595,7 +595,7 @@ public class BackupDBConnection {
 
 	/**
 	 * Diese Methode liefert die Settings eines bestimmten Benutzers aus der
-	 * BackupDatenbank
+	 * BackupDatenbank.
 	 * 
 	 * @param user
 	 *            : UserName des bestimmten Nutzers

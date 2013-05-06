@@ -42,9 +42,9 @@ public class MSG implements Serializable, Comparable<MSG> {
 	private Object data;
 
 	/**
-	 * Konstruktor für TODO
+	 * Konstruktor erstellt eine Nachricht eines mitgegebenen Typs
 	 * 
-	 * @param typ
+	 * @param typ der gewünschte Nachrichtentyp
 	 */
 	private MSG(NachrichtenTyp typ) {
 		this.id = getnextID();
@@ -56,7 +56,7 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter für einen Zähler, addiert 1 dazu wenn er aufgerufen wird.
 	 * 
-	 * @return
+	 * @return liefert die nächste ID zurück 
 	 */
 	private static synchronized int getnextID() {
 		return id_counter++;
@@ -65,12 +65,12 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Konstruktor für Nachrichten
 	 * 
-	 * @param typ
-	 * @param code
-	 * @param sender
-	 * @param empfänger
-	 * @param group
-	 * @param data
+	 * @param typ	typ der zu erstellenden Nachricht 
+	 * @param code	code der zu erstellenden Nachricht
+	 * @param sender der in die Nachricht einzutragende Sender
+	 * @param empfänger der in die Nachricht einzutragende Empfaenger
+	 * @param group	die in die Nachricht einzutragende Gruppe
+	 * @param data	die in der Nachricht zu Speichernde Daten
 	 */
 	public MSG(NachrichtenTyp typ, MSGCode code, long sender, long empfänger, String group, Object data) {
 		this.typ = typ;
@@ -84,10 +84,10 @@ public class MSG implements Serializable, Comparable<MSG> {
 	}
 
 	/**
-	 * Konstruktor für TODO
+	 * An diesen Konstruktor kann Systemnachrichten speichern
 	 * 
-	 * @param payload
-	 * @param code
+	 * @param payload Dateninhalt der SystemNachricht
+	 * @param code	MSGCode der zu erstellenden Nachricht
 	 */
 	public MSG(Object payload, MSGCode code){
 		this(NachrichtenTyp.SYSTEM);
@@ -96,11 +96,11 @@ public class MSG implements Serializable, Comparable<MSG> {
 	}
 
 	/**
-	 * Konstruktor für TODO
+	 * Dieser Konstruktor erstellt eine Nachricht
 	 * 
-	 * @param payload
-	 * @param code
-	 * @param recipient
+	 * @param payload beinhaltet Dateninhalt 
+	 * @param code	beinhaltet MSGCode
+	 * @param recipient	Empfaenger
 	 */
 	public MSG(Object payload, MSGCode code, long recipient) {
 		this(payload,code);
@@ -235,7 +235,9 @@ public class MSG implements Serializable, Comparable<MSG> {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Diese Methode errechnet einen Hashcode für diese Message
+	 * unabhängig vom Inhalt um sie in der Hashmap vergleichen zu können
+	 * 
 	 */
 	public int hashCode() {
 		final int prime = 31;
@@ -270,7 +272,7 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter für die Empfänger NodeID.
 	 * 
-	 * @return
+	 * @return die nodeID des Empfängers
 	 */
 	public long getEmpfänger() {
 		return empfänger;
@@ -279,7 +281,7 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter für die Sender NodeID
 	 * 
-	 * @return
+	 * @return die nodeID des Empfängers
 	 */
 	public long getSender() {
 		return sender;
@@ -288,7 +290,7 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter für den Zeitstempel.
 	 * 
-	 * @return
+	 * @return den Zeitstempel der Nachricht
 	 */
 	public long getTimestamp() {
 		return timestamp;
@@ -304,7 +306,7 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter für den Nachrichtentyp.
 	 * 
-	 * @return
+	 * @return der NachrichtenTyp dieser Nachricht
 	 */
 	public NachrichtenTyp getTyp() {
 		return typ;
@@ -313,16 +315,16 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter fürden Nachrichten-Code.
 	 * 
-	 * @return
+	 * @return der MSGCode dieser Nachricht
 	 */
 	public MSGCode getCode() {
 		return code;
 	}
 	
 	/**
-	 * Getter für TODO
+	 * Getter für für die Daten einer Nachricht
 	 * 
-	 * @return
+	 * @return die Daten dieser Nachricht
 	 */
 	public Object getData() {
 		return data;
@@ -331,16 +333,16 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Getter für die Empfänger-Gruppe. 
 	 * 
-	 * @return
+	 * @return die Gruppe dieser Nachricht
 	 */
 	public String getGroup() {
 		return group;
 	}
 
 	/**
-	 * Getter für TODO
+	 * Getter für die ID der Nachricht
 	 * 
-	 * @return
+	 * @return die ID dieser Nachricht
 	 */
 	public int getId() {
 		return id;
@@ -372,8 +374,8 @@ public class MSG implements Serializable, Comparable<MSG> {
 	 * Methode zum umwandeln von Objekten in einen Byte-Strom, liefert ein
 	 * Byte-Array zurück.
 	 * 
-	 * @param x
-	 * @return
+	 * @param x die Nachricht die umgewandelt werden soll 
+	 * @return ein ByteArray
 	 */
 	public static byte[] getBytes(MSG x) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -390,8 +392,8 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Methode zum umwandeln eines Byte-Arrays in ein MSG-Objekt.
 	 * 
-	 * @param data
-	 * @return
+	 * @param data umzuwandeldes ByteArray
+	 * @return	umgewandeltes ByteArray in Form einer MSG
 	 */
 	public static MSG getMSG(byte[] data) {
 		try {
@@ -423,7 +425,7 @@ public class MSG implements Serializable, Comparable<MSG> {
 	/**
 	 * Setter für den Gruppen-Namen. 
 	 * 
-	 * @param string
+	 * @param string zu setzender Gruppenname
 	 */
 	public void setGroup(String string) {
 		group=string;

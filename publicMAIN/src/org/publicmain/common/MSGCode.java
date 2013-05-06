@@ -12,7 +12,7 @@ public enum MSGCode {
 
 	NODE_UPDATE("inform on node changes"),
 	ALIAS_UPDATE("inform on alias changes"),
-	NODE_LOOKUP("beschreibungEinfügen"), // TODO
+	NODE_LOOKUP("requests for nodeupdate"), 
 	ECHO_REQUEST("ping request"),
 	ECHO_RESPONSE("ping response"),
 	PATH_PING_REQUEST("pathping request"),
@@ -25,7 +25,7 @@ public enum MSGCode {
 	POLL_ALLNODES("ask allnodes"),
 	REPORT_ALLNODES("inform allnodes"),
 	TREE_DATA_POLL("report topologie"),
-	TREE_DATA("beschreibungEinfügen"),// TODO
+	TREE_DATA("carries parcial tree data"),
 	NODE_SHUTDOWN("inform about own nodesshutdown"),
 	CHILD_SHUTDOWN("inform about childshutdown"),
 
@@ -70,7 +70,7 @@ public enum MSGCode {
 	/**
 	 * Liefert eine Description.
 	 * 
-	 * @return
+	 * @return die Description in Form eines Strings
 	 */
 	public String getDescription() {
 		return description;

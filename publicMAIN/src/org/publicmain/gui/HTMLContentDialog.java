@@ -29,6 +29,7 @@ import org.resources.Help;
  * 
  */
 
+@SuppressWarnings("serial")
 public class HTMLContentDialog extends JDialog {
 
 	private JDialog htmlDialog;
@@ -60,9 +61,7 @@ public class HTMLContentDialog extends JDialog {
 		this.setMinimumSize(new Dimension(250, GUI.getGUI().getHeight()));
 		this.setPreferredSize(new Dimension(250, GUI.getGUI().getHeight()));
 
-
 		hlc = new HyperLinkController();
-
 		htmlContentPane = new JTextPane();
 		htmlContentPane.addHyperlinkListener(hlc);
 
@@ -73,12 +72,6 @@ public class HTMLContentDialog extends JDialog {
 
 		htmlContentPane.setBackground(new Color(255, 255, 255));
 		htmlContentPane.setEditable(false);
-
-		//		try {
-		//			this.sound = Applet.newAudioClip(Help.class.getResource("fahrstuhl.mp3"));
-		//		} catch (Exception e2) {
-		//			System.out.println(e2.getMessage());
-		//		}
 
 		/**
 		 * Dieser Thread läd das HTML-Dokument auf die htmlContentPane, ohne die Anwendung
@@ -122,7 +115,6 @@ public class HTMLContentDialog extends JDialog {
 
 	/**
 	 * Den HTMLContentDialog ausblenden.
-	 * TODO: Überprüfen ob diese Methode genutzt wird!
 	 */
 	public void hideIt() {
 		this.setVisible(false);
@@ -131,6 +123,9 @@ public class HTMLContentDialog extends JDialog {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.awt.Dialog#hide()
+	 */
 	@Override
 	@Deprecated
 	public void hide() {
@@ -140,6 +135,9 @@ public class HTMLContentDialog extends JDialog {
 		super.hide();
 	}
 
+	/* (non-Javadoc)
+	 * @see java.awt.Window#dispose()
+	 */
 	@Override
 	public void dispose() {
 		if(sound!=null) {
@@ -147,7 +145,5 @@ public class HTMLContentDialog extends JDialog {
 		}
 		super.dispose();
 	}
-
-
 }
 

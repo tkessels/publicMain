@@ -50,7 +50,7 @@ public class MulticastConnectionHandler {
 
 	/**
 	 * Erstellt einen MulticastSocket nach den Einstellungen in der Config und dekoriert ihn mit einem {@link MulticastConnectionHandler}.
-	 * @return 
+	 * @return MutlicastConnectionHandler
 	 */
 	public static MulticastConnectionHandler getMC() {
 		if (me!=null) return me;
@@ -58,9 +58,9 @@ public class MulticastConnectionHandler {
 	}
 	/**
 	 * Erstellt einen MulticastSocket mit den angegebenen Parametern und dekoriert ihn mit einem {@link MulticastConnectionHandler}.
-	 * @param multicast_IP
-	 * @param port
-	 * @param ttl
+	 * @param multicast_IP MulticastIP des Multicastkanals
+	 * @param port Port des Multicastsockets
+	 * @param ttl Anzahl an hops die gesende Multicastpakete machen
 	 * @return
 	 */
 	public static synchronized MulticastConnectionHandler getMC(String multicast_IP, int port, int ttl) {
@@ -172,10 +172,11 @@ public class MulticastConnectionHandler {
 	}
 
 
+
 	/**
 	 * @author tkessels
-	 * Thread für den Empfang der Multicastpakete
 	 *
+	 *	Thread für den Empfang der Multicastpakete
 	 */
 	private final class MulticastReciever implements Runnable {
 		public void run() {

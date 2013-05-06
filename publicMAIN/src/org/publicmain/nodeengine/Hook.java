@@ -194,8 +194,6 @@ public class Hook {
 	 * alle Nachrichten verwirft, die den angegebenen Kriterien entsprechen.
 	 * 
 	 * @param typ
-	 *            Typ der zu verwerfenden Nachricht
-	 * @param typ
 	 *            Nachrichtentyp der zu filternden Nachricht. (z.B:
 	 *            <code>SYSTEM,GROUP,PRIVATE</code> oder <code>DATA</code>)
 	 * @param code

@@ -32,6 +32,7 @@ import org.publicmain.nodeengine.NodeEngine;
 
 /**
  * @author ATRM
+ * 
  * Die Klasse DatabaseEngine Verwaltet die Kommunikation mit der lokalen und der Backupdatenbank.
  * Sie ruft deren Methoden auf um dem Anwenderwunsch gerecht zu werden
  */

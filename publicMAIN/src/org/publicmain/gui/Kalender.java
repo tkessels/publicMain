@@ -31,6 +31,14 @@ import javax.swing.border.LineBorder;
 import org.resources.Help;
 
 
+/**
+ * Diese Klasse stellt einen grafischen Kalender bereit.
+ * 
+ * Die ursprüngliche Version des Kalenders hat das Projektteam easy Refü entwickelt wurde aber
+ * weitesgehend für unsere Zwecke angepasst und erweitert.
+ * 
+ * @author Team easy Refü
+ */
 @SuppressWarnings("serial")
 public class Kalender extends JDialog {
 
@@ -112,6 +120,11 @@ public class Kalender extends JDialog {
 
 	}
 
+	/**
+	 * Diese Methode fügt benötigte FocusListener hinzu.
+	 * 
+	 * @param tmp
+	 */
 	private void addFL(Component tmp){
 		if(tmp instanceof Container){
 			for (Component cur : ((Container) tmp).getComponents()) {
@@ -122,7 +135,15 @@ public class Kalender extends JDialog {
 	}
 
 
+	/**
+	 * Diese Elementklasse stellt einen FocusAdapter bereit.
+	 * 
+	 * @author Team easy Refü
+	 */
 	private final class Disposer extends FocusAdapter {
+		/* (non-Javadoc)
+		 * @see java.awt.event.FocusAdapter#focusLost(java.awt.event.FocusEvent)
+		 */
 		@Override
 		public void focusLost(FocusEvent e) {
 			Component other = e.getOppositeComponent();
@@ -144,8 +165,8 @@ public class Kalender extends JDialog {
 
 	/**
 	 * Baut eine Matrix / Kalendarübersicht auf
-	 * @author Volker
-	 *
+	 * 
+	 * @author Team easy Refü
 	 */
 	public class MonthPanel extends JPanel {
 
@@ -219,8 +240,9 @@ public class Kalender extends JDialog {
 	/**
 	 * Enthält Daten alle des aktuell gewählten Monats
 	 * in Form einer Liste aus kTagen
-	 * und dem Versatz des Montages am Monatsanfang 
-	 * @author Volker
+	 * und dem Versatz des Montages am Monatsanfang.
+	 * 
+	 * @author Team easy Refü
 	 *
 	 */
 
@@ -273,7 +295,8 @@ public class Kalender extends JDialog {
 		}
 
 		/**
-		 * liest eine ICal Datei und fügt Feiertage der Aktuellen Monatsliste / kTag hinzu
+		 * liest eine ICal Datei und fügt Feiertage der Aktuellen Monatsliste / kTag hinzu.
+		 * 
 		 * @param icsDatei
 		 */
 		private void readICS(File icsDatei){
@@ -316,6 +339,7 @@ public class Kalender extends JDialog {
 	 * feiertagBez - bezeichnung eines Feiertages
 	 * und hat dementsprechende getter & setter
 	 *
+	 * @author Team easy Refü
 	 */
 	private class kTag extends JButton{
 

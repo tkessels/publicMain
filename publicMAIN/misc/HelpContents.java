@@ -84,9 +84,9 @@ public class HelpContents extends JDialog implements HyperlinkListener{
 					// Datei in JTextPane laden
 					helpContentTxt.setPage(fileURL);
 				} catch (MalformedURLException e1) {
-					e1.printStackTrace();
+					LogEngine.log(this, e1);;
 				} catch (IOException e) {
-					e.printStackTrace();
+					LogEngine.log(this, e);
 				}
 		me.add(sp, BorderLayout.CENTER);
 				

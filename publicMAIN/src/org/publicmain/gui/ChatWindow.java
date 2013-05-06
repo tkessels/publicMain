@@ -42,13 +42,13 @@ import org.publicmain.common.Node;
 /**
  * Diese Klasse stellt ein ChatWindow zur Verfügung.
  * 
- * Diese Klasse stellt ein ChatWindow bereit, dieses enthält einen Bereich
- * in dem Nachrichten angezeigt werden, ein Feld zur Texteingabe sowie
- * einen Button um den Text zu senden.
+ * Diese Klasse stellt ein ChatWindow bereit, dieses enthält einen Bereich in
+ * dem Nachrichten angezeigt werden, ein Feld zur Texteingabe sowie einen Button
+ * um den Text zu senden.
  * 
  * @author ATRM
  */
-@SuppressWarnings( "serial" )
+@SuppressWarnings("serial")
 public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 	private GUI gui;
@@ -74,116 +74,123 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 
 	private boolean onlineState;
 	private Thread onlineStateSetter;
-	// dieser "kurze" String ist für die Ausgabe der /help in Tabellenform 
-	private String helptext="<br><table color='#05405E'>" +
-			"<tr><td colspan='3'><b>Command</b></td><td><b>Description</b></td></tr>" +
-			"<tr><td colspan='3'>/clear</td><td>clear screen</td></tr>" +
-			"<tr><td colspan='3'>/exit</td><td>exit program</td></tr>" +
-			"<tr><td colspan='3'>/help</td><td>display this help</td></tr>" +
-			"<tr><td colspan='3'>/afk</td><td>afk on/off</td></tr>" +
-			"<tr><td>/ignore</td><td colspan='2'>&lt;username&gt;</td><td>ignore this user</td></tr>" +
-			"<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>unignore this user</td></tr>" +
-			"<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>display information about user</td></tr>" +
-			"<tr><td>/alias</td><td colspan='2'>&lt;username&gt;</td><td>change username</td></tr>" +
-			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td></td>join/create group</tr>" +
-			"<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>message to group</tr>" +
-			"<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>whisper to user</tr>" +
-			"<tr><td>[b]</td><td>&lt;message&gt;</td><td>[/b]</td>formated message (bold)</tr>" +
-			"<tr><td>[u]</td><td>&lt;message&gt;</td><td>[/u]</td>formated message (underline)</tr>" +
-			"<tr><td>[i]</td><td>&lt;message&gt;</td><td>[/i]</td>formated message (italic)</tr>" +
-			"<tr><td>[strike]</td><td>&lt;message&gt;</td><td>[/strike]</td>formated message (striked)</tr>" +
-			"</table><br>";
+	// dieser "kurze" String ist für die Ausgabe der /help in Tabellenform
+	private String helptext = "<br><table color='#05405E'>"
+			+ "<tr><td colspan='3'><b>Command</b></td><td><b>Description</b></td></tr>"
+			+ "<tr><td colspan='3'>/clear</td><td>clear screen</td></tr>"
+			+ "<tr><td colspan='3'>/exit</td><td>exit program</td></tr>"
+			+ "<tr><td colspan='3'>/help</td><td>display this help</td></tr>"
+			+ "<tr><td colspan='3'>/afk</td><td>afk on/off</td></tr>"
+			+ "<tr><td>/ignore</td><td colspan='2'>&lt;username&gt;</td><td>ignore this user</td></tr>"
+			+ "<tr><td>/unignore</td><td colspan='2'>&lt;username&gt;</td><td>unignore this user</td></tr>"
+			+ "<tr><td>/info</td><td colspan='2'>&lt;username&gt;</td><td>display information about user</td></tr>"
+			+ "<tr><td>/alias</td><td colspan='2'>&lt;username&gt;</td><td>change username</td></tr>"
+			+ "<tr><td>/g</td><td>&lt;groupname&gt;</td><td></td>join/create group</tr>"
+			+ "<tr><td>/g</td><td>&lt;groupname&gt;</td><td>&lt;message&gt;</td>message to group</tr>"
+			+ "<tr><td>/w</td><td>&lt;username&gt;</td><td>&lt;message&gt;</td>whisper to user</tr>"
+			+ "<tr><td>[b]</td><td>&lt;message&gt;</td><td>[/b]</td>formated message (bold)</tr>"
+			+ "<tr><td>[u]</td><td>&lt;message&gt;</td><td>[/u]</td>formated message (underline)</tr>"
+			+ "<tr><td>[i]</td><td>&lt;message&gt;</td><td>[/i]</td>formated message (italic)</tr>"
+			+ "<tr><td>[strike]</td><td>&lt;message&gt;</td><td>[/strike]</td>formated message (striked)</tr>"
+			+ "</table><br>";
 
 	/**
 	 * Dieser Konstruktor erstellt ein privates ChatWindow.
 	 * 
-	 * @param uid long UserID
+	 * @param uid
+	 *            long UserID
 	 */
-	public ChatWindow( long uid ) {
+	public ChatWindow(long uid) {
 		this.userID = uid;
 		this.isPrivCW = true;
-		Node nodeForUID = GUI.getGUI().getNodeForUID( userID );
-		if( nodeForUID != null ){
+		Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
+		if (nodeForUID != null) {
 			this.name = nodeForUID.getAlias();
 		}
 		doWindowbuildingstuff();
-	}//eom ChatWindow( long uid )
+	}// eom ChatWindow( long uid )
 
 	/**
 	 * Dieser Konstruktor erstellt ein ChatWindow für eine Gruppe.
 	 * 
-	 * @param gruppenname String Name der Gruppe
+	 * @param gruppenname
+	 *            String Name der Gruppe
 	 */
-	public ChatWindow( String gruppenname ) {
+	public ChatWindow(String gruppenname) {
 		this.gruppe = gruppenname;
 		this.name = gruppenname;
 		this.isPrivCW = false;
 		this.onlineState = true;
 		doWindowbuildingstuff();
-	}//eom ChatWindow( String gruppenname )
+	}// eom ChatWindow( String gruppenname )
 
 	/**
 	 * Diese Methode gestaltet das ChatWindow.
 	 * 
-	 * Diese Methode erstellt den Inhalt und konfiguriert
-	 * das Layout für das ChatWindow und zeigt dieses an.
+	 * Diese Methode erstellt den Inhalt und konfiguriert das Layout für das
+	 * ChatWindow und zeigt dieses an.
 	 */
 	private void doWindowbuildingstuff() {
 		// Layout für ChatWindow (JPanel) festlegen auf BorderLayout:
-		this.setLayout( new BorderLayout() );
+		this.setLayout(new BorderLayout());
 
 		// Initialisierungen:
-		this.gui 			= GUI.getGUI();
-		this.myTab 			= new ChatWindowTab( name, gui.getTabbedPane(), this ); 
-		this.sendenBtn		= new JButton( "send" );
-		this.msgTextPane	= new JTextPane();
-		this.htmlKit 		= new HTMLEditorKit();
-		this.htmlDoc 		= new HTMLDocument();
-		this.msgTextScroller= new JScrollPane( msgTextPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
-		this.eingabeFeld 	= new JTextField();
-		this.eingBereichPanel= new JPanel( new BorderLayout() );
-		this.keyHistory		= new History( eingabeFeld );
-		this.fontFamily		= "Arial";
-		this.fontSize		= 8;
-
+		this.gui = GUI.getGUI();
+		this.myTab = new ChatWindowTab(name, gui.getTabbedPane(), this);
+		this.sendenBtn = new JButton("send");
+		this.msgTextPane = new JTextPane();
+		this.htmlKit = new HTMLEditorKit();
+		this.htmlDoc = new HTMLDocument();
+		this.msgTextScroller = new JScrollPane(msgTextPane,
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.eingabeFeld = new JTextField();
+		this.eingBereichPanel = new JPanel(new BorderLayout());
+		this.keyHistory = new History(eingabeFeld);
+		this.fontFamily = "Arial";
+		this.fontSize = 8;
 
 		// Konfiguration des Bereiches für Nachrichten (msgTextPane)
-		this.msgTextPane.setEditable( false );
-		this.msgTextPane.setPreferredSize( new Dimension( 400, 300 ) );
-		this.msgTextPane.setEditorKit( htmlKit );
-		this.msgTextPane.setDocument( htmlDoc );
+		this.msgTextPane.setEditable(false);
+		this.msgTextPane.setPreferredSize(new Dimension(400, 300));
+		this.msgTextPane.setEditorKit(htmlKit);
+		this.msgTextPane.setDocument(htmlDoc);
 
 		// Konfiguration des Eingabefeldes (eingabeFeld)
-		this.eingabeFeld.setDocument( new SetMaxText( Config.getConfig().getMaxEingabefeldLength() ) );
+		this.eingabeFeld.setDocument(new SetMaxText(Config.getConfig()
+				.getMaxEingabefeldLength()));
 
 		// benötigte Listener für das Eingabefeld (eingabeFeld) hinzufügen
-		this.eingabeFeld.addKeyListener( new History( eingabeFeld ) );
-		this.eingabeFeld.addActionListener( this );
+		this.eingabeFeld.addKeyListener(new History(eingabeFeld));
+		this.eingabeFeld.addActionListener(this);
 
 		// benötigte Listener für den Sendebutton (sendenBtn) hinzufügen
-		this.sendenBtn.addActionListener( this );
-		this.sendenBtn.addMouseListener( new MouseListenerImplementation() );
+		this.sendenBtn.addActionListener(this);
+		this.sendenBtn.addMouseListener(new MouseListenerImplementation());
 
-		// Eingabefeld und Sendebutton zum Eingabebereich (eingBereichPanel) hinzufügen
-		this.eingBereichPanel.add( eingabeFeld, BorderLayout.CENTER );
-		this.eingBereichPanel.add( sendenBtn, BorderLayout.EAST );
+		// Eingabefeld und Sendebutton zum Eingabebereich (eingBereichPanel)
+		// hinzufügen
+		this.eingBereichPanel.add(eingabeFeld, BorderLayout.CENTER);
+		this.eingBereichPanel.add(sendenBtn, BorderLayout.EAST);
 
 		// Nachrichtenbereich und Eingabebereich zum ChatWindow hinzufügen
-		this.add( msgTextScroller, BorderLayout.CENTER );
-		this.add( eingBereichPanel, BorderLayout.SOUTH );
+		this.add(msgTextScroller, BorderLayout.CENTER);
+		this.add(eingBereichPanel, BorderLayout.SOUTH);
 
-		// Thread für Onlinestatus eines ChatWindows anlegen und für privates ChatWindow starten
-		this.onlineStateSetter = new Thread( new RunnableImplementation() );
-		if( isPrivCW ){
+		// Thread für Onlinestatus eines ChatWindows anlegen und für privates
+		// ChatWindow starten
+		this.onlineStateSetter = new Thread(new RunnableImplementation());
+		if (isPrivCW) {
 			this.onlineStateSetter.start();
 		}
 
-		// Ein DropTarget für den Dateiversand per Drag&Drop auf den Nachrichtenbereich legen
-		new DropTarget( msgTextPane, new DropTargetListenerImplementation() );
+		// Ein DropTarget für den Dateiversand per Drag&Drop auf den
+		// Nachrichtenbereich legen
+		new DropTarget(msgTextPane, new DropTargetListenerImplementation());
 
 		// ChatWindow anzeigen
-		this.setVisible( true );
-	} //eom doWindowbuildingstuff()
+		this.setVisible(true);
+	} // eom doWindowbuildingstuff()
 
 	/**
 	 * Diese Methode ist ein Getter für den Namen des ChatWindows.
@@ -194,7 +201,7 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 */
 	String getChatWindowName() {
 		return this.name;
-	} //eom getChatWindowName()
+	} // eom getChatWindowName()
 
 	/**
 	 * Diese Methode ermöglicht ein Update des Namens für ein ChatWindow.
@@ -203,105 +210,108 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * falls ein User seinen Alias ändert.
 	 */
 	void updateName() {
-		if( isPrivCW ) {
-			Node nodeForUID = GUI.getGUI().getNodeForUID( userID );
-			if( nodeForUID != null ){
+		if (isPrivCW) {
+			Node nodeForUID = GUI.getGUI().getNodeForUID(userID);
+			if (nodeForUID != null) {
 				this.name = nodeForUID.getAlias();
 			}
 			myTab.updateAlias();
 		}
-	} //eom updateName()
+	} // eom updateName()
 
 	/**
 	 * Diese Methode ist ein Getter für den Tab des ChatWindows.
 	 * 
-	 * Diese Methode liefert das JPanel myTab für die Zuordnung zum richtigen Tab
-	 * des JTabbedPane im GUI. Wird beim erstellen des ChatWindows benötigt um
-	 * den Title des Tabs zu rendern.
+	 * Diese Methode liefert das JPanel myTab für die Zuordnung zum richtigen
+	 * Tab des JTabbedPane im GUI. Wird beim erstellen des ChatWindows benötigt
+	 * um den Title des Tabs zu rendern.
 	 * 
 	 * @return JPanel
 	 */
-	JPanel getWindowTab(){
+	JPanel getWindowTab() {
 		return this.myTab;
-	} //eom getWindowTab()
+	} // eom getWindowTab()
 
 	/**
 	 * Diese Methode ist ein Getter für den Onlinestatus des ChatWindows.
 	 * 
-	 * Diese Methode liefert den Onlinestatus des ChatWindows welcher für ein 
+	 * Diese Methode liefert den Onlinestatus des ChatWindows welcher für ein
 	 * privates ChatWindow verwendet wird um anzuzeigen ob ein Chatpartner zu
 	 * dem ein ChatWindow geöffnet ist online/offline ist.
 	 * 
-	 * @return boolean onlineState 
+	 * @return boolean onlineState
 	 */
-	boolean getOnlineState(){
+	boolean getOnlineState() {
 		return this.onlineState;
-	} //eom getOnlineState()
+	} // eom getOnlineState()
 
 	/**
 	 * Diese Methode setzt den Focus im ChatWindow.
 	 * 
-	 * Diese Methode setzt den Focus im ChatWindow auf das Eingabefeld (eingabeFeld).
-	 * Desweiteren wird dafür gesorgt das der Tab eines inaktiven ChatWindows, welches eine Nachricht
-	 * erhalten hat, bei Aktivierung des ChatWindows aufhört zu blinken.
+	 * Diese Methode setzt den Focus im ChatWindow auf das Eingabefeld
+	 * (eingabeFeld). Desweiteren wird dafür gesorgt das der Tab eines inaktiven
+	 * ChatWindows, welches eine Nachricht erhalten hat, bei Aktivierung des
+	 * ChatWindows aufhört zu blinken.
 	 */
-	void focusEingabefeld(){
+	void focusEingabefeld() {
 		Runnable tmp = new Runnable() {
 			public void run() {
 				ChatWindow.this.eingabeFeld.requestFocusInWindow();
 				ChatWindow.this.myTab.stopBlink();
-			} //eom run()
+			} // eom run()
 		};
-		SwingUtilities.invokeLater( tmp );
-	} //eom focusEingabefeld()
+		SwingUtilities.invokeLater(tmp);
+	} // eom focusEingabefeld()
 
 	/**
 	 * Diese Methode prüft ob das ChatWindow ein privates ChatWindow ist.
 	 * 
-	 * Diese Methode liefert true wenn das ChatWindw ein privates ChatWindow ist.
-	 * Ist dies nicht der Fall wird false zurückgegeben.
+	 * Diese Methode liefert true wenn das ChatWindw ein privates ChatWindow
+	 * ist. Ist dies nicht der Fall wird false zurückgegeben.
 	 * 
 	 * @return boolean isPrivCW
 	 */
-	boolean isPrivate(){
+	boolean isPrivate() {
 		return this.isPrivCW;
-	} //eom isPrivate()
+	} // eom isPrivate()
 
 	/**
 	 * Diese Methode prüft ob das ChatWindow für eine Gruppe ist.
 	 * 
-	 * Diese Methode liefert true wenn das ChatWindow einer Gruppe gehört.
-	 * Ist dies nicht der Fall wird false zurückgegeben.
+	 * Diese Methode liefert true wenn das ChatWindow einer Gruppe gehört. Ist
+	 * dies nicht der Fall wird false zurückgegeben.
 	 * 
-	 * @return boolean !isPrivCW 
+	 * @return boolean !isPrivCW
 	 */
-	boolean isGroup(){
+	boolean isGroup() {
 		return !this.isPrivCW;
-	} //eom isGroup()
+	} // eom isGroup()
 
 	/**
 	 * Diese Methode schreibt eine Info in den Nachrichtenbereich.
 	 * 
-	 * Diese Methode schreibt einen übergebenen String (text) als Infomeldung
-	 * in den Nachrichtenbereich des ChatWindows.
+	 * Diese Methode schreibt einen übergebenen String (text) als Infomeldung in
+	 * den Nachrichtenbereich des ChatWindows.
 	 * 
-	 * @param text (String) übergebene Nachricht 
+	 * @param text
+	 *            (String) übergebene Nachricht
 	 */
-	void info( String text ){
-		this.printMSG( new MSG( text, MSGCode.CW_INFO_TEXT ) );
-	} //eom info( String text )
+	void info(String text) {
+		this.printMSG(new MSG(text, MSGCode.CW_INFO_TEXT));
+	} // eom info( String text )
 
 	/**
 	 * Diese Methode schreibt eine Warnung in den Nachrichtenbereich.
 	 * 
-	 * Diese Methode schreibt einen übergebenen String (text) als Warnmeldung
-	 * in den Nachrichtenbereich des ChatWindows.
+	 * Diese Methode schreibt einen übergebenen String (text) als Warnmeldung in
+	 * den Nachrichtenbereich des ChatWindows.
 	 * 
-	 * @param text (String) übergebene Nachricht 
+	 * @param text
+	 *            (String) übergebene Nachricht
 	 */
-	void warn( String text ){
-		this.printMSG( new MSG( text, MSGCode.CW_WARNING_TEXT ) );
-	} //eom warn( String text )
+	void warn(String text) {
+		this.printMSG(new MSG(text, MSGCode.CW_WARNING_TEXT));
+	} // eom warn( String text )
 
 	/**
 	 * Diese Methode schreibt einen Error in den Nachrichtenbereich.
@@ -309,217 +319,254 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 	 * Diese Methode schreibt einen übergebenen String (text) als Errormeldung
 	 * in den Nachrichtenbereich des ChatWindows.
 	 * 
-	 * @param text (String) übergebene Nachricht 
+	 * @param text
+	 *            (String) übergebene Nachricht
 	 */
-	void error( String text ){
-		this.printMSG( new MSG( text, MSGCode.CW_ERROR_TEXT ) );
-	} //eom error( String text )
+	void error(String text) {
+		this.printMSG(new MSG(text, MSGCode.CW_ERROR_TEXT));
+	} // eom error( String text )
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
-	public void actionPerformed( ActionEvent e ) {
+	public void actionPerformed(ActionEvent e) {
 		// Eingabe aus dem Textfeld in String eingabe speichern
 		String eingabe = eingabeFeld.getText();
 
 		// HTML-Elemente verhindern
-		eingabe = eingabe.replaceAll( "<", "&lt;" ).replaceAll( ">", "&gt;" );
+		eingabe = eingabe.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
 		// Erlaubte HTML-Elemente mit anderem Syntax einfügen
-		eingabe = eingabe.replaceAll( "(\\[)(?=/?(b|u|i|strike)\\])", "<" );
-		eingabe = eingabe.replaceAll( "(?<=((</?)(b|u|i|strike)))(\\])", ">" );
+		eingabe = eingabe.replaceAll("(\\[)(?=/?(b|u|i|strike)\\])", "<");
+		eingabe = eingabe.replaceAll("(?<=((</?)(b|u|i|strike)))(\\])", ">");
 
 		// Prüfen ob etwas eingegeben wurde, wenn nicht dann auch nichts machen
-		if ( !eingabe.equals( "" ) ) {
+		if (!eingabe.equals("")) {
 
 			// Prüfen ob die Eingabe ein Befehl ist
-			if ( eingabe.startsWith( "/" ) ) {
-				// Temporäres StringArray um Befehl, Parameter und Nachricht zu trennen
+			if (eingabe.startsWith("/")) {
+				// Temporäres StringArray um Befehl, Parameter und Nachricht zu
+				// trennen
 				String[] tmp;
 
 				// Einfache Befehle ohne Parameter
 				// Das Nachrichtenfeld (msgTextPane) leeren
-				if ( eingabe.equals( "/clear" ) ) {
-					this.msgTextPane.setText( "" );
+				if (eingabe.equals("/clear")) {
+					this.msgTextPane.setText("");
 				}
 				// Ausgabe der Hilfe im Nachrichtenfeld (msgTextPane)
-				else if ( eingabe.equals( "/help" ) ) {
-					info( helptext );
+				else if (eingabe.equals("/help")) {
+					info(helptext);
 				}
 				// AwayFromKeyboard aktivieren/deaktivieren
-				else if ( eingabe.equals( "/afk" ) ) {
+				else if (eingabe.equals("/afk")) {
 					this.gui.afk();
 				}
 				// Das Programm beenden
-				else if ( eingabe.equals( "/exit" ) ) {
+				else if (eingabe.equals("/exit")) {
 					this.gui.shutdown();
-					info( "Shutting down!" );
+					info("Shutting down!");
 				}
 
 				// Befehle mit Parameter
 				// Einen Nutzer ignorieren
-				else if ( eingabe.startsWith( "/ignore " )	&& (( tmp = eingabe.split( " ", 2 ) ).length == 2)) {
-					Node tmp_node = ChatEngine.getCE().getNodeforAlias( tmp[1] );
-					if( ( tmp_node != null ) && this.gui.ignoreUser( tmp_node.getUserID() ) ){
-						LogEngine.log( tmp_node + " is ignored!", LogEngine.INFO );
+				else if (eingabe.startsWith("/ignore ")
+						&& ((tmp = eingabe.split(" ", 2)).length == 2)) {
+					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if ((tmp_node != null)
+							&& this.gui.ignoreUser(tmp_node.getUserID())) {
+						LogEngine
+								.log(tmp_node + " is ignored!", LogEngine.INFO);
 					} else {
-						warn( "ignore " + tmp[1] + " failed!" );
-						LogEngine.log( "ignore " + tmp[1] + " failed!", LogEngine.INFO );
+						warn("ignore " + tmp[1] + " failed!");
+						LogEngine.log("ignore " + tmp[1] + " failed!",
+								LogEngine.INFO);
 					}
 				}
 				// Einen Nutzer nicht weiter ignorieren
-				else if ( eingabe.startsWith( "/unignore " ) && (( tmp = eingabe.split( " ", 2 ) ).length == 2) ){
-					Node tmp_node = ChatEngine.getCE().getNodeforAlias( tmp[1] );
-					if(( tmp_node !=null ) && this.gui.unignoreUser( tmp_node.getUserID() ) ){
-						LogEngine.log( tmp_node + " is unignored!", LogEngine.INFO );
+				else if (eingabe.startsWith("/unignore ")
+						&& ((tmp = eingabe.split(" ", 2)).length == 2)) {
+					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if ((tmp_node != null)
+							&& this.gui.unignoreUser(tmp_node.getUserID())) {
+						LogEngine.log(tmp_node + " is unignored!",
+								LogEngine.INFO);
 					} else {
-						warn( tmp[1] + " not found! unignore failed!" );
-						LogEngine.log( "unignore " + tmp[1] + " failed!", LogEngine.INFO );
+						warn(tmp[1] + " not found! unignore failed!");
+						LogEngine.log("unignore " + tmp[1] + " failed!",
+								LogEngine.INFO);
 					}
 				}
 				// Seinen eigenen Alias ändern
-				else if ( eingabe.startsWith( "/alias " ) && (( tmp = eingabe.split( " ", 2 ) ).length == 2) ) {
-					this.gui.changeAlias( tmp[1] );
+				else if (eingabe.startsWith("/alias ")
+						&& ((tmp = eingabe.split(" ", 2)).length == 2)) {
+					this.gui.changeAlias(tmp[1]);
 				}
-				// Informationen über einen Nutzer im Nachrichtenfeld (msgTextPane) ausgeben
-				else if ( eingabe.startsWith( "/info " ) && (( tmp = eingabe.split( " ", 2 ) ).length == 2) ) {
-					Node nodeforalias=ChatEngine.getCE().getNodeforAlias( tmp[1] );
-					printInfo( nodeforalias );
+				// Informationen über einen Nutzer im Nachrichtenfeld
+				// (msgTextPane) ausgeben
+				else if (eingabe.startsWith("/info ")
+						&& ((tmp = eingabe.split(" ", 2)).length == 2)) {
+					Node nodeforalias = ChatEngine.getCE().getNodeforAlias(
+							tmp[1]);
+					printInfo(nodeforalias);
 				}
 				// Debugbefehle (/debug) zulassen
-				else if ( eingabe.startsWith( "/debug " ) && (( tmp = eingabe.split( " ", 3 ) ).length >= 2) ) {
-					ChatEngine.getCE().debug( tmp[1], ( tmp.length > 2 ) ? tmp[2] : "" );
+				else if (eingabe.startsWith("/debug ")
+						&& ((tmp = eingabe.split(" ", 3)).length >= 2)) {
+					ChatEngine.getCE().debug(tmp[1],
+							(tmp.length > 2) ? tmp[2] : "");
 				}
 				// Eine Flüsternachricht (privat Nachricht) versenden
-				else if ( eingabe.startsWith( "/w " ) && (( tmp = eingabe.split( " ", 3 ) ).length == 3) ) {
-					Node tmp_node=ChatEngine.getCE().getNodeforAlias( tmp[1] );
-					if( tmp_node != null ){
-						this.gui.privSend( tmp_node.getUserID(), tmp[2] );
-					}
-					else{
-						warn( tmp[1] + " not found!" );
+				else if (eingabe.startsWith("/w ")
+						&& ((tmp = eingabe.split(" ", 3)).length == 3)) {
+					Node tmp_node = ChatEngine.getCE().getNodeforAlias(tmp[1]);
+					if (tmp_node != null) {
+						this.gui.privSend(tmp_node.getUserID(), tmp[2]);
+					} else {
+						warn(tmp[1] + " not found!");
 					}
 				}
-				// Eine Gruppe erstellen/beitreten und/oder eine Nachricht an eine Gruppe senden
-				else if ( eingabe.startsWith( "/g " ) ) {
-					if ( ( tmp = eingabe.split( " ", 3 ) ).length == 2 ) {
-						this.gui.addGrpCW( tmp[1], true );
-					} else if ( ( tmp = eingabe.split( " ", 3 ) ).length == 3 ){
-						this.gui.groupSend( tmp[1], tmp[2] );
+				// Eine Gruppe erstellen/beitreten und/oder eine Nachricht an
+				// eine Gruppe senden
+				else if (eingabe.startsWith("/g ")) {
+					if ((tmp = eingabe.split(" ", 3)).length == 2) {
+						this.gui.addGrpCW(tmp[1], true);
+					} else if ((tmp = eingabe.split(" ", 3)).length == 3) {
+						this.gui.groupSend(tmp[1], tmp[2]);
 					} else {
-						error( "command not found!" );
+						error("command not found!");
 					}
 				} else {
-					error( "command not found!" );
+					error("command not found!");
 				}
 			}
 
 			// Standardvorgehensweise für Nachrichten
 			// Private Nachrichten
-			else if ( isPrivate() ) {
-				this.gui.privSend( userID, eingabe );
+			else if (isPrivate()) {
+				this.gui.privSend(userID, eingabe);
 			}
 			// Gruppennachrichten
 			else {
-				this.gui.groupSend( gruppe, eingabe );
+				this.gui.groupSend(gruppe, eingabe);
 			}
-			// Speichen in Befehlshistory und leeren des Eingabefeldes (eingabeFeld)
-			this.keyHistory.add( eingabe );
-			this.eingabeFeld.setText( "" );
+			// Speichen in Befehlshistory und leeren des Eingabefeldes
+			// (eingabeFeld)
+			this.keyHistory.add(eingabe);
+			this.eingabeFeld.setText("");
 		}
-	} //eom actionPerformed()
+	} // eom actionPerformed()
 
 	/**
 	 * Diese Methode gibt Informationen über einen Nutzer aus.
 	 * 
-	 * Diese Methode gibt die im übergebenen Node enthaltenen Informationen
-	 * über einen Nutzer im Nachrichtenbereich (msgTextPane) aus.
+	 * Diese Methode gibt die im übergebenen Node enthaltenen Informationen über
+	 * einen Nutzer im Nachrichtenbereich (msgTextPane) aus.
 	 * 
-	 * @param nodeforalias (Node) übergebener Node
+	 * @param nodeforalias
+	 *            (Node) übergebener Node
 	 */
-	void printInfo( Node nodeforalias ) {
-		if ( nodeforalias != null ) {
+	void printInfo(Node nodeforalias) {
+		if (nodeforalias != null) {
 			Map<String, String> tmp_data = nodeforalias.getData();
-			gui.info( "----------------------------------------------------", null, 0 );
-			gui.info( "Infos for User : " + nodeforalias.getAlias(), null, 0 );
-			for ( String x : tmp_data.keySet() ) {
-				gui.info( x.toUpperCase() + "\t: " + tmp_data.get(x), null, 0 );
+			gui.info("----------------------------------------------------",
+					null, 0);
+			gui.info("Infos for User : " + nodeforalias.getAlias(), null, 0);
+			for (String x : tmp_data.keySet()) {
+				gui.info(x.toUpperCase() + "\t: " + tmp_data.get(x), null, 0);
 			}
-			gui.info( "----------------------------------------------------", null, 0 );
+			gui.info("----------------------------------------------------",
+					null, 0);
 		}
-	} //eom printInfo( Node Nodeforalias )
+	} // eom printInfo( Node Nodeforalias )
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
-	public void update( Observable sourceChannel, Object msg ) {
-		if( gui.getTabbedPane().indexOfComponent( this ) != gui.getTabbedPane().getSelectedIndex() ){
+	public void update(Observable sourceChannel, Object msg) {
+		if (gui.getTabbedPane().indexOfComponent(this) != gui.getTabbedPane()
+				.getSelectedIndex()) {
 			this.myTab.startBlink();
 		}
-		MSG tmpMSG = ( MSG ) msg;
-		this.gui.msgToTray( tmpMSG );
-		this.printMSG( tmpMSG );
-		LogEngine.log( this, "ausgabe", tmpMSG );
-	} //eom update( Observable sourceChannel, Object msg )
+		MSG tmpMSG = (MSG) msg;
+		this.gui.msgToTray(tmpMSG);
+		this.printMSG(tmpMSG);
+		LogEngine.log(this, "ausgabe", tmpMSG);
+	} // eom update( Observable sourceChannel, Object msg )
 
 	/**
 	 * Diese Methode benachrichtigt den Nutzer über den Nachrichtenbereich
 	 * 
-	 * Diese Methode dient zur Benachrichtigung des Benutzers über das Textausgabefeld
-	 * (msgTextArea). Die übergebene Nachricht wird je nach Nachrichtentyp formatiert
-	 * und über das HTMLEditorKit (htmlKit) zum  HTMLDocument (htmlDoc) hinzugefügt, welches
-	 * die formatierte Nachricht im Nachrichtenbereich anhängt.
+	 * Diese Methode dient zur Benachrichtigung des Benutzers über das
+	 * Textausgabefeld (msgTextArea). Die übergebene Nachricht wird je nach
+	 * Nachrichtentyp formatiert und über das HTMLEditorKit (htmlKit) zum
+	 * HTMLDocument (htmlDoc) hinzugefügt, welches die formatierte Nachricht im
+	 * Nachrichtenbereich anhängt.
 	 * 
-	 * @param msg (MSG) übergebene Nachricht
+	 * @param msg
+	 *            (MSG) übergebene Nachricht
 	 */
-	private void printMSG( MSG msg ) {
-		this.fontFamily		= Config.getConfig().getFontFamily();
-		this.fontSize		= Config.getConfig().getFontSize();
+	private void printMSG(MSG msg) {
+		this.fontFamily = Config.getConfig().getFontFamily();
+		this.fontSize = Config.getConfig().getFontSize();
 		String color = "black";
-		Node sender = ChatEngine.getCE().getNodeForNID( msg.getSender() );
-		String senderalias = ( sender != null ) ? sender.getAlias() : "unknown";
+		Node sender = ChatEngine.getCE().getNodeForNID(msg.getSender());
+		String senderalias = (sender != null) ? sender.getAlias() : "unknown";
 
 		// Unterscheidung anhand des Nachrichtentyps
-		switch( msg.getTyp() ){
+		switch (msg.getTyp()) {
 
 		case SYSTEM:
-			if( msg.getCode() == MSGCode.CW_INFO_TEXT ){
+			if (msg.getCode() == MSGCode.CW_INFO_TEXT) {
 				color = "#05405E";
 			} else {
 				color = "red";
 			}
 			try {
-				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), 
-						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='" + color + "'>System: " + ( String ) msg.getData() + "</font>", 0, 0, null );
-			} catch ( BadLocationException | IOException e ) {
-				LogEngine.log( e );
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
+						+ fontFamily + "' size='" + fontSize + "' color='"
+						+ color + "'>System: " + (String) msg.getData()
+						+ "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
+				LogEngine.log(e);
 			}
 			break;
 		case GROUP:
-			if( msg.getSender() == ChatEngine.getCE().getMyNodeID() ){
+			if (msg.getSender() == ChatEngine.getCE().getMyNodeID()) {
 				color = "#FF8512";
 			} else {
 				color = "#0970A4";
 			}
 			try {
-				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), 
-						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='" + color + "'>" + senderalias +": </font>" +
-								"<font face='"+ fontFamily + "' size='" + fontSize + "' color='black'>" + ( String ) msg.getData() + "</font>", 0, 0, null );
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
+						+ fontFamily + "' size='" + fontSize + "' color='"
+						+ color + "'>" + senderalias + ": </font>"
+						+ "<font face='" + fontFamily + "' size='" + fontSize
+						+ "' color='black'>" + (String) msg.getData()
+						+ "</font>", 0, 0, null);
 			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}
 			break;
 		case PRIVATE:
-			if(msg.getSender() == ChatEngine.getCE().getMyNodeID()){
+			if (msg.getSender() == ChatEngine.getCE().getMyNodeID()) {
 				color = "#FF8512";
 			} else {
 				color = "#19A6F1";
 			}
 			try {
-				htmlKit.insertHTML( htmlDoc, htmlDoc.getLength(), 
-						"<font face='"+ fontFamily + "' size='" + fontSize + "' color='" + color + "'>" + senderalias + ": </font>" +
-								"<font face='"+ fontFamily + "' size='" + fontSize + "' color='black'>" + ( String ) msg.getData() + "</font>", 0, 0, null );
-			} catch ( BadLocationException | IOException e ) {
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
+						+ fontFamily + "' size='" + fontSize + "' color='"
+						+ color + "'>" + senderalias + ": </font>"
+						+ "<font face='" + fontFamily + "' size='" + fontSize
+						+ "' color='black'>" + (String) msg.getData()
+						+ "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
 				LogEngine.log(e);
 			}
 			break;
@@ -528,161 +575,180 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		}
 		// Position ans Ende des Nachrichtenbereichs setzen
 		msgTextPane.setCaretPosition(htmlDoc.getLength());
-	} //eom printMSG ( msg )
+	} // eom printMSG ( msg )
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals( Object obj ) {
-		if ( obj != null ) {
-			if ( (gruppe != null) && gruppe.equals( obj ) )
+	public boolean equals(Object obj) {
+		if (obj != null) {
+			if ((gruppe != null) && gruppe.equals(obj))
 				return true;
-			if ( (userID != null) && userID.equals( obj ) )
+			if ((userID != null) && userID.equals(obj))
 				return true;
-			if ( obj instanceof ChatWindow ) {
-				// übergebenes Object (obj) in ChatWindow casten und in tmp Variable (other) speichern
-				ChatWindow other = ( ChatWindow ) obj;
-				// übergebenes Object (jetzt ChatWindow) ungleich dem vergleichenden ChatWindow dann false
-				if ( other.isPrivCW != isPrivCW )
+			if (obj instanceof ChatWindow) {
+				// übergebenes Object (obj) in ChatWindow casten und in tmp
+				// Variable (other) speichern
+				ChatWindow other = (ChatWindow) obj;
+				// übergebenes Object (jetzt ChatWindow) ungleich dem
+				// vergleichenden ChatWindow dann false
+				if (other.isPrivCW != isPrivCW)
 					return false;
-				if ( other.gruppe != gruppe )
+				if (other.gruppe != gruppe)
 					return false;
-				if ( other.userID != userID )
+				if (other.userID != userID)
 					return false;
 				// ansonsten true
 				return true;
 			}
 		}
 		return false;
-	}//eom equals( Object obj )
-
+	}// eom equals( Object obj )
 
 	/**
 	 * Diese Klasse stellt einen Listener für Drag&Drop bereit.
 	 * 
 	 * Diese Klasse stellt einen Listener (Adapter) für ein DropTarget bereit.
-	 * Wird verwendet um eine Datei per Drag&Drop an einen User (privater Chat) zu
-	 * versenden.
+	 * Wird verwendet um eine Datei per Drag&Drop an einen User (privater Chat)
+	 * zu versenden.
 	 * 
 	 * @author ATRM
 	 */
-	private final class DropTargetListenerImplementation extends DropTargetAdapter {
-		/* (non-Javadoc)
-		 * @see java.awt.dnd.DropTargetListener#drop(java.awt.dnd.DropTargetDropEvent)
+	private final class DropTargetListenerImplementation extends
+			DropTargetAdapter {
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * java.awt.dnd.DropTargetListener#drop(java.awt.dnd.DropTargetDropEvent
+		 * )
 		 */
-		public void drop( DropTargetDropEvent event ) {
-			event.acceptDrop( DnDConstants.ACTION_COPY );
+		public void drop(DropTargetDropEvent event) {
+			event.acceptDrop(DnDConstants.ACTION_COPY);
 			try {
 				// nur möglich für privaten Chat
-				if( isPrivCW ){
-					List<File> files = ( List<File> )event.getTransferable().getTransferData( DataFlavor.javaFileListFlavor );
-					if( files.size() == 1 ) {
-						gui.sendFile( files.get( 0 ), userID );
+				if (isPrivCW) {
+					List<File> files = (List<File>) event.getTransferable()
+							.getTransferData(DataFlavor.javaFileListFlavor);
+					if (files.size() == 1) {
+						gui.sendFile(files.get(0), userID);
 					} else {
-						warn( "Only single files can be transfered" );
+						warn("Only single files can be transfered");
 					}
-					// falls versucht wird an Gruppe zu senden wird Fehlermeldung ausgegeben
+					// falls versucht wird an Gruppe zu senden wird
+					// Fehlermeldung ausgegeben
 				} else {
-					warn( "You dropped some files into a GroupChat.... Don't do that!" );
+					warn("You dropped some files into a GroupChat.... Don't do that!");
 				}
 			} catch (Exception e) {
-				LogEngine.log( this, "You can only drop one File", LogEngine.ERROR );
+				LogEngine.log(this, "You can only drop one File",
+						LogEngine.ERROR);
 			}
-			event.dropComplete( true );
+			event.dropComplete(true);
 		}
-	}//eoc DropTargetListenerImplementation
-
+	}// eoc DropTargetListenerImplementation
 
 	/**
 	 * Diese Klasse stellt einen Thread zur Verfügung.
 	 * 
-	 * Diese Klasse stellt einen Thread zur Verfügung welcher das ChatWindow je nach
-	 * Onlinestatus des Chatpartners unterschiedlich gestaltet.
+	 * Diese Klasse stellt einen Thread zur Verfügung welcher das ChatWindow je
+	 * nach Onlinestatus des Chatpartners unterschiedlich gestaltet.
 	 * 
 	 * @author ATRM
 	 */
 	private final class RunnableImplementation implements Runnable {
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see java.lang.Runnable#run()
 		 */
 		@Override
 		public void run() {
-			while( true ){
-				// nur nötig für privaten Chat, da Gruppenchat kein Onlinestatus hat
-				if ( isPrivCW ) {
+			while (true) {
+				// nur nötig für privaten Chat, da Gruppenchat kein Onlinestatus
+				// hat
+				if (isPrivCW) {
 					// Chatpartner ist offline
-					if ( gui.getNodeForUID( userID ) == null ) {
+					if (gui.getNodeForUID(userID) == null) {
 						onlineState = false;
 						myTab.setOffline();
-						eingabeFeld.setEnabled( false );
-						sendenBtn.setForeground( Color.GRAY );
-						sendenBtn.setEnabled( false );
+						eingabeFeld.setEnabled(false);
+						sendenBtn.setForeground(Color.GRAY);
+						sendenBtn.setEnabled(false);
 						// Chatpartner ist online
 					} else {
 						onlineState = true;
 						myTab.setOnline();
 						myTab.updateAlias();
-						eingabeFeld.setEnabled( true );
-						sendenBtn.setForeground( Color.BLACK );
-						sendenBtn.setEnabled( true );
+						eingabeFeld.setEnabled(true);
+						sendenBtn.setForeground(Color.BLACK);
+						sendenBtn.setEnabled(true);
 					}
 					// warte bis sich was tut
-					synchronized ( ChatEngine.getCE().getUsers() ) {
+					synchronized (ChatEngine.getCE().getUsers()) {
 						try {
 							ChatEngine.getCE().getUsers().wait();
-						} catch ( InterruptedException e ) {
-							LogEngine.log( e );
+						} catch (InterruptedException e) {
+							LogEngine.log(e);
 						}
 					}
 				}
 			}
-		} //eom run()
-	} //eoc RunnableImplementation
-
+		} // eom run()
+	} // eoc RunnableImplementation
 
 	/**
 	 * Diese ElementKlasse stellt einen MouseAdapter für das ChatWindow bereit.
 	 * 
-	 * Diese ElementKlasse ermöglicht es dem ChatWindow auf MouseEvents zu reagieren.
-	 * Wird mit der Maus über den Sendenbutton (sendenBtn) gefahren färbt sich die
-	 * Schrift des Buttons orange. Beim verlassen des Buttons wird diese wieder schwarz.
+	 * Diese ElementKlasse ermöglicht es dem ChatWindow auf MouseEvents zu
+	 * reagieren. Wird mit der Maus über den Sendenbutton (sendenBtn) gefahren
+	 * färbt sich die Schrift des Buttons orange. Beim verlassen des Buttons
+	 * wird diese wieder schwarz.
 	 * 
 	 * @author ATRM
 	 */
 	private final class MouseListenerImplementation extends MouseAdapter {
 
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * java.awt.event.MouseAdapter#mouseExited(java.awt.event.MouseEvent)
 		 */
-		public void mouseExited( MouseEvent e ) {
-			JButton source = ( JButton )e.getSource();
-			if( onlineState ){
-				source.setForeground( Color.BLACK );
+		public void mouseExited(MouseEvent e) {
+			JButton source = (JButton) e.getSource();
+			if (onlineState) {
+				source.setForeground(Color.BLACK);
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * java.awt.event.MouseAdapter#mouseEntered(java.awt.event.MouseEvent)
 		 */
-		public void mouseEntered( MouseEvent e ) {
-			JButton source = ( JButton)e.getSource();
-			if( onlineState ){
-				source.setForeground( new Color( 255, 130, 13 ) );
+		public void mouseEntered(MouseEvent e) {
+			JButton source = (JButton) e.getSource();
+			if (onlineState) {
+				source.setForeground(new Color(255, 130, 13));
 			}
 		}
-	}//eoc MouseListenerImplementation
-
+	}// eoc MouseListenerImplementation
 
 	/**
-	 * Diese Klasse ermöglicht den Nutzer Nachrichten und Befehle schnell zu wiederholen
+	 * Diese Klasse ermöglicht den Nutzer Nachrichten und Befehle schnell zu
+	 * wiederholen
 	 * 
-	 * Diese Klasse stellt den Nutzer eine History für Nachrichten und Befehle bereit auf
-	 * welche mit den Pfeiltasten Oben/Unten zugegriffen werden kann.
+	 * Diese Klasse stellt den Nutzer eine History für Nachrichten und Befehle
+	 * bereit auf welche mit den Pfeiltasten Oben/Unten zugegriffen werden kann.
 	 * 
 	 * @author ATRM
 	 */
-	private class History extends KeyAdapter{
+	private class History extends KeyAdapter {
 
 		private ArrayList<String> eingabeHistorie;
 		private int eingabeAktuell;
@@ -690,51 +756,54 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		/**
 		 * Konstruktor für die History.
 		 * 
-		 * Diese Konstruktor erstellt die History und legt eine neue ArrayList vom Typ
-		 * String an um Befehle aufzunehmen. Außerdem wird ein Befehlszähler erstellt
-		 * der bei 0 startet. Als Parameter wird das Eingabefeld (target) übergeben für
-		 * das die History gelten soll.
+		 * Diese Konstruktor erstellt die History und legt eine neue ArrayList
+		 * vom Typ String an um Befehle aufzunehmen. Außerdem wird ein
+		 * Befehlszähler erstellt der bei 0 startet. Als Parameter wird das
+		 * Eingabefeld (target) übergeben für das die History gelten soll.
 		 * 
 		 * @param target
 		 */
-		private History( JTextField target ) {
+		private History(JTextField target) {
 			eingabeHistorie = new ArrayList<String>();
 			eingabeAktuell = 0;
-			target.addKeyListener( this );
-		}//eom History( JTextFiel target)
+			target.addKeyListener(this);
+		}// eom History( JTextFiel target)
 
 		/**
 		 * Diese Methode ermöglicht das Hinzufügen von Befehlen.
 		 * 
-		 * Diese Methode fügt einen eingegeben String (eingabe) zu der History hinzu und
-		 * setzt den Befehlszähler auf size() der ArrayList.
+		 * Diese Methode fügt einen eingegeben String (eingabe) zu der History
+		 * hinzu und setzt den Befehlszähler auf size() der ArrayList.
 		 * 
 		 * @param eingabe
 		 */
-		private void add( String eingabe ) {
-			eingabeHistorie.add( eingabe );
+		private void add(String eingabe) {
+			eingabeHistorie.add(eingabe);
 			eingabeAktuell = eingabeHistorie.size();
-		}//eom add( String eingabe )
+		}// eom add( String eingabe )
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see java.awt.event.KeyAdapter#keyPressed(java.awt.event.KeyEvent)
 		 */
-		public void keyPressed( KeyEvent arg0 ) {
-			JTextField tmp = ( JTextField ) arg0.getSource();
+		public void keyPressed(KeyEvent arg0) {
+			JTextField tmp = (JTextField) arg0.getSource();
 			// Aktion für Pfeiltaste nach oben ( KeyCode 38 )
-			if ( ( arg0.getKeyCode() == 38 ) && ( eingabeAktuell > 0 ) ) {
+			if ((arg0.getKeyCode() == 38) && (eingabeAktuell > 0)) {
 				eingabeAktuell--;
-				tmp.setText( eingabeHistorie.get( eingabeAktuell ) );
+				tmp.setText(eingabeHistorie.get(eingabeAktuell));
 				// Aktion für Pfeiltaste nach unten ( KeyCode 40 )
-			} else if ( ( arg0.getKeyCode() == 40 ) && ( eingabeAktuell < eingabeHistorie.size() ) ) {
+			} else if ((arg0.getKeyCode() == 40)
+					&& (eingabeAktuell < eingabeHistorie.size())) {
 				eingabeAktuell++;
-				if ( eingabeAktuell < eingabeHistorie.size() ) {
-					tmp.setText( eingabeHistorie.get( eingabeAktuell ) );
+				if (eingabeAktuell < eingabeHistorie.size()) {
+					tmp.setText(eingabeHistorie.get(eingabeAktuell));
 				} else {
-					tmp.setText( "" );
+					tmp.setText("");
 				}
 			} else {
 			}
-		} //eom keyPressed( KeyEvent arg0 )
-	} //eoc History
-} //eoc ChatWindow
+		} // eom keyPressed( KeyEvent arg0 )
+	} // eoc History
+} // eoc ChatWindow

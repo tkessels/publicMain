@@ -57,7 +57,7 @@ public class UserListModel extends AbstractListModel<Node>{
 						try {
 							ChatEngine.getCE().getUsers().wait();
 						} catch ( InterruptedException e ) {
-							LogEngine.log(e);
+							LogEngine.log( e );
 						}
 					}
 				}

@@ -476,14 +476,14 @@ public class HistoryWindow extends JDialog{
 				if(beginGregCal!=null){
 					beginGregCal.set(Calendar.HOUR_OF_DAY,value.getHours() );
 					beginGregCal.set(Calendar.MINUTE,value.getMinutes() );
-					System.out.println(beginGregCal);
+//					System.out.println(beginGregCal);
 				}
 				// end Date
 				if(endGregCal!=null){
 					value = (Date) endSpinner.getValue();
 					endGregCal.set(Calendar.HOUR_OF_DAY,value.getHours() );
 					endGregCal.set(Calendar.MINUTE,value.getMinutes() );
-					System.out.println(endGregCal);
+//					System.out.println(endGregCal);
 				}
 				DatabaseDaten querry= null;
 				// Art der Suche

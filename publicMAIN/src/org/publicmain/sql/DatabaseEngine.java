@@ -173,7 +173,9 @@ public class DatabaseEngine {
 	 * @param gateway	NodeID des Gateways
 	 */
 	public void put(long target, long gateway){
-		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
+//		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
+			localDB.writeRoutingTableToDB(target, gateway);
+		
 	}
 
 	/**

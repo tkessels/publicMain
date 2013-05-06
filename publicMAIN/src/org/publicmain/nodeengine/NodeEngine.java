@@ -171,7 +171,7 @@ public class NodeEngine {
 	 * Getter für den optimalen Node zum anfügen eines weiteren, abhängig von
 	 * der gewählten Strategie.
 	 * 
-	 * @return
+	 * @return Node
 	 */
 	private Node getBestNode() {
 		return myStrategy.getBestNode();
@@ -1272,7 +1272,7 @@ public class NodeEngine {
 	 * @param newAlias Neuer Anzeigename des Knoten
 	 * @param nid Der zu aktualisierende Knoten
 	 * 
-	 * @return 
+	 * @return boolean
 	 */
 	private boolean updateAlias(String newAlias, long nid) {
 		Node tmp;
@@ -1304,10 +1304,23 @@ public class NodeEngine {
 		case "ra":
 			sendRA();
 			break;
-
-		case "settings":
-			new SettingsWindow(Integer.parseInt(parameter), false);
+		case "proute":
+			System.out.println(getRoutes());
 			break;
+		case "wroute":
+			Map<Long, Long> routes = getRoutes();
+			for (long x : routes.keySet()) {
+				DatabaseEngine.getDatabaseEngine().put(x, routes.get(x));
+			}
+			break;
+		case "conns":
+			System.out.println(connections.size());
+			for (ConnectionHandler con : connections) {
+				System.out.println(con.toString2());
+				
+			}
+			break;
+
 		case "play":
 			Help.playSound(parameter);
 			break;
@@ -1544,6 +1557,12 @@ public class NodeEngine {
 				}
 			}
 		}
+		Set<Node> tmp = getNodes();
+		tmp.removeAll(getChilds());
+		 long gw = root_connection.host_node.getNodeID();
+		 for(Node x : tmp){
+			 rueck.put(x.getNodeID(), gw);
+		 }
 		return rueck;
 	}
 

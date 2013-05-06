@@ -175,6 +175,38 @@ public class ConnectionHandler {
 		return "ConnectionHandler [" + hostname + "]"
 				+ ((latency < 10000) ? "[" + latency + "]" : "");
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	public String toString2() {
+		return "ConnectionHandler ["
+				+ (children != null ? "children=" + children + ", " : "")
+				+ (groups != null ? "groups=" + groups + ", " : "")
+				+ (host_node != null ? "host_node=" + host_node + ", " : "")
+				+ (ne != null ? "ne=" + ne + ", " : "")
+				+ (line != null ? "line=" + line + ", " : "")
+				+ (line_out != null ? "line_out=" + line_out + ", " : "")
+				+ (line_in != null ? "line_in=" + line_in + ", " : "")
+				+ (me != null ? "me=" + me + ", " : "")
+				+ (hostname != null ? "hostname=" + hostname + ", " : "")
+				+ "latency="
+				+ latency
+				+ ", "
+				+ (hookmanager != null ? "hookmanager=" + hookmanager + ", "
+						: "")
+				+ (pakets_rein_hol_bot != null ? "pakets_rein_hol_bot="
+						+ pakets_rein_hol_bot + ", " : "")
+				+ (pingpongBot != null ? "pingpongBot=" + pingpongBot : "")
+				+ "]";
+	}
 
 	/**
 	 * Sendet ein ECHO_REQUEST Paket zum anderen Verbindungsende.
@@ -352,6 +384,7 @@ public class ConnectionHandler {
 									break;
 								case NODE_UPDATE:
 									me.getChildren().add((Node) tmp.getData());
+									if(host_node==null) host_node=(Node) tmp.getData();
 								default:
 									try {
 										ne.handle(tmp, me);

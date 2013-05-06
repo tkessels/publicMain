@@ -85,9 +85,9 @@ public class DatabaseEngine {
 	
 	/**
 	 * Diese Methode weist die BackupDatenbankConnectionKlasse an eine bestimmte Nutzername-Passwort-Kombination auf gültigkeit zu überprüfen.
-	 * @param username: Nutzername des bestimmten Benutzers
-	 * @param password:	Passwort des bestimmten Benutzers
-	 * @return
+	 * @param username Nutzername des bestimmten Benutzers
+	 * @param password	Passwort des bestimmten Benutzers
+	 * @return true ist valid, false if not valid
 	 */
 	public boolean isValid(String username, String password) {
 		return (backupDB.getIDfor(username, password)!=-1);
@@ -97,14 +97,14 @@ public class DatabaseEngine {
 	 * Diese Methode holt sich eine Connection von der BackupDBConnection Klasse,
 	 * indem sie ihr die gewünschten parameter übergibt und prüft damit / anschließend damit die 
 	 * richtigkeit der übergebenen Daten.
-	 * @param username:		zu überprüfender Benutzername
-	 * @param password:		zu überprüfendes Passowort
-	 * @param ip:			IP-Adresse des Datenbankservers zu welchem die Verbindung hergestellt werden soll
-	 * @param dbPort:		Port über welchen die DB-Verbidung hergestellt werden soll
-	 * @param dbusername:	Username mit welchem die DB-Verbidung hergestellt werden soll
-	 * @param dbpassword:	Passwort mit welchem die DB-Verbidung hergestellt werden soll
-	 * @return true:		übergebene Daten Korrekt
-	 * @return false:		übergebene Daten fehlerhaft
+	 * @param username		zu überprüfender Benutzername
+	 * @param password		zu überprüfendes Passowort
+	 * @param ip			IP-Adresse des Datenbankservers zu welchem die Verbindung hergestellt werden soll
+	 * @param dbPort		Port über welchen die DB-Verbidung hergestellt werden soll
+	 * @param dbusername	Username mit welchem die DB-Verbidung hergestellt werden soll
+	 * @param dbpassword	Passwort mit welchem die DB-Verbidung hergestellt werden soll
+	 * @return true			übergebene Daten Korrekt
+	 * @return false		übergebene Daten fehlerhaft
 	 */
 	public boolean isValid(String username, String password,String ip, String dbPort, String dbusername, String dbpassword) {
 		long tmpID=-1;
@@ -134,7 +134,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert einen übergebene Nachricht(x) in eine lokale NachrichtenQueue 
-	 * @param x: Die zu speichernde Nachricht
+	 * @param x Die zu speichernde Nachricht
 	 */
 	public void put(MSG x){
 		msg2Store.offer(x);
@@ -142,7 +142,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert einen übergebenen Node(x) in eine lokale NodeQueue 
-	 * @param x: Der zu speichernde Node
+	 * @param x Der zu speichernde Node
 	 */
 	public void put(Node x){
 		node2Store.offer(x);
@@ -150,7 +150,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert eine übergebene Nodecollection(x) nacheinander in eine lokale NodeQueue 
-	 * @param x: Die zu speichernde Nodeliste
+	 * @param x Die zu speichernde Nodeliste
 	 */
 	public void put(Collection<Node> x){
 		for (Node node : x) {
@@ -160,20 +160,17 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode speichert einen übergebenen Gruppe(group) in eine lokale GruppenQueue 
-	 * @param x: Der zu speichernde Node
+	 * @param group Der zu speichernde Gruppenname
 	 */
 	public void put(String group){
 		groups2Store.add(group);
 	}
 	
-	/**
-	 * Diese Methode speichert einen übergebenen Node(x) in eine lokale NodeQueue 
-	 * @param x: Der zu speichernde Node
-	 */
+
 	/**
 	 * Diese Methode speichert einen übergebenen Ziel-Gateway-Routenkombination in eine lokale RoutenQueue
-	 * @param target:	NodeID des Ziels
-	 * @param gateway:	NodeID des Gateways
+	 * @param target	NodeID des Ziels
+	 * @param gateway	NodeID des Gateways
 	 */
 	public void put(long target, long gateway){
 		routes2Store.offer(new AbstractMap.SimpleEntry(target, gateway));
@@ -197,9 +194,9 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode weist die BackupDBConnection an die gegebene BenutzerName-Passwort-Kombination zu löschen
-	 * @param username:	Benutzername des zu löschenden Nutzers
-	 * @param password:	Passwort des zu löschenden Nutzers
-	 * @return
+	 * @param username	Benutzername des zu löschenden Nutzers
+	 * @param password	Passwort des zu löschenden Nutzers
+	 * @return 0 if no DB-Connection, 1 if couldn´t find user, 2 if user deleted 
 	 */
 	public int deleteBackupUserAccount(String username, String password) {
 		if(backupDB.getStatus()>=1){
@@ -409,7 +406,7 @@ public class DatabaseEngine {
 	/**
 	 * Diese Methode weist die LocalDBConnection-Klasse an alle gespeicherten
 	 * User zu übergeben, wandelt diese um und gibt sie als JComboBox zurück
-	 * @return
+	 * @return JComboBox mit Nodes
 	 */
 	public JComboBox<Node> getUsers(){
 		try {
@@ -445,11 +442,11 @@ public class DatabaseEngine {
 	/**
 	 * Diese Methode weist die Klasse BackupDBConnection an die Configdaten einers bestimmten
 	 * Benutzers aus der BackupDatenbank zu lesen und schreibt das ergebnis in die ProgrammConfig
-	 * @param user:		Username des besitmmten Benutzers
-	 * @param password:	Passwort des besitmmten Benutzers
-	 * @return 0:		Probleme mit dem SQL-Server
-	 * @return 1:		geladene Config leer
-	 * @return 2:		erfolgreich durchgeführt
+	 * @param user		Username des besitmmten Benutzers
+	 * @param password	Passwort des besitmmten Benutzers
+	 * @return 0		Probleme mit dem SQL-Server
+	 * @return 1		geladene Config leer
+	 * @return 2		erfolgreich durchgeführt
 	 */
 	public int getConfig(String user, String password) {
 		//load config
@@ -515,7 +512,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode wandelt ein ResultSet in ein DefaultTableModel um und gibt dieses zurück
-	 * @param rs:	umzuwandelndes ResultSet
+	 * @param rs	umzuwandelndes ResultSet
 	 * @return		DefaultTableModel
 	 * @throws SQLException
 	 */
@@ -539,12 +536,12 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode weist die BackupDBConnection an, einen nutzer mit bestimmten Username und Passwort zu erstellen
-	 * @param username:	Benutzername des zu erstellenden Benutzers
-	 * @param password:	Passwort des zu erstellenden Benutzers
-	 * @return	0:	BackupDBConnection-Klasse nicht bereit
-	 * @return	1:	Anlegen des Benutzers nicht erfolgreich
-	 * @return	2:	Benutzername oder Passwort enthält verbotene Zeichen.
-	 * @return	3:	Benutzer wurde angelegt	
+	 * @param username	Benutzername des zu erstellenden Benutzers
+	 * @param password	Passwort des zu erstellenden Benutzers
+	 * @return	0	BackupDBConnection-Klasse nicht bereit
+	 * @return	1	Anlegen des Benutzers nicht erfolgreich
+	 * @return	2	Benutzername oder Passwort enthält verbotene Zeichen.
+	 * @return	3	Benutzer wurde angelegt	
 	 */
 	public int createUser(String username, String password) {
 		if(!username.matches(Config.getConfig().getNamePattern()) || !password.matches(Config.getConfig().getNamePattern())) return 2;

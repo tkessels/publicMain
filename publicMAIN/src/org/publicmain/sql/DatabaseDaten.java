@@ -24,7 +24,7 @@ public class DatabaseDaten {
 	/**
 	 * HEX HEX - trifft´s wohl am besten.
 	 * @param mask
-	 * @return
+	 * @return Hoehe als int
 	 */
 	private static int high(int mask)
 	{
@@ -36,7 +36,7 @@ public class DatabaseDaten {
 	/**
 	 * @param i
 	 * @param mask
-	 * @return
+	 * @return true if is up, false if not
 	 */
 	private static boolean isUp(int i,int mask)
 	{

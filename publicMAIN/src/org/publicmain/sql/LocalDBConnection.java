@@ -279,9 +279,6 @@ public class LocalDBConnection {
 	 * reconnect genutzt. Methode wartet festgelegte Zeit zwischen den
 	 * Versuchen, welche durch einen maximalwert begrenzt sind.
 	 * 
-	 * @param reconnectVersuche
-	 *            repräsentiert den Zahlenwert des aktuellen Versuches wird
-	 *            bei jedem erfolglosen Versuch erhöht
 	 */
 	public void reconnectToLocDBServer(){
 		new Thread(new Runnable() {
@@ -779,14 +776,8 @@ public class LocalDBConnection {
 	/**
 	 * Diese Methode schreibt die Routinginformationen in die Datenbank.
 	 * 
-	 * @param nIDZiel
-	 *            NodeID des Ziels
-	 * @param hostNameZiel
-	 *            Hostname des Ziels
-	 * @param uIDZiel
-	 *            userID des Ziels
-	 * @param nIDGateWay
-	 *            nodeID des zu nutzenden Gateways
+	 * @param nIDZiel NodeID des Ziels
+	 * @param nIDGateWay nodeID des zu nutzenden Gateways
 	 * @return true Speichern hat geklappt
 	 * @return false Speichern hat !geklappt
 	 */
@@ -882,7 +873,7 @@ public class LocalDBConnection {
 	 *            werden sollen
 	 * @param msgTxt
 	 *            gibt den gesuchten Nachrichtentext an
-	 * @return: Resultset mit allen Treffern der suche oder 'null' wenn keine
+	 * @return Resultset mit allen Treffern der suche oder 'null' wenn keine
 	 *          treffer oder Fehler
 	 */
 	public ResultSet searchInHistory (String userID, String alias, String groupName, long begin, long end, String msgTxt){

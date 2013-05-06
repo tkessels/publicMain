@@ -32,7 +32,7 @@ public class BackupDBConnection {
 	 * Wenn noch keine BackupDBConnection besteht wird eine erstellt und
 	 * zurückgeliefert.
 	 * 
-	 * @return
+	 * @return DIE Instanz der BackupDBConnection
 	 */
 	public static BackupDBConnection getBackupDBConnection() {
 		if (me == null) {
@@ -104,9 +104,9 @@ public class BackupDBConnection {
 	 * Über diese Methode kann der Status der Backupdatenbankverbindung
 	 * abgefragt werden.
 	 * 
-	 * @return: 0 - keine Verbindung zum Backupserver
-	 * @return: 1 - Verbindung besteht, aber kein User eingerichtet
-	 * @return: 2 - Verbindung besteht, angegebene Nutzerdaten korrekt.
+	 * @return 0 - keine Verbindung zum Backupserver
+	 * @return 1 - Verbindung besteht, aber kein User eingerichtet
+	 * @return 2 - Verbindung besteht, angegebene Nutzerdaten korrekt.
 	 */
 	public int getStatus() {
 		try {

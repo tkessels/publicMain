@@ -714,10 +714,10 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * (Group/UID) oder sie wird im aktuellen ChatWindow angezeigt falls die
 	 * Referenz null ist.
 	 * 
-	 * @param nachricht, Text of the message
-	 * @param reference, Groupname or UID of ChatWindow to put the message in or
+	 * @param nachricht Text of the message
+	 * @param reference Groupname or UID of ChatWindow to put the message in or
 	 *            		 <code>null</code> to take the active one.
-	 * @param typ, <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
+	 * @param typ <ul><li>0 - info<li>1 - warning<li>2 - error</ul>
 	 */
 	public void info( String nachricht, Object reference, int typ ) {
 		ChatWindow tmp = getCW( reference );

@@ -526,7 +526,7 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	/**
-	 * Schreibt die gewählten Einstellungen im Settingswinow in die Config 
+	 * Schreibt die gewählten Einstellungen im Settingswindow in die Config 
 	 */
 	private void acceptSettings(){
 			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
@@ -588,9 +588,10 @@ public class SettingsWindow extends JDialog{
 	
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für die Card-Buttons
-	 * Sie sorgt dafür, dass die Card, auf deren Button geclickt wurde angezeigt wird
+	 * Sie sorgt dafür, dass die Card, auf deren Button geclickt wurde angezeigt wird.
+	 * 
+	 * @author ATRM
 	 */
 	class CardButtonController implements ActionListener{
 		public void actionPerformed(final ActionEvent e) {
@@ -599,9 +600,10 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für die SettingsButtons
-	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird.
+	 * 
+	 * @author ATRM
 	 */
 	class SettingButtonController implements ActionListener{
 
@@ -627,9 +629,9 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	/**
+	 * Diese Klasse verändert die angezeigte Schriftgröße bei bedienunge des Schriftgrößen-Sliders.
+	 * 
 	 * @author ATRM
-	 * Diese Klasse verändert die angezeigte Schriftgröße bei bedienunge des Schriftgrößen-Sliders
-	 *
 	 */
 	class FontSizeSliderController implements ChangeListener{
 
@@ -643,10 +645,11 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für die PushPullButtons
 	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
-	 * und färbt die Felder entsprechend der Ergebnisse ein
+	 * und färbt die Felder entsprechend der Ergebnisse ein.
+	 * 
+	 * @author ATRM
 	 */
 	class PushPullButtonController implements ActionListener{
 
@@ -698,9 +701,10 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für den DeleteButton
-	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird.
+	 * 
+	 * @author ATRM
 	 */
 	class DeleteButtonController implements ActionListener{
 

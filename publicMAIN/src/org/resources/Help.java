@@ -17,21 +17,64 @@ import javax.swing.ImageIcon;
 import org.publicmain.common.LogEngine;
 //import the sun.audio package
 
+/**
+ * Diese Klasse ermöglicht das Einbinden von Icon's und Files.
+ * 
+ * Diese Klasse ermöglicht das Einbinden von Icon's und Files mit richtigem Pfad.
+ * Desweiteren wird die Möglichkeit gegeben Icon's zu formatieren.
+ * 
+ * @author ATRM
+ */
 public class Help {
 
+	/**
+	 * Diese Methode bindet ein ImageIcon ein.
+	 * 
+	 * Diese Methode bindet ein ImageIcon ein mit den Abmessungen 16 * 16 Pixel.
+	 * 
+	 * @param filename name des Bildes
+	 * @return ImageIcon fertiges Bild
+	 */
 	public static ImageIcon getIcon(String filename) {
 		return getIcon(filename, 16);
 	}
+	
+	/**
+	 * Diese Methode bindet ein ImageIcon ein.
+	 * 
+	 * Diese Methode bindet ein ImageIcon ein mit den Abmessungen size * size Pixel.
+	 * 
+	 * @param filename Name des Bildes
+	 * @param size gewünschte quadratische Größe
+	 * @return ImageIcon fertiges Bild
+	 */
 	public static ImageIcon getIcon(String filename,int size) {
 		return getIcon(filename, size,size);
 	}
 
+	/**
+	 * Diese Methode gibt einen InputStream auf ein Object im JAR-File.
+	 * 
+	 * @param filename Name der Datei
+	 * @return InputStream
+	 * @throws IOException
+	 */
 	public static InputStream getInputStream(String filename) throws IOException {
 		URL resource = Help.class.getResource(filename);
 		if (resource !=null) return new BufferedInputStream(resource.openStream());
 		else return null;
 	}
 
+	/**
+	 * Diese Methode liefert ein Fileobjekt für eine Datei im JAR-File.
+	 * 
+	 * Diese Methode liefert ein Fileobjekt für eine Datei im JAR-File indem es
+	 * eine temporäre Kopie erstellt und Fileobjekt darauf verweist.
+	 * 
+	 * @param filename Name der Datei
+	 * @return File Fileobjekt auf tmp Kopie
+	 * @throws IOException
+	 */
 	public static File getFile(String filename) throws IOException {
 
 		File tmp = null;
@@ -61,11 +104,14 @@ public class Help {
 	}
 
 	/**
-	 * Gibt des Bild in der angeforderten Größe zurück.
+	 * Diese Methode bindet ein ImageIcon ein.
 	 * 
-	 * @param filename, Anzupassendes Bild
-	 * @param size, geforderte Größe
-	 * @return, fertiges Icon
+	 * Diese Methode bindet ein ImageIcon ein mit den Abmessungen size * size Pixel.
+	 * 
+	 * @param filename Anzupassendes Bild
+	 * @param size_x  X-Größe
+	 * @param size_y  Y-Größe
+	 * @return ImageIcon fertiges Icon
 	 */
 	public static ImageIcon getIcon(String filename, int size_x, int size_y) {
 		URL resource = Help.class.getResource(filename);
@@ -79,6 +125,14 @@ public class Help {
 		return newIcon;
 	}
 
+	/**
+	 * Diese Methode liefert ein Clipobjekt.
+	 * 
+	 * Diese Methode liefert ein Clipobjekt für ein im JAR-File befindliches Soundfile.
+	 * 
+	 * @param filename name der Datei
+	 * @return Clip Clipobjekt für das File
+	 */
 	public static Clip getSound(final String filename) {
 		try {
 			InputStream stream = getInputStream(filename);
@@ -93,6 +147,14 @@ public class Help {
 		}
 		return null;
 	}
+	
+	/**
+	 * Diese Methode spielt einen Sound ab.
+	 * 
+	 * Diese Methode spielt ein .wav bzw. .au File ab.
+	 * 
+	 * @param filename name der Datei
+	 */
 	public static synchronized void playSound(final String filename) {
 		stopSound();
 		new Thread(new Runnable() {
@@ -104,15 +166,18 @@ public class Help {
 			}
 		}).start();
 	}
+	
+	/**
+	 * Diese Methode stoppt die Wiedergabe.
+	 * 
+	 * Diese Methode stoppt die Wiedergabe eines zuvor gestarteten Soundfiles.
+	 */
 	public static synchronized void stopSound() {
 		if (clip!=null) {
 			clip.stop();
 		}
 		clip=null;
 	}
-
 	private static Clip clip;
-
-
 }
 

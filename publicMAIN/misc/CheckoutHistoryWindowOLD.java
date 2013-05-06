@@ -25,6 +25,7 @@ import javax.swing.JTextPane;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.publicmain.common.LogEngine;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
@@ -190,7 +191,7 @@ public class CheckoutHistoryWindow {
 			} while (!myTime.equals("00:00"));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LogEngine.log(this, e);
 		}
 	}
 	class searchContoller implements ActionListener{
@@ -217,7 +218,7 @@ public class CheckoutHistoryWindow {
 					db.searchInHistory(historyContentTxt, chosenNTyp, chosenAliasOrGrpName, chosenFromDateTime, ChosenToDateTime , htmlKit, htmlDoc);
 					
 				} catch (ParseException e) {
-					e.printStackTrace();
+					LogEngine.log(this, e);
 				}
 				break;
 				

@@ -30,6 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.publicmain.common.LogEngine;
+
 /**
  * Diese Klasse wird nur für die verschiebbaren Registerkarten verwendet und wurde nicht durch
  * das Projektteam erstellt ggf. wird dies wieder entfernt. Quellenangabe siehe nachstehend
@@ -134,7 +136,7 @@ public class DragableJTabbedPane extends JTabbedPane {
 					e.startDrag(DragSource.DefaultMoveDrop, 
 							new TabTransferable(DragableJTabbedPane.this, dragTabIndex), dsl);
 				} catch (InvalidDnDOperationException idoe) {
-					idoe.printStackTrace();
+					LogEngine.log(this, idoe);
 				}
 			}
 		};
@@ -164,7 +166,7 @@ public class DragableJTabbedPane extends JTabbedPane {
 			TabTransferData data = (TabTransferData) a_event.getTransferable().getTransferData(FLAVOR);				
 			return data;
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogEngine.log(this, e);
 		}
 
 		return null;
@@ -187,7 +189,7 @@ public class DragableJTabbedPane extends JTabbedPane {
 				.getTransferable().getTransferData(FLAVOR);				
 			return data;
 		} catch (Exception e) {
-			e.printStackTrace();
+			LogEngine.log(this, e);
 		}
 
 		return null;		

@@ -132,8 +132,7 @@ public class NodeEngine {
 		multi_socket = MulticastConnectionHandler.getMC();
 		multi_socket.registerNodeEngine(this);
 
-		meinNode = new Node(server_socket.getLocalPort(), nodeID,
-				ce.getUserID(), System.getProperty("user.name"), ce.getAlias());
+		meinNode = new Node(server_socket.getLocalPort(), nodeID,ce.getUserID(), System.getProperty("user.name"), ce.getAlias());
 		allNodes.add(meinNode);
 		DatabaseEngine.getDatabaseEngine().put(meinNode);
 
@@ -538,6 +537,18 @@ public class NodeEngine {
 			sendroot(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
 		}
 	}
+	private void updateNodes2() {
+		synchronized (allNodes) {
+			allNodes.clear();
+			allNodes.add(getMe());
+			allNodes.addAll(getChilds());
+			pollChilds();
+			allNodes.notifyAll();
+		}
+		if (hasParent()) {
+			sendroot(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
+		}
+	}
 
 	// Ggf. für die weitere Entwicklung benötigt.
 
@@ -776,9 +787,11 @@ public class NodeEngine {
 					break;
 				case REPORT_ALLNODES:
 					allnodes_set((Set<Node>) paket.getData());
+
 					break;
 				case POLL_CHILDNODES:
 					if (quelle == root_connection) {
+
 						//						sendroot(new MSG(getChilds(), MSGCode.REPORT_CHILDNODES));
 						sendroot(new MSG(Arrays.asList(meinNode), MSGCode.REPORT_CHILDNODES));
 						sendroot(new MSG(meinNode, MSGCode.NODE_UPDATE));
@@ -1091,6 +1104,16 @@ public class NodeEngine {
 	 */
 	private void allnodes_set(Collection<Node> data) {
 		synchronized (allNodes) {
+			Set <Node> myChilds=getChilds();
+			myChilds.addAll(allNodes);
+			Set <Node> oldAllNodes=new HashSet<Node>();
+			oldAllNodes.addAll(allNodes);
+			Set <Node> new_nodes=new HashSet<Node>();
+			new_nodes.addAll(data);
+			new_nodes.removeAll(oldAllNodes);
+			Set <Node> gone_nodes=new HashSet<Node>();
+			
+			
 			int hash = allNodes.hashCode();
 			allNodes.clear();
 			allNodes.addAll(data);
@@ -1557,7 +1580,8 @@ public class NodeEngine {
 				}
 			}
 		}
-		Set<Node> tmp = getNodes();
+		Set<Node> tmp = new HashSet<Node>();
+		tmp.addAll(getNodes());
 		tmp.removeAll(getChilds());
 		 long gw = root_connection.host_node.getNodeID();
 		 for(Node x : tmp){

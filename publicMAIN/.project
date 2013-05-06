@@ -20,10 +20,16 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>net.sourceforge.metrics.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>com.quest.toadext.ToadextNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.instantiations.assist.eclipse.coverage.codeCoverageNature</nature>
+		<nature>net.sourceforge.metrics.nature</nature>
 	</natures>
 </projectDescription>

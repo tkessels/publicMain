@@ -42,14 +42,15 @@ import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 /**
- * @author ATRM
+ * Diese Klasse stellt ein das Settings Fenster bereit.
+ * 
  * Diese Klasse stellt ein Einstellungsfenster zur Verfügung
- * in welchem der Nutzer Nutzerspezifische Einstellungen treffen kann
+ * in welchem der Nutzer Nutzerspezifische Einstellungen treffen kann.
  *
+ * @author ATRM
  */
 public class SettingsWindow extends JDialog{
 	private static final long serialVersionUID = 7576764930617798651L;
-	
 
 	private static SettingsWindow me;
 
@@ -123,7 +124,8 @@ public class SettingsWindow extends JDialog{
 	
 
 	/**
-	 * Dieser Konstruktor Stellt ein SettingsWindow zur Verfügung
+	 * Dieser Konstruktor Stellt ein SettingsWindow zur Verfügung.
+	 * 
 	 * @param card die als erstes sichtbar sein soll
 	 * @param modal	true/false ob das Settingswindwo modal sein soll
 	 */
@@ -136,7 +138,7 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * Dieser Konstruktor Stellt ein Standart-SettingsWindow zur Verfügung
+	 * Dieser Konstruktor Stellt ein Standard-SettingsWindow zur Verfügung.
 	 */
 	private SettingsWindow() {
 		SettingsWindow.me = this;
@@ -145,8 +147,9 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * Factory-Methode für das Startwindwo
-	 * @return DIE StartWindowInstanz
+	 * Factory-Methode für das SettingsWindow
+	 * 
+	 * @return StartWindow me
 	 */
 	public synchronized static SettingsWindow get(){
 		if(me==null) {
@@ -157,7 +160,8 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * Diese Methode sorgt für das Anzeigen eines besstimmten Tabs
+	 * Diese Methode sorgt für das Anzeigen eines besstimmten Tabs.
+	 * 
 	 * @param i repräsentiert den gewünschten Tab (0=User, 1=Database, 2=Push/Pull)
 	 */
 	public void showTab(int i) {
@@ -173,7 +177,7 @@ public class SettingsWindow extends JDialog{
 
 
 	/**
-	 * erstellt alle Fenster elemente
+	 * erstellt alle Fensterelemente.
 	 */
 	private void constructWindowContent() {
 		this.setResizable(false);
@@ -255,6 +259,7 @@ public class SettingsWindow extends JDialog{
 		this.btnGrp.add(databaseBtn);
 		this.btnGrp.add(pushPullBtn);
 
+		//Listener hinzufügen
 		this.userBtn.addActionListener(new CardButtonController());
 		this.databaseBtn.addActionListener(new CardButtonController());
 		this.pushPullBtn.addActionListener(new CardButtonController());
@@ -382,7 +387,7 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * Diese Methode lässt das aktuelle StartWindow disposen wenn es vorhanden ist 
+	 * Diese Methode lässt das aktuelle SettingsWindow disposen wenn es vorhanden ist 
 	 */
 	public static void closeThis(){
 		if(me!=null) {

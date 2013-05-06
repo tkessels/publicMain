@@ -243,7 +243,7 @@ public class ChatEngine{
 		DatabaseEngine.getDatabaseEngine().put(gruppen_name);
 		synchronized (myGroups) {
 			if (myGroups.add(gruppen_name)) {
-				ne.joinGroup(Arrays.asList(gruppen_name), null);
+				ne.updateMyGroups();
 			}
 		}
 	}
@@ -257,7 +257,7 @@ public class ChatEngine{
 	public void group_leave(String gruppen_name) {
 		synchronized (myGroups) {
 			if (myGroups.remove(gruppen_name)) {
-				ne.leaveGroup(Arrays.asList(gruppen_name), null);
+				ne.updateMyGroups();
 			}
 		}
 	}

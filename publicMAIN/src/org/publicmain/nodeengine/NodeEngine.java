@@ -255,8 +255,8 @@ public class NodeEngine {
 	/**
 	 * Liefert eine Node für eine bestimmte <code>uid</code>. 
 	 * 
-	 * @param uid
-	 * @return
+	 * @param uid UserID des zu suchenden Nutzers
+	 * @return zur UserID zugehöriges NodeObjekt 
 	 */
 	public Node getNodeForUID(long uid){
 		synchronized (allNodes) {
@@ -271,7 +271,7 @@ public class NodeEngine {
 	/**
 	 * Getter für ein Set, vom Typ String, für alle Gruppen.
 	 * 
-	 * @return
+	 * @return Set von Gruppennamen
 	 */
 	public Set<String> getGroups() {
 		return allGroups;
@@ -280,11 +280,11 @@ public class NodeEngine {
 	/**
 	 * Sendet eine Nachricht an den übergeordneten Node, wenn einer existiert.
 	 * 
-	 * @param msg
+	 * @param nachricht das zu versende Nachrichtenobjekt
 	 */
-	private void sendroot(MSG msg) {
+	private void sendroot(MSG nachricht) {
 		if (hasParent()) {
-			root_connection.send(msg);
+			root_connection.send(nachricht);
 		}
 	}
 
@@ -293,7 +293,7 @@ public class NodeEngine {
 	 * send_file() weiter. Hier wird geprüft, ob die Dateigröße < 5MB (Aufruf der
 	 * send_file()) anderenfalls als Msg-Type Data
 	 * 
-	 * @param nachricht
+	 * @param nachricht das zu versende Nachrichtenobjekt
 	 */
 	private void sendmutlicast(MSG nachricht) {
 		multi_socket.sendmutlicast(nachricht);
@@ -305,7 +305,7 @@ public class NodeEngine {
 	 * @param msg
 	 *            ist die Nachricht, die verschickt werden soll (darf nicht
 	 *            größer 64KB sein)
-	 * @param target
+	 * @param target Zielnode für Unicastpaket
 	 */
 	private void sendunicast(MSG msg, Node target) {
 		multi_socket.sendunicast(msg, target);
@@ -314,7 +314,7 @@ public class NodeEngine {
 	/**
 	 * Sendet eine Nachricht an alle angeschlossenen Verbindungen.
 	 * 
-	 * @param nachricht
+	 * @param nachricht Zu sendendes Nachrichtenobjekt
 	 */
 	public void sendtcp(MSG nachricht) {
 		if (hasParent()) {
@@ -331,8 +331,8 @@ public class NodeEngine {
 	 * Sendet eine Nachricht an alle angeschlossenen Verbindungen, außer an die
 	 * mitgelieferte Verbindung.
 	 * 
-	 * @param msg
-	 * @param ch
+	 * @param msg zu versendendes Nachrichtenobjekt
+	 * @param ch Beim Versand auszuschließende Verbindung
 	 */
 	private void sendtcpexcept(MSG msg, ConnectionHandler ch) {
 		if (hasParent() && (root_connection != ch)) {
@@ -347,8 +347,8 @@ public class NodeEngine {
 	 * Sendet eine Nachricht an alle angeschlossenen Child-Verbindungen, außer
 	 * an die mitgelieferte Verbindung.
 	 * 
-	 * @param msg
-	 * @param ch
+	 * @param msg zu versendendes Nachrichtenobjekt
+	 * @param ch Beim Versand auszuschließende Verbindung
 	 */
 	private void sendchild(MSG msg, ConnectionHandler ch) {
 		for (ConnectionHandler x : connections) {
@@ -546,9 +546,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Getter für ein Set, vom Typ Nodes, aller ChildNodes.
+	 * Getter für ein Set, vom Typ Node, aller ChildNodes.
 	 * 
-	 * @return
+	 * @return Set aller ChildNodes
 	 */
 	private Set<Node> getChilds() {
 		Set<Node> rück = new HashSet<Node>();
@@ -621,7 +621,7 @@ public class NodeEngine {
 	/**
 	 * Entfernt eine Verbindung wieder.
 	 * 
-	 * @param conn
+	 * @param conn Die zu Entfernende Verbindung
 	 */
 	public void remove(ConnectionHandler conn) {
 		LogEngine.log(conn, "removing");
@@ -653,9 +653,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Methode zur Behandlung eingehender ROOT_CLAIM Nachrichten
 	 * 
-	 * @param paket
+	 * @param paket ROOT_CLAIM Paket
 	 */
 	private void handleRootClaim(MSG paket) {
 		if(paket!=null) {
@@ -804,11 +804,11 @@ public class NodeEngine {
 					break;
 				case GROUP_JOIN:
 					quelle.add((Collection<String>) paket.getData());
-					joinGroup((Collection<String>) paket.getData(), quelle);
+					updateMyGroups();
 					break;
 				case GROUP_LEAVE:
 					quelle.remove((Collection<String>) paket.getData());
-					leaveGroup((Collection<String>) paket.getData(), quelle);
+					updateMyGroups();
 					break;
 				case GROUP_ANNOUNCE:
 					if (addGroup((Collection<String>) paket.getData())) {
@@ -891,10 +891,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Überprüfen, ausformulieren!
-	 * Verwaltung des Dateiempfang, abhängig von der Konfiguration des Benutzers.  
+	 * Verwaltung des Dateiempfangs, abhängig von der Konfiguration des Benutzers.  
 	 * 
-	 * @param tmp
+	 * @param tmp Das {@link FileTransferData} Objekt mit allen Informationen über den Dateitransfer
 	 */
 	private void recieve_file(final FileTransferData tmp) {
 		if(!Config.getConfig().getDisableFileTransfer()) {
@@ -959,9 +958,11 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Versendet ein Paket geroutet
 	 * 
-	 * @param paket
+	 * Das Paket wird in abhängigkeit von seiner ZielnodeID auf der passenden Verbindung weitergeleitet
+	 * 
+	 * @param paket Zu versendendes Paketobjekt
 	 */
 	public void routesend(MSG paket) {
 		long empfänger = paket.getEmpfänger();
@@ -992,10 +993,13 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Versendet eine Gruppennachricht geroutet
 	 * 
-	 * @param paket
-	 * @param quelle
+	 * Das Paket wird in abhängigkeit von seiner Gruppe auf der passenden Verbindung weitergeleitet
+	 * 
+	 * @param paket Zu versendendes Paketobjekt
+	 * 
+	 * @param quelle Verbindung auf der das Paket empfangen wurde
 	 */
 	public void groupRouteSend(MSG paket,ConnectionHandler quelle) {
 		String gruppe = paket.getGroup();
@@ -1012,9 +1016,12 @@ public class NodeEngine {
 	/**
 	 * Die eigenen abonierten Gruppen aktualisieren, hinzufügen oder entfernen.
 	 * 
-	 * @return
+	 * Berechnet einen neue Schnittmenge von Gruppenmitgliedschaften und ermittelt die Veränderungen zum alten Zustand. 
+	 * Alle Veränderungen werden mit dem Vaterknoten kommuniziert. 
+	 * 
+	 * @return <code>true</code>wenn sich die Gruppenzugehörigkeit aus sicht des Vaterknoten geändert hat, sonst <code>false</code> 
 	 */
-	private boolean updateMyGroups() {
+	public boolean updateMyGroups() {
 		Set<String> aktuell = computeGroups();
 		synchronized (myGroups) {
 
@@ -1046,9 +1053,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Entfernt alle Knoten einer Kollektion aus der Gesamtliste
 	 * 
-	 * @param data
+	 * @param data Zu entfernende Nodes
 	 */
 	private void allnodes_remove(Collection<Node> data) {
 		synchronized (allNodes) {
@@ -1061,43 +1068,10 @@ public class NodeEngine {
 		}
 	}
 
-	// Ggf. für die weitere Entwicklung benötigt.
-	// 
-	//	/**
-	//	 * Entfernt einen Benutzer aus der Liste.
-	//	 * 
-	//	 * @param data
-	//	 */
-	//	private void allnodes_remove(Node data) {
-	//		synchronized (allNodes) {
-	//			int hash = allNodes.hashCode();
-	//			allNodes.remove(data);
-	//			if (allNodes.hashCode() != hash) {
-	//				allNodes.notifyAll();
-	//			}
-	//		}
-	//	}
-
-	// Ggf. für die weitere Entwicklung benötigt.
-	//	/**
-	//	 * Fügt einen Benutzer der Liste hinzu.
-	//	 * 
-	//	 * @param data
-	//	 */
-	//	private void allnodes_add(Collection<Node> data) {
-	//		synchronized (allNodes) {
-	//			int hash = allNodes.hashCode();
-	//			allNodes.addAll(data);
-	//			if (allNodes.hashCode() != hash) {
-	//				allNodes.notifyAll();
-	//			}
-	//		}
-	//	}
-
 	/**
-	 * TODO: Kommentar!
+	 * Fügt Nodes zur Gesamtliste hinzu
 	 * 
-	 * @param data
+	 * @param data neue Nodes
 	 */
 	private void allnodes_add(Node data) {
 		synchronized (allNodes) {
@@ -1111,9 +1085,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar!
+	 * Setz die Gesamtliste der Nodes neu
 	 * 
-	 * @param data
+	 * @param data neue Gesamtliste
 	 */
 	private void allnodes_set(Collection<Node> data) {
 		synchronized (allNodes) {
@@ -1166,39 +1140,17 @@ public class NodeEngine {
 	/**
 	 * Getter für die eigene <code>nid</code>.
 	 * 
-	 * @return
+	 * @return Die eigene NodeID
 	 */
 	public long getNodeID() {
 		return nodeID;
 	}
 
 	/**
-	 * Diese Methode tritt einer Gruppe auf einer bestimmten Verbindung bei, um
-	 * die Nachrichten der abonierten Gruppe zu empfangen.
-	 * 
-	 * @param gruppen_namen
-	 * @param con
-	 */
-	public void joinGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
-		updateMyGroups();
-	}
-
-	/**
-	 * Verlässt eine Gruppe auf einer bestimmten Verbindung wieder und
-	 * kann die Nachrichten der vorher abonnierten Gruppe nicht mehr erhalten.
-	 * 
-	 * @param gruppen_namen
-	 * @param con
-	 */
-	public void leaveGroup(Collection<String> gruppen_namen, ConnectionHandler con) {
-		updateMyGroups();
-	}
-
-	/**
 	 * Entfernt Gruppen aus der Gruppenübersicht
 	 * 
 	 * @param gruppen_name die zu entfernenden Gruppennamen
-	 * @return 
+	 * @return <code>true</code> Wenn sich die Gruppenliste durch die aktion geändert hat, sonst <code>false</code>
 	 */
 	public boolean removeGroup(Collection<String> gruppen_name) {
 		synchronized (allGroups) {
@@ -1209,9 +1161,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Setzt Liste verfügbarer Gruppen neu
 	 * 
-	 * @param groups
+	 * @param groups Neue Gruppenliste
 	 */
 	public void setGroup(Collection<String> groups) {
 		synchronized (allGroups) {
@@ -1222,10 +1174,10 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Fügt Gruppen der Liste hinzu 
 	 * 
-	 * @param groups
-	 * @return
+	 * @param groups Neue Gruppen
+	 * @return  <code>true</code> Wenn sich die Gruppenliste durch die aktion geändert hat, sonst <code>false</code>
 	 */
 	public boolean addGroup(Collection<String> groups) {
 		synchronized (allGroups) {
@@ -1236,10 +1188,10 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Verlässt eine Gruppe
 	 * 
-	 * @param gruppen_name
-	 * @return
+	 * @param gruppen_name Zu verlassende Gruppe
+	 * @return  <code>true</code> Wenn sich die Gruppenliste durch die aktion geändert hat, sonst <code>false</code>
 	 */
 	public boolean removeMyGroup(String gruppen_name) {
 		synchronized (myGroups) {
@@ -1248,10 +1200,10 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Tritt einer Gruppe bei
 	 * 
-	 * @param gruppen_name
-	 * @return
+	 * @param gruppen_name Zu betretende Gruppe
+	 * @return  <code>true</code> Wenn sich die Gruppenliste durch die aktion geändert hat, sonst <code>false</code>
 	 */
 	public boolean addMyGroup(String gruppen_name) {
 		synchronized (myGroups) {
@@ -1260,9 +1212,9 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Errechnet die Mitglidschaften alle Kindknoten zusammengenommen
 	 * 
-	 * @return
+	 * @return Vereinigung aller Gruppenmitgliedschaften
 	 */
 	public Set<String>computeGroups(){
 		Set<String> tmpGroups = new HashSet<String>();
@@ -1285,7 +1237,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Zeigt die Latenz von mir zu allen mir bekannten Knoten über den Baum im aktuellen Chatfenster an
 	 */
 	public void pathPing(){
 		for (Node cur : getNodes()) {
@@ -1295,10 +1247,10 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Kommentar! 
+	 * Sendet ein Ping Paket an einen Knoten und registriert einen Hook um die Antwort auszuwerten
 	 * 
-	 * @param remote
-	 * @return
+	 * @param remote Der zu pingende Knoten
+	 * @return Latenz in Millisekunden oder -1 wenn keine Antwort innerhalt 1 Sekunde empfangen wurde
 	 */
 	public long pathPing(Node remote) {
 		if (remote.equals(meinNode))return 0;
@@ -1317,10 +1269,10 @@ public class NodeEngine {
 	 * Geänderten Alias der GUI mitteilen, damit der Alias korrekt auf der GUI
 	 * dargestellt wird.
 	 * 
-	 * @param newAlias
-	 * @param nid
+	 * @param newAlias Neuer Anzeigename des Knoten
+	 * @param nid Der zu aktualisierende Knoten
 	 * 
-	 * @return
+	 * @return 
 	 */
 	private boolean updateAlias(String newAlias, long nid) {
 		Node tmp;
@@ -1344,8 +1296,8 @@ public class NodeEngine {
 	 * Debug-Parameter (/debug) für die Eingabe auf der GUI werden hier
 	 * interpretiert.
 	 * 
-	 * @param command
-	 * @param parameter
+	 * @param command Debug-Befehl
+	 * @param parameter Debug-Befehl-Parameter
 	 */
 	public void debug(String command, String parameter) {
 		switch (command) {
@@ -1414,9 +1366,6 @@ public class NodeEngine {
 		case "tree":
 			showTree(getTree());
 			break;
-		case "tree2":
-			showTree(getTree2());
-			break;
 		case "reconnect_all":
 			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
 			break;
@@ -1429,31 +1378,36 @@ public class NodeEngine {
 		}
 	}
 
+//	/**
+//	 * Erstellt den Topologie-Baum für das Debug-Kommando (/debug tree).
+//	 * 
+//	 * @return TreeNode der die Baumtopologie repräsentiert
+//	 */
+//	public Node getTree() {
+//		Node root = (Node) meinNode.clone();
+//		// Zuerst werden alle Knoten hergestellt...
+//		for (final ConnectionHandler con : connections) {
+//			Runnable tmp = new Runnable() {
+//				public void run() {
+//					con.send(new MSG(null, MSGCode.TREE_DATA_POLL));
+//				}
+//			};
+//			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM,
+//					MSGCode.TREE_DATA, null, null, true, Config.getConfig()
+//					.getTreeBuildTime(), tmp);
+//			if (polled_tree != null) {
+//				root.add((Node) polled_tree.getData());
+//			}
+//		}
+//		return root;
+//	}
+//	
 	/**
 	 * Erstellt den Topologie-Baum für das Debug-Kommando (/debug tree).
 	 * 
-	 * @return
+	 * @return TreeNode der die Baumtopologie repräsentiert
 	 */
 	public Node getTree() {
-		Node root = (Node) meinNode.clone();
-		// Zuerst werden alle Knoten hergestellt...
-		for (final ConnectionHandler con : connections) {
-			Runnable tmp = new Runnable() {
-				public void run() {
-					con.send(new MSG(null, MSGCode.TREE_DATA_POLL));
-				}
-			};
-			MSG polled_tree = angler.fishfor(NachrichtenTyp.SYSTEM,
-					MSGCode.TREE_DATA, null, null, true, Config.getConfig()
-					.getTreeBuildTime(), tmp);
-			if (polled_tree != null) {
-				root.add((Node) polled_tree.getData());
-			}
-		}
-		return root;
-	}
-	
-	public Node getTree2() {
 		Node root = (Node) meinNode.clone();
 		MiniMonitor mon = new MiniMonitor();
 		for (final ConnectionHandler con : connections) {
@@ -1482,8 +1436,8 @@ public class NodeEngine {
 	/**
 	 * Liefert die <code>uid</code> für eine <code>nid</code>. 
 	 * 
-	 * @param nid
-	 * @return
+	 * @param nid NodeID des gesuchten Users
+	 * @return UserID des Nodes
 	 */
 	public long getUIDforNID(long nid){
 		Node node = getNode(nid);
@@ -1495,9 +1449,10 @@ public class NodeEngine {
 
 	/**
 	 * Visualisiert den Topologie-Baum für das Debug-Kommando (/debug tree).
+	 * 
+	 * @param root Wurzel des Baums der dargestellt werden soll.
 	 */
 	public void showTree(TreeNode root) {
-//		TreeNode root = getTree();
 		// Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
 		JTree tree = new JTree( root );
 		// Ein Frame herstellen, um den Tree anzuzeigen
@@ -1511,6 +1466,13 @@ public class NodeEngine {
 		frame.setVisible( true );
 	}
 
+	
+	/**
+	 * @author tkessels
+	 *
+	 * Führt einige Tasks periodisch aus um den Betrieb des Netzes zu gewährleisten
+	 *
+	 */
 	private final class Maintainer implements Runnable {
 		@Override
 		public void run() {
@@ -1557,8 +1519,6 @@ public class NodeEngine {
 	}
 
 	/**
-	 * TODO: Überprüfen!
-	 * 
 	 * Selbst die Root-Position beanspruchen.
 	 */
 	private synchronized void claimRoot() {
@@ -1567,19 +1527,27 @@ public class NodeEngine {
 			rootClaimProcessor.start();
 		}
 	}
+	
+	
+	/**
+	 * Eine aktuelle Routingtabelle zusammenstellen
+	 *  
+	 * @return aktuelle Routingtabelle 
+	 */
 	public Map<Long,Long> getRoutes(){
 		Map<Long,Long> rueck = new HashMap<Long, Long>();
 		for (ConnectionHandler con : connections) {
-			long gw =con.host_node.getNodeID();
-			for (Node  curchi : con.getChildren()) {
-				rueck.put(curchi.getNodeID(), gw);
+			if (con.host_node != null) {
+				long gw = con.host_node.getNodeID();
+				for (Node curchi : con.getChildren()) {
+					rueck.put(curchi.getNodeID(), gw);
+				}
 			}
 		}
 		return rueck;
 	}
 
 	/**
-	 * TODO: Überprüfen!
 	 * 
 	 * Wartet eine gewisse Zeit und wertet dann alle gesammelten ROOT_ANNOUNCES
 	 * aus und fordert anschließend von der neuen Root einen Node zum verbinden
@@ -1636,7 +1604,7 @@ public class NodeEngine {
 	}
 
 	/**
-	 *	TODO: Kommentieren! 
+	 *	Server-Thread der eingehende Verbindungen annimmt und in {@link ConnectionHandler} einhüllt und registriert
 	 */
 	private final class ConnectionsAccepter implements Runnable {
 		public void run() {
@@ -1656,6 +1624,11 @@ public class NodeEngine {
 		}
 	}
 	
+	/**
+	 * @author tkessels
+	 *
+	 * Für Multithreaded Tree kontruktion
+	 */
 	private final class MiniMonitor{
 		private  int anzahl;
 		private  List<Node> mynodes;

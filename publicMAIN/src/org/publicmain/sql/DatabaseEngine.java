@@ -180,7 +180,7 @@ public class DatabaseEngine {
 	}
 
 	/**
-	 * Diese Methode weist die LocalDBConnection an alle Nachichten aus der Datenbank zu entfernen
+	 * Diese Methode weist die LocalDBConnection an alle Nachrichten aus der Datenbank zu entfernen
 	 */
 	public void deleteLocalHistory() {
 		localDB.deleteAllMsgs();
@@ -211,7 +211,7 @@ public class DatabaseEngine {
 	}
 
 	/**
-	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachichten und Settings von der LocalDBConnection-Klasse
+	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachrichten und Settings von der LocalDBConnection-Klasse
 	 * und übergibt diese zur Speicherung an die BackupDBConnection-Klasse
 	 */
 	public void push(){
@@ -224,7 +224,7 @@ public class DatabaseEngine {
 	}
 
 	/**
-	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachichten und Settings von der BackupDBConnection-Klasse
+	 * Diese Methode holt sich nach Statusüprüfung alle User,Nachrichten und Settings von der BackupDBConnection-Klasse
 	 * und übergibt diese zur Speicherung an die LocalDBConnection-Klasse
 	 */
 	public void pull(){
@@ -467,7 +467,7 @@ public class DatabaseEngine {
 
 	/**
 	 * Diese Methode weist die Klasse LocalDBConnection.java an
-	 * alle Nachichten aus der Config in die Datenbank zu schreiben
+	 * alle Nachrichten aus der Config in die Datenbank zu schreiben
 	 */
 	public void writeConfig(){
 		if(localDB.getStatus()) {
@@ -562,7 +562,7 @@ public class DatabaseEngine {
 	 * @author ATRM
 	 * Diese Klasse (bzw.die Run-Methode) wertet den Status der LocalDBConnection aus und lässt diese gegebenenfalls einen 
 	 * reconnect auf die lokale Datenbank ausführen.
-	 * Zeigt der Status eine erfolgreiche Verbindung an übergibt sie die Daten aus der Nachichten-Queue, der Gruppen-Queue und der Nodes-Queue
+	 * Zeigt der Status eine erfolgreiche Verbindung an übergibt sie die Daten aus der Nachrichten-Queue, der Gruppen-Queue und der Nodes-Queue
 	 * um sie in umgekehrter Reihenfolge zum schreiben an die Local-DB-Connection-Klasse zu übergeben.   
 	 *
 	 */

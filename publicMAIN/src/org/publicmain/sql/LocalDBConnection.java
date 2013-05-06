@@ -124,8 +124,8 @@ public class LocalDBConnection {
 	 * Ist f¸r den ersten Verbindungsaufbau verantwortlich. Pr¸ft den Status der
 	 * DB durch Abfragen. L‰sst DB und notwendige Benutzer anlegen.
 	 * 
-	 * TODO: Braucht eine komplette ‹berarbeitung da durch Verschachtelungen und
-	 * Erweiterungen mit der Zeit un¸bersichtlich. TODO: Statuspr¸fmethode ->
+	 * Braucht eine komplette ‹berarbeitung da durch Verschachtelungen und
+	 * Erweiterungen mit der Zeit un¸bersichtlich. Statuspr¸fmethode ->
 	 * SWITCH-CASE zur abarbeitung der aufgaben. NEED MORE TIME!
 	 */
 	private class firstConnectToLocDBServerBot implements Runnable { // wird nur vom Construktor aufgerufen
@@ -927,7 +927,7 @@ public class LocalDBConnection {
 	 * Diese Methode schlieﬂt alle Verbindungen. 
 	 */
 	public void shutdownLocDB() {
-		// TODO: alle verbindungen trennen
+		//alle verbindungen trennen
 		try {
 			if(stmt!=null){
 				stmt.close();

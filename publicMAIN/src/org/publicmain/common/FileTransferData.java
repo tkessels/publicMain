@@ -46,7 +46,7 @@ public class FileTransferData implements Serializable {
 	/**
 	 * Getter für die Sender NodeID.
 	 * 
-	 * @return
+	 * @return die NodeID des Senders
 	 */
 	public long getSender_nid() {
 		return sender.getNodeID();
@@ -55,7 +55,7 @@ public class FileTransferData implements Serializable {
 	/**
 	 * Getter für die Empfänger NodeID.
 	 * 
-	 * @return
+	 * @return die NodeID des Empfängers
 	 */
 	public long getReceiver_nid() {
 		return receiver.getNodeID();
@@ -64,7 +64,7 @@ public class FileTransferData implements Serializable {
 	/**
 	 * Getter für die Einheit der Dateigröße. 
 	 * 
-	 * @return
+	 * @return die Größe als String
 	 */
 	public String getNiceSize() {
 		if (size <= 0) {

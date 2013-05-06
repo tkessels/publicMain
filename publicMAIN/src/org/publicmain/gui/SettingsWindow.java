@@ -270,27 +270,32 @@ public class SettingsWindow extends JDialog{
 		this.createPushPullBtn.addActionListener(new PushPullButtonController());
 		this.deletePushPullBtn.addActionListener(new DeleteButtonController());
 
+		// Konfiguration cardButtonsPanel
 		this.cardButtonsPanel.setPreferredSize(new Dimension(230,25));
 		this.cardButtonsPanel.setBackground(Color.WHITE);
 		this.cardButtonsPanel.add(userBtn);
 		this.cardButtonsPanel.add(databaseBtn);
 		this.cardButtonsPanel.add(pushPullBtn);
 
+		// Konfiguration cardUser
 		this.cardUser.setPreferredSize(new Dimension(230,62));
 		this.cardUser.setBackground(Color.WHITE);
 		this.cardUser.add(userSettingsPanel);
 		this.cardUser.add(trayIconNotificationPanel);
 		this.cardUser.add(fontChooserPanel);
 
+		// Konfiguration cardDB
 		this.cardDB.setPreferredSize(new Dimension(230,62));
 		this.cardDB.setBackground(Color.WHITE);
 		this.cardDB.add(localDBPanel);
 		this.cardDB.add(backupDBPanel);
 
+		// Konfiguration cardPushPull
 		this.cardPushPull.setPreferredSize(new Dimension(230,62));
 		this.cardPushPull.setBackground(Color.WHITE);
 		this.cardPushPull.add(pushPullPanel);
 
+		// Konfiguration userSettingsPanel
 		this.userSettingsPanel.setPreferredSize(new Dimension(230,62));
 		this.userSettingsPanel.setBorder(BorderFactory.createTitledBorder("User"));
 		this.userSettingsPanel.setBackground(Color.WHITE);
@@ -300,6 +305,7 @@ public class SettingsWindow extends JDialog{
 		this.userSettingsPanel.add(fileTransferLabel);
 		this.userSettingsPanel.add(fileTransferCheckBox);
 
+		// Konfiguration trayIconNotificationPanel
 		this.trayIconNotificationPanel.setPreferredSize(new Dimension(230,62));
 		this.trayIconNotificationPanel.setBorder(BorderFactory.createTitledBorder("Notification"));
 		this.trayIconNotificationPanel.setBackground(Color.WHITE);
@@ -310,6 +316,7 @@ public class SettingsWindow extends JDialog{
 		this.trayIconNotificationPanel.add(privMsgLabel);
 		this.trayIconNotificationPanel.add(privMsgCheckBox);
 
+		// Konfiguration fontChooserPanel
 		this.fontChooserPanel.setPreferredSize(new Dimension(230, 62));
 		this.fontChooserPanel.setBorder(BorderFactory.createTitledBorder("Font settings"));
 		this.fontChooserPanel.setBackground(Color.WHITE);
@@ -320,6 +327,7 @@ public class SettingsWindow extends JDialog{
 		this.fontChooserPanel.add(fontSizeLabel);
 		this.fontChooserPanel.add(fontSizeSlider);
 
+		// Konfiguration localDBPanel
 		this.localDBPanel.setPreferredSize(new Dimension(230,82));
 		this.localDBPanel.setBorder(BorderFactory.createTitledBorder("local database"));
 		this.localDBPanel.setBackground(Color.WHITE);
@@ -330,6 +338,7 @@ public class SettingsWindow extends JDialog{
 		this.localDBPanel.add(pwLocalDBLabel);
 		this.localDBPanel.add(pwLocalDBPasswordField);
 
+		// Konfiguration pushPullPanel
 		this.pushPullPanel.setBorder(BorderFactory.createTitledBorder("push/pull to backup DB"));
 		this.pushPullPanel.setPreferredSize(new Dimension(230,106));
 		this.pushPullPanel.setBackground(Color.WHITE);
@@ -342,6 +351,7 @@ public class SettingsWindow extends JDialog{
 		this.pushPullPanel.add(deletePushPullLabel);
 		this.pushPullPanel.add(deletePushPullBtn);
 
+		// Konfiguration backupDBPanel
 		this.backupDBPanel.setBorder(BorderFactory.createTitledBorder("backup database"));
 		this.backupDBPanel.setPreferredSize(new Dimension(230,100));
 		this.backupDBPanel.setBackground(Color.WHITE);
@@ -354,23 +364,27 @@ public class SettingsWindow extends JDialog{
 		this.backupDBPanel.add(pwBackupLabel);
 		this.backupDBPanel.add(pwBackPasswordField);
 
+		// Konfiguration cardsPanel
 		this.cardsPanel.setPreferredSize(new Dimension(230, 200));
 		this.cardsPanel.setBackground(Color.WHITE);
 		this.cardsPanel.add(cardUser, "User");
 		this.cardsPanel.add(cardDB, "DB");
 		this.cardsPanel.add(cardPushPull, "Push/Pull");
 
+		// Konfiguration buttonPanel
 		this.buttonPanel.setPreferredSize(new Dimension(230,25));
 		this.buttonPanel.setBackground(Color.WHITE);
 		this.buttonPanel.add(resetBtn);
 		this.buttonPanel.add(acceptBtn);
 		this.buttonPanel.add(cancelBtn);
 
+		// Hinzufügen der Komponenten
 		this.add(banner);
 		this.add(cardButtonsPanel);
 		this.add(cardsPanel);
 		this.add(buttonPanel);
 
+		// Konfiguration SettingWindow
 		this.setTitle("Settings");
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setIconImage(Help.getIcon("pM_Logo.png").getImage());
@@ -419,8 +433,6 @@ public class SettingsWindow extends JDialog{
 
 		this.fontChooserComboBox.setSelectedItem(Config.getConfig().getFontFamily());
 		this.fontSizeSlider.setValue(Config.getConfig().getFontSize());
-		
-		
 
 		this.userPushPullTextField.setText(Config.getConfig().getBackupDBChoosenUsername());
 		this.pwPushPullPasswordField.setText(Config.getConfig().getBackupDBChoosenUserPassWord());
@@ -514,7 +526,7 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	/**
-	 * Schreibt die gewählten Einstellungen im Settingswinow in die Config 
+	 * Schreibt die gewählten Einstellungen im Settingswindow in die Config 
 	 */
 	private void acceptSettings(){
 			Config.getConfig().setDisableFileTransfer(fileTransferCheckBox.isSelected());
@@ -576,9 +588,10 @@ public class SettingsWindow extends JDialog{
 	
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für die Card-Buttons
-	 * Sie sorgt dafür, dass die Card, auf deren Button geclickt wurde angezeigt wird
+	 * Sie sorgt dafür, dass die Card, auf deren Button geclickt wurde angezeigt wird.
+	 * 
+	 * @author ATRM
 	 */
 	class CardButtonController implements ActionListener{
 		public void actionPerformed(final ActionEvent e) {
@@ -587,9 +600,10 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für die SettingsButtons
-	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird.
+	 * 
+	 * @author ATRM
 	 */
 	class SettingButtonController implements ActionListener{
 
@@ -615,9 +629,9 @@ public class SettingsWindow extends JDialog{
 	}
 	
 	/**
+	 * Diese Klasse verändert die angezeigte Schriftgröße bei bedienunge des Schriftgrößen-Sliders.
+	 * 
 	 * @author ATRM
-	 * Diese Klasse verändert die angezeigte Schriftgröße bei bedienunge des Schriftgrößen-Sliders
-	 *
 	 */
 	class FontSizeSliderController implements ChangeListener{
 
@@ -631,10 +645,11 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für die PushPullButtons
 	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
-	 * und färbt die Felder entsprechend der Ergebnisse ein
+	 * und färbt die Felder entsprechend der Ergebnisse ein.
+	 * 
+	 * @author ATRM
 	 */
 	class PushPullButtonController implements ActionListener{
 
@@ -686,9 +701,10 @@ public class SettingsWindow extends JDialog{
 	}
 
 	/**
-	 * @author ATRM
 	 * Diese Klasse ist der Buttoncontroller für den DeleteButton
-	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
+	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird.
+	 * 
+	 * @author ATRM
 	 */
 	class DeleteButtonController implements ActionListener{
 

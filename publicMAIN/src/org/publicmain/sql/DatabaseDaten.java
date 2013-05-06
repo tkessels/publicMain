@@ -2,9 +2,10 @@ package org.publicmain.sql;
 
 /**
  * 
- * @author LeeGewiese
  * Diese Klasse Stellt eine Speichermöglichkeit für Daten für und aus der Datenbank da.
  * Sie gibt die Möglichkeit sowohl Zelleninhalte als auch Spaltenüberschriften zu halten.
+ * 
+ * @author ATRM
  */
 public class DatabaseDaten {
 	private String[] spaltenüberschriften;

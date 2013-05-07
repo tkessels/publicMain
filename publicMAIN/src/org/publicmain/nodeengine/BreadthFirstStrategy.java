@@ -14,7 +14,7 @@ import org.publicmain.common.Node;
  * @author ATRM
  *
  */
-public class BreadthFirstStrategy implements BestNodeStrategy {
+public class BreadthFirstStrategy extends BestNodeStrategy {
 
 	public Node getBestNode() {
 

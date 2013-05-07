@@ -219,7 +219,7 @@ public class Kalender extends JDialog {
 				t.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						kTag source = (kTag)e.getSource();
-						System.out.println(source.getActionCommand());
+//						System.out.println(source.getActionCommand());
 						if(isBegin) {
 							target.setBegin(source.getDate());
 						} else {

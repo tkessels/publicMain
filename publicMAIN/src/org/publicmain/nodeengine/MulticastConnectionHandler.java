@@ -160,7 +160,7 @@ public class MulticastConnectionHandler {
 		if(paket.getTyp()==NachrichtenTyp.SYSTEM) {
 			if(paket.getCode()==MSGCode.BACKUP_SERVER_OFFER) {
 				ConfigData tmp = (ConfigData) paket.getData();
-				System.out.println(tmp);
+//				System.out.println(tmp);
 				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
 				Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
 				Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());

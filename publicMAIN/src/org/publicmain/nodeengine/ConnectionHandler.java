@@ -116,7 +116,7 @@ public class ConnectionHandler {
 				line_out.flush();
 			} catch (IOException e) {
 				LogEngine.log(ConnectionHandler.this, "failure", paket);
-				System.out.println(e.getMessage());
+//				System.out.println(e.getMessage());
 			}
 		} else {
 			LogEngine.log(ConnectionHandler.this, "dropped", paket);

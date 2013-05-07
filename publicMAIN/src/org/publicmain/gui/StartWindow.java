@@ -307,22 +307,22 @@ public class StartWindow extends JFrame implements ActionListener{
 							// Fehler beim laden der config keine gültige USER ID gefunden
 							statusTextField.setText("Error while loading Settings couldn´t find USER ID");
 							statusTextField.setBackground(new Color(229, 195, 0));
-							System.out.println("Fehler beim laden der config keine gültige USER ID gefunden");
+//							System.out.println("Fehler beim laden der config keine gültige USER ID gefunden");
 						}
 					} else if (config_result == 1) {
 						// Fehler beim pullen der config (null) returned
 						statusTextField.setText("Error: No Settings saved.");
 						statusTextField.setBackground(new Color(229, 195, 0));
-						System.out.println("Fehler beim pullen der config (null) returned");
+//						System.out.println("Fehler beim pullen der config (null) returned");
 					} else if (config_result == 0) {
 						// Angegebener nutzer exisitert nicht oder password falsch
 						statusTextField.setText("Error: User doesn´t exists or UN or PW wrong.");
 						statusTextField.setBackground(new Color(229, 195, 0));
-						System.out.println("Angegebener nutzer exisitert nicht oder password falsch");
+//						System.out.println("Angegebener nutzer exisitert nicht oder password falsch");
 					}
 				} else {
 					//Database not there check settings
-					System.out.println("Database not there check settings");
+//					System.out.println("Database not there check settings");
 					statusTextField.setText("Backupserver not available");
 					statusTextField.setBackground(Color.RED);
 

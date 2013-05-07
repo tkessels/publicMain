@@ -3,7 +3,6 @@ package org.publicmain.nodeengine;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.List;
 
 import org.publicmain.common.Config;
@@ -14,7 +13,7 @@ import org.publicmain.common.Node;
  * Erzeugt ein Scoring für alle Knoten mit justierbaren Parametern und wählt dann den am besten bewerteten Knoten
  *
  */
-public class WeightedDistanceStrategy implements BestNodeStrategy {
+public class WeightedDistanceStrategy extends BestNodeStrategy {
 	public static final int LINEAR =0;
 	public static final int QUADRATIC =1;
 	private double ratio;
@@ -50,9 +49,6 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 				return o1.score.compareTo(o2.score);
 			}
 		});			
-		System.out.println(scores);
-
-
 		return scores.get(0).item;
 	}
 
@@ -70,29 +66,6 @@ public class WeightedDistanceStrategy implements BestNodeStrategy {
 		return (conval*(1-ratio))+(rootval*ratio);
 	}
 	
-	/**Ermittelt alle Kindknoten eines Knoten
-	 * @param node Wurzelknoten
-	 * @return Liste aller Kindknoten einschließlich des Wurzelknotens
-	 */
-	public static List<Node> returnAllNodes(Node node){
-		List<Node> listOfNodes = new ArrayList<Node>();
-		addAllNodes(node, listOfNodes);
-		return listOfNodes;
-	}
-	
-	/** Fügt alle Kinder und Kindeskinder mit einer Breitensuche einer Liste von Knoten hinzu.
-	 * @param node Wurzel des zu druchlaufenden Baums
-	 * @param listOfNodes zu befüllende Liste
-	 */
-	private static void addAllNodes(Node node, List<Node> listOfNodes) {
-		if (node != null) {
-			Enumeration<Node> cursor = node.breadthFirstEnumeration();
-			while(cursor.hasMoreElements()) {
-				listOfNodes.add(cursor.nextElement());
-			}
-		}
-	}
-
 	/**
 	 * @author tkessels
 	 * DatenObjekt für die Scoringtabelle

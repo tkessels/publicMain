@@ -44,13 +44,6 @@ public class ResultWindow extends JDialog {
 	private JScrollPane scroller;
 	
 	
-//	public ResultWindow(DatabaseDaten querry, int columnSelection) {
-//		constructWithTable(new JTable( new DefaultTableModel(querry.getData(columnSelection),querry.getHeader(columnSelection))));
-//	}
-//	
-//	public ResultWindow(DatabaseDaten querry, int columnSelection, String format) {
-//		constructWithPanel(querry.getData(columnSelection), format);
-//	}
 	public ResultWindow(DatabaseDaten querry, String format, boolean text) {
 		if(text) constructWithPanel(querry.getData(127), format);
 		else {
@@ -172,10 +165,10 @@ public class ResultWindow extends JDialog {
 
 	private void printHis(Object[] history,String format) {
 		try {
-			for (int i = 0; i < history.length; i++) {
-				format=format.replace("$"+i+"$", (String) history[i]);
+			for (int i = 1; i <= history.length; i++) {
+				format=format.replace("$"+i+"$", (String) history[i-1]);
 				try {
-					long x = Long.parseLong((String) history[i]);
+					long x = Long.parseLong((String) history[i-1]);
 					String time = new Time(x).toString();
 					String date = new Date(x).toString();
 					format=format.replace("$"+i+"d%", date);

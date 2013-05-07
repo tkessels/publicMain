@@ -292,7 +292,7 @@ public class DatabaseEngine {
 		long para_begin 	= (begin!=null)?begin.getTimeInMillis():0;
 		long para_end 		= (end!=null)?end.getTimeInMillis():Long.MAX_VALUE;
 
-		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
+//		System.out.println(para_uid+para_alias+para_group+"<"+para_begin+":"+para_end+">"+para_text);
 
 		if (para_begin<para_end) {
 			tmpRS =localDB.searchInHistory(para_uid,para_alias,para_group,para_begin,para_end,para_text);
@@ -435,7 +435,7 @@ public class DatabaseEngine {
 			}
 
 		} catch (SQLException e) {
-			System.out.println(e.getMessage() );
+//			System.out.println(e.getMessage() );
 		}
 		return new JComboBox<Node>();
 

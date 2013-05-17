@@ -29,8 +29,8 @@ public class Config {
 	
 
 	private static final String APPNAME 			=   (System.getProperty("appname")==null)?"publicMAIN":System.getProperty("appname");
-	private static final int CURRENTVERSION			=	5;
-	private static final int MINVERSION				=	5;
+	private static final int CURRENTVERSION			=	6;
+	private static final int MINVERSION				=	6;
 	private static final String APPDATA=System.getenv("APPDATA")+File.separator+"publicMAIN"+File.separator;
 	private static final String JARLOCATION=Config.class.getProtectionDomain().getCodeSource().getLocation().getFile();
 	private static final String	lock_file_name		= 	APPNAME+".loc";
@@ -206,7 +206,7 @@ public class Config {
 		tmp.setCurrentVersion(CURRENTVERSION);
 		// Netzwerk-Parameter
 		tmp.setMCGroup("230.223.223.223");
-		tmp.setMCPort(6789);
+		tmp.setMCPort(6790);
 		tmp.setMCTTL(10);
 		tmp.setDiscoverTimeout(200);
 		tmp.setRootClaimTimeout(200);
@@ -240,6 +240,7 @@ public class Config {
 		tmp.setBackupDBPort("3306");
 		tmp.setBackupDBUser("backupPublicMain");
 		tmp.setBackupDBPw("backupPublicMain");
+		tmp.setSoundActivated(false);
 		return tmp;
 	}
 

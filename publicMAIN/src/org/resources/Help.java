@@ -14,6 +14,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 
+import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 //import the sun.audio package
 
@@ -156,6 +157,7 @@ public class Help {
 	 * @param filename name der Datei
 	 */
 	public static synchronized void playSound(final String filename) {
+		if(Config.getConfig().getSoundActivated()){
 		stopSound();
 		new Thread(new Runnable() {
 			public void run() {
@@ -165,6 +167,7 @@ public class Help {
 				}
 			}
 		}).start();
+		}
 	}
 	
 	/**

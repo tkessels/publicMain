@@ -1366,6 +1366,12 @@ public class NodeEngine {
 		case "play":
 			Help.playSound(parameter);
 			break;
+		case "sound":
+//			if("on".equals(parameter.toLowerCase())){
+//				Config.getConfig().setSoundActivated(true);
+//			}else Config.getConfig().setSoundActivated(false);
+			Config.getConfig().setSoundActivated("on".equals(parameter));
+			break;
 		case "stop":
 			Help.stopSound();
 		case "gc":

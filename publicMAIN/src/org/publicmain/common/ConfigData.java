@@ -390,6 +390,14 @@ public class ConfigData extends Properties {
 		this.remove("sql.backup_db_choosen_user_password");
 	}
 
+	public boolean getSoundActivated() {
+		return Boolean.parseBoolean(this.getProperty("gui.sounds"));
+	}
+	
+	public void setSoundActivated(boolean activated){
+		this.setProperty("gui.sounds", String.valueOf(activated));
+	}
+
 
 
 

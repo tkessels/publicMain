@@ -240,6 +240,7 @@ public class Config {
 		tmp.setBackupDBPort("3306");
 		tmp.setBackupDBUser("backupPublicMain");
 		tmp.setBackupDBPw("backupPublicMain");
+		tmp.setSoundActivated(false);
 		return tmp;
 	}
 

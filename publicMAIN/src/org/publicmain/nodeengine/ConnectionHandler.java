@@ -343,12 +343,12 @@ public class ConnectionHandler {
 	 * @return <code>true</code> wenn sich die Liste durch die Aktion verändert
 	 *         hat, anderfalls <code>false</code>
 	 */
-	public boolean setChildren(Collection<Node> toSet) {
+	public void setChildren(Collection<Node> toSet) {
 		synchronized (children) {
-			int oldHash= children.hashCode();
+//			int oldHash= children.hashCode();
 			children.clear();
 			children.addAll(toSet);
-			return (oldHash!=children.hashCode());
+//			return (oldHash!=children.hashCode());
 
 		}
 	}

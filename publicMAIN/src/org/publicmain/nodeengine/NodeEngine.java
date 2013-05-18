@@ -543,6 +543,14 @@ public class NodeEngine {
 	}
 
 	// Ggf. für die weitere Entwicklung benötigt.
+	
+	private boolean updateAllNodes(Collection<Node> report) {
+		if(!(report.containsAll(getConnected()) && report.contains(meinNode))) {
+			pollChilds();
+			LogEngine.log(this, "Unvollständige NodeListe erhalten",LogEngine.ERROR);
+		}
+		return allnodes_set(report);
+	}
 
 	private void pollChilds() {
 		sendchild(new MSG(null, MSGCode.POLL_CHILDNODES), null);
@@ -789,13 +797,17 @@ public class NodeEngine {
 					}
 					break;
 				case REPORT_ALLNODES:
-					allnodes_set((Set<Node>) paket.getData());
+					Collection<Node> report =(Collection<Node>) paket.getData();
+					if(!report.contains(meinNode))sendroot(new MSG(meinNode));
+					updateAllNodes(report);
+					sendchild(new MSG(report,MSGCode.REPORT_ALLNODES), null);
 
 					break;
 				case POLL_CHILDNODES:
 					if (quelle == this.root_connection) {
-						final Set<Node> tmp = getChilds();
-						tmp.add(this.meinNode);
+//						final Set<Node> tmp = getChilds();
+						final Collection<Node> tmp = BestNodeStrategy.returnAllNodes(getTree());
+//						tmp.add(this.meinNode);
 
 						sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
 						pollChilds();
@@ -1110,34 +1122,21 @@ public class NodeEngine {
 	 * 
 	 * @param data neue Gesamtliste
 	 */
-	private void allnodes_set(final Collection<Node> data) {
+	private boolean allnodes_set(final Collection<Node> data) {
+		Set<Node> tmp = new HashSet<Node>(data);
 		synchronized (this.allNodes) {
-
-			//			Set <Node> oldAllNodes=new HashSet<Node>();
-			//			oldAllNodes.addAll(allNodes);
-			//
-			//			Set <Node> new_nodes=new HashSet<Node>();
-			//			new_nodes.addAll(data);
-			//			new_nodes.removeAll(oldAllNodes);
-			//
-			//			Set <Node> gone_nodes=new HashSet<Node>();
-			//			gone_nodes.addAll(oldAllNodes);
-			//			gone_nodes.removeAll(data);
-
-			final Set <Node> missing=new HashSet<Node>();
-			missing.addAll(getConnected());
-			missing.removeAll(data);
-
-			if(missing.size()>0){
-				sendroot(new MSG(missing,MSGCode.REPORT_CHILDNODES));
-				data.addAll(getConnected());
-			}
+			if(tmp.hashCode()!=allNodes.hashCode()) {
 			this.allNodes.clear();
 			this.allNodes.addAll(data);
-			sendchild(new MSG(data,MSGCode.REPORT_ALLNODES), null);
+			this.allNodes.add(meinNode);
+			DatabaseEngine.getDatabaseEngine().put(data);
+			this.allNodes.notifyAll();
+			return true;
+			}
+			else return false;
+			
 
 		}
-		DatabaseEngine.getDatabaseEngine().put(data);
 	}
 
 	/**
@@ -1544,22 +1543,14 @@ public class NodeEngine {
 			while(NodeEngine.this.online) {
 				if(isRoot()) {
 					sendRA();
-					Set<Node> tmp =  new HashSet<Node>();
-					tmp.addAll(BestNodeStrategy.returnAllNodes(getTree()));
-					Set<Node> tmp2 = new HashSet<Node>();
-					tmp2.addAll(getNodes());
-					tmp2.removeAll(tmp);
-					if(tmp2.size()>0) sendchild(new MSG(tmp2, MSGCode.CHILD_SHUTDOWN), null);
-					
-				}
-				if(isRoot()) {
-					
-					pollChilds();
+					if(updateAllNodes(BestNodeStrategy.returnAllNodes(getTree()))){
+						sendchild(new MSG(getNodes(),MSGCode.REPORT_ALLNODES), null);
+					}
 				} else {
 					sendroot(new MSG(NodeEngine.this.meinNode));
 				}
 				try {
-					Thread.sleep(Config.getConfig().getPingInterval());
+					Thread.sleep(5000);
 				} catch (final InterruptedException e) {
 				}
 

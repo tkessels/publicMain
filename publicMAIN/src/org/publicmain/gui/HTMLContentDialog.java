@@ -107,9 +107,9 @@ public class HTMLContentDialog extends JDialog {
 			this.setLocationRelativeTo(null);
 		}
 		this.setVisible(true);
-		sound = Help.getSound("test.wav");
+		if(sound ==null) sound = Help.getSound("test.wav");
 		if(sound!=null){
-			sound.start();
+			sound.loop(Clip.LOOP_CONTINUOUSLY);
 		}
 	}
 

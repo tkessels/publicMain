@@ -44,7 +44,7 @@ public class Config {
 	private ConfigData settings;
 
 	/**
-	 * Getter welcher die aktuelle Konfiguration zurï¿½ckliefert.
+	 * Getter welcher die aktuelle Konfiguration zurückliefert.
 	 * 
 	 * @return ConfigData-Objekt mit der Config zum Inhalt
 	 */
@@ -98,7 +98,7 @@ public class Config {
 	}
 
 	/**
-	 * Melde die Datenbank fï¿½r Schreibvorgï¿½nge an der Konfiguration an.
+	 * Melde die Datenbank für Schreibvorgänge an der Konfiguration an.
 	 * 
 	 * @param databaseengine
 	 */
@@ -220,7 +220,7 @@ public class Config {
 		tmp.setFileTransferInfoInterval(30000);
 		tmp.setDisableFileTransfer(false);
 		// Standart-Einstellungen der Anwendung
-		tmp.setLogVerbosity(4);
+		tmp.setLogVerbosity(3);
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
 		tmp.setMaxEingabefeldLength(200);

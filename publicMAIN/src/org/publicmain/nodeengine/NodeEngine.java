@@ -1590,6 +1590,7 @@ public class NodeEngine {
 		if (this.rootDiscovering == false) {
 			this.rootClaimProcessor = new Thread(new RootClaimProcessor());
 			this.rootClaimProcessor.start();
+			NodeEngine.this.rootDiscovering = true;
 		}
 	}
 
@@ -1631,7 +1632,7 @@ public class NodeEngine {
 	private final class RootClaimProcessor implements Runnable {
 		@Override
 		public void run() {
-			NodeEngine.this.rootDiscovering = true;
+//			NodeEngine.this.rootDiscovering = true;
 			LogEngine.log("DiscoverGame", "started", LogEngine.INFO);
 			sendRA();
 			final long until = System.currentTimeMillis() + NodeEngine.this.ROOT_CLAIM_TIMEOUT;
@@ -1644,8 +1645,7 @@ public class NodeEngine {
 			final List<MSG> ra_replies = new ArrayList<MSG>();
 			ra_replies.addAll(NodeEngine.this.root_claims_stash);
 			Collections.sort(ra_replies);
-			final long deadline = ra_replies.get(0).getTimestamp() + (2
-					* NodeEngine.this.ROOT_CLAIM_TIMEOUT);
+			final long deadline = ra_replies.get(0).getTimestamp() + (2* NodeEngine.this.ROOT_CLAIM_TIMEOUT);
 
 			Node toConnectTo = NodeEngine.this.meinNode;
 			long maxPenunte = getNodes().size();
@@ -1666,7 +1666,7 @@ public class NodeEngine {
 			}
 			LogEngine.log("DiscoverGame", "Finished:"
 					+ ((toConnectTo != NodeEngine.this.meinNode) ? "lost" : "won") + "("
-					+ NodeEngine.this.root_claims_stash.size() + " participants)",
+					+ NodeEngine.this.root_claims_stash.size() + " Root-Claims collected)",
 					LogEngine.INFO);
 			if (toConnectTo == NodeEngine.this.meinNode) {
 				setRootMode(true);

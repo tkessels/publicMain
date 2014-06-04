@@ -41,7 +41,6 @@ import org.publicmain.common.MSGCode;
 import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
-import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 /**
@@ -133,7 +132,6 @@ public class NodeEngine {
 
 		this.meinNode = new Node(this.server_socket.getLocalPort(), this.nodeID,this.ce.getUserID(), System.getProperty("user.name"), this.ce.getAlias());
 		this.allNodes.add(this.meinNode);
-		DatabaseEngine.getDatabaseEngine().put(this.meinNode);
 
 		this.myStrategy = new BreadthFirstStrategy();
 
@@ -783,7 +781,6 @@ public class NodeEngine {
 				}
 				break;
 			case SYSTEM:
-				DatabaseEngine.getDatabaseEngine().put(paket);
 				switch (paket.getCode()) {
 				case NODE_UPDATE:
 
@@ -1113,7 +1110,6 @@ public class NodeEngine {
 			if (this.allNodes.hashCode() != hash) {
 				this.allNodes.notifyAll();
 			}
-			DatabaseEngine.getDatabaseEngine().put(data);
 		}
 	}
 
@@ -1129,7 +1125,6 @@ public class NodeEngine {
 			this.allNodes.clear();
 			this.allNodes.addAll(data);
 			this.allNodes.add(meinNode);
-			DatabaseEngine.getDatabaseEngine().put(data);
 			this.allNodes.notifyAll();
 			return true;
 			}
@@ -1320,7 +1315,6 @@ public class NodeEngine {
 					this.allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
 					// Zur Aktualisierung der Datenbank wegschreiben.
-					DatabaseEngine.getDatabaseEngine().put(this.allNodes);
 					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
 					return true;
 				}
@@ -1344,12 +1338,7 @@ public class NodeEngine {
 		case "proute":
 			System.out.println(getRoutes());
 			break;
-		case "wroute":
-			final Map<Long, Long> routes = getRoutes();
-			for (final long x : routes.keySet()) {
-				DatabaseEngine.getDatabaseEngine().put(x, routes.get(x));
-			}
-			break;
+
 		case "conns":
 			System.out.println(this.connections.size());
 			for (final ConnectionHandler con : this.connections) {

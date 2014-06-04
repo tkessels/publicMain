@@ -37,8 +37,6 @@ import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
-import org.publicmain.sql.DatabaseEngine;
-import org.publicmain.sql.LocalDBConnection;
 import org.resources.Help;
 
 /**
@@ -80,7 +78,6 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	private boolean 	contactListActive;
 	private ContactList contactListWin;
 	private PMTrayIcon 	trayIcon;
-	private LocalDBConnection locDBCon;
 	private HTMLContentDialog hcdAbout;
 	private HTMLContentDialog hcdHelp;
 	private boolean 	afkStatus;	
@@ -512,15 +509,11 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 		// SettingsWindow schließen
 		SettingsWindow.closeThis();
 		// HistoryWindow schließen
-		HistoryWindow.closeThis();
 		// Symbol in der SystemTray schliessen
 		trayIcon.removeTray();
 		// ChatEngine beenden
 		ce.shutdown();
 		// Datenbankverbindung schliessen
-		if ( locDBCon != null ) {
-			locDBCon.shutdownLocDB();
-		}
 	}//eom shutdown()
 
 	/**
@@ -892,57 +885,8 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 					hcdHelp.showIt();
 				}
 				break;
-			case "Search":
-				if ( DatabaseEngine.getDatabaseEngine().getStatusLocal() ) {
-					new HistoryWindow();
-				} else {
-					new SettingsWindow( 1, true );
-				}
-				break;
-			case "Delete":
-				if ( JOptionPane.showConfirmDialog( me, "Do you really want to delete the local history?", "Delete local history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE ) == 0 ) {
-					DatabaseEngine.getDatabaseEngine().deleteLocalHistory();
-				}
-				break;
 			case "Settings":
 				SettingsWindow.get().setVisible( true );
-				break;
-			case "Push History":
-				if ( DatabaseEngine.getDatabaseEngine().getStatusLocal() ) {
-					int statusBackup = DatabaseEngine.getDatabaseEngine().getStatusBackup();
-					if ( statusBackup >= 1 ) {
-						if ( statusBackup >= 2 ){
-							DatabaseEngine.getDatabaseEngine().push();
-						} else {
-							new SettingsWindow( 2, true );
-						}
-					} else {
-						new SettingsWindow( 1, true );
-					}
-				} else {
-					new SettingsWindow( 1, true );
-				}
-				break;
-			case "Pull History":
-				if ( DatabaseEngine.getDatabaseEngine().getStatusLocal() ) {
-					int statusBackup = DatabaseEngine.getDatabaseEngine().getStatusBackup();
-					if ( statusBackup >= 1 ) {
-						if ( statusBackup >= 2 ){
-							DatabaseEngine.getDatabaseEngine().pull();
-						} else {
-							new SettingsWindow( 2, true );
-						}
-					} else {
-						new SettingsWindow( 1, true );
-					}
-				} else {
-					new SettingsWindow( 1, true );
-				}
-				break;
-			case "Delete History":
-				if( JOptionPane.showConfirmDialog( me, "Do you really want to delete the backup history?", "Delete backup history", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE ) == 0 ) {
-					DatabaseEngine.getDatabaseEngine().deleteBackupMessages();
-				}
 				break;
 			}
 		}

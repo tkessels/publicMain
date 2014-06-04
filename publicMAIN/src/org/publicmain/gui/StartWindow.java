@@ -25,7 +25,6 @@ import javax.swing.event.DocumentListener;
 
 import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
-import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 /**
@@ -35,20 +34,6 @@ import org.resources.Help;
  * @author ATRM
  */
 public class StartWindow extends JFrame implements ActionListener{
-
-	private final class backupchecker implements Runnable {
-		public void run() {
-			if (DatabaseEngine.getDatabaseEngine().getStatusBackup() >= 1){
-				statusTextField.setText("Backupserver available");
-				statusTextField.setBackground(Color.GREEN);
-				pullButton.setText("PULL from Backup & GO");
-			} else {
-				statusTextField.setText("Backupserver not available");
-				statusTextField.setBackground(Color.RED);
-				pullButton.setText("Change Settings");
-			}
-		}
-	}
 
 	private StartWindow instanz;
 	private JLabel welcomeLogo;
@@ -91,10 +76,8 @@ public class StartWindow extends JFrame implements ActionListener{
 		this.wellcomeLabel3				=	new JLabel("and the IP of your backupserver");
 		this.userNameLabel				=	new JLabel("Username");
 		this.userNameTextField 			=	new JTextField();
-		this.userNameTextField.getDocument().addDocumentListener(new PPuserChecker());
 		this.passWordLabel				=	new JLabel("Password");
 		this.	passWordTextField		=	new JPasswordField();
-		this.passWordTextField.getDocument().addDocumentListener(new PPuserChecker());
 		this.	statusTextField			=	new JTextField();
 		this.txtFieldML = new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
@@ -182,19 +165,7 @@ public class StartWindow extends JFrame implements ActionListener{
 		return x;
 	}
 	
-	/**
-	 * Diese Methode prüft die Richtigekeit der der vom Benutzer in das Nutzername und Passwort-Feld eingegebenen daten
-	 * und färbt den Hintergund dieser Felder Grün(eingegebene daten richtig) oder white(eingegebene Daten (noch) nicht korrekt(/komplett). 
-	 */
-	private void ppCheck() {
-		if(DatabaseEngine.getDatabaseEngine().isValid(userNameTextField.getText(), passWordTextField.getText())) {
-			userNameTextField.setBackground(Color.green);
-			passWordTextField.setBackground(Color.green);
-		}else {
-			userNameTextField.setBackground(Color.white);
-			passWordTextField.setBackground(Color.white);
-		}
-	}
+
 
 	/**
 	 * Diese Methode ändert das Aussehen des Startwindows und stellt zusätzliche Eingabefelder zur Verfügung.
@@ -249,7 +220,6 @@ public class StartWindow extends JFrame implements ActionListener{
 
 		this.pack();
 
-		new Thread(new backupchecker()).start();
 	}
 
 	/* (non-Javadoc)
@@ -288,75 +258,9 @@ public class StartWindow extends JFrame implements ActionListener{
 				}
 				break;
 
-			case "PULL from Backup":
-				JButton sourceButton = (JButton)evt.getSource();
-				changeStructure(sourceButton);
-				break;
-
-			case "PULL from Backup & GO":						
-				if (DatabaseEngine.getDatabaseEngine().getStatusBackup()>=1) {
-					int config_result = DatabaseEngine.getDatabaseEngine().getConfig(choosenBackupDBUserName, choosenBackupDBPassword);
-					if (config_result == 2) {
-						if (Config.getConfig().isvalid()) {
-//							plsRunGUI = true;
-							synchronized (instanz) {
-								this.notifyAll();
-							}
-							this.setVisible(false);
-						} else {
-							// Fehler beim laden der config keine gültige USER ID gefunden
-							statusTextField.setText("Error while loading Settings couldn´t find USER ID");
-							statusTextField.setBackground(new Color(229, 195, 0));
-//							System.out.println("Fehler beim laden der config keine gültige USER ID gefunden");
-						}
-					} else if (config_result == 1) {
-						// Fehler beim pullen der config (null) returned
-						statusTextField.setText("Error: No Settings saved.");
-						statusTextField.setBackground(new Color(229, 195, 0));
-//						System.out.println("Fehler beim pullen der config (null) returned");
-					} else if (config_result == 0) {
-						// Angegebener nutzer exisitert nicht oder password falsch
-						statusTextField.setText("Error: User doesn´t exists or UN or PW wrong.");
-						statusTextField.setBackground(new Color(229, 195, 0));
-//						System.out.println("Angegebener nutzer exisitert nicht oder password falsch");
-					}
-				} else {
-					//Database not there check settings
-//					System.out.println("Database not there check settings");
-					statusTextField.setText("Backupserver not available");
-					statusTextField.setBackground(Color.RED);
-
-					SettingsWindow tmp = new SettingsWindow(1, true);
-					tmp.addWindowListener(new WindowAdapter() {
-						@Override
-						public void windowClosed(WindowEvent e) {
-							new Thread(new backupchecker()).start();
-						}
-					});
-				}
-				break;
+			
 		}
 	}
 	
 	
-	/**
-	 * Diese Klasse initialiseier eine prüfung der eingegenen Daten
-	 * und kann zum beispiel für Textfelder eingebunden werden.
-	 * 
-	 * @author ATRM
-	 */
-	private final class PPuserChecker implements DocumentListener {
-		@Override
-		public void removeUpdate(DocumentEvent e) {
-			ppCheck();
-		}
-		@Override
-		public void insertUpdate(DocumentEvent e) {
-			ppCheck();
-		}
-		@Override
-		public void changedUpdate(DocumentEvent e) {
-			ppCheck();
-		}
-	}
 }

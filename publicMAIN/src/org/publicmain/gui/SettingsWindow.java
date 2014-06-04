@@ -38,7 +38,6 @@ import javax.swing.event.DocumentListener;
 
 import org.publicmain.chatengine.ChatEngine;
 import org.publicmain.common.Config;
-import org.publicmain.sql.DatabaseEngine;
 import org.resources.Help;
 
 /**
@@ -267,8 +266,7 @@ public class SettingsWindow extends JDialog{
 		this.acceptBtn.addActionListener(new SettingButtonController());
 		this.cancelBtn.addActionListener(new SettingButtonController());
 		this.fontSizeSlider.addChangeListener(new FontSizeSliderController());
-		this.createPushPullBtn.addActionListener(new PushPullButtonController());
-		this.deletePushPullBtn.addActionListener(new DeleteButtonController());
+
 
 		// Konfiguration cardButtonsPanel
 		this.cardButtonsPanel.setPreferredSize(new Dimension(230,25));
@@ -446,12 +444,12 @@ public class SettingsWindow extends JDialog{
 		this.pwBackPasswordField.setText(Config.getConfig().getBackupDBPw());
 		
 		
-		executer.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				checkSettings();
-			}
-		},0,1,TimeUnit.SECONDS);
+//		executer.scheduleAtFixedRate(new Runnable() {
+//			@Override
+//			public void run() {
+//
+//			}
+//		},0,1,TimeUnit.SECONDS);
 		
 		
 	}
@@ -459,71 +457,7 @@ public class SettingsWindow extends JDialog{
 	/**
 	 * Diese Methode prüft die gesetzten Werte und färbt die Felder entsprechend des Ergebnisses
 	 */
-	private void checkSettings() {
-		new Thread(new Runnable() {
-			public void run() {
-				int localDBStatus = DatabaseEngine.getDatabaseEngine().checkCon("127.0.0.1", portLocalDBTextField.getText(), Config.getConfig().getLocalDBDatabasename(), userLocalDBTextField.getText(), pwLocalDBPasswordField.getText(), 500);
-				int backupDBStatus = DatabaseEngine.getDatabaseEngine().checkCon(ipBackupTextField.getText(), portBackupTextField.getText(), Config.getConfig().getBackupDBDatabasename(),userBackupTextField.getText(), pwBackPasswordField.getText(), 500);
-				
-				if(localDBStatus==0) {
-					localDBPanel.setBackground(Color.WHITE);
-					portLocalDBTextField.setBackground(Config.BLUE);
-					userLocalDBTextField.setBackground(Config.BLUE);
-					pwLocalDBPasswordField.setBackground(Config.BLUE);
-				}else if(localDBStatus==1){
-					localDBPanel.setBackground(Config.YELLOW);
-					portLocalDBTextField.setBackground(Config.ORANGE);
-					userLocalDBTextField.setBackground(Config.YELLOW);
-					pwLocalDBPasswordField.setBackground(Config.YELLOW);
 
-				}else if(localDBStatus==2) {
-					localDBPanel.setBackground(Config.YELLOW);
-					portLocalDBTextField.setBackground(Config.BLUE);
-					userLocalDBTextField.setBackground(Config.ORANGE);
-					pwLocalDBPasswordField.setBackground(Config.ORANGE);
-				}
-				
-				if(backupDBStatus==0) {
-					backupDBPanel.setBackground(Color.WHITE);
-					ipBackupTextField.setBackground(Config.BLUE);
-					portBackupTextField.setBackground(Config.BLUE);
-					userBackupTextField.setBackground(Config.BLUE);
-					pwBackPasswordField.setBackground(Config.BLUE);
-					if(DatabaseEngine.getDatabaseEngine().isValid(userPushPullTextField.getText(), pwPushPullPasswordField.getText(),ipBackupTextField.getText(),portBackupTextField.getText(),userBackupTextField.getText(),pwBackPasswordField.getText())) {
-						userPushPullTextField.setBackground(Config.BLUE);
-						pwPushPullPasswordField.setBackground(Config.BLUE);
-					}else {
-						userPushPullTextField.setBackground(Color.white);
-						pwPushPullPasswordField.setBackground(Color.white);
-					}
-				}else if(backupDBStatus==1){
-					backupDBPanel.setBackground(Config.YELLOW);
-					ipBackupTextField.setBackground(Config.ORANGE);
-					portBackupTextField.setBackground(Config.ORANGE);
-					userBackupTextField.setBackground(Config.YELLOW);
-					pwBackPasswordField.setBackground(Config.YELLOW);
-					userPushPullTextField.setBackground(Color.lightGray);
-					pwPushPullPasswordField.setBackground(Color.lightGray);
-
-
-				}else if(backupDBStatus==2) {
-					backupDBPanel.setBackground(Config.YELLOW);
-					ipBackupTextField.setBackground(Config.BLUE);
-					portBackupTextField.setBackground(Config.BLUE);
-					userBackupTextField.setBackground(Config.ORANGE);
-					pwBackPasswordField.setBackground(Config.ORANGE);
-					userPushPullTextField.setBackground(Color.lightGray);
-					pwPushPullPasswordField.setBackground(Color.lightGray);
-					
-				}
-
-				localDBPanel.repaint();
-				pushPullPanel.repaint();
-				backupDBPanel.repaint();
-				
-			}
-		}).start();
-	}
 	
 	/**
 	 * Schreibt die gewählten Einstellungen im Settingswindow in die Config 
@@ -644,114 +578,4 @@ public class SettingsWindow extends JDialog{
 
 	}
 
-	/**
-	 * Diese Klasse ist der Buttoncontroller für die PushPullButtons
-	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird
-	 * und färbt die Felder entsprechend der Ergebnisse ein.
-	 * 
-	 * @author ATRM
-	 */
-	class PushPullButtonController implements ActionListener{
-
-		public void actionPerformed(ActionEvent e) {
-			JButton source = (JButton)e.getSource();
-
-			switch(source.getText()){
-			case "Create" :
-				String username=userPushPullTextField.getText();
-				String password=pwPushPullPasswordField.getText();
-				int res = DatabaseEngine.getDatabaseEngine().createUser(username, password);{
-					switch(res){
-					case 3:
-						SwingUtilities.invokeLater(
-						new Runnable() {
-							public void run() {
-								Config.write();
-								checkSettings();
-							}
-						});
-						DatabaseEngine.getDatabaseEngine().push();
-						//alles Sahne
-						break;
-
-					case 2:
-						userPushPullTextField.setBackground(Color.RED);
-						pwPushPullPasswordField.setBackground(Color.RED);
-						JOptionPane.showMessageDialog(me,"Username or Password doesn´t match requirements!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
-						//Nutzername und Pwd entspricht nicht den anforderungen
-						break;	 
-					case 1:
-						//user gab es bereits
-						JOptionPane.showMessageDialog(me,"Username already exists!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
-
-						break;
-					case 0:
-						//Backupserver nicht erreichbar Datanbank fehlt
-						me.showTab(1);
-						me.backupDBPanel.setBackground(Color.orange);
-						JOptionPane.showMessageDialog(me,"Unable to connect to Backupserver!\n Please check your settings regarding the backupserver.","BackupServer",JOptionPane.ERROR_MESSAGE);
-
-						break;
-					}
-				}
-				break;
-			}
-		}
-
-	}
-
-	/**
-	 * Diese Klasse ist der Buttoncontroller für den DeleteButton
-	 * Sie sorgt dafür, abhängig vom Button die richtige aktion Ausgeführt / Methode aufgerufen wird.
-	 * 
-	 * @author ATRM
-	 */
-	class DeleteButtonController implements ActionListener{
-
-		public void actionPerformed(ActionEvent e) {
-			JButton source = (JButton)e.getSource();
-
-			switch(source.getText()){
-			case "Delete" :
-				String username=userPushPullTextField.getText();
-				String password=pwPushPullPasswordField.getText();
-				int res = DatabaseEngine.getDatabaseEngine().deleteBackupUserAccount(username,password);{
-
-					switch(res){
-					case 2:
-						userPushPullTextField.setText("");
-						pwPushPullPasswordField.setText("");
-						
-						userPushPullTextField.setBackground(Color.WHITE);
-						pwPushPullPasswordField.setBackground(Color.WHITE);
-						Config.getConfig().clearBackupDBChoosenUser();		
-						SwingUtilities.invokeLater(
-								new Runnable() {
-									public void run() {
-										Config.write();
-										checkSettings();
-									}
-								});
-						
-						JOptionPane.showMessageDialog(me,"User deleted!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
-						//alles Sahne
-						break;
-					case 1:
-						//fehler beim Löschen des Nutzers
-						JOptionPane.showMessageDialog(me,"Error while deleating choosen User!","BackupServer",JOptionPane.INFORMATION_MESSAGE);
-
-						break;
-					case 0:
-						//Backupserver nicht erreichbar Datanbank fehlt
-						me.showTab(1);
-						me.backupDBPanel.setBackground(Color.orange);
-						JOptionPane.showMessageDialog(me,"Unable to connect to Backupserver!\n Please check your settings regarding the backupserver.","BackupServer",JOptionPane.ERROR_MESSAGE);
-
-						break;
-					}
-				}
-				break;
-			}
-		}
-	}
 }

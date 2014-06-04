@@ -9,7 +9,6 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 
-import org.publicmain.sql.DatabaseEngine;
 
 /**
  * Diese Klasse enthï¿½lt wichtige Konfigurationsdaten zur Anwendung.
@@ -40,7 +39,6 @@ public class Config {
 	private static File system_conf					=	new File(new File(JARLOCATION).getParentFile(),system_conf_name);
 	private static File user_conf					=	new File(APPDATA,user_conf_name);
 	private static Config me;
-	private static DatabaseEngine de;
 	private ConfigData settings;
 
 	/**
@@ -70,9 +68,6 @@ public class Config {
 			me = new Config();
 		}
 		me.getConfig().setCurrentVersion(CURRENTVERSION);
-		if (de != null) {
-			de.writeConfig();
-		}
 		me.savetoDisk();
 	}
 
@@ -97,14 +92,6 @@ public class Config {
 		}
 	}
 
-	/**
-	 * Melde die Datenbank für Schreibvorgänge an der Konfiguration an.
-	 * 
-	 * @param databaseengine
-	 */
-	public static void registerDatabaseEngine(DatabaseEngine databaseengine) {
-		de = databaseengine;
-	}
 
 	/**
 	 * Method tries to Lock a file <code>pm.loc</code> in Users

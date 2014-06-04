@@ -19,7 +19,7 @@ import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
-import org.publicmain.sql.DatabaseEngine;
+
 
 /**
  * @author ATRM
@@ -76,7 +76,6 @@ public class ChatEngine{
 		// temporäre Initialisierung der GruppenListe mit default Groups
 		ne.getGroups().addAll(Arrays.asList(new String[] { "public" }));
 		msgSorterBot.start();
-		DatabaseEngine.getDatabaseEngine().pull();
 	}
 
 	/**
@@ -238,7 +237,6 @@ public class ChatEngine{
 	 *            alphanumerischen Zeichen
 	 */
 	public void group_join(String gruppen_name) {
-		DatabaseEngine.getDatabaseEngine().put(gruppen_name);
 		synchronized (myGroups) {
 			if (myGroups.add(gruppen_name)) {
 				ne.updateMyGroups();
@@ -400,7 +398,6 @@ public class ChatEngine{
 	 */
 	public void put(MSG nachricht) {
 		inbox.add(nachricht);
-		DatabaseEngine.getDatabaseEngine().put(nachricht);
 		if(GUI.getGUI().isAFK() && (nachricht.getTyp()==NachrichtenTyp.PRIVATE)){
 			MSG tmp = new MSG(ce.getNodeForUID(getNodeForNID(nachricht.getSender()).getUserID()).getNodeID(), "I'm <b>a</b>way <b>f</b>rom <b>k</b>eyboard");
 			ne.routesend(tmp);

@@ -38,7 +38,6 @@ import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
-import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.resources.Help;
@@ -55,55 +54,54 @@ import org.resources.Help;
 public class NodeEngine {
 	// Zeitspanne nach der ein Node die Suche nach anderen Nodes aufgibt und
 	// sich selbst zur Root erklärt.
-	private final long DISCOVER_TIMEOUT = Config.getConfig().getDiscoverTimeout();
+	private final long		       DISCOVER_TIMEOUT   = Config.getConfig().getDiscoverTimeout();
 	// Zeitspanne die ein Root auf ROOT_ANNOUNCES wartet um zu entscheiden wer
 	// Root bleibt.
-	private final long ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout();
+	private final long		       ROOT_CLAIM_TIMEOUT = Config.getConfig().getRootClaimTimeout();
 	// Statischer Zeiger auf die einzige Instanz der NodeEngine.
-	private static volatile NodeEngine ne;
-	private final long nodeID;
+	private static volatile NodeEngine       ne;
+	private final long		       nodeID;
 	// Die Node-Repräsentation dieser NodeEngine.
-	private final Node meinNode;
+	private final Node		       meinNode;
 	// Zeiger auf die ChatEngine.
-	private final ChatEngine ce;
+	private final ChatEngine		 ce;
 	// Haken zum fangen von Nachrichten.
-	private final Hook angler = new Hook();
+	private final Hook		       angler	     = new Hook();
 	// Server-Socket für eingehende Verbindungen (Passiv/Childs).
-	private final ServerSocket server_socket;
+	//private final ServerSocket server_socket;
 	// TCP-Socket zur Verbindung mit anderen Nodes (Aktiv/Parent/Root).
-	private ConnectionHandler root_connection;
+	//private ConnectionHandler root_connection;
 	// Multicast/Broadcat UDP-Socket zur Verbindungsaushandlung.
 	private final MulticastConnectionHandler multi_socket;
 	// Liste bestehender Child-Verbindungenin eigener Hüll-Klasse.
-	public List<ConnectionHandler> connections;
+	//public List<ConnectionHandler> connections;
 	// Set, vom Typ String, aller Gruppen.
-	private final Set<String> allGroups = new HashSet<String>();
+	private final Set<String>		allGroups	  = new HashSet<String>();
 	// Set, vom Typ String, aller <u>abonierten</u> Gruppen und aller
 	// untergeordneter Nodes.
-	private final Set<String> myGroups = new HashSet<String>();
+	private final Set<String>		myGroups	   = new HashSet<String>();
 	// Warteschlange (Queue) für Bewerberpakete bei Neuverhandelung der Root.
-	private final BlockingQueue<MSG> root_claims_stash;
+	private final BlockingQueue<MSG>	 root_claims_stash;
 	// Set, vom Typ Node, aller dieser NodeEngine bekannten Nodes.
-	private final Set<Node> allNodes;
+	private final Set<Node>		  allNodes;
 	// Dieser Knoten möchte die Root sein und benimmt sich dementsprechend.
-	private volatile boolean rootMode;
+	private volatile boolean		 rootMode;
 	// Dieser Node möchte an sein und verbunden bleiben, alle Threads werden
 	// informiert wenn die Anwednung beendet wird.
-	private volatile boolean online;
+	private volatile boolean		 online;
 	// Dieser Node sammelt gerade ROOT_ANNOUNCES um einen neuen Root zu
 	// bestimmen.
-	private volatile boolean rootDiscovering;
+	private volatile boolean		 rootDiscovering;
 	// Dieser Thread akzeptiert und schachelt eingehende Verbindungen auf dem
 	// Server-Socket.
-	private final Thread connectionsAcceptBot = new Thread(new ConnectionsAccepter());
+	//private final Thread connectionsAcceptBot = new Thread(new ConnectionsAccepter());
 	// Dieser Thread bestimmt nach einer Verzögerung diesen
 	// Node zum Root, er wird durch einen Discover gestartet.
-	private Thread rootMe;
+	private Thread			   rootMe;
 	// Der Thread sammelt und wertet ROOT_ANNOUNCES aus, er wird beim Empfang
 	// oder Versand eines ROOT_ANNOUNCE gestartet.
-	private Thread rootClaimProcessor;
-	private final Thread neMaintainer;
-	private BestNodeStrategy myStrategy;
+	private Thread			   rootClaimProcessor;
+	private final Thread		     neMaintainer;
 
 	/**
 	 * Konstruktor für die NodeEngine.
@@ -116,8 +114,7 @@ public class NodeEngine {
 	public NodeEngine(final ChatEngine parent) throws IOException {
 
 		this.allNodes = Collections.synchronizedSet(new HashSet<Node>());
-		this.connections = new CopyOnWriteArrayList<ConnectionHandler>();
-
+		//this.connections = new CopyOnWriteArrayList<ConnectionHandler>();
 
 		this.root_claims_stash = new LinkedBlockingQueue<MSG>();
 
@@ -126,23 +123,21 @@ public class NodeEngine {
 		this.ce = parent;
 		this.online = true;
 
-		this.server_socket = new ServerSocket(0);
+		//this.server_socket = new ServerSocket(0);
 		this.multi_socket = MulticastConnectionHandler.getMC();
 		this.multi_socket.registerNodeEngine(this);
 
-		this.meinNode = new Node(this.server_socket.getLocalPort(), this.nodeID,this.ce.getUserID(), System.getProperty("user.name"), this.ce.getAlias());
+		this.meinNode = new Node(this.multi_socket.getPort(), this.nodeID, this.ce.getUserID(), System.getProperty("user.name"), this.ce.getAlias());
 		this.allNodes.add(this.meinNode);
 
-		this.myStrategy = new BreadthFirstStrategy();
+		//this.connectionsAcceptBot.start();
 
-		this.connectionsAcceptBot.start();
-
-		this.neMaintainer = new Thread(new Maintainer());;
+		this.neMaintainer = new Thread(new Maintainer());
+		;
 		this.neMaintainer.start();
 
 		LogEngine.log(this, "Multicast Socket geöffnet", LogEngine.INFO);
 
-		discover();
 	}
 
 	/**
@@ -164,36 +159,6 @@ public class NodeEngine {
 	}
 
 	/**
-	 * Getter für den optimalen Node zum anfügen eines weiteren, abhängig von
-	 * der gewählten Strategie.
-	 * 
-	 * @return Node
-	 */
-	private Node getBestNode() {
-		return this.myStrategy.getBestNode();
-	}
-
-	/**
-	 * Gibt an, ob dieser Knoten Vater von anderen Knoten im topologischen Baum ist.
-	 * 
-	 * @return
-	 *  <code>true</code> Wenn dieser Knoten verbundene Kindknoten hat
-	 */
-	private boolean hasChildren() {
-		return this.connections.size() > 0;
-	}
-
-	/**
-	 * Gibt <code>true</code> zurück, wenn die laufende NodeEngine Root ist und
-	 * <code>false</code> wenn nicht.
-	 * 
-	 * @return boolean
-	 */
-	public boolean isRoot() {
-		return this.rootMode && !hasParent();
-	}
-
-	/**
 	 * Gibt <code>true</code> zurück, wenn die Anwendung den Status online hat
 	 * und <code>false</code> wenn nicht.
 	 * 
@@ -201,16 +166,6 @@ public class NodeEngine {
 	 */
 	public boolean isOnline() {
 		return this.online;
-	}
-
-	/**
-	 * Prüft, ob dieser Node einen übergeordneten Node hat. Gibt
-	 * <code>true</code> zurück wenn ja und <code>false</code> wenn nicht.
-	 * 
-	 * @return boolean
-	 */
-	public boolean hasParent() {
-		return ((this.root_connection != null) && this.root_connection.isConnected());
 	}
 
 	/**
@@ -241,10 +196,7 @@ public class NodeEngine {
 				if (x.getNodeID() == nid)
 					return x;
 			}
-			if (isRoot())
-				return retrieve(nid);
-			else
-				return null;
+			return null;
 		}
 	}
 
@@ -254,7 +206,7 @@ public class NodeEngine {
 	 * @param uid UserID des zu suchenden Nutzers
 	 * @return zur UserID zugehöriges NodeObjekt
 	 */
-	public Node getNodeForUID(final long uid){
+	public Node getNodeForUID(final long uid) {
 		synchronized (this.allNodes) {
 			for (final Node x : getNodes()) {
 				if (x.getUserID() == uid)
@@ -279,9 +231,7 @@ public class NodeEngine {
 	 * @param nachricht das zu versende Nachrichtenobjekt
 	 */
 	private void sendroot(final MSG nachricht) {
-		if (hasParent()) {
-			this.root_connection.send(nachricht);
-		}
+		sendmutlicast(nachricht);
 	}
 
 	/**
@@ -313,14 +263,7 @@ public class NodeEngine {
 	 * @param nachricht Zu sendendes Nachrichtenobjekt
 	 */
 	public void sendtcp(final MSG nachricht) {
-		if (hasParent()) {
-			sendroot(nachricht);
-		}
-		if (hasChildren()) {
-			for (final ConnectionHandler x : this.connections) {
-				x.send(nachricht);
-			}
-		}
+		sendmutlicast(nachricht);
 	}
 
 	/**
@@ -331,198 +274,154 @@ public class NodeEngine {
 	 * @param ch Beim Versand auszuschließende Verbindung
 	 */
 	private void sendtcpexcept(final MSG msg, final ConnectionHandler ch) {
-		if (hasParent() && (this.root_connection != ch)) {
-			this.root_connection.send(msg);
-		}
-		if (hasChildren()) {
-			sendchild(msg, ch);
-		}
+		sendmutlicast(msg);
 	}
 
-	/**
-	 * Sendet eine Nachricht an alle angeschlossenen Child-Verbindungen, außer
-	 * an die mitgelieferte Verbindung.
-	 * 
-	 * @param msg zu versendendes Nachrichtenobjekt
-	 * @param ch Beim Versand auszuschließende Verbindung
-	 */
-	private void sendchild(final MSG msg, final ConnectionHandler ch) {
-		for (final ConnectionHandler x : this.connections) {
-			if ((x != ch) || (ch == null)) {
-				x.send(msg);
-			}
-		}
-	}
+	//	/**
+	//	 * Versendet Datein über eine TCP-Direktverbindung. Wird nur von send()
+	//	 * aufgerufen, nachdem festgestellt wurde, dass Nachricht > 5MB
+	//	 * 
+	//	 * @param datei Das zu versendende Fileobjekt
+	//	 * @param receiver NodeID des Empfängers
+	//	 */
+	//	public void send_file(final File datei, final long receiver) {
+	//		if (datei.isFile() && datei.exists() && datei.canRead()
+	//				&& (datei.length() > 0)) {
+	//			new Thread(new Runnable() {
+	//				@Override
+	//				public void run() {
+	//					// Erstelle das Parameter Objekt für die Dateiübertragung
+	//					final FileTransferData tmp_FR = new FileTransferData(datei,
+	//							datei.length(), NodeEngine.this.meinNode, NodeEngine.this.getNode(receiver));
+	//					// Wenn Datei unterhalb des Schwellwerts liegt: Als
+	//					// Nachricht verschicken...
+	//					if (datei.length() < Config.getConfig().getMaxFileSize()) {
+	//						try {
+	//							NodeEngine.this.routesend(new MSG(tmp_FR));
+	//						} catch (final IOException e1) {
+	//							LogEngine.log(e1);
+	//						}
+	//					} else {
+	//						// Sonst: Direkt übertragen...
+	//						// Server Thread
+	//						new Thread(new Runnable() {
+	//							@Override
+	//							public void run() {
+	//								// Datei holen, Socket öffnen
+	//								try (final BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
+	//										final ServerSocket f_server = new ServerSocket(0)) {
+	//									// Warten
+	//									Socket client = null;
+	//									f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
+	//									synchronized (tmp_FR) {
+	//										tmp_FR.server_port = f_server.getLocalPort();
+	//										tmp_FR.notify();
+	//									}
+	//
+	//									// Server Close Thread
+	//									new Thread(new Runnable() {
+	//										@Override
+	//										public void run() {
+	//											final MSG tmp_msg = NodeEngine.this.angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout());
+	//											if (tmp_msg != null) {
+	//												try {
+	//													GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + "has denied recieving the file: " + tmp_FR.datei.getName(), tmp_FR.receiver.getUserID(), 0);
+	//													f_server.close();
+	//												} catch (final IOException e) {
+	//												}
+	//											}
+	//										}
+	//									}).start();
+	//
+	//									// Verbindung anbieten
+	//									client = f_server.accept();
+	//									try {
+	//										f_server.close();
+	//									} catch (final Exception e) {
+	//									}
+	//									// Übertragen
+	//									if ((client != null) && client.isConnected() && !client.isClosed()) {
+	//										final BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+	//										long infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
+	//										long transmitted = 0;
+	//										final byte[] cup = new byte[65535];
+	//										int len = -1;
+	//										while ((len = bis.read(cup)) != -1) {
+	//											bos.write(cup, 0, len);
+	//											transmitted += len;
+	//											if (System.currentTimeMillis() > infoupdate) {
+	//												infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
+	//												GUI.getGUI().info(tmp_FR.datei.getName() + "(" + ((transmitted * 100) / tmp_FR.size) + "%)", tmp_FR.sender.getUserID(), 0);
+	//											}
+	//										}
+	//										bos.flush();
+	//										bos.close();
+	//
+	//										GUI.getGUI().info(tmp_FR.datei.getName() + " Done", tmp_FR.sender.getUserID(), 0);
+	//									}
+	//									// Ergebnis melden
+	//								} catch (final FileNotFoundException e) {
+	//									LogEngine.log("FileTransfer", e.getMessage(), LogEngine.ERROR);
+	//								} catch (final SocketTimeoutException e) {
+	//									LogEngine.log("FileTransfer", "Timed Out", LogEngine.ERROR);
+	//									GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + " has not answered in time. Connection Timedout", tmp_FR.receiver.getUserID(), 0);
+	//								} catch (final SocketException e) {
+	//									LogEngine.log("FileTransfer", "Aborted", LogEngine.ERROR);
+	//								} catch (final IOException e) {
+	//									LogEngine.log("FileTransfer", e);
+	//									GUI.getGUI().info("Transmission-Error, if this keeps happening buy a USB-Stick", tmp_FR.receiver.getUserID(), 0);
+	//								}
+	//							}
+	//						}).start();
+	//
+	//						// Warten bis der Server-Thread fertig ist...
+	//						synchronized (tmp_FR) {
+	//							try {
+	//								if (tmp_FR.server_port == -2) {
+	//									tmp_FR.wait();
+	//								}
+	//							} catch (final InterruptedException e) {
+	//							}
+	//						}
+	//						// ... send FileTransferRequest
+	//						final MSG request = new MSG(tmp_FR, MSGCode.FILE_TCP_REQUEST,
+	//								tmp_FR.getReceiver_nid());
+	//						NodeEngine.this.routesend(request);
+	//					}
+	//				}
+	//			}).start();
+	//		}
+	//	}
 
-	/**
-	 * Versendet Datein über eine TCP-Direktverbindung. Wird nur von send()
-	 * aufgerufen, nachdem festgestellt wurde, dass Nachricht > 5MB
-	 * 
-	 * @param datei Das zu versendende Fileobjekt
-	 * @param receiver NodeID des Empfängers
-	 */
-	public void send_file(final File datei, final long receiver) {
-		if (datei.isFile() && datei.exists() && datei.canRead()
-				&& (datei.length() > 0)) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					// Erstelle das Parameter Objekt für die Dateiübertragung
-					final FileTransferData tmp_FR = new FileTransferData(datei,
-							datei.length(), NodeEngine.this.meinNode, NodeEngine.this.getNode(receiver));
-					// Wenn Datei unterhalb des Schwellwerts liegt: Als
-					// Nachricht verschicken...
-					if (datei.length() < Config.getConfig().getMaxFileSize()) {
-						try {
-							NodeEngine.this.routesend(new MSG(tmp_FR));
-						} catch (final IOException e1) {
-							LogEngine.log(e1);
-						}
-					} else {
-						// Sonst: Direkt übertragen...
-						// Server Thread
-						new Thread(new Runnable() {
-							@Override
-							public void run() {
-								// Datei holen, Socket öffnen
-								try (final BufferedInputStream bis = new BufferedInputStream(new FileInputStream(datei));
-										final ServerSocket f_server = new ServerSocket(0)) {
-									// Warten
-									Socket client = null;
-									f_server.setSoTimeout((int) Config.getConfig().getFileTransferTimeout());
-									synchronized (tmp_FR) {
-										tmp_FR.server_port = f_server.getLocalPort();
-										tmp_FR.notify();
-									}
-
-									// Server Close Thread
-									new Thread(new Runnable() {
-										@Override
-										public void run() {
-											final MSG tmp_msg = NodeEngine.this.angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.FILE_TCP_ABORT, tmp_FR.getReceiver_nid(), tmp_FR.hashCode(), true, Config.getConfig().getFileTransferTimeout());
-											if (tmp_msg != null) {
-												try {
-													GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + "has denied recieving the file: " + tmp_FR.datei.getName(), tmp_FR.receiver.getUserID(), 0);
-													f_server.close();
-												} catch (final IOException e) {
-												}
-											}
-										}
-									}).start();
-
-									// Verbindung anbieten
-									client = f_server.accept();
-									try {
-										f_server.close();
-									} catch (final Exception e) {
-									}
-									// Übertragen
-									if ((client != null) && client.isConnected() && !client.isClosed()) {
-										final BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
-										long infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
-										long transmitted = 0;
-										final byte[] cup = new byte[65535];
-										int len = -1;
-										while ((len = bis.read(cup)) != -1) {
-											bos.write(cup, 0, len);
-											transmitted += len;
-											if (System.currentTimeMillis() > infoupdate) {
-												infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
-												GUI.getGUI().info(tmp_FR.datei.getName() + "(" + ((transmitted * 100) / tmp_FR.size) + "%)", tmp_FR.sender.getUserID(), 0);
-											}
-										}
-										bos.flush();
-										bos.close();
-
-										GUI.getGUI().info(tmp_FR.datei.getName() + " Done", tmp_FR.sender.getUserID(), 0);
-									}
-									// Ergebnis melden
-								} catch (final FileNotFoundException e) {
-									LogEngine.log("FileTransfer", e.getMessage(), LogEngine.ERROR);
-								} catch (final SocketTimeoutException e) {
-									LogEngine.log("FileTransfer", "Timed Out", LogEngine.ERROR);
-									GUI.getGUI().info("User " + tmp_FR.receiver.getAlias() + " has not answered in time. Connection Timedout", tmp_FR.receiver.getUserID(), 0);
-								} catch (final SocketException e) {
-									LogEngine.log("FileTransfer", "Aborted", LogEngine.ERROR);
-								} catch (final IOException e) {
-									LogEngine.log("FileTransfer", e);
-									GUI.getGUI().info("Transmission-Error, if this keeps happening buy a USB-Stick", tmp_FR.receiver.getUserID(), 0);
-								}
-							}
-						}).start();
-
-						// Warten bis der Server-Thread fertig ist...
-						synchronized (tmp_FR) {
-							try {
-								if (tmp_FR.server_port == -2) {
-									tmp_FR.wait();
-								}
-							} catch (final InterruptedException e) {
-							}
-						}
-						// ... send FileTransferRequest
-						final MSG request = new MSG(tmp_FR, MSGCode.FILE_TCP_REQUEST,
-								tmp_FR.getReceiver_nid());
-						NodeEngine.this.routesend(request);
-					}
-				}
-			}).start();
-		}
-	}
-
-	/**
-	 * Behandelt Dateitransferanfragen
-	 * 
-	 * @param data_paket Das FileRequest Paket des Senders
-	 */
-	private void recieve_file(final MSG data_paket) {
-		final Object[] tmp = (Object[]) data_paket.getData();
-		final FileTransferData tmp_file = (FileTransferData) tmp[0];
-		final File destination;
-		if (!Config.getConfig().getDisableFileTransfer()
-				&& ((destination = this.ce.request_File(tmp_file)) != null)) {
-			tmp_file.accepted = true;
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						data_paket.save(destination);
-					} catch (final IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-		} else {
-			tmp_file.accepted = false;
-		}
-		final MSG reply = new MSG(tmp_file, MSGCode.FILE_RECIEVED,
-				data_paket.getSender());
-		routesend(reply);
-	}
-
-	/**
-	 * ROOT_DISCOVERY senden.
-	 */
-	private void discover() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				NodeEngine.this.sendmutlicast(new MSG(NodeEngine.this.meinNode, MSGCode.ROOT_DISCOVERY));
-				NodeEngine.this.rootMe = new Thread(new RootMe());
-				NodeEngine.this.rootMe.start();
-			}
-		}).start();
-	}
-
-	/**
-	 * Antwort auf ROOT_DISCOVERY senden.
-	 * 
-	 * @param quelle Ziel für gerichtete (Unicast) Antwort
-	 */
-	private void sendDiscoverReply(final Node quelle) {
-		LogEngine.log(this, "sending Replay to " + quelle.toString(),LogEngine.INFO);
-		sendunicast(new MSG(getBestNode(), MSGCode.ROOT_REPLY), quelle);
-	}
+	//	/**
+	//	 * Behandelt Dateitransferanfragen
+	//	 * 
+	//	 * @param data_paket Das FileRequest Paket des Senders
+	//	 */
+	//	private void recieve_file(final MSG data_paket) {
+	//		final Object[] tmp = (Object[]) data_paket.getData();
+	//		final FileTransferData tmp_file = (FileTransferData) tmp[0];
+	//		final File destination;
+	//		if (!Config.getConfig().getDisableFileTransfer()
+	//				&& ((destination = this.ce.request_File(tmp_file)) != null)) {
+	//			tmp_file.accepted = true;
+	//			new Thread(new Runnable() {
+	//				@Override
+	//				public void run() {
+	//					try {
+	//						data_paket.save(destination);
+	//					} catch (final IOException e) {
+	//						e.printStackTrace();
+	//					}
+	//				}
+	//			}).start();
+	//		} else {
+	//			tmp_file.accepted = false;
+	//		}
+	//		final MSG reply = new MSG(tmp_file, MSGCode.FILE_RECIEVED,
+	//				data_paket.getSender());
+	//		routesend(reply);
+	//	}
 
 	/**
 	 * Alle verbundenen Nodes benachrichtigen.
@@ -535,23 +434,20 @@ public class NodeEngine {
 			pollChilds();
 			this.allNodes.notifyAll();
 		}
-		if (hasParent()) {
-			sendroot(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
-		}
 	}
 
 	// Ggf. für die weitere Entwicklung benötigt.
-	
+
 	private boolean updateAllNodes(Collection<Node> report) {
-		if(!(report.containsAll(getConnected()) && report.contains(meinNode))) {
+		if (!(report.containsAll(getConnected()) && report.contains(meinNode))) {
 			pollChilds();
-			LogEngine.log(this, "Unvollständige NodeListe erhalten",LogEngine.ERROR);
+			LogEngine.log(this, "Unvollständige NodeListe erhalten", LogEngine.ERROR);
 		}
 		return allnodes_set(report);
 	}
 
 	private void pollChilds() {
-		sendchild(new MSG(null, MSGCode.POLL_CHILDNODES), null);
+		sendmutlicast(new MSG(null, MSGCode.NODE_LOOKUP));
 	}
 
 	/**
@@ -560,22 +456,11 @@ public class NodeEngine {
 	 * @return Set aller ChildNodes
 	 */
 	private Set<Node> getChilds() {
-		final Set<Node> rück = new HashSet<Node>();
-		for (final ConnectionHandler x : this.connections) {
-			rück.addAll(x.getChildren());
-		}
-		return rück;
+		return allNodes;
 	}
 
-	private Set<Node> getConnected(){
-		final Set<Node> tmp= new HashSet<Node>();
-		for (final ConnectionHandler cons : this.connections) {
-			tmp.add(cons.host_node);
-		}
-		if(this.root_connection!=null) {
-			tmp.add(this.root_connection.host_node);
-		}
-		return tmp;
+	private Set<Node> getConnected() {
+		return allNodes;
 	}
 
 	/**
@@ -587,23 +472,7 @@ public class NodeEngine {
 	 *             Wenn der hergestellte Socket
 	 */
 	private void connectTo(final Node knoten) {
-		try {
-			this.root_connection = ConnectionHandler.connectTo(knoten);
-			if (this.root_connection != null) {
-
-				final List<Node> newALLnodes = WeightedDistanceStrategy.returnAllNodes(getTree());
-				allnodes_set(newALLnodes);
-				setRootMode(false);
-				setGroup(this.myGroups);
-				sendroot(new MSG(getMe()));
-				sendroot(new MSG(this.myGroups, MSGCode.GROUP_REPLY));
-				sendroot(new MSG(getNodes(), MSGCode.REPORT_CHILDNODES));
-				sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
-				sendroot(new MSG(null, MSGCode.GROUP_POLL));
-			}
-		} catch (final IOException e) {
-			LogEngine.log(e);
-		}
+		System.out.println("WARUM WIRD HIER VERSUCH SICH ZU VERBINDEN");
 	}
 
 	/**
@@ -614,29 +483,12 @@ public class NodeEngine {
 	@SuppressWarnings("deprecation")
 	public void disconnect() {
 		this.online = false;
-		this.connectionsAcceptBot.stop();
+		//this.connectionsAcceptBot.stop();
 		//		multicastRecieverBot.stop();
 		sendtcp(new MSG(this.meinNode, MSGCode.NODE_SHUTDOWN));
-		sendroot(new MSG(this.myGroups,MSGCode.GROUP_LEAVE));
-		if(this.root_connection!=null) {
-			this.root_connection.disconnect();
-		}
-		for (final ConnectionHandler con : this.connections)
-		{
-			(new Thread(new Runnable() {
-				@Override
-				public void run() {
-					con.disconnect();
-				}
-			})).start();// Threadded Disconnect für jede Leitung
-		}
+		sendroot(new MSG(this.myGroups, MSGCode.GROUP_LEAVE));
+
 		this.multi_socket.close();
-		try {
-			this.server_socket.close();
-		}
-		catch (final IOException e) {
-			LogEngine.log(e);
-		}
 	}
 
 	/**
@@ -644,46 +496,13 @@ public class NodeEngine {
 	 * 
 	 * @param conn Die zu Entfernende Verbindung
 	 */
-	public void remove(final ConnectionHandler conn) {
-		LogEngine.log(conn, "removing");
-		if (conn == this.root_connection) {
-			LogEngine.log(this, "Lost Root", LogEngine.INFO);
-			this.root_connection = null;
-			if (this.online) {
-				updateNodes();
-				discover();
-			}
-		}
-		else {
-			LogEngine.log(this, "Lost Child", LogEngine.INFO);
-			this.connections.remove(conn);
-			sendtcp(new MSG(conn.getChildren(), MSGCode.CHILD_SHUTDOWN));
-			updateMyGroups();
-			allnodes_remove(conn.getChildren());
-		}
-	}
 
 	/**
 	 * Sendet eine ROOT_ANNOUNCE und initiert so die Neuverhandlung der Root.
 	 */
 	private void sendRA() {
-		final MSG ra= new MSG(this.meinNode, MSGCode.ROOT_ANNOUNCE,getNodes().size());
+		final MSG ra = new MSG(this.meinNode, MSGCode.NODE_UPDATE);
 		sendmutlicast(ra);
-		this.root_claims_stash.add(ra);
-	}
-
-	/**
-	 * Methode zur Behandlung eingehender ROOT_CLAIM Nachrichten
-	 * 
-	 * @param paket ROOT_CLAIM Paket
-	 */
-	private void handleRootClaim(final MSG paket) {
-		if(paket!=null) {
-			// Ändert den Zeitstempel auf die tatsächliche Empfangszeit
-			paket.reStamp();
-			this.root_claims_stash.offer(paket);
-		}
-		claimRoot();
 	}
 
 	/**
@@ -697,50 +516,26 @@ public class NodeEngine {
 		LogEngine.log(this, "handling [MC]", paket);
 		if (this.angler.check(paket))
 			return;
-		if (this.online && (paket.getTyp() == NachrichtenTyp.SYSTEM)) {
+		if (this.online) {
 			switch (paket.getCode()) {
-			case ROOT_REPLY:
-				if (!hasParent()) {
-					connectTo((Node) paket.getData());
-				}
-				break;
-			case ROOT_DISCOVERY:
-				if (isRoot()) {
-					sendDiscoverReply((Node) paket.getData());
-				}
-				break;
-			case ROOT_ANNOUNCE:
-				if (!hasParent()) {
-					handleRootClaim(paket);
-				}
-				break;
-			case NODE_LOOKUP:
+			case MSGCode.NODE_LOOKUP:
 				if ((long) paket.getData() == this.meinNode.getNodeID()) {
 					sendroot(new MSG(this.meinNode));
 				}
 				break;
-			case ALIAS_UPDATE:
+			case MSGCode.ALIAS_UPDATE:
 				this.updateAlias((String) paket.getData(), paket.getSender());
 				break;
-			case CMD_RECONNECT:
-				final long payload = (Long) paket.getData();
-				if ((payload == this.nodeID) || (payload == -1337)) {
-					if (this.root_connection != null) {
-						this.root_connection.close();
-					}
+
+			case MSGCode.GROUP_MESSAGE:
+			case MSGCode.PRIVATE_MESSAGE:
+				if (!this.ce.is_ignored(paket.getSender())) {
+					this.ce.put(paket);
 				}
 				break;
-			case BACKUP_SERVER_OFFER:
-				final ConfigData tmp = (ConfigData) paket.getData();
-				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
-				Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
-				Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());
-				Config.getConfig().setBackupDBPw(tmp.getBackupDBPw());
-				Config.getConfig().setBackupDBDatabasename(
-						tmp.getBackupDBDatabasename());
-				Config.write();
-				break;
-			case BACKUP_SERVER_DISCOVER:
+			case MSGCode.NODE_UPDATE:
+
+				allnodes_add((Node) paket.getData());
 				break;
 
 			default:
@@ -760,232 +555,229 @@ public class NodeEngine {
 	 *            Quelle des Pakets
 	 */
 	@SuppressWarnings("unchecked")
-	public void handle(final MSG paket, final ConnectionHandler quelle) {
-		LogEngine.log(this, "handling[" + quelle + "]", paket);
-		if (this.angler.check(paket))
-			return;
-		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != this.nodeID)) {
-			routesend(paket);
-		}
-		else {
-			switch (paket.getTyp()) {
-			case PRIVATE:
-				if(!this.ce.is_ignored(paket.getSender())) {
-					this.ce.put(paket);
-				}
-				break;
-			case GROUP:
-				groupRouteSend(paket,quelle);
-				if(!this.ce.is_ignored(paket.getSender())) {
-					this.ce.put(paket);
-				}
-				break;
-			case SYSTEM:
-				switch (paket.getCode()) {
-				case NODE_UPDATE:
-
-					allnodes_add((Node) paket.getData());
-					sendtcpexcept(paket, quelle);
-					break;
-
-				case POLL_ALLNODES:
-					if (quelle != this.root_connection) {
-						quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
-					}
-					break;
-				case REPORT_ALLNODES:
-					Collection<Node> report =(Collection<Node>) paket.getData();
-					if(!report.contains(meinNode))sendroot(new MSG(meinNode));
-					updateAllNodes(report);
-					sendchild(new MSG(report,MSGCode.REPORT_ALLNODES), null);
-
-					break;
-				case POLL_CHILDNODES:
-					if (quelle == this.root_connection) {
-//						final Set<Node> tmp = getChilds();
-						final Collection<Node> tmp = BestNodeStrategy.returnAllNodes(getTree());
-//						tmp.add(this.meinNode);
-
-						sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
-						pollChilds();
-					}
-					break;
-				case REPORT_CHILDNODES:
-					if (quelle != this.root_connection) {
-						quelle.setChildren((Collection<Node>) paket.getData());
-					}
-					break;
-				case NODE_SHUTDOWN:
-					allnodes_remove(quelle.getChildren());
-					quelle.close();
-					break;
-				case CHILD_SHUTDOWN:
-					final Collection<Node> shutted = (Collection<Node>) paket.getData();
-					if (quelle != this.root_connection) {
-						quelle.removeChildren(shutted);
-					}
-					if(shutted.contains(this.meinNode)){
-						shutted.remove(this.meinNode);
-						quelle.send(new MSG(this.meinNode));
-					}
-					allnodes_remove(shutted);
-					sendtcpexcept(new MSG(shutted,MSGCode.CHILD_SHUTDOWN), quelle);
-					break;
-				case GROUP_JOIN:
-					quelle.add((Collection<String>) paket.getData());
-					updateMyGroups();
-					break;
-				case GROUP_LEAVE:
-					quelle.remove((Collection<String>) paket.getData());
-					updateMyGroups();
-					break;
-				case GROUP_ANNOUNCE:
-					if (addGroup((Collection<String>) paket.getData())) {
-						sendchild(paket, null);
-					}
-					break;
-				case GROUP_EMPTY:
-					if (removeGroup((Collection<String>) paket.getData())) {
-						sendchild(paket, null);
-					}
-					break;
-				case GROUP_POLL:
-					quelle.send(new MSG(this.allGroups, MSGCode.GROUP_REPLY));
-					break;
-				case GROUP_REPLY:
-					final Set<String> groups = (Set<String>) paket.getData();
-					quelle.add(groups);
-					updateMyGroups();
-					addGroup(groups);
-					break;
-				case FILE_TCP_REQUEST:
-					final FileTransferData tmp = (FileTransferData) paket.getData();
-					if(!this.ce.is_ignored(paket.getSender())) {
-						this.recieve_file(tmp);
-					}
-					break;
-				case FILE_RECIEVED:
-					if(!this.ce.is_ignored(paket.getSender())) {
-						this.ce.inform((FileTransferData) paket.getData());
-					}
-					break;
-				case NODE_LOOKUP:
-					Node tmp_node = null;
-					if ((tmp_node = getNode((long) paket.getData())) != null) {
-						quelle.send(new MSG(tmp_node));
-					} else {
-						sendroot(paket);
-					}
-					break;
-				case PATH_PING_REQUEST:
-					if (paket.getEmpfänger() == this.nodeID) {
-						routesend(new MSG(paket.getData(),
-								MSGCode.PATH_PING_RESPONSE, paket.getSender()));
-					} else {
-						routesend(paket);
-					}
-					break;
-				case PATH_PING_RESPONSE:
-					if (paket.getEmpfänger() == this.nodeID) {
-						routesend(new MSG(paket.getData(),
-								MSGCode.PATH_PING_RESPONSE, paket.getSender()));
-					} else {
-						routesend(paket);
-					}
-					break;
-				case TREE_DATA_POLL:
-					sendroot(new MSG(getTree(), MSGCode.TREE_DATA));
-					break;
-				case CMD_SHUTDOWN:
-					System.exit(0);
-					break;
-				default:
-					LogEngine.log(this, "handling[" + quelle + "]:undefined",
-							paket);
-					break;
-				}
-				break;
-			case DATA:
-				if (paket.getEmpfänger() != this.nodeID) {
-					routesend(paket);
-				} else {
-					if(!this.ce.is_ignored(paket.getSender())) {
-						this.recieve_file(paket);
-					}
-				}
-				break;
-			default:
-			}
-		}
-	}
-
+	//	public void handle(final MSG paket, final ConnectionHandler quelle) {
+	//		LogEngine.log(this, "handling[" + quelle + "]", paket);
+	//		if (this.angler.check(paket))
+	//			return;
+	//		if((paket.getEmpfänger() != -1) && (paket.getEmpfänger() != this.nodeID)) {
+	//			routesend(paket);
+	//		}
+	//		else {
+	//			switch (paket.getTyp()) {
+	//			case PRIVATE:
+	//				if(!this.ce.is_ignored(paket.getSender())) {
+	//					this.ce.put(paket);
+	//				}
+	//				break;
+	//			case GROUP:
+	//				groupRouteSend(paket,quelle);
+	//				if(!this.ce.is_ignored(paket.getSender())) {
+	//					this.ce.put(paket);
+	//				}
+	//				break;
+	//			case SYSTEM:
+	//				switch (paket.getCode()) {
+	//				case NODE_UPDATE:
+	//
+	//					allnodes_add((Node) paket.getData());
+	//					sendtcpexcept(paket, quelle);
+	//					break;
+	//
+	//				case POLL_ALLNODES:
+	//					if (quelle != this.root_connection) {
+	//						quelle.send(new MSG(getNodes(), MSGCode.REPORT_ALLNODES));
+	//					}
+	//					break;
+	//				case REPORT_ALLNODES:
+	//					Collection<Node> report =(Collection<Node>) paket.getData();
+	//					if(!report.contains(meinNode))sendroot(new MSG(meinNode));
+	//					updateAllNodes(report);
+	//					sendchild(new MSG(report,MSGCode.REPORT_ALLNODES), null);
+	//
+	//					break;
+	//				case POLL_CHILDNODES:
+	//					if (quelle == this.root_connection) {
+	////						final Set<Node> tmp = getChilds();
+	//						final Collection<Node> tmp = BestNodeStrategy.returnAllNodes(getTree());
+	////						tmp.add(this.meinNode);
+	//
+	//						sendroot(new MSG(tmp, MSGCode.REPORT_CHILDNODES));
+	//						pollChilds();
+	//					}
+	//					break;
+	//				case REPORT_CHILDNODES:
+	//					if (quelle != this.root_connection) {
+	//						quelle.setChildren((Collection<Node>) paket.getData());
+	//					}
+	//					break;
+	//				case NODE_SHUTDOWN:
+	//					allnodes_remove(quelle.getChildren());
+	//					quelle.close();
+	//					break;
+	//				case CHILD_SHUTDOWN:
+	//					final Collection<Node> shutted = (Collection<Node>) paket.getData();
+	//					if (quelle != this.root_connection) {
+	//						quelle.removeChildren(shutted);
+	//					}
+	//					if(shutted.contains(this.meinNode)){
+	//						shutted.remove(this.meinNode);
+	//						quelle.send(new MSG(this.meinNode));
+	//					}
+	//					allnodes_remove(shutted);
+	//					sendtcpexcept(new MSG(shutted,MSGCode.CHILD_SHUTDOWN), quelle);
+	//					break;
+	//				case GROUP_JOIN:
+	//					quelle.add((Collection<String>) paket.getData());
+	//					updateMyGroups();
+	//					break;
+	//				case GROUP_LEAVE:
+	//					quelle.remove((Collection<String>) paket.getData());
+	//					updateMyGroups();
+	//					break;
+	//				case GROUP_ANNOUNCE:
+	//					if (addGroup((Collection<String>) paket.getData())) {
+	//						sendchild(paket, null);
+	//					}
+	//					break;
+	//				case GROUP_EMPTY:
+	//					if (removeGroup((Collection<String>) paket.getData())) {
+	//						sendchild(paket, null);
+	//					}
+	//					break;
+	//				case GROUP_POLL:
+	//					quelle.send(new MSG(this.allGroups, MSGCode.GROUP_REPLY));
+	//					break;
+	//				case GROUP_REPLY:
+	//					final Set<String> groups = (Set<String>) paket.getData();
+	//					quelle.add(groups);
+	//					updateMyGroups();
+	//					addGroup(groups);
+	//					break;
+	//				case FILE_TCP_REQUEST:
+	//					final FileTransferData tmp = (FileTransferData) paket.getData();
+	//					if(!this.ce.is_ignored(paket.getSender())) {
+	//						this.recieve_file(tmp);
+	//					}
+	//					break;
+	//				case FILE_RECIEVED:
+	//					if(!this.ce.is_ignored(paket.getSender())) {
+	//						this.ce.inform((FileTransferData) paket.getData());
+	//					}
+	//					break;
+	//				case NODE_LOOKUP:
+	//					Node tmp_node = null;
+	//					if ((tmp_node = getNode((long) paket.getData())) != null) {
+	//						quelle.send(new MSG(tmp_node));
+	//					} else {
+	//						sendroot(paket);
+	//					}
+	//					break;
+	//				case PATH_PING_REQUEST:
+	//					if (paket.getEmpfänger() == this.nodeID) {
+	//						routesend(new MSG(paket.getData(),
+	//								MSGCode.PATH_PING_RESPONSE, paket.getSender()));
+	//					} else {
+	//						routesend(paket);
+	//					}
+	//					break;
+	//				case PATH_PING_RESPONSE:
+	//					if (paket.getEmpfänger() == this.nodeID) {
+	//						routesend(new MSG(paket.getData(),
+	//								MSGCode.PATH_PING_RESPONSE, paket.getSender()));
+	//					} else {
+	//						routesend(paket);
+	//					}
+	//					break;
+	//				case TREE_DATA_POLL:
+	//					sendroot(new MSG(getTree(), MSGCode.TREE_DATA));
+	//					break;
+	//				case CMD_SHUTDOWN:
+	//					System.exit(0);
+	//					break;
+	//				default:
+	//					LogEngine.log(this, "handling[" + quelle + "]:undefined",
+	//							paket);
+	//					break;
+	//				}
+	//				break;
+	//			case DATA:
+	//				if (paket.getEmpfänger() != this.nodeID) {
+	//					routesend(paket);
+	//				} else {
+	//					if(!this.ce.is_ignored(paket.getSender())) {
+	//						this.recieve_file(paket);
+	//					}
+	//				}
+	//				break;
+	//			default:
+	//			}
+	//		}
+	//	}
 	/**
 	 * Verwaltung des Dateiempfangs, abhängig von der Konfiguration des Benutzers.
 	 * 
-	 * @param tmp Das {@link FileTransferData} Objekt mit allen Informationen über den Dateitransfer
-	 */
-	private void recieve_file(final FileTransferData tmp) {
-		if(!Config.getConfig().getDisableFileTransfer()) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					final long until = (System.currentTimeMillis()+Config.getConfig().getFileTransferTimeout())-1000;
-					final File destination = NodeEngine.this.ce.request_File(tmp);
-					if(System.currentTimeMillis()<until) {
-						tmp.accepted = (destination != null);
-						MSG reply;
-						if(tmp.accepted) {
-							reply = new MSG(tmp, MSGCode.FILE_RECIEVED,tmp.getSender_nid());
-						} else {
-							reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid());
-						}
-						NodeEngine.this.routesend(reply);
-						if (destination != null) {
-							Socket data_con = null;
-							for (final InetAddress ip : tmp.sender.getSockets()) {
-								if (!NodeEngine.this.meinNode.getSockets().contains(ip)) {
-									try {
-										data_con = new Socket(ip, tmp.server_port);
-									} catch (final IOException e) {
-										e.printStackTrace();
-									}
-								}
-							}
-							if (data_con != null) {
-								try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
-									long infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
-									long transmitted=0;
-									final byte[] cup = new byte[65535];
-									int len = -1;
-									while ((len = bis.read(cup)) != -1) {
-										bos.write(cup, 0, len);
-										transmitted+=len;
-										if(System.currentTimeMillis()>infoupdate) {
-											infoupdate = System.currentTimeMillis()+Config.getConfig().getFileTransferInfoInterval();
-											GUI.getGUI().info(tmp.datei.getName()+"("+((transmitted*100)/tmp.size)+"%)", tmp.sender.getUserID(), 0);
-										}
-									}
-									bos.flush();
-									bos.close();
-									data_con.close();
-									GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
-								}
-								catch (final SocketException e) {
-									GUI.getGUI().info(tmp.datei.getName()+" Done", tmp.sender.getUserID(), 0);
-								}
-								catch (final IOException e) {
-									e.printStackTrace();
-								}
-							}
-						}
-					}}
-			}).start();
-		}
-		else {
-			tmp.accepted=false;
-			routesend(new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT,tmp.getSender_nid()));
-		}
-	}
+//	 * @param tmp Das {@link FileTransferData} Objekt mit allen Informationen über den Dateitransfer
+//	 */
+//	private void recieve_file(final FileTransferData tmp) {
+//		if (!Config.getConfig().getDisableFileTransfer()) {
+//			new Thread(new Runnable() {
+//				@Override
+//				public void run() {
+//					final long until = (System.currentTimeMillis() + Config.getConfig().getFileTransferTimeout()) - 1000;
+//					final File destination = NodeEngine.this.ce.request_File(tmp);
+//					if (System.currentTimeMillis() < until) {
+//						tmp.accepted = (destination != null);
+//						MSG reply;
+//						if (tmp.accepted) {
+//							reply = new MSG(tmp, MSGCode.FILE_RECIEVED, tmp.getSender_nid());
+//						} else {
+//							reply = new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT, tmp.getSender_nid());
+//						}
+//						NodeEngine.this.routesend(reply);
+//						if (destination != null) {
+//							Socket data_con = null;
+//							for (final InetAddress ip : tmp.sender.getSockets()) {
+//								if (!NodeEngine.this.meinNode.getSockets().contains(ip)) {
+//									try {
+//										data_con = new Socket(ip, tmp.server_port);
+//									} catch (final IOException e) {
+//										e.printStackTrace();
+//									}
+//								}
+//							}
+//							if (data_con != null) {
+//								try (final BufferedInputStream bis = new BufferedInputStream(data_con.getInputStream()); final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(destination))) {
+//									long infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
+//									long transmitted = 0;
+//									final byte[] cup = new byte[65535];
+//									int len = -1;
+//									while ((len = bis.read(cup)) != -1) {
+//										bos.write(cup, 0, len);
+//										transmitted += len;
+//										if (System.currentTimeMillis() > infoupdate) {
+//											infoupdate = System.currentTimeMillis() + Config.getConfig().getFileTransferInfoInterval();
+//											GUI.getGUI().info(tmp.datei.getName() + "(" + ((transmitted * 100) / tmp.size) + "%)", tmp.sender.getUserID(), 0);
+//										}
+//									}
+//									bos.flush();
+//									bos.close();
+//									data_con.close();
+//									GUI.getGUI().info(tmp.datei.getName() + " Done", tmp.sender.getUserID(), 0);
+//								} catch (final SocketException e) {
+//									GUI.getGUI().info(tmp.datei.getName() + " Done", tmp.sender.getUserID(), 0);
+//								} catch (final IOException e) {
+//									e.printStackTrace();
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}).start();
+//		} else {
+//			tmp.accepted = false;
+//			routesend(new MSG(tmp.hashCode(), MSGCode.FILE_TCP_ABORT, tmp.getSender_nid()));
+//		}
+//	}
 
 	/**
 	 * Versendet ein Paket geroutet
@@ -996,30 +788,7 @@ public class NodeEngine {
 	 */
 	public void routesend(final MSG paket) {
 		final long empfänger = paket.getEmpfänger();
-		for (final ConnectionHandler con : this.connections) {
-			if(con.hasChild(empfänger)) {
-				con.send(paket);
-				return;
-			}
-		}
-		if(hasParent()) {
-			sendroot(paket);
-		}
-		// Dieser Node ist Root des Baums und ihr ist nicht bekannt wo der
-		// Empfänger ist.
-		else if(isRoot()) {
-			// Versuche dem Empfänger zu finden...
-			final Node tmp = retrieve(empfänger);
-			// ...und das Paket zuzustellen.
-			if(tmp!=null) {
-				routesend(paket);
-			}
-			else {
-				// Weist alle Nodes an diesen Empfänger zu entfernen und alle
-				// offenen Fenster zu schliessen.
-				sendchild(new MSG(empfänger,MSGCode.NODE_SHUTDOWN),null);
-			}
-		}
+		sendunicast(paket, getNode(empfänger));
 	}
 
 	/**
@@ -1031,55 +800,20 @@ public class NodeEngine {
 	 * 
 	 * @param quelle Verbindung auf der das Paket empfangen wurde
 	 */
-	public void groupRouteSend(final MSG paket,final ConnectionHandler quelle) {
-		final String gruppe = paket.getGroup();
-		for (final ConnectionHandler con : this.connections) {
-			if((quelle!=con)&&con.getGroups().contains(gruppe)) {
-				con.send(paket);
-			}
-		}
-		if(hasParent()&&(this.root_connection!=quelle)) {
-			sendroot(paket);
-		}
+	public void groupRouteSend(final MSG paket, final ConnectionHandler quelle) {
+		sendroot(paket);
 	}
 
 	/**
 	 * Die eigenen abonierten Gruppen aktualisieren, hinzufügen oder entfernen.
 	 * 
-	 * Berechnet einen neue Schnittmenge von Gruppenmitgliedschaften und ermittelt die Veränderungen zum alten Zustand.
-	 * Alle Veränderungen werden mit dem Vaterknoten kommuniziert.
 	 * 
-	 * @return <code>true</code>wenn sich die Gruppenzugehörigkeit aus sicht des Vaterknoten geändert hat, sonst <code>false</code>
+	 *
 	 */
-	public boolean updateMyGroups() {
+	public void updateMyGroups() {
 		final Set<String> aktuell = computeGroups();
-		synchronized (this.myGroups) {
-
-			if (aktuell.hashCode() != this.myGroups.hashCode()) {
-				final Set<String> dazu = new HashSet<String>(aktuell);
-				dazu.removeAll(this.myGroups);
-				if(dazu.size()>0) {
-					sendroot(new MSG(dazu, MSGCode.GROUP_JOIN));
-					if(addGroup(dazu)) {
-						sendchild(new MSG(dazu, MSGCode.GROUP_ANNOUNCE),null);
-					}
-				}
-				final Set<String> weg = new HashSet<String>(this.myGroups);
-				weg.removeAll(aktuell);
-				if(weg.size()>0) {
-					sendroot(new MSG(weg, MSGCode.GROUP_LEAVE));
-					if(isRoot()) {
-						if(removeGroup(weg)) {
-							sendchild(new MSG(weg, MSGCode.GROUP_EMPTY),null);
-						}
-					}
-				}
-				this.myGroups.clear();
-				this.myGroups.addAll(aktuell);
-				return true;
-			}
-			return false;
-		}
+		this.myGroups.clear();
+		this.myGroups.addAll(aktuell);
 	}
 
 	/**
@@ -1121,15 +855,14 @@ public class NodeEngine {
 	private boolean allnodes_set(final Collection<Node> data) {
 		Set<Node> tmp = new HashSet<Node>(data);
 		synchronized (this.allNodes) {
-			if(tmp.hashCode()!=allNodes.hashCode()) {
-			this.allNodes.clear();
-			this.allNodes.addAll(data);
-			this.allNodes.add(meinNode);
-			this.allNodes.notifyAll();
-			return true;
-			}
-			else return false;
-			
+			if (tmp.hashCode() != allNodes.hashCode()) {
+				this.allNodes.clear();
+				this.allNodes.addAll(data);
+				this.allNodes.add(meinNode);
+				this.allNodes.notifyAll();
+				return true;
+			} else
+				return false;
 
 		}
 	}
@@ -1146,12 +879,13 @@ public class NodeEngine {
 	 */
 	private Node retrieve(final long nid) {
 		sendmutlicast(new MSG(nid, MSGCode.NODE_LOOKUP));
-		final MSG x = this.angler.fishfor(NachrichtenTyp.SYSTEM,MSGCode.NODE_UPDATE,nid,null,false,1000);
+		
+		final MSG x = this.angler.fishfor(MSGCode.NODE_UPDATE, nid, null, false, 1000);
 		if (x != null)
 			return (Node) x.getData();
 		else {
-			LogEngine.log("retriever", "NodeID:["+nid+"] konnte nicht aufgespürt werden und sollte neu Verbinden!!!",LogEngine.ERROR);
-			sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
+			LogEngine.log("retriever", "NodeID:[" + nid + "] konnte nicht aufgespürt werden und sollte neu Verbinden!!!", LogEngine.ERROR);
+			//sendmutlicast(new MSG(nid, MSGCode.CMD_RECONNECT));
 			return null;
 		}
 	}
@@ -1163,9 +897,9 @@ public class NodeEngine {
 	 */
 	private void setRootMode(final boolean rootmode) {
 		this.rootMode = rootmode;
-		GUI.getGUI().setTitle("publicMAIN"+((rootmode)?"[ROOT]":"" ));
-		if(rootmode) {
-			setGroup(this.myGroups) ;
+		GUI.getGUI().setTitle("publicMAIN" + ((rootmode) ? "[ROOT]" : ""));
+		if (rootmode) {
+			setGroup(this.myGroups);
 		}
 	}
 
@@ -1248,11 +982,9 @@ public class NodeEngine {
 	 * 
 	 * @return Vereinigung aller Gruppenmitgliedschaften
 	 */
-	public Set<String>computeGroups(){
+	public Set<String> computeGroups() {
 		final Set<String> tmpGroups = new HashSet<String>();
-		for (final ConnectionHandler cur : this.connections) {
-			tmpGroups.addAll(cur.getGroups());
-		}
+
 		tmpGroups.addAll(this.ce.getMyGroups());
 		return tmpGroups;
 	}
@@ -1262,40 +994,42 @@ public class NodeEngine {
 	 */
 	public void updateAlias() {
 		final String alias = this.ce.getAlias();
-		if(this.online&&(!alias.equals(this.meinNode.getAlias()))) {
+		if (this.online && (!alias.equals(this.meinNode.getAlias()))) {
 			sendmutlicast(new MSG(alias, MSGCode.ALIAS_UPDATE));
-			this.updateAlias(alias,this.nodeID);
+			this.updateAlias(alias, this.nodeID);
 		}
 	}
 
-	/**
-	 * Zeigt die Latenz von mir zu allen mir bekannten Knoten über den Baum im aktuellen Chatfenster an
-	 */
-	public void pathPing(){
-		for (final Node cur : getNodes()) {
-			GUI.getGUI().info(cur.toString() + ":" +this.pathPing(cur), null, 0);
+//	/**
+//	 * Zeigt die Latenz von mir zu allen mir bekannten Knoten über den Baum im aktuellen Chatfenster an
+//	 */
+//	public void pathPing() {
+//		for (final Node cur : getNodes()) {
+//			GUI.getGUI().info(cur.toString() + ":" + this.pathPing(cur), null, 0);
+//
+//		}
+//	}
 
-		}
-	}
-
-	/**
-	 * Sendet ein Ping Paket an einen Knoten und registriert einen Hook um die Antwort auszuwerten
-	 * 
-	 * @param remote Der zu pingende Knoten
-	 * @return Latenz in Millisekunden oder -1 wenn keine Antwort innerhalt 1 Sekunde empfangen wurde
-	 */
-	public long pathPing(final Node remote) {
-		if (remote.equals(this.meinNode))return 0;
-		else {
-			final long currentTimeMillis = System.currentTimeMillis();
-			final MSG paket = new MSG(currentTimeMillis, MSGCode.PATH_PING_REQUEST,remote.getNodeID());
-			final MSG response = this.angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.PATH_PING_RESPONSE, remote.getNodeID(),currentTimeMillis, true, 1000,paket);
-			if(response==null)return -1;
-			else
-				return (System.currentTimeMillis()-currentTimeMillis);
-
-		}
-	}
+//	/**
+//	 * Sendet ein Ping Paket an einen Knoten und registriert einen Hook um die Antwort auszuwerten
+//	 * 
+//	 * @param remote Der zu pingende Knoten
+//	 * @return Latenz in Millisekunden oder -1 wenn keine Antwort innerhalt 1 Sekunde empfangen wurde
+//	 */
+//	public long pathPing(final Node remote) {
+//		if (remote.equals(this.meinNode))
+//			return 0;
+//		else {
+//			final long currentTimeMillis = System.currentTimeMillis();
+//			final MSG paket = new MSG(currentTimeMillis, MSGCode.PATH_PING_REQUEST, remote.getNodeID());
+//			final MSG response = this.angler.fishfor(NachrichtenTyp.SYSTEM, MSGCode.PATH_PING_RESPONSE, remote.getNodeID(), currentTimeMillis, true, 1000, paket);
+//			if (response == null)
+//				return -1;
+//			else
+//				return (System.currentTimeMillis() - currentTimeMillis);
+//
+//		}
+//	}
 
 	/**
 	 * Geänderten Alias der GUI mitteilen, damit der Alias korrekt auf der GUI
@@ -1315,7 +1049,7 @@ public class NodeEngine {
 					this.allNodes.notifyAll();
 					GUI.getGUI().notifyGUI();
 					// Zur Aktualisierung der Datenbank wegschreiben.
-					LogEngine.log(this,"User " +tmp.getAlias() + " has changed ALIAS to " + newAlias,LogEngine.INFO);
+					LogEngine.log(this, "User " + tmp.getAlias() + " has changed ALIAS to " + newAlias, LogEngine.INFO);
 					return true;
 				}
 			}
@@ -1335,29 +1069,13 @@ public class NodeEngine {
 		case "ra":
 			sendRA();
 			break;
-		case "proute":
-			System.out.println(getRoutes());
-			break;
-
-		case "conns":
-			System.out.println(this.connections.size());
-			for (final ConnectionHandler con : this.connections) {
-				System.out.println(con.toString2());
-
-			}
-			if(this.root_connection!=null) {
-				System.out.println("root:\n"+this.root_connection.toString2());
-			}
-
-			break;
-
 		case "play":
 			Help.playSound(parameter);
 			break;
 		case "sound":
-//			if("on".equals(parameter.toLowerCase())){
-//				Config.getConfig().setSoundActivated(true);
-//			}else Config.getConfig().setSoundActivated(false);
+			//			if("on".equals(parameter.toLowerCase())){
+			//				Config.getConfig().setSoundActivated(true);
+			//			}else Config.getConfig().setSoundActivated(false);
 			Config.getConfig().setSoundActivated("on".equals(parameter));
 			break;
 		case "stop":
@@ -1365,46 +1083,23 @@ public class NodeEngine {
 		case "gc":
 			System.gc();
 			break;
-		case "poll":
-			sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
-			break;
+//		case "poll":
+//			sendroot(new MSG(null, MSGCode.POLL_ALLNODES));
+//			break;
 		case "nup":
 			sendtcp(new MSG(this.meinNode, MSGCode.NODE_UPDATE));
 			break;
-		case "pingall":
-			this.pathPing();
-			break;
-		case "_kick":
-			final Node tmp = this.ce.getNodeforAlias(parameter);
-			if (tmp != null) {
-				routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
-			}
-			break;
+//		case "pingall":
+//			this.pathPing();
+//			break;
+//		case "_kick":
+//			final Node tmp = this.ce.getNodeforAlias(parameter);
+//			if (tmp != null) {
+//				routesend(new MSG(null, MSGCode.CMD_SHUTDOWN, tmp.getNodeID()));
+//			}
+//			break;
 		case "maxcon":
 			Config.getConfig().setMaxConnections(Integer.parseInt(parameter));
-			break;
-		case "bestnode":
-			final long time = System.currentTimeMillis();
-			GUI.getGUI().info("Strategie:" + this.myStrategy.getClass().getSimpleName()+ " MaxConnections:"+ Config.getConfig().getMaxConnections(), null, 0);
-			GUI.getGUI().info(getBestNode().toString(), null, 0);
-			GUI.getGUI().info("took " + (System.currentTimeMillis() - time)+ " ms to evaluate", null, 0);
-			break;
-		case "strategy":
-			if (parameter.equals("random")) {
-				this.myStrategy = new RandomStrategy(this.nodeID);
-			} else if (parameter.equals("breadth")) {
-				this.myStrategy = new BreadthFirstStrategy();
-			} else if (parameter.startsWith("weighted")
-					&& (parameter.split(" ").length == 4)) {
-				this.myStrategy = new WeightedDistanceStrategy(
-						Double.parseDouble(parameter.split(" ")[1]),
-						Integer.parseInt(parameter.split(" ")[2]),
-						Integer.parseInt(parameter.split(" ")[3]));
-			} else {
-				GUI.getGUI().info(
-						"unknown Strategy [random, breadth, weighted 0.5 0 1]",
-						null, 1);
-			}
 			break;
 		case "update":
 			GUI.getGUI().notifyGUI();
@@ -1412,15 +1107,12 @@ public class NodeEngine {
 		case "conf":
 			Config.writeSystemConfiguration();
 			break;
-		case "tree":
-			showTree(getTree());
-			break;
-		case "reconnect_all":
-			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
-			break;
-		case "poll_bus":
-			this.multi_socket.discoverBUS();
-			break;
+//		case "reconnect_all":
+//			sendmutlicast(new MSG(-1337l, MSGCode.CMD_RECONNECT));
+//			break;
+//		case "poll_bus":
+//			this.multi_socket.discoverBUS();
+//			break;
 		default:
 			LogEngine.log(this, "debug command not found", LogEngine.ERROR);
 			break;
@@ -1451,40 +1143,6 @@ public class NodeEngine {
 	//		return root;
 	//	}
 	//
-	/**
-	 * Erstellt den Topologie-Baum für das Debug-Kommando (/debug tree).
-	 * 
-	 * @return TreeNode der die Baumtopologie repräsentiert
-	 */
-	public Node getTree() {
-		final Node root = (Node) this.meinNode.clone();
-		final MiniMonitor mon = new MiniMonitor();
-		for (final ConnectionHandler con : this.connections) {
-			final Runnable runa = new Runnable() {
-				@Override
-				public void run() {
-					con.send(new MSG(null, MSGCode.TREE_DATA_POLL));
-				}};
-				// Zuerst werden für alle connections hooks registrier
-				mon.add();
-				final MSG tmp =con.getHook().fishfor(NachrichtenTyp.SYSTEM,MSGCode.TREE_DATA, null, null, true, Config.getConfig().getTreeBuildTime(),runa);
-				if(tmp!=null) {
-					mon.dec((Node) tmp.getData());
-				} else {
-					mon.dec(null);
-				}
-		}
-		//wenn alle hooks abgelaufen sind
-		final List<Node> tmp = mon.check();
-		for (final Node node : tmp) {
-			root.add(node);
-		}
-
-		//tree bauen und zurückgeben
-		return root;
-	}
-
-
 
 	/**
 	 * Liefert die <code>uid</code> für eine <code>nid</code>.
@@ -1492,9 +1150,9 @@ public class NodeEngine {
 	 * @param nid NodeID des gesuchten Users
 	 * @return UserID des Nodes
 	 */
-	public long getUIDforNID(final long nid){
+	public long getUIDforNID(final long nid) {
 		final Node node = getNode(nid);
-		if (node!=null)
+		if (node != null)
 			return node.getUserID();
 		else
 			return -1;
@@ -1507,18 +1165,17 @@ public class NodeEngine {
 	 */
 	public void showTree(final TreeNode root) {
 		// Der Wurzelknoten wird dem neuen JTree im Konstruktor übergeben
-		final JTree tree = new JTree( root );
+		final JTree tree = new JTree(root);
 		// Ein Frame herstellen, um den Tree anzuzeigen
-		final JFrame frame = new JFrame( "publicMAIN - Topology" );
-		frame.add( new JScrollPane( tree ));
+		final JFrame frame = new JFrame("publicMAIN - Topology");
+		frame.add(new JScrollPane(tree));
 		frame.setIconImage(Help.getIcon("pM_Logo.png").getImage());
 		frame.setMinimumSize(new Dimension(250, 400));
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		frame.pack();
-		frame.setLocationRelativeTo( null );
-		frame.setVisible( true );
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
 	}
-
 
 	/**
 	 * @author tkessels
@@ -1529,202 +1186,16 @@ public class NodeEngine {
 	private final class Maintainer implements Runnable {
 		@Override
 		public void run() {
-			while(NodeEngine.this.online) {
-				if(isRoot()) {
-					sendRA();
-					if(updateAllNodes(BestNodeStrategy.returnAllNodes(getTree()))){
-						sendchild(new MSG(getNodes(),MSGCode.REPORT_ALLNODES), null);
-					}
-				} else {
-					sendroot(new MSG(NodeEngine.this.meinNode));
-				}
+			while (NodeEngine.this.online) {
+
+				sendroot(new MSG(NodeEngine.this.meinNode));
+
 				try {
 					Thread.sleep(5000);
 				} catch (final InterruptedException e) {
 				}
-
-
 			}
 		}
 	}
 
-	/**
-	 * Definiert diesen Node nach einem Timeout als Root, wenn bis dahin keine
-	 * Verbindung aufgebaut wurde.
-	 */
-	private final class RootMe implements Runnable {
-		@Override
-		public void run() {
-			if (!NodeEngine.this.online||isRoot()||NodeEngine.this.rootDiscovering)
-				return;
-			final long until = System.currentTimeMillis() + NodeEngine.this.DISCOVER_TIMEOUT;
-			while (System.currentTimeMillis() < until) {
-				try {
-					Thread.sleep(NodeEngine.this.DISCOVER_TIMEOUT);
-				}
-				catch (final InterruptedException e) {
-				}
-			}
-			if (NodeEngine.this.online&&!hasParent()) {
-				LogEngine.log("RootMe", "no Nodes detected: claiming Root", LogEngine.INFO);
-				claimRoot();
-			}
-		}
-	}
-
-	/**
-	 * Selbst die Root-Position beanspruchen.
-	 */
-	private synchronized void claimRoot() {
-		if (this.rootDiscovering == false) {
-			this.rootClaimProcessor = new Thread(new RootClaimProcessor());
-			this.rootClaimProcessor.start();
-			NodeEngine.this.rootDiscovering = true;
-		}
-	}
-
-
-	/**
-	 * Eine aktuelle Routingtabelle zusammenstellen
-	 * 
-	 * @return aktuelle Routingtabelle
-	 */
-	public Map<Long,Long> getRoutes(){
-		final Map<Long,Long> rueck = new HashMap<Long, Long>();
-		for (final ConnectionHandler con : this.connections) {
-			if (con.host_node != null) {
-				final long gw = con.host_node.getNodeID();
-				for (final Node curchi : con.getChildren()) {
-					rueck.put(curchi.getNodeID(), gw);
-				}
-			}
-		}
-		final Set<Node> tmp = new HashSet<Node>();
-		tmp.addAll(getNodes());
-		tmp.removeAll(getChilds());
-
-		if (this.root_connection!=null) {
-			final long gw = this.root_connection.host_node.getNodeID();
-			for (final Node x : tmp) {
-				rueck.put(x.getNodeID(), gw);
-			}
-		}
-		return rueck;
-	}
-
-	/**
-	 * 
-	 * Wartet eine gewisse Zeit und wertet dann alle gesammelten ROOT_ANNOUNCES
-	 * aus und fordert anschließend von der neuen Root einen Node zum verbinden
-	 * an, wenn der Node selbst die neue Root ist.
-	 */
-	private final class RootClaimProcessor implements Runnable {
-		@Override
-		public void run() {
-//			NodeEngine.this.rootDiscovering = true;
-			LogEngine.log("DiscoverGame", "started", LogEngine.INFO);
-			sendRA();
-			final long until = System.currentTimeMillis() + NodeEngine.this.ROOT_CLAIM_TIMEOUT;
-			while (System.currentTimeMillis() < until) {
-				try {
-					Thread.sleep(NodeEngine.this.ROOT_CLAIM_TIMEOUT);
-				} catch (final InterruptedException e) {
-				}
-			}
-			final List<MSG> ra_replies = new ArrayList<MSG>();
-			ra_replies.addAll(NodeEngine.this.root_claims_stash);
-			Collections.sort(ra_replies);
-			final long deadline = ra_replies.get(0).getTimestamp() + (2* NodeEngine.this.ROOT_CLAIM_TIMEOUT);
-
-			Node toConnectTo = NodeEngine.this.meinNode;
-			long maxPenunte = getNodes().size();
-			for (final MSG x : NodeEngine.this.root_claims_stash) {
-				if (x.getTimestamp() <= deadline) {
-					final long tmp_size = x.getEmpfänger();
-					final Node tmp_node = (Node) x.getData(); // Cast Payload in ein
-					// Object Array und das
-					// 2. Object dieses
-					// Arrays in einen Node
-					if ((tmp_size > maxPenunte)
-							|| ((tmp_size == maxPenunte) && (tmp_node
-									.getNodeID() > toConnectTo.getNodeID()))) {
-						toConnectTo = tmp_node;
-						maxPenunte = tmp_size;
-					}
-				}
-			}
-			LogEngine.log("DiscoverGame", "Finished:"
-					+ ((toConnectTo != NodeEngine.this.meinNode) ? "lost" : "won") + "("
-					+ NodeEngine.this.root_claims_stash.size() + " Root-Claims collected)",
-					LogEngine.INFO);
-			if (toConnectTo == NodeEngine.this.meinNode) {
-				setRootMode(true);
-			} else {
-				discover(); // another root won and should be
-				// answeringconnectTo(toConnectTo);
-			}
-			NodeEngine.this.root_claims_stash.clear();
-			NodeEngine.this.rootDiscovering = false;
-		}
-	}
-
-	/**
-	 *	Server-Thread der eingehende Verbindungen annimmt und in {@link ConnectionHandler} einhüllt und registriert
-	 */
-	private final class ConnectionsAccepter implements Runnable {
-		@Override
-		public void run() {
-			if((NodeEngine.this.connections==null)||(NodeEngine.this.server_socket==null))
-				return;
-			while (NodeEngine.this.online) {
-				LogEngine.log("ConnectionsAccepter", "Listening on Port:" + NodeEngine.this.server_socket.getLocalPort(), LogEngine.INFO);
-				try {
-					final ConnectionHandler tmp = new ConnectionHandler(NodeEngine.this.server_socket.accept());
-					NodeEngine.this.connections.add(tmp);
-					tmp.isConnected();
-				}
-				catch (final IOException e) {
-					LogEngine.log(e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * @author tkessels
-	 *
-	 * Für Multithreaded Tree konstruktion
-	 */
-	private final class MiniMonitor{
-		private  int anzahl;
-		private final  List<Node> mynodes;
-
-
-		public MiniMonitor() {
-			this.anzahl=0;
-			this.mynodes = new ArrayList<Node>();
-		}
-
-		public synchronized void add() {
-			this.anzahl++;
-		}
-		public synchronized  List<Node> check() {
-			while(this.anzahl>0) {
-				try {
-					this.wait();
-				} catch (final InterruptedException e) {
-				}
-			}
-			return this.mynodes;
-		}
-		public synchronized void dec(final Node tmp) {
-			this.anzahl--;
-			if(tmp!=null) {
-				this.mynodes.add(tmp);
-			}
-			notifyAll();
-		}
-
-
-	}
 }

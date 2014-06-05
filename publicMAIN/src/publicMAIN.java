@@ -30,7 +30,7 @@ public class publicMAIN {
 			//			DatabaseEngine.getDatabaseEngine();
 
 			if (Config.getConfig().getUserID() == null) {
-				MulticastConnectionHandler.getMC().discoverBUS();
+				
 				boolean tom = StartWindow.getStartWindow();
 				if (tom) {
 					// Help.playSound("logon.wav");

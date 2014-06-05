@@ -2,7 +2,7 @@ package org.publicmain.chatengine;
 
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
-import org.publicmain.common.NachrichtenTyp;
+import org.publicmain.common.MSGCode;
 
 /**
  * @author ATRM
@@ -30,10 +30,8 @@ public class GruppenKanal extends Kanal {
 	 *   
 	 */
 	public boolean add(MSG nachricht) {
-		if ((nachricht.getTyp() == NachrichtenTyp.GROUP)
-				&& nachricht.getGroup().equals(referenz)) {
-			LogEngine.log(this, "[" + referenz + "]" + countObservers() + ":",
-					nachricht);
+		if ((nachricht.getCode() == MSGCode.GROUP_MESSAGE) && nachricht.getGroup().equals(referenz)) {
+			LogEngine.log(this, "[" + referenz + "]" + countObservers() + ":",nachricht);
 			//	messages.add(nachricht);
 			setChanged();
 			notifyObservers(nachricht);

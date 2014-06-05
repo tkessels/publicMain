@@ -17,8 +17,8 @@ public class LogEngine {
 	public static final int WARNING=2;
 	public static final int ERROR=1;
 	public static final int NONE=0;
-	public static MSGCode[] filter_code= {MSGCode.ECHO_REQUEST,MSGCode.ECHO_RESPONSE};
-	public static NachrichtenTyp[] filter_typ= {};
+	public static byte[] filter_code= {MSGCode.ECHO_REQUEST,MSGCode.ECHO_RESPONSE};
+//	public static NachrichtenTyp[] filter_typ= {};
 	public static String[] filter_source={};
 
 	/**Gibt eine Exception auf dem Programm Fehlerstrom aus
@@ -67,7 +67,7 @@ public class LogEngine {
 
 	private static String msg2String(MSG x){
 		if(x==null) return "null";
-		return "MSG{"+x.getTyp()+"("+((x.getCode()!=null)?x.getCode():"")+((x.getGroup()!=null)?x.getGroup():"")+")"+ "\t:"+Math.abs(x.getSender()%10000)+"("+x.getId()+")"+">"+Math.abs(x.getEmpfänger()%10000)+"["+x.getData()+"]}";
+		return "MSG{"+"("+((x.getCode()>=0 )?x.getCode():"")+((x.getGroup()!=null)?x.getGroup():"")+")"+ "\t:"+Math.abs(x.getSender()%10000)+"("+x.getId()+")"+">"+Math.abs(x.getEmpfänger()%10000)+"["+x.getData()+"]}";
 	}
 
 
@@ -86,13 +86,7 @@ public class LogEngine {
 	}
 
 	protected static boolean filtered(MSG x) {
-		if(x!=null)
-		{
-			for (NachrichtenTyp tmp : filter_typ) 	if(x.getTyp()==tmp)return true;
-			if(x.getTyp()==NachrichtenTyp.SYSTEM) {
-				for (MSGCode tmp : filter_code)	if(x.getCode()==tmp) return true;
-			}
-		}
+		if(x!=null) for (byte tmp : filter_code)	if(Byte.compare(x.getCode(),tmp)==0) return true;
 		return false;
 	}
 

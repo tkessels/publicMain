@@ -19,7 +19,6 @@ import org.publicmain.common.Config;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
-import org.publicmain.common.NachrichtenTyp;
 import org.resources.Help;
 
 /**
@@ -169,7 +168,7 @@ public class PMTrayIcon {
 		Help.playSound("icq.au");
 		String msgSender;
 
-		if (msg.getTyp() == NachrichtenTyp.PRIVATE) {
+		if (msg.getCode() == MSGCode.PRIVATE_MESSAGE) {
 			// Sender der Nachricht aus dem MSG paket holen
 			msgSender = ChatEngine.getCE().getNodeForNID(msg.getSender())
 					.getAlias();
@@ -206,7 +205,7 @@ public class PMTrayIcon {
 	 *            MSGCode CW_WARNING_TEXT für Warnmeldung, CW_ERROR_TEXT für
 	 *            Fehlermeldungen, CW_INFO_TEXT für Informartionen.
 	 */
-	void recieveText(String text, MSGCode code) {
+	void recieveText(String text, byte code) {
 		Help.playSound("notify.wav");
 		if (code == MSGCode.CW_INFO_TEXT) {
 			trayIcon.displayMessage("Incoming Info", text,

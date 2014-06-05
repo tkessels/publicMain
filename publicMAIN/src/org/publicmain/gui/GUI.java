@@ -694,7 +694,7 @@ public class GUI extends JFrame implements Observer, ChangeListener {
 	 * 
 	 * @param text
 	 */
-	void textToTray(String text, MSGCode code){
+	void textToTray(String text, byte code){
 		if( this.getExtendedState() == JFrame.ICONIFIED ){
 			trayIcon.recieveText( text, code );
 		}

@@ -1,78 +1,29 @@
 package org.publicmain.common;
 
-/**
- * Dieses Enum enthält alle derzeit möglichen Nachrichten-Codes welche an andere
- * Nodes übermittelt werden und dort ein Ereignis auslösen.
- * 
- * @author ATRM
- * 
- */
-
-public enum MSGCode {
-
-	NODE_UPDATE("inform on node changes"),
-	ALIAS_UPDATE("inform on alias changes"),
-	NODE_LOOKUP("requests for nodeupdate"), 
-	ECHO_REQUEST("ping request"),
-	ECHO_RESPONSE("ping response"),
-	PATH_PING_REQUEST("pathping request"),
-	PATH_PING_RESPONSE("pathping response"),
-	ROOT_DISCOVERY("request for root"),
-	ROOT_REPLY("answer from root"),
-	ROOT_ANNOUNCE("root announce for this node"),
-	POLL_CHILDNODES("ask childnodes"),
-	REPORT_CHILDNODES("inform childnodes"),
-	POLL_ALLNODES("ask allnodes"),
-	REPORT_ALLNODES("inform allnodes"),
-	TREE_DATA_POLL("report topologie"),
-	TREE_DATA("carries parcial tree data"),
-	NODE_SHUTDOWN("inform about own nodesshutdown"),
-	CHILD_SHUTDOWN("inform about childshutdown"),
-
-	GROUP_POLL("ask for group members"),
-	GROUP_REPLY("group answer"),
-	GROUP_JOIN("inform about group join"),
-	GROUP_LEAVE("inform about group leave"),
-	GROUP_EMPTY("inform about an empty group"),
-	GROUP_ANNOUNCE("register a group"),
-
-	FILE_REQUEST("beschreibungEinfügen"),
-	FILE_REPLY("beschreibungEinfügen"),
-	FILE_RECIEVED("beschreibungEinfügen"),
-	FILE_TCP_REQUEST("beschreibungEinfügen"),
-	FILE_TCP_REPLY("beschreibungEinfügen"),
-	FILE_TCP_ABORT("file refused"),
-
-	CMD_SHUTDOWN("beschreibungEinfügen"),
-	CMD_RESTART("beschreibungEinfügen"),
-	CMD_RECONNECT("beschreibungEinfügen"),
-
-	CW_INFO_TEXT("beschreibungEinfügen"),
-	CW_WARNING_TEXT("beschreibungEinfügen"),
-	CW_ERROR_TEXT("beschreibungEinfügen"),
-
-	BACKUP_SERVER_DISCOVER("find active backupservers on the net"),
-	BACKUP_SERVER_OFFER("offer backupserver services on the net"),
-
-	GUI_INFORM("notify the gui about an event");
-
-	private String description;
-
-	/**
-	 * Liefert einen MSGCode für eine Description.
-	 * 
-	 * @param description
-	 */
-	private MSGCode(String description) {
-		this.description = description;
-	}
-
-	/**
-	 * Liefert eine Description.
-	 * 
-	 * @return die Description in Form eines Strings
-	 */
-	public String getDescription() {
-		return description;
-	}
+public class MSGCode {
+	public final static byte PRIVATE_MESSAGE=0;
+	public final static byte GROUP_MESSAGE=1;
+	public final static byte NODE_UPDATE=2;
+	public final static byte ALIAS_UPDATE=3;
+	public final static byte NODE_LOOKUP=4;
+	public final static byte ECHO_REQUEST=5;
+	public final static byte ECHO_RESPONSE=6;
+	public final static byte NODE_SHUTDOWN=7;
+	public final static byte GROUP_POLL=8;
+	public final static byte GROUP_REPLY=9;
+	public final static byte GROUP_JOIN=10;
+	public final static byte GROUP_LEAVE=11;
+	public final static byte GROUP_EMPTY=12;
+	public final static byte GROUP_ANNOUNCE=13;
+	public final static byte FILE_REQUEST=14;
+	public final static byte FILE_ACCEPT=15;
+	public final static byte FILE_DENIE=16;
+	public final static byte FILE_ABORT=17;
+	public final static byte FILE_ERROR=18;
+	
+	public final static byte CW_ERROR_TEXT=30;
+	public final static byte CW_WARNING_TEXT=31;
+	public final static byte CW_INFO_TEXT=32;
+	
+	
 }

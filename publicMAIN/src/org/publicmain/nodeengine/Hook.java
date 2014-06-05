@@ -6,7 +6,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
-import org.publicmain.common.NachrichtenTyp;
 
 /**
  * Diese Klasse erlaubt es, eine Reihe von Vergleichskriterien (Haken)
@@ -75,9 +74,8 @@ public class Hook {
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
 	 */
-	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,
-			Object payload, boolean filter, long timeout) {
-		Haken x = new Haken(typ, code, nid, payload, filter);
+	public MSG fishfor(byte code, Long nid,Object payload, boolean filter, long timeout) {
+		Haken x = new Haken(code, nid, payload, filter);
 		add(x);
 		synchronized (x) {
 			try {
@@ -124,8 +122,8 @@ public class Hook {
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
 	 */
-	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,Object payload,boolean filter, long timeout,MSG paket) {
-		Haken x = new Haken(typ,code, nid,payload,filter);
+	public MSG fishfor(byte code, Long nid,Object payload,boolean filter, long timeout,MSG paket) {
+		Haken x = new Haken(code, nid,payload,filter);
 		add(x);
 		synchronized (x) {
 			try {
@@ -174,9 +172,9 @@ public class Hook {
 	 *         null</code> wenn das <code>timeout</code> abgelaufen ist ohne
 	 *         eine Nachricht zu matchen.
 	 */
-	public MSG fishfor(NachrichtenTyp typ, MSGCode code, Long nid,
+	public MSG fishfor(byte code, Long nid,
 			Object payload, boolean filter, long timeout, Runnable dothat) {
-		Haken x = new Haken(typ, code, nid, payload, filter);
+		Haken x = new Haken(code, nid, payload, filter);
 		add(x);
 		synchronized (x) {
 			try {
@@ -207,9 +205,9 @@ public class Hook {
 	 *            bleiben soll bevor er sich selbst enfernt.
 	 * 
 	 */
-	public void filter(NachrichtenTyp typ, MSGCode code, Long nid,
+	public void filter(byte code, Long nid,
 			Object payload, final long timeout) {
-		final Haken x = new Haken(typ, code, nid, payload, true);
+		final Haken x = new Haken(code, nid, payload, true);
 		new Thread(new Runnable() {
 			public void run() {
 				add(x);
@@ -263,8 +261,7 @@ public class Hook {
 	 */
 	private class Haken {
 		// Filterinformationen
-		private NachrichtenTyp typ;
-		private MSGCode code;
+		private byte code=-1;
 		private Long sender;
 		private Object payload;
 		//		 Ggf. für die weitere Entwicklung benötigt.
@@ -282,10 +279,9 @@ public class Hook {
 		 * @param payload Daten, die betrachtet werden sollen.
 		 * @param filter Ob die Nachricht entfernt werden soll oder nicht.
 		 */
-		public Haken(NachrichtenTyp typ, MSGCode code, Long sender,
+		public Haken( byte code, Long sender,
 				Object payload, boolean filter) {
 			super();
-			this.typ = typ;
 			this.code = code;
 			this.sender = sender;
 			this.payload = payload;
@@ -303,17 +299,14 @@ public class Hook {
 		 * 			andernfalls <code>false</code>
 		 */
 		private synchronized boolean check(MSG x) {
-			boolean typ_check = (typ == null) || (typ == x.getTyp());
-			boolean code_check = (code == null) || code.equals(x.getCode());
-			boolean sender_check = (sender == null)
-					|| sender.equals(x.getSender());
-			boolean payload_check = (payload == null)
-					|| payload.equals(x.getData());
+			boolean code_check = (code <0) || (Byte.compare(code, x.getCode())==0);
+			boolean sender_check = (sender == null) || sender.equals(x.getSender());
+			boolean payload_check = (payload == null) || payload.equals(x.getData());
 			//			 Ggf. für die weitere Entwicklung benötigt.
 			//			 boolean reciever_check=(reciever==null)||reciever==x.getEmpfänger();
 			//			 boolean gruppe_check=(gruppe==null)||gruppe==x.getGroup();
 
-			if (typ_check && code_check && sender_check && payload_check) {// &&reciever_check&&gruppe_check)
+			if (code_check && sender_check && payload_check) {// &&reciever_check&&gruppe_check)
 				// {
 				LogEngine.log(this.toString(), "hooked", x);
 				hookedMSG = x;
@@ -327,8 +320,7 @@ public class Hook {
 		 * Die toString-Methode der internen Klasse.
 		 */
 		public String toString() {
-			return "Hook [" + (typ != null ? "typ=" + typ + ", " : "")
-					+ (code != null ? "code=" + code + ", " : "")
+			return "Hook [" +  (code >=0 ? "code=" + code + ", " : "")
 					+ (sender != null ? "sender=" + sender + ", " : "")
 					+ "filter=" + filter + "]";
 		}

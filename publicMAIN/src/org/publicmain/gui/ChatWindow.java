@@ -519,41 +519,8 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 		String senderalias = (sender != null) ? sender.getAlias() : "unknown";
 
 		// Unterscheidung anhand des Nachrichtentyps
-		switch (msg.getTyp()) {
-
-		case SYSTEM:
-			if (msg.getCode() == MSGCode.CW_INFO_TEXT) {
-				color = "#05405E";
-			} else {
-				color = "red";
-			}
-			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
-						+ fontFamily + "' size='" + fontSize + "' color='"
-						+ color + "'>System: " + (String) msg.getData()
-						+ "</font>", 0, 0, null);
-			} catch (BadLocationException | IOException e) {
-				LogEngine.log(e);
-			}
-			break;
-		case GROUP:
-			if (msg.getSender() == ChatEngine.getCE().getMyNodeID()) {
-				color = "#FF8512";
-			} else {
-				color = "#0970A4";
-			}
-			try {
-				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
-						+ fontFamily + "' size='" + fontSize + "' color='"
-						+ color + "'>" + senderalias + ": </font>"
-						+ "<font face='" + fontFamily + "' size='" + fontSize
-						+ "' color='black'>" + (String) msg.getData()
-						+ "</font>", 0, 0, null);
-			} catch (BadLocationException | IOException e) {
-				LogEngine.log(e);
-			}
-			break;
-		case PRIVATE:
+		switch (msg.getCode()) {
+		case MSGCode.PRIVATE_MESSAGE:
 			if (msg.getSender() == ChatEngine.getCE().getMyNodeID()) {
 				color = "#FF8512";
 			} else {
@@ -570,6 +537,42 @@ public class ChatWindow extends JPanel implements ActionListener, Observer {
 				LogEngine.log(e);
 			}
 			break;
+
+		case MSGCode.GROUP_MESSAGE:
+			if (msg.getSender() == ChatEngine.getCE().getMyNodeID()) {
+				color = "#FF8512";
+			} else {
+				color = "#0970A4";
+			}
+			try {
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
+						+ fontFamily + "' size='" + fontSize + "' color='"
+						+ color + "'>" + senderalias + ": </font>"
+						+ "<font face='" + fontFamily + "' size='" + fontSize
+						+ "' color='black'>" + (String) msg.getData()
+						+ "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
+				LogEngine.log(e);
+			}
+			break;
+		
+			
+			
+		case MSGCode.CW_INFO_TEXT:
+			color = "#05405E";
+		case MSGCode.CW_WARNING_TEXT:
+		case MSGCode.CW_ERROR_TEXT:			
+			color = "red";
+			try {
+				htmlKit.insertHTML(htmlDoc, htmlDoc.getLength(), "<font face='"
+						+ fontFamily + "' size='" + fontSize + "' color='"
+						+ color + "'>System: " + (String) msg.getData()
+						+ "</font>", 0, 0, null);
+			} catch (BadLocationException | IOException e) {
+				LogEngine.log(e);
+			}
+			break;
+		
 		default:
 
 		}

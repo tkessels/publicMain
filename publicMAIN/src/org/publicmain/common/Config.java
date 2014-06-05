@@ -207,7 +207,7 @@ public class Config {
 		tmp.setFileTransferInfoInterval(30000);
 		tmp.setDisableFileTransfer(false);
 		// Standart-Einstellungen der Anwendung
-		tmp.setLogVerbosity(3);
+		tmp.setLogVerbosity(4);
 		tmp.setMaxAliasLength(19);
 		tmp.setMaxGroupLength(19);
 		tmp.setMaxEingabefeldLength(200);

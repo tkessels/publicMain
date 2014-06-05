@@ -15,36 +15,35 @@ import org.publicmain.common.Config;
 import org.publicmain.common.FileTransferData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
-import org.publicmain.common.NachrichtenTyp;
+import org.publicmain.common.MSGCode;
 import org.publicmain.common.Node;
 import org.publicmain.gui.GUI;
 import org.publicmain.nodeengine.NodeEngine;
-
 
 /**
  * @author ATRM
  * 
  */
 
-public class ChatEngine{
+public class ChatEngine {
 
-	private static ChatEngine ce;
-	private NodeEngine ne;
-	private Set<Long> ignored;
-	private long userID;
-	private String alias;
+	private static ChatEngine  ce;
+	private NodeEngine	 ne;
+	private Set<Long>	  ignored;
+	private long	       userID;
+	private String	     alias;
 
-	private Set<GruppenKanal> group_channels;
-	private Set<KnotenKanal> private_channels;
-	private KnotenKanal default_channel;
+	private Set<GruppenKanal>  group_channels;
+	private Set<KnotenKanal>   private_channels;
+	private KnotenKanal	default_channel;
 
 	// Verteilt eingehende Messages auf die Kanäle
-	private Thread msgSorterBot = new Thread(new MsgSorter());
+	private Thread	     msgSorterBot = new Thread(new MsgSorter());
 	// Wartungsthread für die NodeEngine
 	// private Thread neMaintenance;
 	private BlockingQueue<MSG> inbox;
 	// private Set<String> allGroups=new HashSet<String>();
-	private Set<String> myGroups = new HashSet<String>();
+	private Set<String>	myGroups     = new HashSet<String>();
 
 	/**
 	 * Liefert die laufende Instanz der ChatEngine
@@ -105,7 +104,8 @@ public class ChatEngine{
 		alias = alias.toLowerCase();
 		for (Node x : getUsers()) {
 			if (x.getAlias().toLowerCase().startsWith(alias)) {
-				if(x.getAlias().equals(alias))return x;
+				if (x.getAlias().equals(alias))
+					return x;
 				tmp.add(x);
 			}
 		}
@@ -163,7 +163,7 @@ public class ChatEngine{
 	public void send_private(long uid, String text) {
 		MSG tmp = new MSG(ce.getNodeForUID(uid).getNodeID(), text);
 		put(tmp);
-		if(GUI.getGUI().isAFK()) {
+		if (GUI.getGUI().isAFK()) {
 			GUI.getGUI().afk();
 		}
 		ne.routesend(tmp);
@@ -179,7 +179,7 @@ public class ChatEngine{
 	public void send_group(String group, String text) {
 		MSG tmp = new MSG(group, text);
 		put(tmp);
-		if(GUI.getGUI().isAFK()) {
+		if (GUI.getGUI().isAFK()) {
 			GUI.getGUI().afk();
 		}
 		ne.groupRouteSend(tmp, null);
@@ -195,13 +195,12 @@ public class ChatEngine{
 	 *            UID des Empfängers
 	 */
 	public void send_file(File datei, long uid) {
-		Node tmp_node = getNodeForUID(uid);
-		if (tmp_node == null) {
-			GUI.getGUI().info(
-					"User currently offline. Unable to transmit File.", uid, 2);
-		} else {
-			ne.send_file(datei, tmp_node.getNodeID());
-		}
+//		Node tmp_node = getNodeForUID(uid);
+//		if (tmp_node == null) {
+//			GUI.getGUI().info("User currently offline. Unable to transmit File.", uid, 2);
+//		} else {
+//			ne.send_file(datei, tmp_node.getNodeID());
+//		}
 	}
 
 	//	 Ggf. für die weitere Entwicklung benötigt.
@@ -398,7 +397,7 @@ public class ChatEngine{
 	 */
 	public void put(MSG nachricht) {
 		inbox.add(nachricht);
-		if(GUI.getGUI().isAFK() && (nachricht.getTyp()==NachrichtenTyp.PRIVATE)){
+		if (GUI.getGUI().isAFK() && (nachricht.getCode() == MSGCode.PRIVATE_MESSAGE)) {
 			MSG tmp = new MSG(ce.getNodeForUID(getNodeForNID(nachricht.getSender()).getUserID()).getNodeID(), "I'm <b>a</b>way <b>f</b>rom <b>k</b>eyboard");
 			ne.routesend(tmp);
 		}
@@ -415,12 +414,12 @@ public class ChatEngine{
 				try {
 					MSG tmp = inbox.take();
 					LogEngine.log("msgSorterBot", "sorting", tmp);
-					if (tmp.getTyp() == NachrichtenTyp.GROUP) {
+					if (tmp.getCode() == MSGCode.GROUP_MESSAGE) {
 						for (Kanal x : group_channels)
 							if (x.add(tmp)) {
 								break;
 							}
-					} else if (tmp.getTyp() == NachrichtenTyp.PRIVATE) {
+					} else if (tmp.getCode() == MSGCode.PRIVATE_MESSAGE) {
 						boolean msgAssigned = false;
 						for (KnotenKanal y : private_channels) {
 							if (y.add(tmp)) {
@@ -480,18 +479,16 @@ public class ChatEngine{
 			shutdown();
 			break;
 
-		case "ping":
-			final Node tmp_ping = ce.getNodeforAlias(parameter);
-			if (tmp_ping != null) {
-				new Thread(new Runnable() {
-					public void run() {
-						GUI.getGUI().info(
-								"Ping(" + tmp_ping.getAlias() + "):"
-										+ ne.pathPing(tmp_ping), null, 0);
-					}
-				}).start();
-			}
-			break;
+//		case "ping":
+//			final Node tmp_ping = ce.getNodeforAlias(parameter);
+//			if (tmp_ping != null) {
+//				new Thread(new Runnable() {
+//					public void run() {
+//						GUI.getGUI().info("Ping(" + tmp_ping.getAlias() + "):" + ne.pathPing(tmp_ping), null, 0);
+//					}
+//				}).start();
+//			}
+//			break;
 
 		case "info":
 			Node nodeforAlias = ce.getNodeforAlias(parameter);
@@ -504,10 +501,7 @@ public class ChatEngine{
 			break;
 
 		case "file":
-			GUI.getGUI().request_File(
-					new FileTransferData(new File("C:\test.txt"),
-							(long) (4000000000L * Math.random()), ne.getMe(),
-							ne.getMe()));
+			GUI.getGUI().request_File(new FileTransferData(new File("C:\test.txt"), (long) (4000000000L * Math.random()), ne.getMe(), ne.getMe()));
 
 		default:
 			ne.debug(command, parameter);
@@ -532,10 +526,11 @@ public class ChatEngine{
 	 */
 	public boolean is_ignored(long nodeID) {
 		Node tmp = ce.getNodeForNID(nodeID);
-		if(tmp!=null)
+		if (tmp != null)
 			return ignored.contains(tmp.getUserID());
 		return false;
 	}
+
 	/**
 	 * Prüfen ob uid auf der ignored-Liste steht und ein entsprechendes boolean
 	 * zurückliefern.
@@ -553,9 +548,7 @@ public class ChatEngine{
 	 * @param tmp
 	 */
 	public void inform(FileTransferData tmp) {
-		String str = tmp.receiver.getAlias()
-				+ ((tmp.accepted) ? " accept " : " declined ")
-				+ "receiving File:\"" + tmp.datei.getName() + "\"";
+		String str = tmp.receiver.getAlias() + ((tmp.accepted) ? " accept " : " declined ") + "receiving File:\"" + tmp.datei.getName() + "\"";
 		GUI.getGUI().info(str, tmp.receiver.getUserID(), 0);
 	}
 }

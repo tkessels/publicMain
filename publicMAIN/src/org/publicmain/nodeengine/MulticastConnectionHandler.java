@@ -10,7 +10,6 @@ import org.publicmain.common.ConfigData;
 import org.publicmain.common.LogEngine;
 import org.publicmain.common.MSG;
 import org.publicmain.common.MSGCode;
-import org.publicmain.common.NachrichtenTyp;
 import org.publicmain.common.Node;
 
 /** HüllKlasse für einen Multicastsocket. Dekoriert den Socket mit einem Objektwriter.
@@ -77,6 +76,10 @@ public class MulticastConnectionHandler {
 		return me;
 
 	}
+	
+	public int getPort() {
+		return multi_socket.getLocalPort();
+	}
 
 	/**
 	 *  Schließt den zugrundeliegenden MulticasSocket und stoppt den Empfangsthread
@@ -102,19 +105,7 @@ public class MulticastConnectionHandler {
 		else LogEngine.log(this, "dropped [MC]", nachricht);
 	}
 	
-	
-	/**
-	 * Schickt ein Discover für einen Backupserver auf dem Multicastkanal
-	 */
-	public void discoverBUS() {
-		MulticastConnectionHandler.getMC().sendmutlicast(new MSG(NachrichtenTyp.SYSTEM, MSGCode.BACKUP_SERVER_DISCOVER, -1, -1, null, null));
-	}
 
-	/**
-	 * Sendet ein Unicastpaket auf dem MulticastSocket
-	 * @param nachricht Das zu versendende NachrichtenObjekt
-	 * @param target Der Empfänger
-	 */
 	public synchronized void sendunicast(MSG nachricht, Node target) {
 		for (InetAddress x : target.getSockets()) {
 			if (!Node.getMyIPs().contains(x)) {
@@ -146,10 +137,9 @@ public class MulticastConnectionHandler {
 	 */
 	private DatagramPacket msg2UDP(MSG nachricht,InetAddress recipient, int port) throws IllegalArgumentException {
 		byte[] data = MSG.getBytes(nachricht);
-		if (data.length < 65000)
-			return new DatagramPacket(data, data.length,recipient,port);
-		else
-			throw new IllegalArgumentException(nachricht.toString()+" to big for UDP - Datagram");
+		System.out.println(data.length);
+		if (data.length < 65508 ) return new DatagramPacket(data, data.length,recipient,port);
+		else throw new IllegalArgumentException(nachricht.toString()+" to big for UDP - Datagram");
 	}
 	
 	/**
@@ -157,18 +147,6 @@ public class MulticastConnectionHandler {
 	 * @param paket das zu behandelnde Paket
 	 */
 	private void handle(MSG paket) {
-		if(paket.getTyp()==NachrichtenTyp.SYSTEM) {
-			if(paket.getCode()==MSGCode.BACKUP_SERVER_OFFER) {
-				ConfigData tmp = (ConfigData) paket.getData();
-//				System.out.println(tmp);
-				Config.getConfig().setBackupDBIP(tmp.getBackupDBIP());
-				Config.getConfig().setBackupDBPort(tmp.getBackupDBPort());
-				Config.getConfig().setBackupDBUser(tmp.getBackupDBUser());
-				Config.getConfig().setBackupDBPw(tmp.getBackupDBPw());
-				Config.getConfig().setBackupDBDatabasename(tmp.getBackupDBDatabasename());
-				Config.write();
-			}
-		}
 	}
 
 
@@ -182,7 +160,7 @@ public class MulticastConnectionHandler {
 		public void run() {
 			if(multi_socket==null)return;
 			while (true) {
-				byte[] buff = new byte[65535];
+				byte[] buff = new byte[65508 ];
 				DatagramPacket tmp = new DatagramPacket(buff, buff.length);
 				try {
 					multi_socket.receive(tmp);

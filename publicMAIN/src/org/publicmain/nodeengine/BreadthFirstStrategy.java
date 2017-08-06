@@ -9,8 +9,8 @@ import org.publicmain.common.Config;
 import org.publicmain.common.Node;
 
 /**
- * Klasse für die BreadthFirstStrategy, die Breitensuche.
- * 
+ * Klasse fï¿½r die BreadthFirstStrategy, die Breitensuche.
+ *
  * @author ATRM
  *
  */
@@ -20,7 +20,7 @@ public class BreadthFirstStrategy extends BestNodeStrategy {
 
 		Node tmp = NodeEngine.getNE().getTree();
 		int level = tmp.getLevel();
-		// Cache für die Kandidaten 
+		// Cache fï¿½r die Kandidaten
 		Set<Node> candidates = new HashSet<Node>();
 		// Erste Suche
 		@SuppressWarnings("unchecked")
@@ -39,7 +39,7 @@ public class BreadthFirstStrategy extends BestNodeStrategy {
 				candidates.add(tree_cursor);
 				return getMinNode(candidates);
 			}
-			// Möglicher Kandidat
+			// Mï¿½glicher Kandidat
 			if (tree_cursor.getChildCount() < Config.getConfig()
 					.getMaxConnections()) {
 				candidates.add(tree_cursor);
@@ -50,7 +50,7 @@ public class BreadthFirstStrategy extends BestNodeStrategy {
 
 	/**
 	 * Sucht aus einer Kollektion von Nodes den, mit den wenigsten ChildNodes.
-	 * 
+	 *
 	 * @param selection
 	 *            die Kollektion von Nodes.
 	 * @return Knoten mit den wenigsten Childs oder bei gleich vielen den Ersten.
@@ -61,7 +61,7 @@ public class BreadthFirstStrategy extends BestNodeStrategy {
 		for (Node node : selection) {
 			if (theone == null) {
 				theone = node;
-			} else if (theone.getChildCount() < node.getChildCount()) {
+			} else if (node.getChildCount() < theone.getChildCount()) {
 				theone = node;
 			}
 		}
